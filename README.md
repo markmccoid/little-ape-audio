@@ -1,14 +1,11 @@
-# Expo Router Example
+# Little Ape Audio Books
 
-Use [`expo-router`](https://expo.github.io/router) to build native navigation using files in the `app/` directory.
+Little Ape Audio Books (L.A.A.B) is a React Native app focused on allowing the user to log into their Dropbox account and download Audio Books to listen to through the app.
 
-## 🚀 How to use
+## Technology Used
 
-```sh
-npx create-expo-app -e with-router
-```
-
-## 📝 Notes
-
-- [Expo Router: Docs](https://expo.github.io/router)
-- [Expo Router: Repo](https://github.com/expo/router)
+- React Native
+- Expo
+- Expo Router
+- TypeScript
+- Zustand
