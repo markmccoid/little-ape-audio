@@ -6,12 +6,14 @@ import {
   removeFromAsyncStorage,
   saveToAsyncStorage,
 } from "./data/asyncStorage";
-import { getAudioFileTags } from "../utils/audioUtils";
 import { analyzePlaylistTracks } from "./storeUtils";
 import sortBy from "lodash/sortBy";
+import map from "lodash/map";
 import TrackPlayer, { Track, State, Event } from "react-native-track-player";
 import { useEffect, useState } from "react";
-import { remove } from "lodash";
+import { addTrack } from "./store-functions";
+import { deleteFromFileSystem } from "./data/fileSystemAccess";
+import { NumberProp } from "react-native-svg";
 
 let eventIdOne;
 let eventIdTwo;
@@ -20,65 +22,9 @@ let eventIdTwo;
 //-- ==================================
 export const useTracksStore = create<AudioState>((set, get) => ({
   tracks: [],
-  playlists: [],
+  playlists: {},
   actions: {
-    addNewTrack: async (
-      fileURI,
-      filename,
-      sourceLocation,
-      playlistId = undefined,
-      directory = ""
-    ) => {
-      // Get metadata for passed audio file
-      const tags = await getAudioFileTags(fileURI);
-
-      const id = `${directory}${filename}`;
-      const newAudioFile = {
-        id,
-        fileURI,
-        directory,
-        filename,
-        sourceLocation,
-        metadata: { ...tags },
-      };
-      // Right now we do NOT allow any duplicate files (dir/filename)
-      // remove the file ONLY FROM STORE if it exists.  By the time we are in the store
-      // it has already been saved and that is fine.
-      const filteredList = get().tracks.filter((el) => el.id !== id);
-
-      // Add the new track to current track list
-      const newAudioFileList = [...filteredList, newAudioFile];
-      set({ tracks: newAudioFileList });
-
-      //! -- When a new track is added, we need to get the title and author
-      //!    information.  This will be our Playlist name
-      /**
-       * PLAYLIST
-       *  - id - uuid
-       *  - title
-       *  - author
-       *  - tracks: []
-       *  - currentTrack - trackId
-       */
-      // If no playlist ID passed, then assume single download and create new playlist
-      // and add track
-
-      const plName =
-        newAudioFile.metadata?.album ||
-        newAudioFile.metadata?.title ||
-        newAudioFile.filename;
-      const plAuthor = newAudioFile.metadata?.artist || "Unknown";
-      const finalPlaylistId = await get().actions.addNewPlaylist(
-        plName,
-        plAuthor,
-        playlistId
-      );
-      await get().actions.addTracksToPlaylist(finalPlaylistId, [
-        newAudioFile.id,
-      ]);
-
-      await saveToAsyncStorage("tracks", newAudioFileList);
-    },
+    addNewTrack: addTrack(set, get),
     removeTracks: async (ids) => {
       // Use passed id to do the following:
       // - lookup audioFile information in audioFiles array
@@ -115,17 +61,22 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       return taggedFiles;
     },
     addNewPlaylist: async (name, author = "Unknown", playlistId) => {
-      const playlists = [...get().playlists];
+      //!const playlists = [...get().playlists];
       // If playlist ID is passed, check to see if the playlist exists
       if (playlistId) {
-        if (playlists.findIndex((el) => el.id === playlistId) !== -1) {
+        if (get().playlists[playlistId]) {
           return playlistId;
         }
+        //! if (playlists.findIndex((el) => el.id === playlistId) !== -1) {
+        //!   return playlistId;
+        //! }
       }
 
       // the "name" passed will be the album of the track that is going to be added
       // Check all of the existing playlists to see if one has the same name
       // If so, then return that id otherwise create a new playlist and return that id
+      //--Use lodash to convert obj into array of objects
+      const playlists = map(get().playlists);
       for (const playlist of playlists) {
         if (playlist.name === name) {
           return playlist.id;
@@ -142,35 +93,39 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         totalDurationSeconds: 0,
         currentRate: 1,
       };
-      const newPlaylistArray = [newPlaylist, ...get().playlists];
-      set({ playlists: newPlaylistArray });
-      await saveToAsyncStorage("playlists", newPlaylistArray);
+      //! const newPlaylistArray = [newPlaylist, ...get().playlists];
+
+      const newPlaylistObj = { ...get().playlists, [id]: newPlaylist };
+      set({ playlists: newPlaylistObj });
+      await saveToAsyncStorage("playlists", newPlaylistObj);
       return id;
     },
     addTracksToPlaylist: async (playlistId, tracks) => {
-      const playlists = [...get().playlists];
+      //! const playlists = [...get().playlists];
       const storedTracks = [...get().tracks];
+      const playlist = get().playlists[playlistId];
 
       // console.log("ADD TRACK TO PL", playlistId, tracks);
-      for (let playlist of playlists) {
-        if (playlist.id === playlistId) {
-          // Take the tracks being added and merge them with existing tracks
-          // in playlist.  Get rid of dups.
-          const uniqueTracksPlaylist = [
-            ...new Set([...tracks, ...(playlist.trackIds || [])]),
-          ];
-          const { images, totalDuration } = analyzePlaylistTracks(
-            storedTracks,
-            uniqueTracksPlaylist
-          );
-          playlist.imageURI = images[0];
-          playlist.totalDurationSeconds = totalDuration;
-          playlist.trackIds = sortBy(uniqueTracksPlaylist);
-          // Once we find our playlist, exit
-          break;
-        }
-      }
+      //! for (let playlist of playlists) {
+      //! if (playlist.id === playlistId) {
+      // Take the tracks being added and merge them with existing tracks
+      // in playlist.  Get rid of dups.
+      const uniqueTracksPlaylist = [
+        ...new Set([...tracks, ...(playlist.trackIds || [])]),
+      ];
+      const { images, totalDuration } = analyzePlaylistTracks(
+        storedTracks,
+        uniqueTracksPlaylist
+      );
+      playlist.imageURI = images[0];
+      playlist.totalDurationSeconds = totalDuration;
+      playlist.trackIds = sortBy(uniqueTracksPlaylist);
+      //! Once we find our playlist, exit
+      //!break;
+      //! }
+      //! }
       // Update playlists in Store and Async Storage
+      const playlists = { ...get().playlists, [playlistId]: playlist };
       set({ playlists });
       await saveToAsyncStorage("playlists", playlists);
     },
@@ -178,26 +133,30 @@ export const useTracksStore = create<AudioState>((set, get) => ({
     //! exist in this playlist.  i.e. need to check all other playlists OR
     //! Have a a playlist Id array in each track.
     removePlaylist: async (playlistId, removeAllTracks = true) => {
-      const playlistToDelete = get().playlists.find(
-        (el) => el.id === playlistId
-      );
+      const playlistToDelete = get().playlists[playlistId];
+
+      // const playlistToDelete = get().playlists.find(
+      //   (el) => el.id === playlistId
+      // );
       if (removeAllTracks && playlistToDelete?.trackIds) {
         const x = await get().actions.removeTracks(playlistToDelete.trackIds);
       }
-      const updatedPlayList = get().playlists.filter(
-        (el) => el.id !== playlistId
-      );
+      const updatedPlayList = get().playlists;
+      delete updatedPlayList[playlistId];
+      // const updatedPlayList = get().playlists.filter(
+      //   (el) => el.id !== playlistId
+      // );
       set({ playlists: updatedPlayList });
-      await await saveToAsyncStorage("playlists", updatedPlayList);
+      await saveToAsyncStorage("playlists", updatedPlayList);
     },
     getPlaylist: (playlistId) => {
-      return get().playlists.find((el) => el.id === playlistId);
+      return get().playlists[playlistId];
     },
     getTrack: (trackId) => {
       return get().tracks.find((el) => el.id === trackId);
     },
     clearAll: async () => {
-      set({ tracks: [], playlists: [] });
+      set({ tracks: [], playlists: {} });
       await removeFromAsyncStorage("tracks");
       await removeFromAsyncStorage("playlists");
     },
@@ -205,7 +164,8 @@ export const useTracksStore = create<AudioState>((set, get) => ({
 }));
 
 export const useTrackActions = () => useTracksStore((state) => state.actions);
-
+export const usePlaylists = () =>
+  useTracksStore((state) => map(state.playlists));
 //-- ==================================
 //-- PLAYBACK STORE
 //-- ==================================
@@ -222,6 +182,8 @@ type PlaybackState = {
     pause: () => Promise<void>;
     next: () => Promise<void>;
     prev: () => Promise<void>;
+    jumpForward: (jumpForward: number) => Promise<void>;
+    jumpBack: (jumpBack: number) => Promise<void>;
   };
 };
 export const usePlaybackStore = create<PlaybackState>((set, get) => ({
@@ -265,20 +227,34 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
         Event.PlaybackTrackChanged,
         async (event) => {
           console.log("TRACK CHANGE", event);
+          // ON TRACK CHANGE -
+          // Get Next Track (if there is one) and update
+          // PlaybackStore -> currentTrack, currentTrackIndex
+          // TrackStore -> playlists object for current playlist
+          //     update the playlists current position
           if (event.nextTrack != null) {
             const track = await TrackPlayer.getTrack(event.nextTrack);
             set({ currentTrack: track, currentTrackIndex: event.nextTrack });
-            const playlists = useTracksStore.getState().playlists;
-            for (let playlist of playlists) {
-              if (playlist.id === get().currentPlaylistId) {
-                playlist.currentPosition = {
-                  trackIndex: event.nextTrack,
-                  position: 0,
-                };
-              }
-            }
-            useTracksStore.setState({ playlists });
-            await saveToAsyncStorage("playlists", playlists);
+            const playlist =
+              useTracksStore.getState().playlists[get().currentPlaylistId];
+            playlist.currentPosition = {
+              trackIndex: event.nextTrack,
+              position: 0,
+            };
+            // for (let playlist of playlists) {
+            //   if (playlist.id === get().currentPlaylistId) {
+            //     playlist.currentPosition = {
+            //       trackIndex: event.nextTrack,
+            //       position: 0,
+            //     };
+            //   }
+            // }
+            const updatedPlaylists = {
+              ...useTracksStore.getState().playlists,
+              [playlist.id]: playlist,
+            };
+            useTracksStore.setState({ playlists: updatedPlaylists });
+            await saveToAsyncStorage("playlists", updatedPlaylists);
           }
         }
       );
@@ -290,20 +266,31 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
         Event.PlaybackState,
         async (event) => {
           console.log("STATE CHANGE", event);
+          // Whenever state chagnes to Paused, then save teh current position
+          // on PlaybackStore AND TrackStore
           if (event.state === State.Paused) {
             const currPos = await TrackPlayer.getPosition();
             set({ currentTrackPosition: currPos });
             const playlists = useTracksStore.getState().playlists;
-            for (let playlist of playlists) {
-              if (playlist.id === get().currentPlaylistId) {
-                playlist.currentPosition = {
-                  trackIndex: get().currentTrackIndex,
-                  position: currPos,
-                };
-              }
-            }
-            useTracksStore.setState({ playlists });
-            await saveToAsyncStorage("playlists", playlists);
+            const playlist = playlists[get().currentPlaylistId];
+            playlist.currentPosition = {
+              trackIndex: get().currentTrackIndex,
+              position: currPos,
+            };
+            const updatedPlaylists = {
+              ...playlists,
+              [get().currentPlaylistId]: playlist,
+            };
+            // for (let playlist of playlists) {
+            //   if (playlist.id === get().currentPlaylistId) {
+            //     playlist.currentPosition = {
+            //       trackIndex: get().currentTrackIndex,
+            //       position: currPos,
+            //     };
+            //   }
+            // }
+            useTracksStore.setState({ playlists: updatedPlaylists });
+            await saveToAsyncStorage("playlists", updatedPlaylists);
           }
         }
       );
@@ -327,6 +314,37 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
     },
     prev: async () => {
       await TrackPlayer.skipToPrevious();
+    },
+    jumpForward: async (jumpForwardSeconds: number) => {
+      const currPos = await TrackPlayer.getPosition();
+      const currDuration = await TrackPlayer.getDuration();
+      const newPos = currPos + jumpForwardSeconds;
+      if (newPos > currDuration) {
+        // go to next track.  You could get crazy and calculate how much "seekTo" is in
+        // currtrack and how much in next track.
+        // currPos = 25 currDuration = 30, seekTo = 10
+        // We go to next track and start 5 seconds in next track
+        //!  Right now, just go to next track
+        await get().actions.next();
+      } else {
+        await TrackPlayer.seekTo(newPos);
+      }
+    },
+    jumpBack: async (jumpBackSeconds: number) => {
+      const currPos = await TrackPlayer.getPosition();
+      const newPos = currPos - jumpBackSeconds;
+      if (newPos < 0) {
+        // go to prev track.  You could get crazy and calculate how much "seekBack" is in
+        // currtrack and how much in prev track.
+        // currPos = 25 currDuration = 30, seekTo = 10
+        // We go to prev track and start 5 seconds in prev track
+        //!  Right now, just go to Prev track
+        await get().actions.prev();
+        const duration = await TrackPlayer.getDuration();
+        await TrackPlayer.seekTo(duration + newPos);
+      } else {
+        await TrackPlayer.seekTo(newPos);
+      }
     },
   },
 }));
@@ -375,7 +393,7 @@ export const onInitialize = async () => {
   const tracks = await loadFromAsyncStorage("tracks");
   const playlists = await loadFromAsyncStorage("playlists");
 
-  useTracksStore.setState({ tracks: tracks || [], playlists: playlists || [] });
+  useTracksStore.setState({ tracks: tracks || [], playlists: playlists || {} });
   // useTracksStore.setState({ tracks: [], playlists: [] });
 
   console.log(
@@ -384,8 +402,13 @@ export const onInitialize = async () => {
   );
   console.log(
     "store INIT Playlists",
-    useTracksStore.getState().playlists.length,
-    useTracksStore.getState().playlists.map((id) => `${id.id}-${id.name}`)
+    //useTracksStore.getState().playlists.length
+    // map(`useTracksStore.getState().playlists`, "id"),
+    // Object.keys(useTracksStore.getState().playlists)
+    Object.keys(useTracksStore.getState().playlists).map(
+      (key) => useTracksStore.getState().playlists[key].id
+    )
+    // usePlaylists().map((id) => `${id.id}-${id.name}`)
   );
 
   return;

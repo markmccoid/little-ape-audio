@@ -277,6 +277,8 @@ PODS:
     - RCTTypeSafety
     - React-Core
     - ReactCommon/turbomodule/core
+  - react-native-slider (4.4.2):
+    - React-Core
   - react-native-track-player (3.2.0):
     - React-Core
     - SwiftAudioEx (= 0.15.3)
@@ -438,6 +440,7 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - react-native-app-auth (from `../node_modules/react-native-app-auth`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
+  - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
   - react-native-track-player (from `../node_modules/react-native-track-player`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
@@ -535,6 +538,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-app-auth"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
+  react-native-slider:
+    :path: "../node_modules/@react-native-community/slider"
   react-native-track-player:
     :path: "../node_modules/react-native-track-player"
   React-perflogger:
@@ -615,6 +620,7 @@ SPEC CHECKSUMS:
   React-logger: 342f358b8decfbf8f272367f4eacf4b6154061be
   react-native-app-auth: fd1eaa667c0bc014199456d14a6440cb74de814e
   react-native-safe-area-context: 39c2d8be3328df5d437ac1700f4f3a4f75716acc
+  react-native-slider: 33b8d190b59d4f67a541061bb91775d53d617d9d
   react-native-track-player: 0c26d981b5097910486cbbeb6d8f5352d41be069
   React-perflogger: d21f182895de9d1b077f8a3cd00011095c8c9100
   React-RCTActionSheet: 0151f83ef92d2a7139bba7dfdbc8066632a6d47b

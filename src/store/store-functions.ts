@@ -1,11 +1,22 @@
+import { SetState, StateCreator, StoreApi } from "zustand";
 import { getAudioFileTags } from "../utils/audioUtils";
 import { saveToAsyncStorage } from "./data/asyncStorage";
 import { AudioState } from "./types";
 
-type addTrack = AudioState["actions"]["addNewTrack"];
+type AddTrack = AudioState["actions"]["addNewTrack"];
+type ZSetGet<T> = {
+  set: (
+    partial: T | Partial<T> | ((state: T) => T | Partial<T>),
+    replace?: boolean
+  ) => void;
+  get: () => T;
+};
 
 export const addTrack =
-  (set, get) =>
+  (
+    set: ZSetGet<AudioState>["set"],
+    get: ZSetGet<AudioState>["get"]
+  ): AddTrack =>
   async (
     fileURI,
     filename,

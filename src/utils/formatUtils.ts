@@ -18,8 +18,9 @@ export const formatBytes = (bytes: number) => {
 
 export const formatSeconds = (
   secondsIn: number,
-  type: "minimal" | "verbose"
+  type?: "minimal" | "verbose"
 ) => {
+  type = type || "minimal";
   // if (!secondsIn) return 0;
   const d = Number(secondsIn);
   const h = Math.floor(d / 3600);

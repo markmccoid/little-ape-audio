@@ -31,7 +31,11 @@ const PlaylistRow = ({ playlist }: Props) => {
       <Pressable onPress={onPlaylistSelect}>
         <Image style={styles.trackImage} source={{ uri: playlist.imageURI }} />
       </Pressable>
-
+      <TouchableOpacity
+        onPress={() => trackActions.removePlaylist(playlist.id)}
+      >
+        <Text>Delete</Text>
+      </TouchableOpacity>
       <View className="flex-col flex-grow ml-2 justify-between pb-1">
         <View className="flex-col">
           <Text

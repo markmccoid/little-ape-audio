@@ -53,13 +53,15 @@ const TrackPlayerControls = ({ style }: Props) => {
 
   return (
     <View className="flex-row gap-10 items-center justify-center" style={style}>
+      {/* SEEK BACK */}
+      <TouchableOpacity onPress={() => actions.jumpBack(10)}>
+        <BackInTimeIcon size={CONTROLSIZE} />
+      </TouchableOpacity>
+      {/* PREV TRACK */}
       <TouchableOpacity onPress={() => actions.prev()}>
         <BackIcon size={CONTROLSIZE} />
       </TouchableOpacity>
-
-      {/* <TouchableOpacity onPress={() => actions.seekTo(10)}>
-        <BackInTimeIcon size={CONTROLSIZE} />
-      </TouchableOpacity> */}
+      {/* PLAY/PAUSE */}
       <TouchableOpacity
         onPress={isPlaying ? () => pause() : () => play()}
         style={styles.actionButton}
@@ -72,14 +74,16 @@ const TrackPlayerControls = ({ style }: Props) => {
           )}
         </View>
       </TouchableOpacity>
-      {/* <TouchableOpacity onPress={() => playbackActions.jumpForward(10)}>
+      {/* NEXT TRACK */}
+      <TouchableOpacity onPress={() => actions.next()}>
+        <NextIcon size={CONTROLSIZE} />
+      </TouchableOpacity>
+      {/* SEEK FORWARD */}
+      <TouchableOpacity onPress={() => actions.jumpForward(10)}>
         <BackInTimeIcon
           style={{ transform: [{ scaleX: -1 }] }}
           size={CONTROLSIZE}
         />
-      </TouchableOpacity> */}
-      <TouchableOpacity onPress={() => actions.next()}>
-        <NextIcon size={CONTROLSIZE} />
       </TouchableOpacity>
     </View>
   );

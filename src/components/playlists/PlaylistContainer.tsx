@@ -1,15 +1,20 @@
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import React from "react";
-import { useTrackActions, useTracksStore } from "../../store/store";
+import {
+  usePlaylists,
+  useTrackActions,
+  useTracksStore,
+} from "../../store/store";
 import { Link, useNavigation } from "expo-router";
 import PlaylistRow from "./PlaylistRow";
 import { ScrollView } from "react-native-gesture-handler";
 
 const PlaylistContainer = () => {
-  const playlists = useTracksStore((state) => state.playlists);
+  const playlists = usePlaylists(); //useTracksStore((state) => state.playlists);
   const tracks = useTracksStore((state) => state.tracks);
   const trackActions = useTrackActions();
   const navigation = useNavigation();
+
   return (
     <ScrollView
       className="w-full"

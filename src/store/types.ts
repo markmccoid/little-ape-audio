@@ -24,6 +24,7 @@ export type AudioMetadata = {
 //~ ================================
 //~ Playlist Type
 //~ ================================
+type PlaylistId = string;
 export type Playlist = {
   id: string;
   name: string;
@@ -40,7 +41,7 @@ export type Playlist = {
 //~ ================================
 export type AudioState = {
   tracks: AudioTrack[];
-  playlists: Playlist[];
+  playlists: Record<PlaylistId, Playlist>;
   actions: {
     // given the audio file location in storage, look up metadata and create
     // record in AudioState.audioFiles store array
