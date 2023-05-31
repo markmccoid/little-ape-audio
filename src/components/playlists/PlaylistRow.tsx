@@ -5,13 +5,13 @@ import {
   TouchableOpacity,
   StyleSheet,
   Pressable,
+  ImageSourcePropType,
 } from "react-native";
 import React from "react";
 import { usePlaybackStore, useTrackActions } from "../../store/store";
 import { Playlist, AudioTrack } from "../../store/types";
 import { Link, useRouter } from "expo-router";
 import { formatSeconds } from "../../utils/formatUtils";
-import { usePlaybackState } from "react-native-track-player";
 
 type Props = {
   playlist: Playlist;
@@ -26,18 +26,22 @@ const PlaylistRow = ({ playlist }: Props) => {
     await setCurrPlaylist(playlist.id);
     route.push({ pathname: "/audio/player", params: {} });
   };
+
+  const imageSource =
+    playlist?.imageType === "uri"
+      ? { uri: playlist.imageURI }
+      : playlist.imageURI;
+  // console.log("IMAE URI", image5, playlist.imageURI);
   return (
-    <View className="flex-row justify-between flex-1 mb-2 px-2 flex-grow border-b border-b-amber-700">
+    <View className="flex-row  mb-2 py-2 px-2 border-b border-b-amber-700">
+      {/* IMAGE */}
       <Pressable onPress={onPlaylistSelect}>
-        <Image style={styles.trackImage} source={{ uri: playlist.imageURI }} />
+        <Image style={styles.trackImage} source={imageSource} />
       </Pressable>
-      <TouchableOpacity
-        onPress={() => trackActions.removePlaylist(playlist.id)}
-      >
-        <Text>Delete</Text>
-      </TouchableOpacity>
-      <View className="flex-col flex-grow ml-2 justify-between pb-1">
-        <View className="flex-col">
+
+      {/* TITLE AUTHOR LENGTH */}
+      <View className="flex-col flex-1 flex-grow ml-2 justify-between pb-1 ">
+        <View className="flex-col flex-shrink">
           <Text
             className="text-lg font-ssp_semibold"
             numberOfLines={2}
@@ -53,8 +57,14 @@ const PlaylistRow = ({ playlist }: Props) => {
           {formatSeconds(playlist.totalDurationSeconds, "minimal")}
         </Text>
       </View>
-      <View className="w-[50 align-middle justify-center">
+
+      {/* DELETE BUTTON */}
+      <View
+        className="flex-row items-center justify-center"
+        style={{ width: 50 }}
+      >
         <TouchableOpacity
+          className="flex-1"
           onPress={() => trackActions.removePlaylist(playlist.id)}
         >
           <Text>Delete</Text>

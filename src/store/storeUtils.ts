@@ -1,4 +1,4 @@
-import { AudioTrack } from "./store";
+import { AudioTrack } from "./types";
 
 export const analyzePlaylistTracks = (
   storedTracks: AudioTrack[],

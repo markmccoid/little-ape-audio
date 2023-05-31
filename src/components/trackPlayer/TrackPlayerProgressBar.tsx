@@ -15,7 +15,10 @@ const TrackPlayerProgressBar = () => {
   }
   return (
     <View>
-      <Text>{formatSeconds(Math.floor(position))}</Text>
+      <Text>
+        {formatSeconds(Math.floor(position))} of{" "}
+        {formatSeconds(Math.floor(duration))}
+      </Text>
       {seeking && <Text>{formatSeconds(Math.floor(seeking))}</Text>}
       <Slider
         style={{ width: width - 20, height: 40 }}

@@ -17,22 +17,6 @@ export default function AudioScreen() {
   return (
     <View style={styles.container}>
       <PlaylistContainer />
-      <View style={styles.main}>
-        <Text style={styles.title}>Hello World</Text>
-        <Link href="../settings">Settings</Link>
-        <Link href="./audio/dropbox">Get From Dropbox</Link>
-        <TouchableOpacity
-          onPress={async () => {
-            await TrackPlayer.add([track]);
-            await TrackPlayer.play();
-          }}
-        >
-          <Text>Play</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => TrackPlayer.pause()}>
-          <Text>Pause</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }
@@ -40,7 +24,7 @@ export default function AudioScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
+    // padding: 24,
   },
   main: {
     flex: 1,

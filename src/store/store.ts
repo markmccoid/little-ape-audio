@@ -13,10 +13,12 @@ import TrackPlayer, { Track, State, Event } from "react-native-track-player";
 import { useEffect, useState } from "react";
 import { addTrack } from "./store-functions";
 import { deleteFromFileSystem } from "./data/fileSystemAccess";
-import { NumberProp } from "react-native-svg";
 
-let eventIdOne;
-let eventIdTwo;
+export const image5 = require("../../assets/images/LittleApAudio05.png");
+let eventPlayerTrackChange = undefined;
+let eventEndOfQueue = undefined;
+let eventPlayerStateChange = undefined;
+let saveIntervalId = undefined;
 //-- ==================================
 //-- TRACK STORE
 //-- ==================================
@@ -90,10 +92,10 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         name,
         author,
         imageURI: undefined,
+        imageType: undefined,
         totalDurationSeconds: 0,
         currentRate: 1,
       };
-      //! const newPlaylistArray = [newPlaylist, ...get().playlists];
 
       const newPlaylistObj = { ...get().playlists, [id]: newPlaylist };
       set({ playlists: newPlaylistObj });
@@ -101,13 +103,10 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       return id;
     },
     addTracksToPlaylist: async (playlistId, tracks) => {
-      //! const playlists = [...get().playlists];
       const storedTracks = [...get().tracks];
       const playlist = get().playlists[playlistId];
 
       // console.log("ADD TRACK TO PL", playlistId, tracks);
-      //! for (let playlist of playlists) {
-      //! if (playlist.id === playlistId) {
       // Take the tracks being added and merge them with existing tracks
       // in playlist.  Get rid of dups.
       const uniqueTracksPlaylist = [
@@ -117,13 +116,12 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         storedTracks,
         uniqueTracksPlaylist
       );
-      playlist.imageURI = images[0];
+      // console.log("IN STORE", image5);
+      playlist.imageURI = images[0] || image5;
+      playlist.imageType = images[0] ? "uri" : "imported";
       playlist.totalDurationSeconds = totalDuration;
       playlist.trackIds = sortBy(uniqueTracksPlaylist);
-      //! Once we find our playlist, exit
-      //!break;
-      //! }
-      //! }
+
       // Update playlists in Store and Async Storage
       const playlists = { ...get().playlists, [playlistId]: playlist };
       set({ playlists });
@@ -177,6 +175,7 @@ type PlaybackState = {
   currentTrackIndex: number;
   currentTrackPosition: number;
   actions: {
+    // New playlist being loaded
     setCurrentPlaylist: (playlistId: string) => Promise<void>;
     play: () => Promise<void>;
     pause: () => Promise<void>;
@@ -195,6 +194,12 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
   currentTrackPosition: 0,
   actions: {
     setCurrentPlaylist: async (playlistId) => {
+      //----------
+      // Store existing playlist information in TrackStore -> playlists
+      // before loading new playlist
+      await saveCurrentTrackInfo();
+      //---------
+      // Load new Playlist
       const currPlaylist = useTracksStore
         .getState()
         .actions.getPlaylist(playlistId);
@@ -220,80 +225,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       await TrackPlayer.skip(currTrackIndex);
       await TrackPlayer.seekTo(currTrackPosition);
 
-      if (eventIdOne) {
-        eventIdOne.remove();
-      }
-      eventIdOne = TrackPlayer.addEventListener(
-        Event.PlaybackTrackChanged,
-        async (event) => {
-          console.log("TRACK CHANGE", event);
-          // ON TRACK CHANGE -
-          // Get Next Track (if there is one) and update
-          // PlaybackStore -> currentTrack, currentTrackIndex
-          // TrackStore -> playlists object for current playlist
-          //     update the playlists current position
-          if (event.nextTrack != null) {
-            const track = await TrackPlayer.getTrack(event.nextTrack);
-            set({ currentTrack: track, currentTrackIndex: event.nextTrack });
-            const playlist =
-              useTracksStore.getState().playlists[get().currentPlaylistId];
-            playlist.currentPosition = {
-              trackIndex: event.nextTrack,
-              position: 0,
-            };
-            // for (let playlist of playlists) {
-            //   if (playlist.id === get().currentPlaylistId) {
-            //     playlist.currentPosition = {
-            //       trackIndex: event.nextTrack,
-            //       position: 0,
-            //     };
-            //   }
-            // }
-            const updatedPlaylists = {
-              ...useTracksStore.getState().playlists,
-              [playlist.id]: playlist,
-            };
-            useTracksStore.setState({ playlists: updatedPlaylists });
-            await saveToAsyncStorage("playlists", updatedPlaylists);
-          }
-        }
-      );
-
-      if (eventIdTwo) {
-        eventIdTwo.remove();
-      }
-      eventIdTwo = TrackPlayer.addEventListener(
-        Event.PlaybackState,
-        async (event) => {
-          console.log("STATE CHANGE", event);
-          // Whenever state chagnes to Paused, then save teh current position
-          // on PlaybackStore AND TrackStore
-          if (event.state === State.Paused) {
-            const currPos = await TrackPlayer.getPosition();
-            set({ currentTrackPosition: currPos });
-            const playlists = useTracksStore.getState().playlists;
-            const playlist = playlists[get().currentPlaylistId];
-            playlist.currentPosition = {
-              trackIndex: get().currentTrackIndex,
-              position: currPos,
-            };
-            const updatedPlaylists = {
-              ...playlists,
-              [get().currentPlaylistId]: playlist,
-            };
-            // for (let playlist of playlists) {
-            //   if (playlist.id === get().currentPlaylistId) {
-            //     playlist.currentPosition = {
-            //       trackIndex: get().currentTrackIndex,
-            //       position: currPos,
-            //     };
-            //   }
-            // }
-            useTracksStore.setState({ playlists: updatedPlaylists });
-            await saveToAsyncStorage("playlists", updatedPlaylists);
-          }
-        }
-      );
+      mountTrackPlayerListeners();
     },
     play: async () => {
       await TrackPlayer.play();
@@ -372,6 +304,7 @@ const buildTrackPlayerQueue = (trackIds: string[]) => {
   for (const trackId of trackIds) {
     const trackInfo = trackActions.getTrack(trackId);
     const trackPlayerTrack = {
+      id: trackInfo.id,
       url: trackInfo.fileURI,
       title: trackInfo.metadata.title,
       artist: trackInfo.metadata.artist,
@@ -384,6 +317,42 @@ const buildTrackPlayerQueue = (trackIds: string[]) => {
   }
   return queue;
 };
+
+//~ ------------------------------------
+//~ HELPERS
+//~ ------------------------------------
+/**
+ * saveCurrentTrackInfo
+ * Inquires the TrackPlayer to get the current track and position
+ * then updates the playlist that is being played with this
+ * information AND stores to asyncStorage "playlists".
+ *
+ */
+const saveCurrentTrackInfo = async () => {
+  const trackIndex = await TrackPlayer.getCurrentTrack();
+  if (trackIndex !== null && trackIndex !== undefined) {
+    console.log("Saving Track Progress");
+    const position = await TrackPlayer.getPosition();
+    usePlaybackStore.setState({ currentTrackPosition: position });
+    const playlist = {
+      ...useTracksStore.getState().playlists[
+        usePlaybackStore.getState().currentPlaylistId
+      ],
+    };
+    playlist.currentPosition = {
+      trackIndex: trackIndex,
+      position,
+    };
+    // Create update list of playlists
+    const updatedPlaylists = {
+      ...useTracksStore.getState().playlists,
+      [playlist.id]: playlist,
+    };
+    useTracksStore.setState({ playlists: updatedPlaylists });
+    await saveToAsyncStorage("playlists", updatedPlaylists);
+  }
+};
+
 /** =============================
  * ON INITIALIZE
  ** ============================= */
@@ -413,3 +382,107 @@ export const onInitialize = async () => {
 
   return;
 };
+
+//~ ----------------------------------
+//~ MOUNT TrackPlayer Event Listeners
+//~ ----------------------------------
+const mountTrackPlayerListeners = () => {
+  // -- METADATA
+  // https://react-native-track-player.js.org/docs/api/events#playbackmetadatareceived
+  // if (eventMetadata) {
+  //   eventMetadata.remove();
+  // }
+  // eventMetadata = TrackPlayer.addEventListener(
+  //   Event.PlaybackMetadataReceived,
+  //   async (event) => {
+  //     console.log("Metadata received", event);
+  //   }
+  // );
+  // -- END OF QUEUE
+  if (eventEndOfQueue) {
+    eventEndOfQueue.remove();
+  }
+  eventEndOfQueue = TrackPlayer.addEventListener(
+    Event.PlaybackQueueEnded,
+    async (event) => {
+      console.log("END OF QUEUE", event);
+      const queue = await TrackPlayer.getQueue();
+      if (queue.length > 1) {
+        TrackPlayer.skip(0);
+        TrackPlayer.pause();
+      }
+    }
+  );
+
+  // -- TRACK CHANGED
+  if (eventPlayerTrackChange) {
+    eventPlayerTrackChange.remove();
+  }
+  eventPlayerTrackChange = TrackPlayer.addEventListener(
+    Event.PlaybackTrackChanged,
+    async (event) => {
+      console.log("TRACK CHANGE", event);
+      // ON TRACK CHANGE -
+      // Get Next Track (if there is one) and update
+      // PlaybackStore -> currentTrack, currentTrackIndex
+      // TrackStore -> playlists object for current playlist
+      //     update the playlists current position
+      if (event.nextTrack != null) {
+        const track = await TrackPlayer.getTrack(event.nextTrack);
+        usePlaybackStore.setState({
+          currentTrack: track,
+          currentTrackIndex: event.nextTrack,
+        });
+        const playlist =
+          useTracksStore.getState().playlists[
+            usePlaybackStore.getState().currentPlaylistId
+          ];
+        playlist.currentPosition = {
+          trackIndex: event.nextTrack,
+          position: 0,
+        };
+        const updatedPlaylists = {
+          ...useTracksStore.getState().playlists,
+          [playlist.id]: playlist,
+        };
+        useTracksStore.setState({ playlists: updatedPlaylists });
+        await saveToAsyncStorage("playlists", updatedPlaylists);
+      } else {
+        TrackPlayer.seekTo(0);
+        TrackPlayer.pause();
+      }
+    }
+  );
+  //-- =================
+  // -- STATE CHANGED
+  //-- =================
+  if (eventPlayerStateChange) {
+    eventPlayerStateChange.remove();
+  }
+  eventPlayerStateChange = TrackPlayer.addEventListener(
+    Event.PlaybackState,
+    async (event) => {
+      console.log("STATE CHANGE", event, saveIntervalId);
+      // Whenever state chagnes to Paused, then save teh current position
+      // on PlaybackStore AND TrackStore
+      if (event.state === State.Stopped) {
+        clearAutoSaveInterval(saveIntervalId);
+      }
+      if (event.state === State.Paused) {
+        clearAutoSaveInterval(saveIntervalId);
+        await saveCurrentTrackInfo();
+        return;
+      }
+      if (event.state === State.Playing) {
+        clearAutoSaveInterval(saveIntervalId);
+        saveIntervalId = setInterval(async () => saveCurrentTrackInfo(), 10000);
+        console.log("NEW Interval Id", saveIntervalId);
+      }
+    }
+  );
+};
+
+function clearAutoSaveInterval(intervalId: number) {
+  clearInterval(intervalId);
+  intervalId = undefined;
+}

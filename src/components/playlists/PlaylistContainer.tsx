@@ -20,7 +20,7 @@ const PlaylistContainer = () => {
       className="w-full"
       contentContainerStyle={{ paddingBottom: 30 }}
     >
-      <View className="mt-2 ">
+      <View className="mt-2">
         {playlists.map((playlist) => (
           <PlaylistRow key={playlist.id} playlist={playlist} />
         ))}

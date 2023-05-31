@@ -29,7 +29,8 @@ export type Playlist = {
   id: string;
   name: string;
   author: string;
-  imageURI: string | undefined;
+  imageURI: { uri: string } | number | undefined;
+  imageType: "uri" | "imported" | "url";
   totalDurationSeconds: number;
   trackIds?: string[];
   currentPosition?: { trackIndex: number; position: number };
