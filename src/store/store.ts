@@ -365,6 +365,7 @@ const saveCurrentTrackInfo = async () => {
 export const onInitialize = async () => {
   // await removeFromAsyncStorage("tracks");
   // await removeFromAsyncStorage("playlists");
+  // await removeFromAsyncStorage("favfolders");
   const tracks = await loadFromAsyncStorage("tracks");
   const playlists = await loadFromAsyncStorage("playlists");
   const favFolders = await loadFromAsyncStorage("favfolders");

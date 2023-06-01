@@ -8,7 +8,8 @@ import {
 import { useDropboxStore } from "../../../src/store/store-dropbox";
 
 const DropboxScreens = () => {
-  const favFolders = useDropboxStore((state) => state.favoriteFolders);
+  const favFolders = useDropboxStore((state) => state.favoriteFolders) || [];
+
   return (
     <View className="flex-col">
       <View className="m-4">
