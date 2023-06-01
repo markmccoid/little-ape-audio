@@ -255,6 +255,8 @@ export type FolderEntry = {
   path_lower: string;
   path_display: string;
   id: string;
+  favorited?: boolean;
+  favoriteId?: string;
 };
 export type FileEntry = {
   [".tag"]: "file";

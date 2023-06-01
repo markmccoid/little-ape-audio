@@ -28,6 +28,9 @@ export const DragHandleIcon = ({ size = 25, color, style }: Props) => {
     <MaterialIcons name="drag-handle" size={size} color={color} style={style} />
   );
 };
+export const BookmarkIcon = ({ size = 25, color, style }: Props) => {
+  return <Fontisto name="favorite" size={size} color={color} style={style} />;
+};
 
 export const TagIcon = ({ size = 25, color, style }: Props) => {
   return <FontAwesome name="tags" color={color} size={size} style={style} />;

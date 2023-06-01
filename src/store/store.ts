@@ -1,4 +1,4 @@
-import { AudioTrack, AudioMetadata, Playlist, AudioState } from "./types";
+import { Playlist, AudioState } from "./types";
 import { create } from "zustand";
 import uuid from "react-native-uuid";
 import {
@@ -13,6 +13,7 @@ import TrackPlayer, { Track, State, Event } from "react-native-track-player";
 import { useEffect, useState } from "react";
 import { addTrack } from "./store-functions";
 import { deleteFromFileSystem } from "./data/fileSystemAccess";
+import { useDropboxStore } from "./store-dropbox";
 
 export const image5 = require("../../assets/images/LittleApAudio05.png");
 let eventPlayerTrackChange = undefined;
@@ -366,9 +367,11 @@ export const onInitialize = async () => {
   // await removeFromAsyncStorage("playlists");
   const tracks = await loadFromAsyncStorage("tracks");
   const playlists = await loadFromAsyncStorage("playlists");
+  const favFolders = await loadFromAsyncStorage("favfolders");
 
   useTracksStore.setState({ tracks: tracks || [], playlists: playlists || {} });
-  // useTracksStore.setState({ tracks: [], playlists: [] });
+
+  useDropboxStore.setState({ favoriteFolders: favFolders });
 
   console.log(
     "store INIT # of Tracks",

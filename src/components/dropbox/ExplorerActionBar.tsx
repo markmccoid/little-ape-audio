@@ -10,14 +10,9 @@ import { CloudDownloadIcon } from "../common/svg/Icons";
 
 type Props = {
   currentPath: string;
-  onHandleBack: (newPath) => void;
   handleDownloadAll: () => void;
 };
-const ExplorerActionBar = ({
-  currentPath,
-  onHandleBack,
-  handleDownloadAll,
-}: Props) => {
+const ExplorerActionBar = ({ currentPath, handleDownloadAll }: Props) => {
   return (
     <View className="flex flex-row items-center justify-end mr-2 flex-grow-1">
       {/* <View className="flex flex-grow-1">

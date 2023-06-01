@@ -5,8 +5,10 @@ import {
   DropboxIcon,
   StarFilledIcon,
 } from "../../../src/components/common/svg/Icons";
+import { useDropboxStore } from "../../../src/store/store-dropbox";
 
 const DropboxScreens = () => {
+  const favFolders = useDropboxStore((state) => state.favoriteFolders);
   return (
     <View className="flex-col">
       <View className="m-4">
@@ -31,34 +33,27 @@ const DropboxScreens = () => {
           Favorites
         </Text>
         <View className="rounded-xl bg-white">
-          <View
-            className=" border-b-amber-800"
-            style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
-          >
-            <Link
-              href={{
-                pathname: "./dropbox/newdir",
-                params: { fullPath: "", backTitle: "Back" },
-              }}
-            >
-              <View className="flex-row px-2 py-3 items-center">
-                <StarFilledIcon />
-                <Text className="ml-3 text">Read from Favs</Text>
+          {favFolders.map((folder) => {
+            return (
+              <View
+                key={folder.id}
+                className=" border-b-amber-800"
+                style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
+              >
+                <Link
+                  href={{
+                    pathname: "./dropbox/newdir",
+                    params: { fullPath: folder.folderPath, backTitle: "Back" },
+                  }}
+                >
+                  <View className="flex-row px-2 py-3 items-center">
+                    <StarFilledIcon />
+                    <Text className="ml-3 text">{folder.folderPath}</Text>
+                  </View>
+                </Link>
               </View>
-            </Link>
-          </View>
-
-          <Link
-            href={{
-              pathname: "./dropbox/newdir",
-              params: { fullPath: "", backTitle: "Back" },
-            }}
-          >
-            <View className="flex-row px-2 py-3 items-center">
-              <StarFilledIcon />
-              <Text className="ml-3 text">Read from Favs</Text>
-            </View>
-          </Link>
+            );
+          })}
         </View>
       </View>
     </View>

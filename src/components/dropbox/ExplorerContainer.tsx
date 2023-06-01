@@ -21,6 +21,7 @@ import { MotiView } from "moti";
 import { times } from "lodash";
 import { Skeleton } from "moti/skeleton";
 import { FolderClosedIcon } from "../common/svg/Icons";
+import { useDropboxStore } from "../../store/store-dropbox";
 
 function filterAudioFiles(filesAndFolders: DropboxDir) {
   const files = filesAndFolders.files;
@@ -54,6 +55,7 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
   const [isLoading, setIsLoading] = React.useState(false);
   const [isError, setIsError] = React.useState(undefined);
   const trackActions = useTrackActions();
+  const dropboxActions = useDropboxStore((state) => state.actions);
 
   React.useEffect(() => {
     const getFiles = async () => {
@@ -66,8 +68,11 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
         const taggedFiles = trackActions.isTrackDownloaded(
           filteredFoldersFiles.files
         );
+        const taggedFolders = dropboxActions.isFolderFavorited(
+          filteredFoldersFiles.folders
+        );
         const finalFolderFileList: DropboxDir = {
-          folders: filteredFoldersFiles.folders,
+          folders: taggedFolders, //filteredFoldersFiles.folders,
           files: taggedFiles,
         };
         setFiles(finalFolderFileList);
@@ -131,9 +136,6 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
       <View style={{ zIndex: 5 }}>
         <ExplorerActionBar
           currentPath={pathIn}
-          onHandleBack={(newPath) => {
-            goBackInPath(currentPath);
-          }}
           handleDownloadAll={onDownloadAll}
         />
       </View>
