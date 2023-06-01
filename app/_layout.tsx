@@ -14,7 +14,7 @@ import {
   Lato_700Bold,
 } from "@expo-google-fonts/lato";
 
-import TrackPlayer from "react-native-track-player";
+import TrackPlayer, { Capability } from "react-native-track-player";
 import { onInitialize } from "../src/store/store";
 
 export {
@@ -38,11 +38,23 @@ export default function RootLayout() {
   // Zustand Store and app initialization
   //--------
   useEffect(() => {
+    const setupTP = async () => {
+      await TrackPlayer.setupPlayer();
+      await TrackPlayer.updateOptions({
+        capabilities: [
+          Capability.Play,
+          Capability.Pause,
+          Capability.SkipToNext,
+          Capability.SkipToPrevious,
+          Capability.SeekTo,
+        ],
+      });
+      await onInitialize();
+      console.log("TrackPlayer SETUP and onInitialize");
+    };
     // Run your initialization code here
     // It can be async
-    console.log("TrackPlayer SETUP and onInitialize");
-    TrackPlayer.setupPlayer();
-    onInitialize();
+    setupTP();
   }, []);
 
   return (

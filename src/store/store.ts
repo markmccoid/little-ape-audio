@@ -183,6 +183,7 @@ type PlaybackState = {
     prev: () => Promise<void>;
     jumpForward: (jumpForward: number) => Promise<void>;
     jumpBack: (jumpBack: number) => Promise<void>;
+    seekTo: (position: number) => Promise<void>;
   };
 };
 export const usePlaybackStore = create<PlaybackState>((set, get) => ({
@@ -278,6 +279,10 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
         await TrackPlayer.seekTo(newPos);
       }
     },
+    seekTo: async (position) => {
+      await TrackPlayer.seekTo(position);
+      await saveCurrentTrackInfo();
+    },
   },
 }));
 
@@ -353,9 +358,9 @@ const saveCurrentTrackInfo = async () => {
   }
 };
 
-/** =============================
- * ON INITIALIZE
- ** ============================= */
+//~ ----------------------------------
+//~ ON INITIALIZE
+//~ ----------------------------------
 export const onInitialize = async () => {
   // await removeFromAsyncStorage("tracks");
   // await removeFromAsyncStorage("playlists");

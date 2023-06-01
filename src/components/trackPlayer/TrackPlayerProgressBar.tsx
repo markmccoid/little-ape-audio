@@ -7,19 +7,23 @@ import { formatSeconds } from "../../utils/formatUtils";
 
 const { width, height } = Dimensions.get("window");
 const TrackPlayerProgressBar = () => {
+  const playbackActions = usePlaybackStore((state) => state.actions);
   const { position, duration } = useProgress();
   const [seeking, setSeeking] = useState<number>();
-  function handleChange(value) {
-    TrackPlayer.seekTo(value);
+  async function handleChange(value) {
+    if (value < 0) value = 0;
+    await playbackActions.seekTo(value);
+    // await TrackPlayer.seekTo(value);
     setSeeking(undefined);
   }
+  // console.log("position", position);
   return (
     <View>
       <Text>
         {formatSeconds(Math.floor(position))} of{" "}
         {formatSeconds(Math.floor(duration))}
       </Text>
-      {seeking && <Text>{formatSeconds(Math.floor(seeking))}</Text>}
+      {seeking > 0 && <Text>{formatSeconds(Math.floor(seeking))}</Text>}
       <Slider
         style={{ width: width - 20, height: 40 }}
         minimumValue={0}
