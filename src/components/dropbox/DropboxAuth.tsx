@@ -18,6 +18,7 @@ import {
   checkDropboxToken,
   revokeDropboxAccess,
 } from "../../utils/dropboxUtils";
+import { Link } from "expo-router";
 
 //-- ----------------------
 //-- APP AUTH CONFIG SETUP
@@ -57,10 +58,10 @@ const DropboxAuthContainer = () => {
       authState = await authorize(config);
     } catch (err) {
       console.log(`authState Errorr`);
-      Alert.alert("authState Caught Error", JSON.stringify(err));
+      // Alert.alert("authState Caught Error", JSON.stringify(err));
       return;
     }
-    Alert.alert("after");
+    // Alert.alert("after");
     const dropboxToken = authState?.accessToken;
     const dropboxRefreshToken = authState?.refreshToken;
     // The fields below are not really needed for anything auth-wise
@@ -97,19 +98,17 @@ const DropboxAuthContainer = () => {
   }, []);
 
   return (
-    <View>
-      <Text>DropboxAuthContainer</Text>
-
-      <TouchableOpacity style={styles.authButton} onPress={onAuthorize}>
+    <View className="flex-1 flex-col items-center">
+      {/* <TouchableOpacity style={styles.authButton} onPress={onAuthorize}>
         <Text style={{ color: "white" }}>Authorize Dropbox</Text>
       </TouchableOpacity>
 
       <Text>ValidToken: {JSON.stringify(validToken)}</Text>
-      <Text>isMounted: {JSON.stringify(isCheckingToken)}</Text>
+      <Text>isMounted: {JSON.stringify(isCheckingToken)}</Text> */}
       {/* {!isMounted?.current && <ActivityIndicator size="large" />} */}
       {validToken && !isCheckingToken && (
         <View>
-          <Text>Dropbox is Authorized</Text>
+          <Text className="text-lg font-bold">Dropbox is Authorized</Text>
         </View>
       )}
       {!validToken && !isCheckingToken && (
@@ -118,9 +117,16 @@ const DropboxAuthContainer = () => {
         </TouchableOpacity>
       )}
       {validToken && !isCheckingToken && (
-        <TouchableOpacity style={styles.revokeButton} onPress={onRevoke}>
-          <Text style={{ color: "white" }}>Revoke Dropbox Authorization</Text>
-        </TouchableOpacity>
+        <View className="flex-row items-center justify-between w-full">
+          <Link href="/audio" asChild>
+            <TouchableOpacity className="rounded-md p-2 ml-4 border border-black bg-amber-300">
+              <Text className="text-amber-950">Home</Text>
+            </TouchableOpacity>
+          </Link>
+          <TouchableOpacity style={styles.revokeButton} onPress={onRevoke}>
+            <Text style={{ color: "white" }}>Revoke Dropbox Authorization</Text>
+          </TouchableOpacity>
+        </View>
       )}
     </View>
   );
@@ -129,10 +135,11 @@ const DropboxAuthContainer = () => {
 const styles = StyleSheet.create({
   revokeButton: {
     backgroundColor: "#9f170d",
-    padding: 10,
-    borderRadius: 10,
+    padding: 8,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: "black",
+    marginRight: 12,
   },
   authButton: {
     backgroundColor: "#0261fe",

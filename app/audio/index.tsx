@@ -15,7 +15,7 @@ const track: Track = {
 };
 export default function AudioScreen() {
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-amber-50">
       <PlaylistContainer />
     </View>
   );
@@ -24,6 +24,7 @@ export default function AudioScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+
     // padding: 24,
   },
   main: {

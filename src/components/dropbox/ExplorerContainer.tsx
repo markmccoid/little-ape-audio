@@ -76,9 +76,10 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
           files: taggedFiles,
         };
         setFiles(finalFolderFileList);
+        // setIsError(undefined)
       } catch (err) {
         console.log(err);
-        setIsError(err.cause);
+        setIsError("Dropbox");
       }
       setIsLoading(false);
     };
@@ -98,7 +99,7 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
     const playlistId = uuid.v4() as string;
     setDownloadAllId(playlistId);
   };
-
+  console.log("IS ERROR", isError);
   if (isError) {
     return (
       <View>

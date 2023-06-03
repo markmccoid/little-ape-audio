@@ -4,8 +4,7 @@ import DropboxAuth from "../../src/components/dropbox/DropboxAuth";
 
 const DropboxAuthScreen = () => {
   return (
-    <View>
-      <Text>DropboxAuthScreen</Text>
+    <View className="flex-1 bg-amber-50">
       <DropboxAuth />
     </View>
   );

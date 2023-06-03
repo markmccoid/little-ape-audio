@@ -4,6 +4,7 @@ import Slider from "@react-native-community/slider";
 import TrackPlayer, { useProgress } from "react-native-track-player";
 import { usePlaybackStore } from "../../store/store";
 import { formatSeconds } from "../../utils/formatUtils";
+import { colors } from "../../constants/Colors";
 
 const { width, height } = Dimensions.get("window");
 const TrackPlayerProgressBar = () => {
@@ -18,8 +19,8 @@ const TrackPlayerProgressBar = () => {
   }
   // console.log("position", position);
   return (
-    <View>
-      <Text>
+    <View className="flex-col justify-center items-center">
+      <Text className="font-semibold mt-2">
         {formatSeconds(Math.floor(position))} of{" "}
         {formatSeconds(Math.floor(duration))}
       </Text>
@@ -28,8 +29,9 @@ const TrackPlayerProgressBar = () => {
         style={{ width: width - 20, height: 40 }}
         minimumValue={0}
         maximumValue={duration}
-        minimumTrackTintColor="#FFFFFF"
-        maximumTrackTintColor="#000000"
+        minimumTrackTintColor={colors.amber700}
+        maximumTrackTintColor={colors.amber400}
+        thumbTintColor={colors.amber600}
         value={position}
         onValueChange={setSeeking}
         onSlidingComplete={handleChange}

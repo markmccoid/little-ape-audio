@@ -1,4 +1,4 @@
-import { Dimensions, View, Image } from "react-native";
+import { Dimensions, View, Image, Text } from "react-native";
 import React from "react";
 import { Stack } from "expo-router";
 import { usePlaybackStore } from "../../src/store/store";
@@ -13,8 +13,16 @@ const PlaylistScreen = () => {
       ? { uri: playlist.imageURI }
       : playlist.imageURI;
   return (
-    <View>
-      <Stack.Screen options={{ title: playlist.author }} />
+    <View className="flex-1 bg-amber-50 pt-2">
+      <Stack.Screen
+        options={{
+          headerTitle: () => (
+            <Text className="text-base font-bold text-amber-950">
+              {playlist.name}
+            </Text>
+          ),
+        }}
+      />
       <Image
         className="rounded-xl"
         style={{

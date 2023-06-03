@@ -31,7 +31,7 @@ const { width, height } = Dimensions.get("window");
 
 const TrackPlayerContainer = () => {
   return (
-    <View>
+    <View className="flex-1 flex-col flex-grow">
       <TrackPlayerControls />
       <TrackPlayerProgressBar />
       <TrackList />

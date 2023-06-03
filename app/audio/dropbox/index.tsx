@@ -6,15 +6,22 @@ import {
   StarFilledIcon,
 } from "../../../src/components/common/svg/Icons";
 import { useDropboxStore } from "../../../src/store/store-dropbox";
+import { colors } from "../../../src/constants/Colors";
 
 const DropboxScreens = () => {
   const favFolders = useDropboxStore((state) => state.favoriteFolders) || [];
 
   return (
-    <View className="flex-col">
+    <View className="flex-1 flex-col bg-amber-50">
       <View className="m-4">
         <Text className="text-amber-800 font-semibold mb-1 ml-2">Cloud</Text>
-        <View className="rounded-xl bg-white">
+        <View
+          className="rounded-xl bg-white"
+          style={{
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.amber900,
+          }}
+        >
           <Link
             href={{
               pathname: "./dropbox/newdir",
@@ -33,7 +40,13 @@ const DropboxScreens = () => {
         <Text className="text-amber-800 font-semibold mb-1 ml-2">
           Favorites
         </Text>
-        <View className="rounded-xl bg-white">
+        <View
+          className="rounded-xl bg-white"
+          style={{
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.amber900,
+          }}
+        >
           {favFolders.map((folder) => {
             return (
               <View

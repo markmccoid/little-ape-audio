@@ -1,3 +1,4 @@
+import { Track } from "react-native-track-player";
 import { FileEntry } from "../utils/dropboxUtils";
 
 //~ ================================
@@ -24,6 +25,11 @@ export type AudioMetadata = {
 //~ ================================
 //~ Playlist Type
 //~ ================================
+export interface ApeTrack extends Track {
+  id: string;
+  filename: string;
+}
+
 type PlaylistId = string;
 export type Playlist = {
   id: string;
@@ -72,6 +78,7 @@ export type AudioState = {
     removePlaylist: (playlistId: string, removeAllTracks?: boolean) => void;
     getPlaylist: (playlistId: string) => Playlist | undefined;
     getTrack: (trackId: string) => AudioTrack | undefined;
+    updatePlaylistRate: (playlistId, newRate) => void;
     clearAll: () => Promise<void>;
   };
 };

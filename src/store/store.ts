@@ -1,4 +1,4 @@
-import { Playlist, AudioState } from "./types";
+import { Playlist, AudioState, ApeTrack } from "./types";
 import { create } from "zustand";
 import uuid from "react-native-uuid";
 import {
@@ -159,6 +159,13 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       await removeFromAsyncStorage("tracks");
       await removeFromAsyncStorage("playlists");
     },
+    updatePlaylistRate: (playlistId, newRate) => {
+      const playlists = { ...get().playlists };
+      playlists[playlistId].currentRate = newRate;
+
+      set({ playlists });
+      saveToAsyncStorage("playlists", playlists);
+    },
   },
 }));
 
@@ -171,9 +178,10 @@ export const usePlaylists = () =>
 type PlaybackState = {
   currentPlaylistId: string;
   currentPlaylist: Playlist;
-  trackPlayerQueue: Track[];
-  currentTrack: Track;
+  trackPlayerQueue: ApeTrack[];
+  currentTrack: ApeTrack;
   currentTrackIndex: number;
+  playerState: State;
   currentTrackPosition: number;
   actions: {
     // New playlist being loaded
@@ -185,6 +193,8 @@ type PlaybackState = {
     jumpForward: (jumpForward: number) => Promise<void>;
     jumpBack: (jumpBack: number) => Promise<void>;
     seekTo: (position: number) => Promise<void>;
+    goToTrack: (trackIndex: number) => Promise<void>;
+    updatePlaybackRate: (newRate: number) => Promise<void>;
   };
 };
 export const usePlaybackStore = create<PlaybackState>((set, get) => ({
@@ -194,8 +204,10 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
   currentTrack: undefined,
   currentTrackIndex: 0,
   currentTrackPosition: 0,
+  playerState: undefined,
   actions: {
     setCurrentPlaylist: async (playlistId) => {
+      if (get().currentPlaylistId === playlistId) return;
       //----------
       // Store existing playlist information in TrackStore -> playlists
       // before loading new playlist
@@ -226,8 +238,19 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       // - Make sure current track is loaded and set to proper position
       await TrackPlayer.skip(currTrackIndex);
       await TrackPlayer.seekTo(currTrackPosition);
+      await TrackPlayer.setRate(get().currentPlaylist.currentRate);
 
       mountTrackPlayerListeners();
+    },
+    updatePlaybackRate: async (newRate) => {
+      if (isNaN(newRate)) return;
+      const currPlaylistId = get().currentPlaylistId;
+      if (newRate > 0 && newRate <= 5) {
+        useTracksStore
+          .getState()
+          .actions.updatePlaylistRate(currPlaylistId, newRate);
+        await TrackPlayer.setRate(newRate);
+      }
     },
     play: async () => {
       await TrackPlayer.play();
@@ -247,7 +270,12 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       }
     },
     prev: async () => {
-      await TrackPlayer.skipToPrevious();
+      const trackIndex = await TrackPlayer.getCurrentTrack();
+      if (trackIndex === 0) {
+        await TrackPlayer.seekTo(0);
+      } else {
+        await TrackPlayer.skipToPrevious();
+      }
     },
     jumpForward: async (jumpForwardSeconds: number) => {
       const currPos = await TrackPlayer.getPosition();
@@ -284,6 +312,9 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       await TrackPlayer.seekTo(position);
       await saveCurrentTrackInfo();
     },
+    goToTrack: async (trackIndex) => {
+      await TrackPlayer.skip(trackIndex);
+    },
   },
 }));
 
@@ -304,13 +335,15 @@ export const useGetQueue = () => {
 
   return tracks;
 };
-const buildTrackPlayerQueue = (trackIds: string[]) => {
+
+const buildTrackPlayerQueue = (trackIds: string[]): ApeTrack[] => {
   const trackActions = useTracksStore.getState().actions;
   let queue = [];
   for (const trackId of trackIds) {
     const trackInfo = trackActions.getTrack(trackId);
     const trackPlayerTrack = {
       id: trackInfo.id,
+      filename: trackInfo.filename,
       url: trackInfo.fileURI,
       title: trackInfo.metadata.title,
       artist: trackInfo.metadata.artist,
@@ -474,6 +507,7 @@ const mountTrackPlayerListeners = () => {
       console.log("STATE CHANGE", event, saveIntervalId);
       // Whenever state chagnes to Paused, then save teh current position
       // on PlaybackStore AND TrackStore
+      usePlaybackStore.setState({ playerState: event.state });
       if (event.state === State.Stopped) {
         clearAutoSaveInterval(saveIntervalId);
       }

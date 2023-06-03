@@ -3,6 +3,8 @@ import React from "react";
 import { Link, Stack } from "expo-router";
 import AddBook from "../../src/components/common/svg/AddBook";
 import Monkey from "../../src/components/common/svg/Monkey";
+import { SettingsIcon } from "../../src/components/common/svg/Icons";
+import { colors } from "../../src/constants/Colors";
 
 const AudioLayout = () => {
   return (
@@ -11,6 +13,8 @@ const AudioLayout = () => {
         name="index"
         options={{
           title: "Audio Books",
+          headerStyle: { backgroundColor: colors.amber200 },
+          headerTintColor: colors.amber900,
           headerRight: () => {
             return (
               <Link href="./audio/dropbox" asChild>
@@ -38,6 +42,13 @@ const AudioLayout = () => {
         name="player"
         options={{
           headerShown: true,
+          headerStyle: { backgroundColor: colors.amber200 },
+          headerTintColor: colors.amber900,
+          headerRight: () => (
+            <Link href="/audio/playersettings">
+              <SettingsIcon size={25} />
+            </Link>
+          ),
         }}
       />
       <Stack.Screen

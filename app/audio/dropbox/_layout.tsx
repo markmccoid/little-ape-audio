@@ -1,6 +1,7 @@
 import { View, Text } from "react-native";
 import React from "react";
 import { Stack } from "expo-router";
+import { colors } from "../../../src/constants/Colors";
 
 const DropboxLayout = () => {
   return (
@@ -12,6 +13,8 @@ const DropboxLayout = () => {
           presentation: "modal",
           headerBackTitleVisible: false,
           headerBackVisible: false,
+          headerStyle: { backgroundColor: colors.amber200 },
+          headerTintColor: colors.amber900,
         }}
       />
       <Stack.Screen

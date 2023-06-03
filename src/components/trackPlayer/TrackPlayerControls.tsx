@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ViewStyle,
+  TextInput,
 } from "react-native";
 import React, { useState } from "react";
 import { useGetQueue, usePlaybackStore } from "../../store/store";
@@ -25,21 +26,12 @@ type Props = {
 const CONTROLSIZE = 35;
 const TrackPlayerControls = ({ style }: Props) => {
   const playbackActions = usePlaybackStore((state) => state.actions);
-  const [playerState, setPlayerState] = useState(null);
+  // const [playerState, setPlayerState] = useState(null);
+  const playerState = usePlaybackStore((state) => state.playerState);
   const playlistId = usePlaybackStore((state) => state.currentPlaylist);
   const queue = usePlaybackStore((state) => state.trackPlayerQueue);
-  const currentTrack = usePlaybackStore((state) => state.currentTrack);
   const actions = usePlaybackStore((state) => state.actions);
-  const hookTracks = useGetQueue();
-
-  useTrackPlayerEvents(events, (event) => {
-    if (event.type === Event.PlaybackError) {
-      console.warn("An error occured while playing the current track.");
-    }
-    if (event.type === Event.PlaybackState) {
-      setPlayerState(event.state);
-    }
-  });
+  const currentTrack = usePlaybackStore((state) => state.currentTrack);
 
   const isPlaying = playerState === State.Playing;
 
@@ -52,39 +44,45 @@ const TrackPlayerControls = ({ style }: Props) => {
   };
 
   return (
-    <View className="flex-row gap-10 items-center justify-center" style={style}>
-      {/* SEEK BACK */}
-      <TouchableOpacity onPress={() => actions.jumpBack(10)}>
-        <BackInTimeIcon size={CONTROLSIZE} />
-      </TouchableOpacity>
-      {/* PREV TRACK */}
-      <TouchableOpacity onPress={() => actions.prev()}>
-        <BackIcon size={CONTROLSIZE} />
-      </TouchableOpacity>
-      {/* PLAY/PAUSE */}
-      <TouchableOpacity
-        onPress={isPlaying ? () => pause() : () => play()}
-        style={styles.actionButton}
+    <View className="flex flex-col justify-center items-center">
+      <Text>{currentTrack.title}</Text>
+      <View
+        className="flex-row gap-10 items-center justify-center"
+        style={style}
       >
-        <View>
-          {!isPlaying ? (
-            <PlayIcon size={CONTROLSIZE} />
-          ) : (
-            <PauseIcon size={CONTROLSIZE} />
-          )}
-        </View>
-      </TouchableOpacity>
-      {/* NEXT TRACK */}
-      <TouchableOpacity onPress={() => actions.next()}>
-        <NextIcon size={CONTROLSIZE} />
-      </TouchableOpacity>
-      {/* SEEK FORWARD */}
-      <TouchableOpacity onPress={() => actions.jumpForward(10)}>
-        <BackInTimeIcon
-          style={{ transform: [{ scaleX: -1 }] }}
-          size={CONTROLSIZE}
-        />
-      </TouchableOpacity>
+        {/* SEEK BACK */}
+        <TouchableOpacity onPress={() => actions.jumpBack(10)}>
+          <BackInTimeIcon size={CONTROLSIZE} />
+        </TouchableOpacity>
+        {/* PREV TRACK */}
+        <TouchableOpacity onPress={() => actions.prev()}>
+          <BackIcon size={CONTROLSIZE} />
+        </TouchableOpacity>
+        {/* PLAY/PAUSE */}
+        <TouchableOpacity
+          onPress={isPlaying ? () => pause() : () => play()}
+          style={styles.actionButton}
+        >
+          <View>
+            {!isPlaying ? (
+              <PlayIcon size={CONTROLSIZE} />
+            ) : (
+              <PauseIcon size={CONTROLSIZE} />
+            )}
+          </View>
+        </TouchableOpacity>
+        {/* NEXT TRACK */}
+        <TouchableOpacity onPress={() => actions.next()}>
+          <NextIcon size={CONTROLSIZE} />
+        </TouchableOpacity>
+        {/* SEEK FORWARD */}
+        <TouchableOpacity onPress={() => actions.jumpForward(10)}>
+          <BackInTimeIcon
+            style={{ transform: [{ scaleX: -1 }] }}
+            size={CONTROLSIZE}
+          />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
