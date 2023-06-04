@@ -99,7 +99,7 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
     const playlistId = uuid.v4() as string;
     setDownloadAllId(playlistId);
   };
-  console.log("IS ERROR", isError);
+
   if (isError) {
     return (
       <View>

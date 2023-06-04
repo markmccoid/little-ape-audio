@@ -4,7 +4,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ViewStyle,
-  TextInput,
+  Dimensions,
 } from "react-native";
 import React, { useState } from "react";
 import { useGetQueue, usePlaybackStore } from "../../store/store";
@@ -17,6 +17,7 @@ import {
 } from "../common/svg/Icons";
 import { useTrackPlayerEvents, Event, State } from "react-native-track-player";
 
+const { width, height } = Dimensions.get("window");
 // Subscribing to the following events inside MyComponent
 const events = [Event.PlaybackState, Event.PlaybackError];
 
@@ -45,7 +46,14 @@ const TrackPlayerControls = ({ style }: Props) => {
 
   return (
     <View className="flex flex-col justify-center items-center">
-      <Text>{currentTrack.title}</Text>
+      <Text
+        className="text-sm text-center py-2"
+        style={{ width: width / 1.25 }}
+        numberOfLines={2}
+        ellipsizeMode="tail"
+      >
+        {currentTrack.title}
+      </Text>
       <View
         className="flex-row gap-10 items-center justify-center"
         style={style}

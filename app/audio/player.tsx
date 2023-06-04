@@ -17,7 +17,12 @@ const PlaylistScreen = () => {
       <Stack.Screen
         options={{
           headerTitle: () => (
-            <Text className="text-base font-bold text-amber-950">
+            <Text
+              className="text-base font-bold text-amber-950 text-center"
+              style={{ width: width / 1.35 }}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
               {playlist.name}
             </Text>
           ),

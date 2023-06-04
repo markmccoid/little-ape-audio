@@ -9,7 +9,12 @@ import {
 import { analyzePlaylistTracks } from "./storeUtils";
 import sortBy from "lodash/sortBy";
 import map from "lodash/map";
-import TrackPlayer, { Track, State, Event } from "react-native-track-player";
+import TrackPlayer, {
+  Track,
+  State,
+  Event,
+  PitchAlgorithm,
+} from "react-native-track-player";
 import { useEffect, useState } from "react";
 import { addTrack } from "./store-functions";
 import { deleteFromFileSystem } from "./data/fileSystemAccess";
@@ -351,6 +356,7 @@ const buildTrackPlayerQueue = (trackIds: string[]): ApeTrack[] => {
       genre: trackInfo.metadata.album,
       artwork: trackInfo.metadata.pictureURI,
       duration: trackInfo.metadata.durationSeconds,
+      pitchAlgorithm: PitchAlgorithm.Voice,
     };
     queue.push(trackPlayerTrack);
   }
