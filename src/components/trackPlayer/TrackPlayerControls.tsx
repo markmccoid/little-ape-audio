@@ -7,7 +7,7 @@ import {
   Dimensions,
 } from "react-native";
 import React, { useState } from "react";
-import { useGetQueue, usePlaybackStore } from "../../store/store";
+import { usePlaybackStore } from "../../store/store";
 import {
   BackIcon,
   BackInTimeIcon,

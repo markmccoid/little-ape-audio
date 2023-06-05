@@ -5,11 +5,17 @@ import TrackPlayer, { useProgress } from "react-native-track-player";
 import { usePlaybackStore } from "../../store/store";
 import { formatSeconds } from "../../utils/formatUtils";
 import { colors } from "../../constants/Colors";
+import { AnimatePresence, MotiView } from "moti";
+import AnimateText from "../common/animations/AnimateText";
 
 const { width, height } = Dimensions.get("window");
 const TrackPlayerProgressBar = () => {
   const playbackActions = usePlaybackStore((state) => state.actions);
   const { position, duration } = useProgress();
+  const queuePos = usePlaybackStore((state) => state.currentQueuePosition);
+  const queueDuration = usePlaybackStore(
+    (state) => state.currentPlaylist.totalDurationSeconds
+  );
   const [seeking, setSeeking] = useState<number>();
   async function handleChange(value) {
     if (value < 0) value = 0;
@@ -17,14 +23,29 @@ const TrackPlayerProgressBar = () => {
     // await TrackPlayer.seekTo(value);
     setSeeking(undefined);
   }
-  // console.log("position", position);
+
   return (
     <View className="flex-col justify-center items-center">
       <Text className="font-semibold mt-2">
         {formatSeconds(Math.floor(position))} of{" "}
         {formatSeconds(Math.floor(duration))}
       </Text>
-      {seeking > 0 && <Text>{formatSeconds(Math.floor(seeking))}</Text>}
+      <Text className="font-semibold mt-2">
+        {formatSeconds(Math.floor(position + queuePos))} of{" "}
+        {formatSeconds(Math.floor(queueDuration))}
+      </Text>
+      <AnimatePresence>
+        {seeking > 0 && (
+          <AnimateText>{formatSeconds(Math.floor(seeking))}</AnimateText>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {seeking > 0 && (
+          <AnimateText>
+            {formatSeconds(Math.floor(seeking + queuePos))}
+          </AnimateText>
+        )}
+      </AnimatePresence>
       <Slider
         style={{ width: width - 20, height: 40 }}
         minimumValue={0}

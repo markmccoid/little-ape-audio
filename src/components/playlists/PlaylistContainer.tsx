@@ -17,7 +17,7 @@ const PlaylistContainer = () => {
 
   return (
     <ScrollView
-      className="w-full"
+      className="w-full flex-grow"
       contentContainerStyle={{ paddingBottom: 30 }}
     >
       <View className="mt-2">

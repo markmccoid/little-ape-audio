@@ -187,7 +187,10 @@ type PlaybackState = {
   currentTrack: ApeTrack;
   currentTrackIndex: number;
   playerState: State;
+  playlistLoaded: boolean;
   currentTrackPosition: number;
+  // The number of seconds into the queue
+  currentQueuePosition: number;
   actions: {
     // New playlist being loaded
     setCurrentPlaylist: (playlistId: string) => Promise<void>;
@@ -199,7 +202,9 @@ type PlaybackState = {
     jumpBack: (jumpBack: number) => Promise<void>;
     seekTo: (position: number) => Promise<void>;
     goToTrack: (trackIndex: number) => Promise<void>;
+    // Updates the speed (rate) of the audio
     updatePlaybackRate: (newRate: number) => Promise<void>;
+    getPrevTrackDuration: () => number;
   };
 };
 export const usePlaybackStore = create<PlaybackState>((set, get) => ({
@@ -209,14 +214,20 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
   currentTrack: undefined,
   currentTrackIndex: 0,
   currentTrackPosition: 0,
+  currentQueuePosition: 0,
   playerState: undefined,
+  playlistLoaded: false,
   actions: {
     setCurrentPlaylist: async (playlistId) => {
       if (get().currentPlaylistId === playlistId) return;
+      set({ playlistLoaded: false });
       //----------
-      // Store existing playlist information in TrackStore -> playlists
+      // Pause the player before loading the new track.  Even though
+      // store existing playlist information in TrackStore -> playlists
       // before loading new playlist
       await saveCurrentTrackInfo();
+      await TrackPlayer.pause();
+      await TrackPlayer.reset();
       //---------
       // Load new Playlist
       const currPlaylist = useTracksStore
@@ -237,8 +248,15 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
         currentTrackIndex: currTrackIndex,
         currentTrackPosition: currTrackPosition,
       });
+      // when a track changes, set the currentQueuePosition.  This is the total of all
+      // track durations in queue UP TO, but NOT including the current track
+      const prevTracksDuration = usePlaybackStore
+        .getState()
+        .actions.getPrevTrackDuration();
+      usePlaybackStore.setState({ currentQueuePosition: prevTracksDuration });
+
       // - Reset TrackPlayer and add the Queue
-      await TrackPlayer.reset();
+
       await TrackPlayer.add(queue);
       // - Make sure current track is loaded and set to proper position
       await TrackPlayer.skip(currTrackIndex);
@@ -246,16 +264,32 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       await TrackPlayer.setRate(get().currentPlaylist.currentRate);
 
       mountTrackPlayerListeners();
+      set({ playlistLoaded: true });
     },
     updatePlaybackRate: async (newRate) => {
       if (isNaN(newRate)) return;
       const currPlaylistId = get().currentPlaylistId;
       if (newRate > 0 && newRate <= 5) {
+        // Update rate on playlist in trackStore
         useTracksStore
           .getState()
           .actions.updatePlaylistRate(currPlaylistId, newRate);
+        // ALSO update the playlist in the playbackStore (currentPlaylist)
+        const currPlaylist = { ...get().currentPlaylist };
+        currPlaylist.currentRate = newRate;
+        set({ currentPlaylist: currPlaylist });
         await TrackPlayer.setRate(newRate);
       }
+    },
+    getPrevTrackDuration: () => {
+      // used is calculating progress acroos all tracks in playlist
+      const queue = get().trackPlayerQueue;
+      return queue.reduce((final, el, index) => {
+        if (index < get().currentTrackIndex) {
+          final = final + el.duration;
+        }
+        return final;
+      }, 0);
     },
     play: async () => {
       await TrackPlayer.play();
@@ -495,6 +529,12 @@ const mountTrackPlayerListeners = () => {
         };
         useTracksStore.setState({ playlists: updatedPlaylists });
         await saveToAsyncStorage("playlists", updatedPlaylists);
+        // when a track changes, set the currentQueuePosition.  This is the total of all
+        // track durations in queue UP TO, but NOT including the current track
+        const prevTracksDuration = usePlaybackStore
+          .getState()
+          .actions.getPrevTrackDuration();
+        usePlaybackStore.setState({ currentQueuePosition: prevTracksDuration });
       } else {
         TrackPlayer.seekTo(0);
         TrackPlayer.pause();

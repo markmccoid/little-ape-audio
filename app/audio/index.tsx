@@ -1,43 +1,26 @@
-import { StyleSheet, Text, View } from "react-native";
-// import DropboxAuth from "@components/dropbox/DropboxAuth";
-import { Link } from "expo-router";
-import TrackPlayer, { Track } from "react-native-track-player";
-import { useEffect } from "react";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { StyleSheet, View, SafeAreaView } from "react-native";
 import PlaylistContainer from "../../src/components/playlists/PlaylistContainer";
+import { usePlaybackStore } from "../../src/store/store";
+import PlaylistTrackControl from "../../src/components/playlists/PlaylistTrackControl";
 
-const track: Track = {
-  id: "one",
-  url: require("../../assets/funk.mp3"),
-  artist: "Hunter McCoid",
-  artwork: require("../../assets/littleapeaudio.png"),
-  isLiveStream: true,
-};
+// const track: Track = {
+//   id: "one",
+//   url: require("../../assets/funk.mp3"),
+//   artist: "Hunter McCoid",
+//   artwork: require("../../assets/littleapeaudio.png"),
+//   isLiveStream: true,
+// };
 export default function AudioScreen() {
+  const isPlaylistLoaded = usePlaybackStore((state) => state.playlistLoaded);
+
   return (
-    <View className="flex-1 bg-amber-50">
-      <PlaylistContainer />
-    </View>
+    <SafeAreaView
+      className={`flex-1 ${isPlaylistLoaded ? "bg-amber-200" : "bg-amber-50"}`}
+    >
+      <View className="flex-col justify-start flex-grow bg-amber-50">
+        <PlaylistContainer />
+        {isPlaylistLoaded && <PlaylistTrackControl />}
+      </View>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-
-    // padding: 24,
-  },
-  main: {
-    flex: 1,
-    maxWidth: 960,
-    marginHorizontal: "auto",
-  },
-  title: {
-    fontSize: 64,
-    fontWeight: "bold",
-  },
-  subtitle: {
-    fontSize: 36,
-    color: "#38434D",
-  },
-});
