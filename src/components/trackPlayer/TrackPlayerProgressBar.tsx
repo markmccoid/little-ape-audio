@@ -25,29 +25,21 @@ const TrackPlayerProgressBar = () => {
   }
 
   return (
-    <View className="flex-col justify-center items-center">
-      <Text className="font-semibold mt-2">
-        {formatSeconds(Math.floor(position))} of{" "}
-        {formatSeconds(Math.floor(duration))}
-      </Text>
-      <Text className="font-semibold mt-2">
-        {formatSeconds(Math.floor(position + queuePos))} of{" "}
-        {formatSeconds(Math.floor(queueDuration))}
-      </Text>
+    <View className="flex-col justify-center items-center mt-3 mb-4">
       <AnimatePresence>
         {seeking > 0 && (
           <AnimateText>{formatSeconds(Math.floor(seeking))}</AnimateText>
         )}
       </AnimatePresence>
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {seeking > 0 && (
           <AnimateText>
             {formatSeconds(Math.floor(seeking + queuePos))}
           </AnimateText>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
       <Slider
-        style={{ width: width - 20, height: 40 }}
+        style={{ width: width - 20 }}
         minimumValue={0}
         maximumValue={duration}
         minimumTrackTintColor={colors.amber700}
@@ -59,6 +51,18 @@ const TrackPlayerProgressBar = () => {
         // onSlidingStart={() => soundActions.pause()}
         // onSlidingComplete={(val) => soundActions.updatePosition(val)}
       />
+      <View className="flex-row w-full px-1 justify-between mt-[-5]">
+        <Text className="font-semibold text-xs">
+          {formatSeconds(Math.floor(position))}
+        </Text>
+        <Text className="font-semibold text-xs">
+          {formatSeconds(Math.floor(position + queuePos))} of{" "}
+          {formatSeconds(Math.floor(queueDuration))}
+        </Text>
+        <Text className="font-semibold">
+          {formatSeconds(Math.floor(duration))}
+        </Text>
+      </View>
     </View>
   );
 };

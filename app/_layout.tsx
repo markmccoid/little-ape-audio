@@ -50,7 +50,7 @@ export default function RootLayout() {
         ],
       });
       await onInitialize();
-      console.log("TrackPlayer SETUP and onInitialize");
+      // console.log("TrackPlayer SETUP and onInitialize");
     };
     // Run your initialization code here
     // It can be async

@@ -177,6 +177,15 @@ export const BackInTimeIcon = ({ size = 25, color, style }: Props) => {
   return <Entypo name="back-in-time" color={color} size={size} style={style} />;
 };
 
+export const OpenIcon = ({ size = 25, color, style }: Props) => {
+  return <AntDesign name="upcircleo" color={color} size={size} style={style} />;
+};
+export const OpenInNewIcon = ({ size = 25, color, style }: Props) => {
+  return (
+    <MaterialIcons name="open-in-new" color={color} size={size} style={style} />
+  );
+};
+
 //-- -----------------------------------
 //-- DROPBOX Icons
 //-- -----------------------------------

@@ -10,6 +10,7 @@ import { Link, useRouter } from "expo-router";
 
 import { usePlaybackStore } from "../../store/store";
 import TrackPlayerControls from "../trackPlayer/TrackPlayerControls";
+import { OpenInNewIcon } from "../common/svg/Icons";
 
 export default function AudioScreen() {
   const currPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
@@ -24,8 +25,8 @@ export default function AudioScreen() {
   return (
     <View className=" bg-amber-200 border-t border-amber-900">
       <TrackPlayerControls />
-      <TouchableOpacity onPress={onPlaylistSelect}>
-        <Text>Open</Text>
+      <TouchableOpacity onPress={onPlaylistSelect} className="absolute right-2">
+        <OpenInNewIcon size={30} />
       </TouchableOpacity>
     </View>
   );

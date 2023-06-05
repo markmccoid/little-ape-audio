@@ -447,20 +447,16 @@ export const onInitialize = async () => {
 
   useDropboxStore.setState({ favoriteFolders: favFolders });
 
-  console.log(
-    "store INIT # of Tracks",
-    useTracksStore.getState().tracks.length
-  );
-  console.log(
-    "store INIT Playlists",
-    //useTracksStore.getState().playlists.length
-    // map(`useTracksStore.getState().playlists`, "id"),
-    // Object.keys(useTracksStore.getState().playlists)
-    Object.keys(useTracksStore.getState().playlists).map(
-      (key) => useTracksStore.getState().playlists[key].id
-    )
-    // usePlaylists().map((id) => `${id.id}-${id.name}`)
-  );
+  // console.log(
+  //   "store INIT # of Tracks",
+  //   useTracksStore.getState().tracks.length
+  // );
+  // console.log(
+  //   "store INIT Playlists",
+  //   Object.keys(useTracksStore.getState().playlists).map(
+  //     (key) => useTracksStore.getState().playlists[key].id
+  //   )
+  // );
 
   return;
 };
@@ -510,7 +506,7 @@ const mountTrackPlayerListeners = () => {
       // TrackStore -> playlists object for current playlist
       //     update the playlists current position
       if (event.nextTrack != null) {
-        const track = await TrackPlayer.getTrack(event.nextTrack);
+        const track = (await TrackPlayer.getTrack(event.nextTrack)) as ApeTrack;
         usePlaybackStore.setState({
           currentTrack: track,
           currentTrackIndex: event.nextTrack,
