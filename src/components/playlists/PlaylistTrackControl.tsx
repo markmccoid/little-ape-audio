@@ -7,14 +7,15 @@ import {
 } from "react-native";
 // import DropboxAuth from "@components/dropbox/DropboxAuth";
 import { Link, useRouter } from "expo-router";
+import PlaylistImage from "../common/PlaylistImage";
 
 import { usePlaybackStore } from "../../store/store";
-import TrackPlayerControls from "../trackPlayer/TrackPlayerControls";
+import TrackPlayerControlsMinimal from "../trackPlayer/TrackPlayerControlsMinimal";
 import { OpenInNewIcon } from "../common/svg/Icons";
 
 export default function AudioScreen() {
   const currPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
-  const isPlaylistLoaded = usePlaybackStore((state) => state.playlistLoaded);
+  const playlist = usePlaybackStore((state) => state.currentPlaylist);
   const actions = usePlaybackStore((state) => state.actions);
   const route = useRouter();
 
@@ -23,11 +24,14 @@ export default function AudioScreen() {
     route.push({ pathname: "/audio/player", params: {} });
   };
   return (
-    <View className=" bg-amber-200 border-t border-amber-900">
-      <TrackPlayerControls />
-      <TouchableOpacity onPress={onPlaylistSelect} className="absolute right-2">
-        <OpenInNewIcon size={30} />
-      </TouchableOpacity>
+    <View className="flex-row items-center px-3 py-2 justify-between bg-amber-200 border-t border-amber-900">
+      <PlaylistImage style={{ width: 50, height: 50 }} />
+      <TrackPlayerControlsMinimal />
+      <View>
+        <TouchableOpacity onPress={onPlaylistSelect} className="pr-3">
+          <OpenInNewIcon size={30} />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

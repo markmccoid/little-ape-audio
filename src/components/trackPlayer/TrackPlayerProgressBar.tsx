@@ -9,7 +9,7 @@ import { AnimatePresence, MotiView } from "moti";
 import AnimateText from "../common/animations/AnimateText";
 
 const { width, height } = Dimensions.get("window");
-const TrackPlayerProgressBar = () => {
+const TrackPlayerProgressBar = ({ setIsSeeking }) => {
   const playbackActions = usePlaybackStore((state) => state.actions);
   const { position, duration } = useProgress();
   const queuePos = usePlaybackStore((state) => state.currentQueuePosition);
@@ -22,15 +22,17 @@ const TrackPlayerProgressBar = () => {
     await playbackActions.seekTo(value);
     // await TrackPlayer.seekTo(value);
     setSeeking(undefined);
+    setIsSeeking(undefined);
   }
 
   return (
     <View className="flex-col justify-center items-center mt-3 mb-4">
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {seeking > 0 && (
           <AnimateText>{formatSeconds(Math.floor(seeking))}</AnimateText>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
+
       {/* <AnimatePresence>
         {seeking > 0 && (
           <AnimateText>
@@ -46,7 +48,10 @@ const TrackPlayerProgressBar = () => {
         maximumTrackTintColor={colors.amber400}
         thumbTintColor={colors.amber600}
         value={position}
-        onValueChange={setSeeking}
+        onValueChange={(val) => {
+          setSeeking(val);
+          setIsSeeking(val);
+        }}
         onSlidingComplete={handleChange}
         // onSlidingStart={() => soundActions.pause()}
         // onSlidingComplete={(val) => soundActions.updatePosition(val)}

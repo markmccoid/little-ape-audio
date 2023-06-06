@@ -7,17 +7,21 @@ import {
   Pressable,
   ImageSourcePropType,
 } from "react-native";
-import React from "react";
+import React, { useMemo } from "react";
 import { usePlaybackStore, useTrackActions } from "../../store/store";
 import { Playlist, AudioTrack } from "../../store/types";
 import { Link, useRouter } from "expo-router";
 import { formatSeconds } from "../../utils/formatUtils";
+import PlaylistImage from "../common/PlaylistImage";
 
 type Props = {
   playlist: Playlist;
 };
 const PlaylistRow = ({ playlist }: Props) => {
   const trackActions = useTrackActions();
+  const currentPlaylistId = usePlaybackStore(
+    (state) => state.currentPlaylistId
+  );
   const setCurrPlaylist = usePlaybackStore(
     (state) => state.actions.setCurrentPlaylist
   );
@@ -26,6 +30,10 @@ const PlaylistRow = ({ playlist }: Props) => {
     await setCurrPlaylist(playlist.id);
     route.push({ pathname: "/audio/player", params: {} });
   };
+  const isActive = useMemo(
+    () => currentPlaylistId === playlist.id,
+    [currentPlaylistId]
+  );
 
   const imageSource =
     playlist?.imageType === "uri"
@@ -33,10 +41,15 @@ const PlaylistRow = ({ playlist }: Props) => {
       : playlist.imageURI;
   // console.log("IMAE URI", image5, playlist.imageURI);
   return (
-    <View className="flex-row  mb-2 py-2 px-2 border-b border-b-amber-700">
+    <View
+      className={`flex-row  py-2 px-2 border-b border-b-amber-700 ${
+        isActive ? "bg-amber-300" : ""
+      }`}
+    >
       {/* IMAGE */}
       <Pressable onPress={onPlaylistSelect}>
-        <Image style={styles.trackImage} source={imageSource} />
+        {/* <Image style={styles.trackImage} source={imageSource} /> */}
+        <PlaylistImage style={styles.trackImage} playlistId={playlist.id} />
       </Pressable>
 
       {/* TITLE AUTHOR LENGTH */}

@@ -17,7 +17,7 @@ export default function AudioScreen() {
     <SafeAreaView
       className={`flex-1 ${isPlaylistLoaded ? "bg-amber-200" : "bg-amber-50"}`}
     >
-      <View className="flex-col justify-start flex-grow bg-amber-50">
+      <View className="flex-col flex-1 justify-start flex-grow bg-amber-50">
         <PlaylistContainer />
         {isPlaylistLoaded && <PlaylistTrackControl />}
       </View>

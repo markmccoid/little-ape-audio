@@ -28,19 +28,7 @@ const PlaylistScreen = () => {
           ),
         }}
       />
-      <Image
-        className="rounded-xl"
-        style={{
-          width: width / 1.25,
-          height: width / 1.25,
-          resizeMode: "stretch",
-          alignSelf: "center",
-        }}
-        // source={{ uri: playlist.imageURI }}
-        source={imageSource}
-      />
-      {/* <TrackPlaybackState />
-      <Link href="./playersettings">Playlist Settings</Link> */}
+
       <TrackPlayerContainer />
     </View>
   );
