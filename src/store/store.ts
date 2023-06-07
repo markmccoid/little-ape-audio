@@ -8,6 +8,7 @@ import {
 } from "./data/asyncStorage";
 import { analyzePlaylistTracks } from "./storeUtils";
 import sortBy from "lodash/sortBy";
+import orderBy from "lodash/orderBy";
 import map from "lodash/map";
 import TrackPlayer, {
   Track,
@@ -97,6 +98,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         id,
         name,
         author,
+        lastPlayedDateTime: Date.now(),
         imageURI: undefined,
         imageType: undefined,
         totalDurationSeconds: 0,
@@ -126,7 +128,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       playlist.imageURI = images[0] || image5;
       playlist.imageType = images[0] ? "uri" : "imported";
       playlist.totalDurationSeconds = totalDuration;
-      playlist.trackIds = sortBy(uniqueTracksPlaylist);
+      playlist.trackIds = sortBy(uniqueTracksPlaylist, ["lastPlayedDateTime"]);
 
       // Update playlists in Store and Async Storage
       const playlists = { ...get().playlists, [playlistId]: playlist };
@@ -167,16 +169,46 @@ export const useTracksStore = create<AudioState>((set, get) => ({
     updatePlaylistRate: (playlistId, newRate) => {
       const playlists = { ...get().playlists };
       playlists[playlistId].currentRate = newRate;
-
       set({ playlists });
       saveToAsyncStorage("playlists", playlists);
+    },
+    updatePlaylistFields: (playlistId, updateObj) => {
+      const {
+        name,
+        author,
+        lastPlayedDateTime,
+
+        imageType,
+        imageURI,
+      } = updateObj;
+      const playlists = { ...get().playlists };
+      // lastPlayedDateTime processing
+      if (lastPlayedDateTime && !isNaN(lastPlayedDateTime)) {
+        playlists[playlistId].lastPlayedDateTime = lastPlayedDateTime;
+      }
+
+      // name processing
+      if (name) {
+        playlists[playlistId].name = name;
+      }
+      if (author) {
+        playlists[playlistId].author = author;
+      }
+
+      // Image Processing
+      if (imageType && imageURI) {
+        playlists[playlistId].imageType = imageType;
+        playlists[playlistId].imageURI = imageURI;
+      }
     },
   },
 }));
 
 export const useTrackActions = () => useTracksStore((state) => state.actions);
 export const usePlaylists = () =>
-  useTracksStore((state) => map(state.playlists));
+  useTracksStore((state) =>
+    orderBy(map(state.playlists), ["lastPlayedDateTime"], ["desc"])
+  );
 //-- ==================================
 //-- PLAYBACK STORE
 //-- ==================================
@@ -221,6 +253,9 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
     setCurrentPlaylist: async (playlistId) => {
       if (get().currentPlaylistId === playlistId) return;
       set({ playlistLoaded: false });
+      useTracksStore.getState().actions.updatePlaylistFields(playlistId, {
+        lastPlayedDateTime: Date.now(),
+      });
       //----------
       // Pause the player before loading the new track.  Even though
       // store existing playlist information in TrackStore -> playlists
@@ -253,7 +288,8 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       const prevTracksDuration = usePlaybackStore
         .getState()
         .actions.getPrevTrackDuration();
-      usePlaybackStore.setState({ currentQueuePosition: prevTracksDuration });
+      // usePlaybackStore.setState({ currentQueuePosition: prevTracksDuration });
+      set({ currentQueuePosition: prevTracksDuration });
 
       // - Reset TrackPlayer and add the Queue
 
@@ -546,7 +582,7 @@ const mountTrackPlayerListeners = () => {
   eventPlayerStateChange = TrackPlayer.addEventListener(
     Event.PlaybackState,
     async (event) => {
-      console.log("STATE CHANGE", event, saveIntervalId);
+      console.log("STATE CHANGE", event);
       // Whenever state chagnes to Paused, then save teh current position
       // on PlaybackStore AND TrackStore
       usePlaybackStore.setState({ playerState: event.state });
@@ -561,7 +597,6 @@ const mountTrackPlayerListeners = () => {
       if (event.state === State.Playing) {
         clearAutoSaveInterval(saveIntervalId);
         saveIntervalId = setInterval(async () => saveCurrentTrackInfo(), 10000);
-        console.log("NEW Interval Id", saveIntervalId);
       }
     }
   );

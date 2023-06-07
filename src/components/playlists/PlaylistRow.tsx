@@ -42,34 +42,33 @@ const PlaylistRow = ({ playlist }: Props) => {
   // console.log("IMAE URI", image5, playlist.imageURI);
   return (
     <View
-      className={`flex-row  py-2 px-2 border-b border-b-amber-700 ${
+      className={`flex-row flex-1 py-2 px-2 border-b border-b-amber-700 ${
         isActive ? "bg-amber-300" : ""
       }`}
     >
-      {/* IMAGE */}
-      <Pressable onPress={onPlaylistSelect}>
+      <Pressable className="flex-1 flex-row" onPress={onPlaylistSelect}>
+        {/* IMAGE */}
         {/* <Image style={styles.trackImage} source={imageSource} /> */}
         <PlaylistImage style={styles.trackImage} playlistId={playlist.id} />
-      </Pressable>
-
-      {/* TITLE AUTHOR LENGTH */}
-      <View className="flex-col flex-1 flex-grow ml-2 justify-between pb-1 ">
-        <View className="flex-col flex-shrink">
-          <Text
-            className="text-lg font-ssp_semibold"
-            numberOfLines={2}
-            ellipsizeMode="tail"
-          >
-            {playlist?.name}
-          </Text>
-          <Text className="text-sm font-ssp_regular" ellipsizeMode="tail">
-            {playlist.author}
+        {/* TITLE AUTHOR LENGTH */}
+        <View className="flex-col flex-1 ml-2 justify-between pb-1 ">
+          <View className="flex-col flex-shrink">
+            <Text
+              className="text-lg font-ssp_semibold"
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {playlist?.name}
+            </Text>
+            <Text className="text-sm font-ssp_regular" ellipsizeMode="tail">
+              {playlist.author}
+            </Text>
+          </View>
+          <Text className="text-sm font-ssp_regular">
+            {formatSeconds(playlist.totalDurationSeconds, "minimal")}
           </Text>
         </View>
-        <Text className="text-sm font-ssp_regular">
-          {formatSeconds(playlist.totalDurationSeconds, "minimal")}
-        </Text>
-      </View>
+      </Pressable>
 
       {/* DELETE BUTTON */}
       <View

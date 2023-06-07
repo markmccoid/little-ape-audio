@@ -35,6 +35,7 @@ export type Playlist = {
   id: string;
   name: string;
   author: string;
+  lastPlayedDateTime: number;
   imageURI: { uri: string } | number | undefined;
   imageType: "uri" | "imported" | "url";
   totalDurationSeconds: number;
@@ -43,6 +44,21 @@ export type Playlist = {
   currentRate: number;
 };
 
+type PlaylistUpdateObj = {
+  name?: string;
+  author?: string;
+  lastPlayedDateTime?: number;
+  imageURI?: { uri: string } | number | undefined;
+  imageType?: "uri" | "imported" | "url";
+  //~ Current Position is updated separately
+  // currentPosition?: { trackIndex: number; position: number };
+  //~ Current Rate has its own update function
+  // currentRate: number;
+  //~ These need to be updated in a separate function as duration needs to be recalced
+  //~ incase tracks added
+  //totalDurationSeconds: number;
+  //trackIds?: string[];
+};
 //~ ================================
 //~ AudioState => AudioStore Type
 //~ ================================
@@ -78,7 +94,11 @@ export type AudioState = {
     removePlaylist: (playlistId: string, removeAllTracks?: boolean) => void;
     getPlaylist: (playlistId: string) => Playlist | undefined;
     getTrack: (trackId: string) => AudioTrack | undefined;
-    updatePlaylistRate: (playlistId, newRate) => void;
+    updatePlaylistRate: (playlistId: string, newRate: number) => void;
+    updatePlaylistFields: (
+      playlistId: string,
+      updateObj: PlaylistUpdateObj
+    ) => void;
     clearAll: () => Promise<void>;
   };
 };
