@@ -91,13 +91,20 @@ export type AudioState = {
       playlistId: string,
       trackIds: string[]
     ) => Promise<void>;
-    removePlaylist: (playlistId: string, removeAllTracks?: boolean) => void;
+    removePlaylist: (
+      playlistId: string,
+      removeAllTracks?: boolean
+    ) => Promise<void>;
     getPlaylist: (playlistId: string) => Playlist | undefined;
     getTrack: (trackId: string) => AudioTrack | undefined;
     updatePlaylistRate: (playlistId: string, newRate: number) => void;
     updatePlaylistFields: (
       playlistId: string,
       updateObj: PlaylistUpdateObj
+    ) => void;
+    updatePlaylistTracks: (
+      playlistId: string,
+      newTracksArray: string[]
     ) => void;
     clearAll: () => Promise<void>;
   };

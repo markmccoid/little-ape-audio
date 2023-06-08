@@ -186,6 +186,10 @@ export const OpenInNewIcon = ({ size = 25, color, style }: Props) => {
   );
 };
 
+export const EditIcon = ({ size = 25, color, style }: Props) => {
+  return <AntDesign name="edit" color={color} size={size} style={style} />;
+};
+
 //-- -----------------------------------
 //-- DROPBOX Icons
 //-- -----------------------------------

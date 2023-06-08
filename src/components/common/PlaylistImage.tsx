@@ -15,11 +15,18 @@ const PlaylistImage = ({ playlistId, style }: Props) => {
   if (playlistId) {
     playlist = actions.getPlaylist(playlistId);
   }
+
   const imageSource =
     playlist?.imageType === "uri"
       ? { uri: playlist.imageURI }
       : playlist.imageURI;
-  return <Image style={[styles.trackImage, style]} source={imageSource} />;
+  return (
+    <>
+      {playlist.id && (
+        <Image style={[styles.trackImage, style]} source={imageSource} />
+      )}
+    </>
+  );
 };
 
 const styles = StyleSheet.create({

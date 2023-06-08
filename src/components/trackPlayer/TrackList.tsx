@@ -17,6 +17,7 @@ const { width, height } = Dimensions.get("window");
 const TrackList = () => {
   const queue = usePlaybackStore((state) => state.trackPlayerQueue);
   const currentTrack = usePlaybackStore((state) => state.currentTrack);
+  const isPlaylistLoaded = usePlaybackStore((state) => state.playlistLoaded);
   const currentTrackIndex = usePlaybackStore(
     (state) => state.currentTrackIndex
   );
@@ -26,6 +27,7 @@ const TrackList = () => {
 
   // Scroll to the active track
   const scrollToRow = (rowIndex) => {
+    if (!scrollViewRef.current) return;
     scrollViewRef.current.scrollTo({
       x: 0,
       y: rowIndex * 55 - 1, // Assuming each row has a height of 55 and 1 border
@@ -37,6 +39,9 @@ const TrackList = () => {
     scrollToRow(currentTrackIndex);
   }, [currentTrackIndex, scrollViewRef.current]);
 
+  if (!isPlaylistLoaded) {
+    return null;
+  }
   return (
     <View
       className="flex-1"
@@ -52,8 +57,10 @@ const TrackList = () => {
           const isCurrentTrack = currentTrack.id === el.id;
           return (
             <TouchableOpacity
-              key={el.url}
-              onPress={() => playbackActions.goToTrack(index)}
+              key={el.id}
+              onPress={() => {
+                playbackActions.goToTrack(index);
+              }}
               className=""
             >
               <View

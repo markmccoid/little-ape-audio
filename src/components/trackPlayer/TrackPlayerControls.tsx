@@ -31,6 +31,7 @@ const TrackPlayerControls = ({ style }: Props) => {
   const playerState = usePlaybackStore((state) => state.playerState);
   const playlistId = usePlaybackStore((state) => state.currentPlaylist);
   const queue = usePlaybackStore((state) => state.trackPlayerQueue);
+  const isPlaylistLoaded = usePlaybackStore((state) => state.playlistLoaded);
   const actions = usePlaybackStore((state) => state.actions);
   const currentTrack = usePlaybackStore((state) => state.currentTrack);
 
@@ -44,6 +45,9 @@ const TrackPlayerControls = ({ style }: Props) => {
     playbackActions.pause();
   };
 
+  if (!isPlaylistLoaded) {
+    return null;
+  }
   return (
     <View className="flex flex-col justify-center items-center">
       <Text
@@ -52,7 +56,7 @@ const TrackPlayerControls = ({ style }: Props) => {
         numberOfLines={2}
         ellipsizeMode="tail"
       >
-        {currentTrack.title}
+        {currentTrack?.title}
       </Text>
       <View
         className="flex-row gap-10 items-center justify-center"

@@ -6,23 +6,28 @@ import DragDropEntry, {
   sortArray,
   TScrollFunctions,
 } from "@markmccoid/react-native-drag-and-order";
-import { Track } from "react-native-track-player";
-import { usePlaybackStore } from "../../../store/store";
+import { usePlaybackStore, useTrackActions } from "../../../store/store";
 import TrackDragItem from "./TrackDragItem";
+import { ApeTrack } from "../../../store/types";
 
-function buildList(queue: Track[]) {
+function buildList(queue: ApeTrack[]) {
   return queue.map((el, index) => {
-    return { id: el.title, name: el.title, pos: index };
+    return { id: el.filename, name: el.title, pos: index };
   });
 }
 
 const TrackPlayerSettingsTracks = () => {
   const queue = usePlaybackStore((state) => state.trackPlayerQueue);
+  const playlistId = usePlaybackStore((state) => state.currentPlaylistId);
+  const trackActions = useTrackActions();
+  const actions = usePlaybackStore((state) => state.actions);
   const [items, setItems] = useState([]);
 
   useEffect(() => {
     setItems(buildList(queue));
-  }, []);
+    const x = trackActions.getPlaylist(playlistId);
+    // console.log("TRACK IDS", x.trackIds);
+  }, [queue]);
 
   return (
     <DragDropEntry
@@ -32,9 +37,14 @@ const TrackPlayerSettingsTracks = () => {
         borderWidth: 1,
         borderColor: "#aaa",
       }}
-      updatePositions={(positions) => {
-        console.log("POSITIONS", sortArray(positions, items, "id"));
-        //     updateItemList(sortArray<ItemType>(positions, items, "pos"))
+      updatePositions={async (positions) => {
+        // console.log("POSITIONS", sortArray(positions, items, "id"));
+        const sortedItems = sortArray(positions, items, "id");
+        // console.log(sortedItems.map((el) => el.id));
+        await actions.updatePlaylistTracks(
+          playlistId,
+          sortedItems.map((el) => el.id)
+        );
       }}
       // getScrollFunctions={(functionObj) => setScrollFunctions(functionObj)}
       itemHeight={50}
@@ -49,6 +59,7 @@ const TrackPlayerSettingsTracks = () => {
             name={item.name}
             id={item.id}
             itemHeight={50}
+            onEditItem={(val) => console.log("edit", val)}
             // onRemoveItem={() => removeItemById(item.id)}
             // firstItem={idx === 0 ? true : false}
           />
