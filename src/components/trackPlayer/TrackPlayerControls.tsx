@@ -29,8 +29,6 @@ const TrackPlayerControls = ({ style }: Props) => {
   const playbackActions = usePlaybackStore((state) => state.actions);
   // const [playerState, setPlayerState] = useState(null);
   const playerState = usePlaybackStore((state) => state.playerState);
-  const playlistId = usePlaybackStore((state) => state.currentPlaylist);
-  const queue = usePlaybackStore((state) => state.trackPlayerQueue);
   const isPlaylistLoaded = usePlaybackStore((state) => state.playlistLoaded);
   const actions = usePlaybackStore((state) => state.actions);
   const currentTrack = usePlaybackStore((state) => state.currentTrack);

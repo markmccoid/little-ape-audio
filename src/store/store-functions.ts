@@ -36,6 +36,9 @@ export const addTrack =
       sourceLocation,
       metadata: { ...tags },
     };
+    // If title is blank then use filename
+    newAudioFile.metadata.title =
+      newAudioFile.metadata?.title || newAudioFile.filename;
     // Right now we do NOT allow any duplicate files (dir/filename)
     // remove the file ONLY FROM STORE if it exists.  By the time we are in the store
     // it has already been saved and that is fine.

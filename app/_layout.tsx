@@ -41,12 +41,14 @@ export default function RootLayout() {
     const setupTP = async () => {
       await TrackPlayer.setupPlayer();
       await TrackPlayer.updateOptions({
+        alwaysPauseOnInterruption: true,
         capabilities: [
           Capability.Play,
           Capability.Pause,
           Capability.SkipToNext,
           Capability.SkipToPrevious,
           Capability.SeekTo,
+          Capability.Bookmark,
         ],
       });
       await onInitialize();

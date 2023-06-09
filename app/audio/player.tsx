@@ -1,13 +1,17 @@
 import { Dimensions, View, Image, Text } from "react-native";
 import React from "react";
 import { Stack } from "expo-router";
-import { usePlaybackStore } from "../../src/store/store";
+import { getCurrentPlaylist, usePlaybackStore } from "../../src/store/store";
 import TrackPlayerContainer from "../../src/components/trackPlayer/TrackPlayerContainer";
 const littleApeImage05 = require("../../assets/images/LittleApAudio05.png");
 
 const { width, height } = Dimensions.get("window");
+
 const PlaylistScreen = () => {
-  const playlist = usePlaybackStore((state) => state.currentPlaylist);
+  const playlist = getCurrentPlaylist();
+  // const playlist = usePlaybackStore(
+  //   (state) => state.actions.getCurrentPlaylist
+  // )();
   const imageSource =
     playlist?.imageType === "uri"
       ? { uri: playlist.imageURI }
@@ -23,7 +27,7 @@ const PlaylistScreen = () => {
               numberOfLines={1}
               ellipsizeMode="tail"
             >
-              {playlist.name}
+              {playlist?.name}
             </Text>
           ),
         }}

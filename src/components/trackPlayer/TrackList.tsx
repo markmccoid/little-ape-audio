@@ -10,8 +10,9 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import { usePlaybackStore } from "../../store/store";
 import { formatSeconds } from "../../utils/formatUtils";
-import { useProgress } from "react-native-track-player";
+import TrackPlayer, { useProgress } from "react-native-track-player";
 import { colors } from "../../constants/Colors";
+import { ApeTrack } from "../../store/types";
 
 const { width, height } = Dimensions.get("window");
 const TrackList = () => {
@@ -90,7 +91,7 @@ const TrackList = () => {
                 </View>
                 <Text
                   className="text-xs"
-                  numberOfLines={2}
+                  numberOfLines={1}
                   ellipsizeMode="tail"
                 >{`${el.filename}`}</Text>
               </View>

@@ -2,7 +2,7 @@ import { View, Text, Dimensions } from "react-native";
 import React, { useState } from "react";
 import Slider from "@react-native-community/slider";
 import TrackPlayer, { useProgress } from "react-native-track-player";
-import { usePlaybackStore } from "../../store/store";
+import { getCurrentPlaylist, usePlaybackStore } from "../../store/store";
 import { formatSeconds } from "../../utils/formatUtils";
 import { colors } from "../../constants/Colors";
 import { AnimatePresence, MotiView } from "moti";
@@ -13,9 +13,10 @@ const TrackPlayerProgressBar = ({ setIsSeeking }) => {
   const playbackActions = usePlaybackStore((state) => state.actions);
   const { position, duration } = useProgress();
   const queuePos = usePlaybackStore((state) => state.currentQueuePosition);
-  const queueDuration = usePlaybackStore(
-    (state) => state.currentPlaylist.totalDurationSeconds
-  );
+  const queueDuration = getCurrentPlaylist().totalDurationSeconds;
+  // const queueDuration = usePlaybackStore(
+  //   (state) => state.currentPlaylist.totalDurationSeconds
+  // );
   const [seeking, setSeeking] = useState<number>();
   async function handleChange(value) {
     if (value < 0) value = 0;

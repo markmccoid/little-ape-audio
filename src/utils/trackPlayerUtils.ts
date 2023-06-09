@@ -1,4 +1,5 @@
 import TrackPlayer, { Event } from "react-native-track-player";
+import { usePlaybackStore } from "../store/store";
 
 //! =================================
 //! REMOTE FUNCTIONS
@@ -7,6 +8,7 @@ export const handleRemoteNext = async () => {
   const trackIndex = await TrackPlayer.getCurrentTrack();
   const queue = await TrackPlayer.getQueue();
   const rate = await TrackPlayer.getRate();
+  const plId = usePlaybackStore.getState().currentPlaylistId;
 
   if (queue.length - 1 === trackIndex) {
     await TrackPlayer.skip(0);

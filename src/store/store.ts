@@ -234,6 +234,7 @@ type PlaybackState = {
     // New playlist being loaded
     setCurrentPlaylist: (playlistId: string) => Promise<void>;
     resetPlaybackStore: () => Promise<void>;
+    getCurrentPlaylist: () => Playlist;
     play: () => Promise<void>;
     pause: () => Promise<void>;
     next: () => Promise<void>;
@@ -251,6 +252,7 @@ type PlaybackState = {
     getPrevTrackDuration: () => number;
   };
 };
+
 export const usePlaybackStore = create<PlaybackState>((set, get) => ({
   currentPlaylistId: undefined,
   currentPlaylist: undefined,
@@ -328,6 +330,10 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
 
       mountTrackPlayerListeners();
       set({ playlistLoaded: true });
+    },
+    getCurrentPlaylist: () => {
+      const plId = get().currentPlaylistId;
+      return useTracksStore.getState().actions.getPlaylist(plId);
     },
     updatePlaybackRate: async (newRate) => {
       if (isNaN(newRate)) return;
@@ -469,6 +475,10 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
   },
 }));
 
+export const getCurrentPlaylist = () => {
+  const plId = usePlaybackStore.getState().currentPlaylistId;
+  return useTracksStore.getState().actions.getPlaylist(plId);
+};
 //! - This gets the current queue in TrackPlayer
 //! - BUT, we also store this in the PlaybackStore in currentQueue
 //!! - NOT SURE IF WE NEED THIS

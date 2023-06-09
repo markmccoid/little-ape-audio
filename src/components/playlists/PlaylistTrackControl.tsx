@@ -13,9 +13,8 @@ import { usePlaybackStore } from "../../store/store";
 import TrackPlayerControlsMinimal from "../trackPlayer/TrackPlayerControlsMinimal";
 import { OpenInNewIcon } from "../common/svg/Icons";
 
-export default function AudioScreen() {
+export default function PlaylistTrackControl() {
   const currPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
-  const playlist = usePlaybackStore((state) => state.currentPlaylist);
   const actions = usePlaybackStore((state) => state.actions);
   const route = useRouter();
 

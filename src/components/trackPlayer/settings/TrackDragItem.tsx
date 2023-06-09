@@ -31,8 +31,10 @@ const TrackDragItem = ({
       style={{
         flexDirection: "row",
         alignItems: "center",
+        justifyContent: "flex-start",
         height: itemHeight,
-        padding: 10,
+        paddingVertical: 10,
+        paddingHorizontal: 3,
         backgroundColor: "white",
         borderWidth: 0.5,
         borderColor: "#aaa",
@@ -40,8 +42,20 @@ const TrackDragItem = ({
       }}
     >
       <View className="flex-col flex-1">
-        <Text className="font-bold mr-10 text-base">{name}</Text>
-        <Text className="font-semibold mr-10 text-gray-600 text-xs">{id}</Text>
+        <Text
+          className="font-bold mr-3 text-base"
+          ellipsizeMode="tail"
+          numberOfLines={1}
+        >
+          {name}
+        </Text>
+        <Text
+          className="font-semibold mr-3 text-gray-600 text-xs"
+          ellipsizeMode="tail"
+          numberOfLines={1}
+        >
+          {id}
+        </Text>
       </View>
 
       {/* <TouchableOpacity

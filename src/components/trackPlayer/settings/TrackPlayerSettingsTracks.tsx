@@ -19,14 +19,12 @@ function buildList(queue: ApeTrack[]) {
 const TrackPlayerSettingsTracks = () => {
   const queue = usePlaybackStore((state) => state.trackPlayerQueue);
   const playlistId = usePlaybackStore((state) => state.currentPlaylistId);
-  const trackActions = useTrackActions();
+
   const actions = usePlaybackStore((state) => state.actions);
   const [items, setItems] = useState([]);
 
   useEffect(() => {
     setItems(buildList(queue));
-    const x = trackActions.getPlaylist(playlistId);
-    // console.log("TRACK IDS", x.trackIds);
   }, [queue]);
 
   return (

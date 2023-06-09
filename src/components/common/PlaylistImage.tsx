@@ -1,7 +1,11 @@
 import { StyleSheet, Image, StyleProp, ImageStyle } from "react-native";
 import React, { useMemo } from "react";
 import { Playlist } from "../../store/types";
-import { usePlaybackStore, useTrackActions } from "../../store/store";
+import {
+  getCurrentPlaylist,
+  usePlaybackStore,
+  useTrackActions,
+} from "../../store/store";
 import { colors } from "../../constants/Colors";
 
 type Props = {
@@ -11,7 +15,8 @@ type Props = {
 };
 const PlaylistImage = ({ playlistId, style }: Props) => {
   const actions = useTrackActions();
-  let playlist = usePlaybackStore((state) => state.currentPlaylist);
+  // let playlist = usePlaybackStore((state) => state.currentPlaylist);
+  let playlist = getCurrentPlaylist();
   if (playlistId) {
     playlist = actions.getPlaylist(playlistId);
   }
