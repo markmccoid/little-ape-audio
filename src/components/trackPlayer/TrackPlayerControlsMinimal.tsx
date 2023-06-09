@@ -7,7 +7,7 @@ import {
   Dimensions,
 } from "react-native";
 import React, { useState } from "react";
-import { usePlaybackStore } from "../../store/store";
+import { getCurrentPlaylist, usePlaybackStore } from "../../store/store";
 import {
   BackIcon,
   BackInTimeIcon,
@@ -29,7 +29,8 @@ const TrackPlayerControls = ({ style }: Props) => {
   const playbackActions = usePlaybackStore((state) => state.actions);
   // const [playerState, setPlayerState] = useState(null);
   const playerState = usePlaybackStore((state) => state.playerState);
-  const playlist = usePlaybackStore((state) => state.currentPlaylist);
+  // const playlist = usePlaybackStore((state) => state.currentPlaylist);
+  const playlist = getCurrentPlaylist();
   const actions = usePlaybackStore((state) => state.actions);
   const currentTrack = usePlaybackStore((state) => state.currentTrack);
 

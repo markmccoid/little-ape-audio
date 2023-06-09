@@ -48,6 +48,8 @@ export default function RootLayout() {
           Capability.SkipToNext,
           Capability.SkipToPrevious,
           Capability.SeekTo,
+          Capability.JumpBackward,
+          Capability.JumpForward,
           Capability.Bookmark,
         ],
       });

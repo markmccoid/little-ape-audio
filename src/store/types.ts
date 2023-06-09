@@ -105,7 +105,7 @@ export type AudioState = {
     updatePlaylistTracks: (
       playlistId: string,
       newTracksArray: string[]
-    ) => void;
+    ) => Promise<void>;
     clearAll: () => Promise<void>;
   };
 };

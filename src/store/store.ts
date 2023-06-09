@@ -197,7 +197,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       set({ playlists });
       saveToAsyncStorage("playlists", playlists);
     },
-    updatePlaylistTracks: (playlistId, newTracksArray) => {
+    updatePlaylistTracks: async (playlistId, newTracksArray) => {
       const playlists = { ...get().playlists };
       playlists[playlistId].trackIds = newTracksArray;
       // When tracks are updated RESET position of playlist
@@ -206,7 +206,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         trackIndex: 0,
       };
       set({ playlists });
-      saveToAsyncStorage("playlists", playlists);
+      await saveToAsyncStorage("playlists", playlists);
     },
   },
 }));
@@ -221,7 +221,7 @@ export const usePlaylists = () =>
 //-- ==================================
 type PlaybackState = {
   currentPlaylistId: string;
-  currentPlaylist: Playlist;
+  // currentPlaylist: Playlist;
   trackPlayerQueue: ApeTrack[];
   currentTrack: ApeTrack;
   currentTrackIndex: number;
@@ -255,7 +255,7 @@ type PlaybackState = {
 
 export const usePlaybackStore = create<PlaybackState>((set, get) => ({
   currentPlaylistId: undefined,
-  currentPlaylist: undefined,
+  // currentPlaylist: undefined,
   trackPlayerQueue: undefined,
   currentTrack: undefined,
   currentTrackIndex: 0,
@@ -267,7 +267,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
     resetPlaybackStore: async () => {
       set({
         currentPlaylistId: undefined,
-        currentPlaylist: undefined,
+        // currentPlaylist: undefined,
         trackPlayerQueue: undefined,
         currentTrack: undefined,
         currentTrackIndex: 0,
@@ -300,7 +300,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       const queue = buildTrackPlayerQueue(currPlaylist.trackIds);
       set({
         currentPlaylistId: playlistId,
-        currentPlaylist: currPlaylist,
+        // currentPlaylist: currPlaylist,
         trackPlayerQueue: queue,
       });
 
@@ -326,7 +326,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       // - Make sure current track is loaded and set to proper position
       await TrackPlayer.skip(currTrackIndex);
       await TrackPlayer.seekTo(currTrackPosition);
-      await TrackPlayer.setRate(get().currentPlaylist.currentRate);
+      await TrackPlayer.setRate(currPlaylist.currentRate);
 
       mountTrackPlayerListeners();
       set({ playlistLoaded: true });
@@ -344,9 +344,9 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
           .getState()
           .actions.updatePlaylistRate(currPlaylistId, newRate);
         // ALSO update the playlist in the playbackStore (currentPlaylist)
-        const currPlaylist = { ...get().currentPlaylist };
-        currPlaylist.currentRate = newRate;
-        set({ currentPlaylist: currPlaylist });
+        // const currPlaylist = { ...get().currentPlaylist };
+        // currPlaylist.currentRate = newRate;
+        // set({ currentPlaylist: currPlaylist });
         await TrackPlayer.setRate(newRate);
       }
     },
@@ -389,13 +389,12 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       set({ currentQueuePosition: prevTracksDuration });
 
       // - Make sure current track is loaded and set to proper position
-      set({ playlistLoaded: false });
       await TrackPlayer.reset();
       await TrackPlayer.add(queue);
 
       await TrackPlayer.skip(get().currentTrackIndex);
       await TrackPlayer.seekTo(get().currentTrackPosition);
-      await TrackPlayer.setRate(get().currentPlaylist.currentRate);
+      await TrackPlayer.setRate(getCurrentPlaylist().currentRate);
       mountTrackPlayerListeners();
       set({ playlistLoaded: true });
     },
