@@ -20,6 +20,7 @@ import { useEffect, useState } from "react";
 import { addTrack } from "./store-functions";
 import { deleteFromFileSystem } from "./data/fileSystemAccess";
 import { useDropboxStore } from "./store-dropbox";
+import { useSettingStore } from "./store-settings";
 
 export const image5 = require("../../assets/images/LittleApAudio05.png");
 let eventPlayerTrackChange = undefined;
@@ -563,11 +564,14 @@ export const onInitialize = async () => {
   const tracks = await loadFromAsyncStorage("tracks");
   const playlists = await loadFromAsyncStorage("playlists");
   const favFolders = await loadFromAsyncStorage("favfolders");
+  const settings = await loadFromAsyncStorage("settings");
 
   useTracksStore.setState({ tracks: tracks || [], playlists: playlists || {} });
 
   useDropboxStore.setState({ favoriteFolders: favFolders });
-
+  useSettingStore.setState({
+    jumpForwardSeconds: settings?.jumpForwardSeconds || 15,
+  });
   // console.log(
   //   "store INIT # of Tracks",
   //   useTracksStore.getState().tracks.length

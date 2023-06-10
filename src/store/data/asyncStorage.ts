@@ -1,7 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Dictionary } from "lodash";
 
-type StorageKeys = "images" | "tracks" | "playlists" | "favfolders";
+type StorageKeys =
+  | "images"
+  | "tracks"
+  | "playlists"
+  | "favfolders"
+  | "settings";
 
 // --------------------------------------------
 // -- LOAD passed key from Local Storage

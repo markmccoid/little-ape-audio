@@ -7,6 +7,7 @@ import {
 } from "../../../src/components/common/svg/Icons";
 import { useDropboxStore } from "../../../src/store/store-dropbox";
 import { colors } from "../../../src/constants/Colors";
+import MainFavFolders from "../../../src/components/dropbox/MainFavFolders";
 
 const DropboxScreens = () => {
   const favFolders = useDropboxStore((state) => state.favoriteFolders) || [];
@@ -47,27 +48,7 @@ const DropboxScreens = () => {
             borderColor: colors.amber900,
           }}
         >
-          {favFolders.map((folder) => {
-            return (
-              <View
-                key={folder.id}
-                className=" border-b-amber-800"
-                style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
-              >
-                <Link
-                  href={{
-                    pathname: "./dropbox/newdir",
-                    params: { fullPath: folder.folderPath, backTitle: "Back" },
-                  }}
-                >
-                  <View className="flex-row px-2 py-3 items-center">
-                    <StarFilledIcon />
-                    <Text className="ml-3 text">{folder.folderPath}</Text>
-                  </View>
-                </Link>
-              </View>
-            );
-          })}
+          <MainFavFolders favFolders={favFolders} />
         </View>
       </View>
     </View>

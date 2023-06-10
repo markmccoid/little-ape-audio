@@ -6,7 +6,7 @@ import { FolderEntry } from "../utils/dropboxUtils";
 //-- ==================================
 //-- DROPBOX STORE
 //-- ==================================
-type FavoriteFolders = {
+export type FavoriteFolders = {
   id: string;
   folderPath: string;
   // order position when displaying
@@ -18,6 +18,7 @@ type DropboxState = {
     addFavorite: (favPath: string) => Promise<void>;
     removeFavorite: (favPath: string) => Promise<void>;
     isFolderFavorited: (folders: FolderEntry[]) => FolderEntry[];
+    updateFavFolderArray: (favFolders: FavoriteFolders[]) => void;
   };
 };
 export const useDropboxStore = create<DropboxState>((set, get) => ({
@@ -39,6 +40,10 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       const updatedFavs = currFavs.filter((el) => el.folderPath !== favPath);
       set({ favoriteFolders: updatedFavs });
       saveToAsyncStorage("favfolders", updatedFavs);
+    },
+    updateFavFolderArray: (favFolders) => {
+      set({ favoriteFolders: favFolders });
+      saveToAsyncStorage("favfolders", favFolders);
     },
     isFolderFavorited: (folders) => {
       const currFavs = get().favoriteFolders || [];

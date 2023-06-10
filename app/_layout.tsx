@@ -16,6 +16,7 @@ import {
 
 import TrackPlayer, { Capability } from "react-native-track-player";
 import { onInitialize } from "../src/store/store";
+import { useSettingStore } from "../src/store/store-settings";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -39,9 +40,12 @@ export default function RootLayout() {
   //--------
   useEffect(() => {
     const setupTP = async () => {
+      await onInitialize();
+      const jumpForwardSeconds = useSettingStore.getState().jumpForwardSeconds;
       await TrackPlayer.setupPlayer();
       await TrackPlayer.updateOptions({
         alwaysPauseOnInterruption: true,
+        forwardJumpInterval: jumpForwardSeconds,
         capabilities: [
           Capability.Play,
           Capability.Pause,
@@ -53,7 +57,6 @@ export default function RootLayout() {
           Capability.Bookmark,
         ],
       });
-      await onInitialize();
       // console.log("TrackPlayer SETUP and onInitialize");
     };
     // Run your initialization code here

@@ -1,4 +1,4 @@
-import { StyleSheet, Image, StyleProp, ImageStyle } from "react-native";
+import { StyleSheet, Image, StyleProp, ImageStyle, View } from "react-native";
 import React, { useMemo } from "react";
 import { Playlist } from "../../store/types";
 import {
@@ -28,7 +28,9 @@ const PlaylistImage = ({ playlistId, style }: Props) => {
   return (
     <>
       {playlist.id && (
-        <Image style={[styles.trackImage, style]} source={imageSource} />
+        <View style={styles.shadow}>
+          <Image style={[styles.trackImage, style]} source={imageSource} />
+        </View>
       )}
     </>
   );
@@ -42,6 +44,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.amber900,
+  },
+  shadow: {
+    shadowColor: "#000000",
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: 5.62,
   },
 });
 
