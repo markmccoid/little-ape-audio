@@ -54,7 +54,7 @@ const TrackPlayerControls = ({ style }: Props) => {
         className="flex-row gap-10 items-center justify-center"
         style={style}
       >
-        {/* SEEK FORWARD */}
+        {/* SEEK BACKWARD */}
         <TouchableOpacity onPress={() => actions.jumpForward(jumpSeconds)}>
           <RewindIcon
             size={CONTROLSIZE}
