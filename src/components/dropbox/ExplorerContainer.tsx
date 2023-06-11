@@ -102,12 +102,19 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
 
   if (isError) {
     return (
-      <View>
-        <Text>Error: {isError}</Text>
+      <View className="flex-1 flex-col items-center mt-5">
+        <Text className="text-lg">Error: {isError}</Text>
         {isError === "Dropbox" && (
-          <Link href="/settings/dropboxauth">
-            <Text>Go To Dropbox Authorization Page</Text>
-          </Link>
+          <View className="flex-row justify-center mt-2">
+            <Link href="/settings/dropboxauth">
+              <View
+                className="p-2 border border-amber-800 bg-blue-600 flex justify-center items-center"
+                style={{ borderRadius: 10 }}
+              >
+                <Text className="text-white text-lg">Authorize Dropbox</Text>
+              </View>
+            </Link>
+          </View>
         )}
       </View>
     );

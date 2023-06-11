@@ -28,14 +28,16 @@ export default {
     // Apple App Store Connect prompts you to select the type of encryption algorithm your app implements.
     // This is known as Export Compliance Information. It is asked when publishing the app or submitting for TestFlight.
     // The first setting takes care of this prompt
-    config: {
-      usesNonExemptEncryption: false,
-    },
+    // config: {
+    //   usesNonExemptEncryption: false,
+    // },
     supportsTablet: false,
     bundleIdentifier: "com.markmccoid.little-ape-audio",
     buildNumber: "0.0.1",
     infoPlist: {
       RCTAsyncStorageExcludeFromBackup: false,
+      NSMicrophoneUsageDescription:
+        "While this app does not use the microphone, the APIs used to play audio still have access to the microphone.  The app will not however ever use the microphone on your device.",
       UIBackgroundModes: ["audio"],
     },
   },
