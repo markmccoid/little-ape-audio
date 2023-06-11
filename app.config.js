@@ -11,7 +11,7 @@ export default {
   scheme: "littleapeaudio",
   privacy: "unlisted",
   platforms: ["ios"],
-  version: "0.0.1",
+  version: "0.0.2",
   orientation: "portrait",
   icon: "./assets/littleapeaudiocolor.png",
   userInterfaceStyle: "automatic",
@@ -28,12 +28,12 @@ export default {
     // Apple App Store Connect prompts you to select the type of encryption algorithm your app implements.
     // This is known as Export Compliance Information. It is asked when publishing the app or submitting for TestFlight.
     // The first setting takes care of this prompt
-    // config: {
-    //   usesNonExemptEncryption: false,
-    // },
+    config: {
+      usesNonExemptEncryption: false,
+    },
     supportsTablet: false,
     bundleIdentifier: "com.markmccoid.little-ape-audio",
-    buildNumber: "0.0.1",
+    buildNumber: "0.0.2",
     infoPlist: {
       RCTAsyncStorageExcludeFromBackup: false,
       NSMicrophoneUsageDescription:
