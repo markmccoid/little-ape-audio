@@ -176,6 +176,21 @@ export const SpinnerForwardIcon = ({ size = 25, color, style }: Props) => {
 export const BackInTimeIcon = ({ size = 25, color, style }: Props) => {
   return <Entypo name="back-in-time" color={color} size={size} style={style} />;
 };
+export const RewindIcon = ({ size = 25, color, style }: Props) => {
+  return (
+    <MaterialIcons name="fast-rewind" color={color} size={size} style={style} />
+  );
+};
+export const ForwardIcon = ({ size = 25, color, style }: Props) => {
+  return (
+    <MaterialIcons
+      name="fast-forward"
+      color={color}
+      size={size}
+      style={style}
+    />
+  );
+};
 
 export const OpenIcon = ({ size = 25, color, style }: Props) => {
   return <AntDesign name="upcircleo" color={color} size={size} style={style} />;

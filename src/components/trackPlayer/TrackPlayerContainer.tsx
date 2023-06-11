@@ -32,7 +32,7 @@ type PlaybackState = {
 };
 const { width, height } = Dimensions.get("window");
 
-const leftOffset = (width - width / 1.5) / 2;
+const leftOffset = (width - width / 2.25) / 2;
 const topOffset = width / 1.25 - 50;
 const TrackPlayerContainer = () => {
   const [isSeeking, setIsSeeking] = useState(undefined);
@@ -45,7 +45,7 @@ const TrackPlayerContainer = () => {
               className="bg-amber-200 rounded-xl p-2 absolute z-10 opacity-80 border
               border-amber-700"
               style={{
-                width: width / 1.5,
+                width: width / 2.25,
                 left: leftOffset,
                 top: topOffset,
               }}
@@ -54,7 +54,7 @@ const TrackPlayerContainer = () => {
                 scale: 0,
               }}
               animate={{
-                opacity: 0.8,
+                opacity: 0.9,
                 scale: 1,
               }}
               exit={{

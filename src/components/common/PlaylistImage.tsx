@@ -28,7 +28,7 @@ const PlaylistImage = ({ playlistId, style }: Props) => {
   return (
     <>
       {playlist.id && (
-        <View style={styles.shadow}>
+        <View style={[styles.shadow, style]}>
           <Image style={[styles.trackImage, style]} source={imageSource} />
         </View>
       )}
@@ -40,12 +40,14 @@ const styles = StyleSheet.create({
   trackImage: {
     width: 100,
     height: 100,
-    resizeMode: "stretch",
     borderRadius: 10,
+    resizeMode: "stretch",
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.amber900,
   },
   shadow: {
+    borderRadius: 10,
+    backgroundColor: colors.amber100,
     shadowColor: "#000000",
     shadowOffset: {
       width: 0,

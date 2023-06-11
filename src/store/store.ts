@@ -22,7 +22,27 @@ import { deleteFromFileSystem } from "./data/fileSystemAccess";
 import { useDropboxStore } from "./store-dropbox";
 import { useSettingStore } from "./store-settings";
 
-export const image5 = require("../../assets/images/LittleApAudio05.png");
+export const defaultImages = {
+  image01: require("../../assets/images/LittleApAudio01.png"),
+  image02: require("../../assets/images/LittleApAudio02.png"),
+  image03: require("../../assets/images/LittleApAudio03.png"),
+  image04: require("../../assets/images/LittleApAudio04.png"),
+  image05: require("../../assets/images/LittleApAudio05.png"),
+  image06: require("../../assets/images/LittleApAudio06.png"),
+  image07: require("../../assets/images/LittleApAudio07.png"),
+  image08: require("../../assets/images/LittleApAudio08.png"),
+  image09: require("../../assets/images/LittleApAudio09.png"),
+  image10: require("../../assets/images/LittleApAudio10.png"),
+  image11: require("../../assets/images/LittleApAudio11.png"),
+  image12: require("../../assets/images/LittleApAudio12.png"),
+  image13: require("../../assets/images/LittleApAudio13.png"),
+};
+
+function getRandomNumber() {
+  const randomNumber = Math.floor(Math.random() * 13) + 1; // Generate random number between 1 and 13
+  return randomNumber.toString().padStart(2, "0"); // Pad number with leading zero if less than 10
+}
+
 let eventPlayerTrackChange = undefined;
 let eventEndOfQueue = undefined;
 let eventPlayerStateChange = undefined;
@@ -126,7 +146,10 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         uniqueTracksPlaylist
       );
       // console.log("IN STORE", image5);
-      playlist.imageURI = images[0] || image5;
+      // Example usage
+      const randomNum = getRandomNumber();
+
+      playlist.imageURI = images[0] || defaultImages[`image${randomNum}`];
       playlist.imageType = images[0] ? "uri" : "imported";
       playlist.totalDurationSeconds = totalDuration;
       playlist.trackIds = sortBy(uniqueTracksPlaylist);

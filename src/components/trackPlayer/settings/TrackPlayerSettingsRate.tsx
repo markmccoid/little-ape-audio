@@ -3,10 +3,12 @@ import React, { useEffect, useState } from "react";
 import { usePlaybackStore } from "../../../store/store";
 import TrackPlayer from "react-native-track-player";
 import Slider from "@react-native-community/slider";
+import { MotiView } from "moti";
 
 const TrackPlayerSettingsRate = () => {
   const playbackActions = usePlaybackStore((state) => state.actions);
   const [rate, setRate] = useState<number>(1);
+  const [isSliding, setIsSliding] = useState(false);
 
   useEffect(() => {
     const getRate = async () => {
@@ -39,9 +41,17 @@ const TrackPlayerSettingsRate = () => {
               <Text>{el.toFixed(2)}</Text>
             </TouchableOpacity>
           ))}
-          <View className="flex-row justify-end flex-grow mr-2">
+          <MotiView
+            from={{ scale: 1, translateX: 0 }}
+            animate={{
+              scale: isSliding ? 2 : 1,
+              translateX: isSliding ? -35 : 0,
+            }}
+            exit={{ scale: 1 }}
+            className="flex-row justify-end flex-grow mr-2"
+          >
             <Text className="text-amber-900 text-lg">{rate.toFixed(2)}</Text>
-          </View>
+          </MotiView>
         </View>
         <View className="flex-row w-full ">
           <Slider
@@ -54,7 +64,11 @@ const TrackPlayerSettingsRate = () => {
             onValueChange={(val) => {
               setRate(val / 100);
             }}
-            onSlidingComplete={(val) => updateRate(val / 100)}
+            onSlidingStart={() => setIsSliding(true)}
+            onSlidingComplete={(val) => {
+              updateRate(val / 100);
+              setIsSliding(false);
+            }}
           />
         </View>
       </View>

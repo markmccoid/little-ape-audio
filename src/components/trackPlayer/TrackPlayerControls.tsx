@@ -11,11 +11,14 @@ import { usePlaybackStore } from "../../store/store";
 import {
   BackIcon,
   BackInTimeIcon,
+  ForwardIcon,
   NextIcon,
   PauseIcon,
   PlayIcon,
+  RewindIcon,
 } from "../common/svg/Icons";
-import { useTrackPlayerEvents, Event, State } from "react-native-track-player";
+import { Event, State } from "react-native-track-player";
+import { useSettingStore } from "../../store/store-settings";
 
 const { width, height } = Dimensions.get("window");
 // Subscribing to the following events inside MyComponent
@@ -26,6 +29,7 @@ type Props = {
 };
 const CONTROLSIZE = 35;
 const TrackPlayerControls = ({ style }: Props) => {
+  const jumpSeconds = useSettingStore((state) => state.jumpForwardSeconds);
   const playbackActions = usePlaybackStore((state) => state.actions);
   // const [playerState, setPlayerState] = useState(null);
   const playerState = usePlaybackStore((state) => state.playerState);
@@ -60,13 +64,19 @@ const TrackPlayerControls = ({ style }: Props) => {
         className="flex-row gap-10 items-center justify-center"
         style={style}
       >
-        {/* SEEK BACK */}
-        <TouchableOpacity onPress={() => actions.jumpBack(10)}>
-          <BackInTimeIcon size={CONTROLSIZE} />
-        </TouchableOpacity>
         {/* PREV TRACK */}
         <TouchableOpacity onPress={() => actions.prev()}>
           <BackIcon size={CONTROLSIZE} />
+        </TouchableOpacity>
+        {/* SEEK BACK */}
+        <TouchableOpacity onPress={() => actions.jumpBack(jumpSeconds)}>
+          <RewindIcon
+            size={CONTROLSIZE}
+            // style={{ transform: [{ rotateZ: "45deg" }, { scale: 1.2 }] }}
+          />
+          <Text style={{ position: "absolute", bottom: -10, left: 12 }}>
+            {jumpSeconds}
+          </Text>
         </TouchableOpacity>
         {/* PLAY/PAUSE */}
         <TouchableOpacity
@@ -81,16 +91,19 @@ const TrackPlayerControls = ({ style }: Props) => {
             )}
           </View>
         </TouchableOpacity>
+        {/* SEEK FORWARD */}
+        <TouchableOpacity onPress={() => actions.jumpForward(jumpSeconds)}>
+          <ForwardIcon
+            size={CONTROLSIZE}
+            // style={{ transform: [{ rotateZ: "45deg" }, { scale: 1.2 }] }}
+          />
+          <Text style={{ position: "absolute", bottom: -10, right: 12 }}>
+            {jumpSeconds}
+          </Text>
+        </TouchableOpacity>
         {/* NEXT TRACK */}
         <TouchableOpacity onPress={() => actions.next()}>
           <NextIcon size={CONTROLSIZE} />
-        </TouchableOpacity>
-        {/* SEEK FORWARD */}
-        <TouchableOpacity onPress={() => actions.jumpForward(10)}>
-          <BackInTimeIcon
-            style={{ transform: [{ scaleX: -1 }] }}
-            size={CONTROLSIZE}
-          />
         </TouchableOpacity>
       </View>
     </View>
