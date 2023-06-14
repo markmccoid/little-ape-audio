@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Pressable,
   Dimensions,
+  FlatList,
 } from "react-native";
 import React from "react";
 import uuid from "react-native-uuid";
@@ -50,7 +51,9 @@ type Props = {
 };
 const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
   const [files, setFiles] = React.useState<DropboxDir>();
+  const [flatlistData, setFlatlistData] = React.useState([]);
   const [downloadAllId, setDownloadAllId] = React.useState<string>();
+  const [downloadMetadata, setDownloadMetadata] = React.useState(false);
   const [currentPath, setCurrentPath] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
   const [isError, setIsError] = React.useState(undefined);
@@ -76,6 +79,10 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
           files: taggedFiles,
         };
         setFiles(finalFolderFileList);
+        setFlatlistData([
+          ...finalFolderFileList.folders,
+          ...finalFolderFileList.files,
+        ]);
         // setIsError(undefined)
       } catch (err) {
         console.log(err);
@@ -90,6 +97,9 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
     onPathChange(nextPath, folderName);
   };
 
+  const onDownloadMetadata = () => {
+    setDownloadMetadata((prev) => !prev);
+  };
   const onDownloadAll = () => {
     // path WILL equal currentPath and we can just assume
     // the current "files" state variable has the data we need
@@ -99,7 +109,7 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
     const playlistId = uuid.v4() as string;
     setDownloadAllId(playlistId);
   };
-
+  //~ == ERROR JSX ===
   if (isError) {
     return (
       <View className="flex-1 flex-col items-center mt-5">
@@ -119,6 +129,7 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
       </View>
     );
   }
+  //~ == LOADING JSX ===
   if (isLoading) {
     return (
       <MotiView
@@ -135,28 +146,60 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
       </MotiView>
     );
   }
+  //~ == FINAL JSX ===
   return (
     <MotiView
       from={{ opacity: 0.5 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0.5 }}
+      style={{ flex: 1 }}
     >
       <View style={{ zIndex: 5 }}>
         <ExplorerActionBar
           currentPath={pathIn}
           handleDownloadAll={onDownloadAll}
+          handleDownloadMetadata={onDownloadMetadata}
         />
       </View>
 
-      <ScrollView
+      <FlatList
+        data={flatlistData}
+        renderItem={({ item, index }) => {
+          if (item[".tag"] === "folder") {
+            return (
+              <ExplorerFolder
+                key={item.id}
+                index={index}
+                folder={item}
+                onNavigateForward={onNavigateForward}
+                downloadMetadata={downloadMetadata}
+              />
+            );
+          } else if (item[".tag"] === "file") {
+            return (
+              <ExplorerFile
+                key={item.id}
+                file={item}
+                playlistId={downloadAllId}
+              />
+            );
+          }
+        }}
+        keyExtractor={(item) => item.id}
+        horizontal={false}
+      />
+
+      {/* <ScrollView
         contentContainerStyle={{ paddingBottom: 30 }}
         // style={{ flex: 1 }}
       >
-        {files?.folders.map((folder) => (
+        {files?.folders.map((folder, index) => (
           <ExplorerFolder
             key={folder.id}
+            index={index}
             folder={folder}
             onNavigateForward={onNavigateForward}
+            downloadMetadata={downloadMetadata}
           />
         ))}
         {files?.files.map((file) => {
@@ -168,7 +211,7 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
             />
           );
         })}
-      </ScrollView>
+      </ScrollView> */}
     </MotiView>
   );
 };

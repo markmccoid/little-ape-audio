@@ -6,15 +6,23 @@ import {
   TouchableOpacity,
 } from "react-native";
 import React from "react";
-import { CloudDownloadIcon } from "../common/svg/Icons";
+import { CloudDownloadIcon, DatabaseDownloadIcon } from "../common/svg/Icons";
 
 type Props = {
   currentPath: string;
   handleDownloadAll: () => void;
+  handleDownloadMetadata: () => void;
 };
-const ExplorerActionBar = ({ currentPath, handleDownloadAll }: Props) => {
+const ExplorerActionBar = ({
+  currentPath,
+  handleDownloadAll,
+  handleDownloadMetadata,
+}: Props) => {
   return (
-    <View className="flex flex-row items-center justify-end mr-2 flex-grow-1">
+    <View className="flex flex-row items-center justify-between pr-2 flex-grow-1 border-b border-black">
+      <TouchableOpacity onPress={handleDownloadMetadata} className="ml-2">
+        <DatabaseDownloadIcon />
+      </TouchableOpacity>
       {/* <View className="flex flex-grow-1">
         <Text className="text-sm font-ssp_regular text-amber-900 px-2 pt-1 pb-2">
           {currentPath.length === 0 ? "/" : currentPath}

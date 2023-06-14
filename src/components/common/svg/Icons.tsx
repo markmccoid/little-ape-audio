@@ -252,3 +252,21 @@ export const StarFilledIcon = ({ size = 25, color, style }: Props) => {
 export const StarUnFilledIcon = ({ size = 25, color, style }: Props) => {
   return <FontAwesome name="star-o" size={size} color={color} style={style} />;
 };
+export const InfoCircleIcon = ({ size = 25, color, style }: Props) => {
+  return (
+    <Entypo name="info-with-circle" size={size} color={color} style={style} />
+  );
+};
+export const InfoIcon = ({ size = 25, color, style }: Props) => {
+  return <FontAwesome name="info" size={size} color={color} style={style} />;
+};
+export const DatabaseDownloadIcon = ({ size = 25, color, style }: Props) => {
+  return (
+    <MaterialCommunityIcons
+      name="database-arrow-down"
+      size={size}
+      color={color}
+      style={style}
+    />
+  );
+};
