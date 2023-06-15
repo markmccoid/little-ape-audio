@@ -10,16 +10,18 @@ import { CloudDownloadIcon, DatabaseDownloadIcon } from "../common/svg/Icons";
 
 type Props = {
   currentPath: string;
+  fileCount: number;
   handleDownloadAll: () => void;
   handleDownloadMetadata: () => void;
 };
 const ExplorerActionBar = ({
   currentPath,
+  fileCount,
   handleDownloadAll,
   handleDownloadMetadata,
 }: Props) => {
   return (
-    <View className="flex flex-row items-center justify-between pr-2 flex-grow-1 border-b border-black">
+    <View className="flex flex-row items-center justify-between mt-1 pb-1 pr-2 flex-grow-1 border-b border-black">
       <TouchableOpacity onPress={handleDownloadMetadata} className="ml-2">
         <DatabaseDownloadIcon />
       </TouchableOpacity>
@@ -38,15 +40,17 @@ const ExplorerActionBar = ({
           </TouchableOpacity>
           <Text className="px-4 py-2 ">Favorites</Text>
         </View> */}
-      <View className="ml-2 ">
-        <TouchableOpacity
-          className="flex-row items-center space-x-1 px-2 py-1 "
-          onPress={handleDownloadAll}
-        >
-          <CloudDownloadIcon />
-          <Text>All</Text>
-        </TouchableOpacity>
-      </View>
+      {fileCount > 0 && (
+        <View className="ml-2 ">
+          <TouchableOpacity
+            className="flex-row items-center space-x-1 px-2 py-1 "
+            onPress={handleDownloadAll}
+          >
+            <CloudDownloadIcon />
+            <Text>All</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };

@@ -8,6 +8,8 @@ import {
 } from "../../store/store";
 import { colors } from "../../constants/Colors";
 
+// Common image dims 128x164 (W * 1.28)
+
 type Props = {
   // IF not playlistId passed, then currentPlaylist is used
   playlistId?: string;
@@ -39,7 +41,7 @@ const PlaylistImage = ({ playlistId, style }: Props) => {
 const styles = StyleSheet.create({
   trackImage: {
     width: 100,
-    height: 100,
+    height: 100 * 1.28,
     borderRadius: 10,
     resizeMode: "stretch",
     borderWidth: StyleSheet.hairlineWidth,

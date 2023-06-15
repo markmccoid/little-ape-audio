@@ -46,8 +46,9 @@ const ExplorerFolder = ({
     }
   };
 
+  //~ if downloadMetadata flag is true
+  //~ it will download the metadata for this folder
   useEffect(() => {
-    console.log("download metadata");
     if (downloadMetadata) {
       downloadFolderMetadata();
     }
@@ -63,7 +64,7 @@ const ExplorerFolder = ({
     );
 
     if (metadataFile) {
-      console.log("PATH", metadataFile?.path_lower);
+      // console.log("PATH", metadataFile?.path_lower);
       const metadata = (await downloadDropboxFile(
         `${metadataFile.path_lower}`
       )) as FolderMetadata;

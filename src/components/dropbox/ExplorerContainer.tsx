@@ -50,7 +50,7 @@ type Props = {
   onPathChange: (newPath: string, folderName: string) => void;
 };
 const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
-  const [files, setFiles] = React.useState<DropboxDir>();
+  const [ilesFolderObj, setFilesFolderObj] = React.useState<DropboxDir>();
   const [flatlistData, setFlatlistData] = React.useState([]);
   const [downloadAllId, setDownloadAllId] = React.useState<string>();
   const [downloadMetadata, setDownloadMetadata] = React.useState(false);
@@ -78,7 +78,7 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
           folders: taggedFolders, //filteredFoldersFiles.folders,
           files: taggedFiles,
         };
-        setFiles(finalFolderFileList);
+        setFilesFolderObj(finalFolderFileList);
         setFlatlistData([
           ...finalFolderFileList.folders,
           ...finalFolderFileList.files,
@@ -157,6 +157,7 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
       <View style={{ zIndex: 5 }}>
         <ExplorerActionBar
           currentPath={pathIn}
+          fileCount={ilesFolderObj?.files?.length || 0}
           handleDownloadAll={onDownloadAll}
           handleDownloadMetadata={onDownloadMetadata}
         />

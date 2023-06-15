@@ -270,3 +270,13 @@ export const DatabaseDownloadIcon = ({ size = 25, color, style }: Props) => {
     />
   );
 };
+export const PowerIcon = ({ size = 25, color, style }: Props) => {
+  return (
+    <MaterialCommunityIcons
+      name="power"
+      size={size}
+      color={color}
+      style={style}
+    />
+  );
+};
