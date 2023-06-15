@@ -71,4 +71,7 @@ export const PlaybackService = async () => {
   TrackPlayer.addEventListener(Event.RemoteSeek, (seek) =>
     TrackPlayer.seekTo(seek.position)
   );
+  TrackPlayer.addEventListener(Event.RemoteDuck, async (event) => {
+    console.log("REMOTE DUCK", event);
+  });
 };
