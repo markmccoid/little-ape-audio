@@ -8,6 +8,7 @@ import {
   Pressable,
   Dimensions,
   FlatList,
+  RefreshControl,
 } from "react-native";
 import React from "react";
 import uuid from "react-native-uuid";
@@ -54,6 +55,7 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
   const [flatlistData, setFlatlistData] = React.useState([]);
   const [downloadAllId, setDownloadAllId] = React.useState<string>();
   const [downloadMetadata, setDownloadMetadata] = React.useState(false);
+  const [forceFlag, setForceFlag] = React.useState(false);
   const [currentPath, setCurrentPath] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
   const [isError, setIsError] = React.useState(undefined);
@@ -93,10 +95,20 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
     getFiles();
   }, [pathIn]);
 
+  const onRefresh = () => {
+    // I don't know if this is going to work
+    // If a long list the flat list won't rerender those at the end of
+    // of the list.
+    // Maybe only real way is to remove data from Zustand
+    setDownloadMetadata(true);
+    setForceFlag(true);
+    setTimeout(() => setForceFlag(false), 500);
+  };
+  //~ == Navigate forward in Dropbox ==
   const onNavigateForward = (nextPath: string, folderName: string) => {
     onPathChange(nextPath, folderName);
   };
-
+  //~ == download Folder Metadata flag set==
   const onDownloadMetadata = () => {
     setDownloadMetadata((prev) => !prev);
   };
@@ -165,6 +177,10 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
 
       <FlatList
         data={flatlistData}
+        refreshControl={
+          <RefreshControl refreshing={false} onRefresh={onRefresh} />
+        }
+        extraData={forceFlag}
         renderItem={({ item, index }) => {
           if (item[".tag"] === "folder") {
             return (
@@ -174,6 +190,7 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
                 folder={item}
                 onNavigateForward={onNavigateForward}
                 downloadMetadata={downloadMetadata}
+                forceFlag={forceFlag}
               />
             );
           } else if (item[".tag"] === "file") {

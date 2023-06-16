@@ -17,21 +17,25 @@ import Colors, { colors } from "../../constants/Colors";
 import { FolderMetadata, cleanOneBook } from "../../utils/audiobookMetadata";
 import ExplorerFolderRow from "./ExplorerFolderRow";
 import { MotiView } from "moti";
+import { defaultImages } from "../../store/store";
 
 type Props = {
   folder: FolderEntry;
   index: number;
   onNavigateForward: (path: string, folderName: string) => void;
   downloadMetadata: boolean;
+  forceFlag: boolean;
 };
 const ExplorerFolder = ({
   folder,
   index,
   onNavigateForward,
-  downloadMetadata,
+  downloadMetadata: downloadMetadataFlag,
+  forceFlag = false,
 }: Props) => {
   const [isFavorite, setIsFavorite] = useState(!!folder.favorited);
   const actions = useDropboxStore((state) => state.actions);
+
   // Stores Metadata info if requested
   const [metadataInfo, setMetadataInfo] = useState(undefined);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,14 +52,29 @@ const ExplorerFolder = ({
 
   //~ if downloadMetadata flag is true
   //~ it will download the metadata for this folder
+  //~ IF downloadMetadata is false it will clear metadata (taking away the display)
   useEffect(() => {
-    if (downloadMetadata) {
+    if (downloadMetadataFlag) {
       downloadFolderMetadata();
+    } else {
+      setMetadataInfo(undefined);
     }
-  }, [downloadMetadata]);
+  }, [downloadMetadataFlag]);
+  //~ ----------------------------
+  //~ Download Function
+  //~ ----------------------------
   const downloadFolderMetadata = async () => {
     // If we already downloaded metadata do not do it again!
-    if (metadataInfo) return;
+
+    if (metadataInfo && !forceFlag) return;
+    //! Check if we have metadata in zustand store
+    const folderMetadata = actions.getFolderMetadata(folder.path_lower);
+    if (folderMetadata && !forceFlag) {
+      setMetadataInfo(folderMetadata);
+      return;
+    }
+
+    //! Since we didn't have it in the store, download it
     // Start download and parse
     setIsLoading(true);
     const dropboxFolder = await listDropboxFiles(folder.path_lower);
@@ -68,16 +87,21 @@ const ExplorerFolder = ({
       const metadata = (await downloadDropboxFile(
         `${metadataFile.path_lower}`
       )) as FolderMetadata;
+
       const convertedMeta = cleanOneBook(metadata);
 
-      // console.log(
-      //   metadata?.folderNameData?.author,
-      //   metadata?.folderNameData?.title,
-      //   metadata?.googleAPIData?.imageURL
-      // );
+      //! Cache in zustand store (store-dropbox)
+      actions.addFolderMetadata(convertedMeta, folder.path_lower);
       setMetadataInfo(convertedMeta);
     } else {
-      setMetadataInfo(undefined);
+      // This means we did NOT find any ...metadata.json file build minimal info
+      const partialMeta = {
+        id: folder.path_lower,
+        title: folder.name,
+        imageURL: defaultImages.image10,
+      };
+      actions.addFolderMetadata(partialMeta, folder.path_lower);
+      setMetadataInfo(partialMeta);
     }
     setIsLoading(false);
   };

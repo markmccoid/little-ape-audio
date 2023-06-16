@@ -22,24 +22,12 @@ const ExplorerActionBar = ({
 }: Props) => {
   return (
     <View className="flex flex-row items-center justify-between mt-1 pb-1 pr-2 flex-grow-1 border-b border-black">
+      {/* DOWNLOAD METADATA Button */}
       <TouchableOpacity onPress={handleDownloadMetadata} className="ml-2">
         <DatabaseDownloadIcon />
       </TouchableOpacity>
-      {/* <View className="flex flex-grow-1">
-        <Text className="text-sm font-ssp_regular text-amber-900 px-2 pt-1 pb-2">
-          {currentPath.length === 0 ? "/" : currentPath}
-        </Text>
-      </View> */}
-      {/* <View className="flex-row">
-          <TouchableOpacity
-            disabled={currentPath.length === 0}
-            onPress={onHandleBack}
-            className="border border-black"
-          >
-            <Text className="px-4 py-2">Back</Text>
-          </TouchableOpacity>
-          <Text className="px-4 py-2 ">Favorites</Text>
-        </View> */}
+
+      {/* DOWNLOAD ALL Button */}
       {fileCount > 0 && (
         <View className="ml-2 ">
           <TouchableOpacity

@@ -2,6 +2,7 @@ import uuid from "react-native-uuid";
 import { create } from "zustand";
 import { saveToAsyncStorage } from "./data/asyncStorage";
 import { FolderEntry } from "../utils/dropboxUtils";
+import { CleanBookMetadata } from "./../utils/audiobookMetadata";
 
 //-- ==================================
 //-- DROPBOX STORE
@@ -12,17 +13,26 @@ export type FavoriteFolders = {
   // order position when displaying
   position: number;
 };
+
 type DropboxState = {
   favoriteFolders: FavoriteFolders[];
+  folderMetadata: Record<string, Partial<CleanBookMetadata>>;
   actions: {
     addFavorite: (favPath: string) => Promise<void>;
     removeFavorite: (favPath: string) => Promise<void>;
     isFolderFavorited: (folders: FolderEntry[]) => FolderEntry[];
     updateFavFolderArray: (favFolders: FavoriteFolders[]) => void;
+    // --  FOLDER METADATA ---
+    addFolderMetadata: (
+      newFolderMetadata: Partial<CleanBookMetadata>,
+      path_lower: string
+    ) => void;
+    getFolderMetadata: (path_lower: string) => Partial<CleanBookMetadata>;
   };
 };
 export const useDropboxStore = create<DropboxState>((set, get) => ({
   favoriteFolders: [],
+  folderMetadata: {},
   actions: {
     addFavorite: async (favPath) => {
       const favs = [...(get().favoriteFolders || [])];
@@ -58,6 +68,16 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       }
 
       return taggedFolders as FolderEntry[];
+    },
+    addFolderMetadata: (newFolderMetadata, path_lower) => {
+      const currMetadata = get().folderMetadata;
+
+      set({
+        folderMetadata: { ...currMetadata, [path_lower]: newFolderMetadata },
+      });
+    },
+    getFolderMetadata: (path_lower: string) => {
+      return get().folderMetadata?.[path_lower];
     },
   },
 }));
