@@ -72,6 +72,11 @@ export const PlaybackService = async () => {
     TrackPlayer.seekTo(seek.position)
   );
   TrackPlayer.addEventListener(Event.RemoteDuck, async (event) => {
-    console.log("REMOTE DUCK", event);
+    const { paused, permanent } = event;
+    if (paused) {
+      TrackPlayer.pause();
+    } else {
+      TrackPlayer.play();
+    }
   });
 };

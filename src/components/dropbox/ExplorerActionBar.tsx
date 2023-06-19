@@ -11,21 +11,28 @@ import { CloudDownloadIcon, DatabaseDownloadIcon } from "../common/svg/Icons";
 type Props = {
   currentPath: string;
   fileCount: number;
+  folderCount: number;
   handleDownloadAll: () => void;
   handleDownloadMetadata: () => void;
 };
 const ExplorerActionBar = ({
   currentPath,
   fileCount,
+  folderCount,
   handleDownloadAll,
   handleDownloadMetadata,
 }: Props) => {
   return (
     <View className="flex flex-row items-center justify-between mt-1 pb-1 pr-2 flex-grow-1 border-b border-black">
       {/* DOWNLOAD METADATA Button */}
-      <TouchableOpacity onPress={handleDownloadMetadata} className="ml-2">
-        <DatabaseDownloadIcon />
-      </TouchableOpacity>
+      {folderCount > 0 ? (
+        <TouchableOpacity onPress={handleDownloadMetadata} className="ml-2">
+          <DatabaseDownloadIcon />
+        </TouchableOpacity>
+      ) : (
+        // This is a placeholder so the justify between keeps icons in correct place
+        <View />
+      )}
 
       {/* DOWNLOAD ALL Button */}
       {fileCount > 0 && (

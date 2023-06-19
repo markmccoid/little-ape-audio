@@ -6,7 +6,8 @@ type StorageKeys =
   | "tracks"
   | "playlists"
   | "favfolders"
-  | "settings";
+  | "settings"
+  | "foldermetadata";
 
 // --------------------------------------------
 // -- LOAD passed key from Local Storage

@@ -1,5 +1,21 @@
 import { AudioTrack } from "./types";
 
+export const defaultImages = {
+  image01: require("../../assets/images/LittleApAudio01.png"),
+  image02: require("../../assets/images/LittleApAudio02.png"),
+  image03: require("../../assets/images/LittleApAudio03.png"),
+  image04: require("../../assets/images/LittleApAudio04.png"),
+  image05: require("../../assets/images/LittleApAudio05.png"),
+  image06: require("../../assets/images/LittleApAudio06.png"),
+  image07: require("../../assets/images/LittleApAudio07.png"),
+  image08: require("../../assets/images/LittleApAudio08.png"),
+  image09: require("../../assets/images/LittleApAudio09.png"),
+  image10: require("../../assets/images/LittleApAudio10.png"),
+  image11: require("../../assets/images/LittleApAudio11.png"),
+  image12: require("../../assets/images/LittleApAudio12.png"),
+  image13: require("../../assets/images/LittleApAudio13.png"),
+};
+
 export const analyzePlaylistTracks = (
   storedTracks: AudioTrack[],
   tracks: string[]

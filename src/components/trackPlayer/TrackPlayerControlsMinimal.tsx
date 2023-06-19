@@ -95,7 +95,7 @@ const TrackPlayerControls = ({ style }: Props) => {
         </TouchableOpacity>
       </View>
       <Text
-        className="text-sm text-center "
+        className="text-sm text-center mt-2"
         style={{ width: width / 1.5 }}
         numberOfLines={1}
         ellipsizeMode="tail"

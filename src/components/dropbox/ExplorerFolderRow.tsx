@@ -46,7 +46,7 @@ const ExplorerFolderRow = ({ metadata, index }: Props) => {
           className="flex flex-col pl-2 flex-grow"
           style={{
             borderTopWidth: StyleSheet.hairlineWidth,
-            borderTopColor: colors.amber600,
+            borderTopColor: colors.amber300,
           }}
         >
           <View className="flex flex-row">

@@ -21,22 +21,7 @@ import { addTrack } from "./store-functions";
 import { deleteFromFileSystem } from "./data/fileSystemAccess";
 import { useDropboxStore } from "./store-dropbox";
 import { useSettingStore } from "./store-settings";
-
-export const defaultImages = {
-  image01: require("../../assets/images/LittleApAudio01.png"),
-  image02: require("../../assets/images/LittleApAudio02.png"),
-  image03: require("../../assets/images/LittleApAudio03.png"),
-  image04: require("../../assets/images/LittleApAudio04.png"),
-  image05: require("../../assets/images/LittleApAudio05.png"),
-  image06: require("../../assets/images/LittleApAudio06.png"),
-  image07: require("../../assets/images/LittleApAudio07.png"),
-  image08: require("../../assets/images/LittleApAudio08.png"),
-  image09: require("../../assets/images/LittleApAudio09.png"),
-  image10: require("../../assets/images/LittleApAudio10.png"),
-  image11: require("../../assets/images/LittleApAudio11.png"),
-  image12: require("../../assets/images/LittleApAudio12.png"),
-  image13: require("../../assets/images/LittleApAudio13.png"),
-};
+import { defaultImages } from "./storeUtils";
 
 function getRandomNumber() {
   const randomNumber = Math.floor(Math.random() * 13) + 1; // Generate random number between 1 and 13
@@ -584,14 +569,17 @@ export const onInitialize = async () => {
   // await removeFromAsyncStorage("tracks");
   // await removeFromAsyncStorage("playlists");
   // await removeFromAsyncStorage("favfolders");
+  // await removeFromAsyncStorage("foldermetadata");
   const tracks = await loadFromAsyncStorage("tracks");
   const playlists = await loadFromAsyncStorage("playlists");
   const favFolders = await loadFromAsyncStorage("favfolders");
+  const folderMetadata = await loadFromAsyncStorage("foldermetadata");
   const settings = await loadFromAsyncStorage("settings");
 
   useTracksStore.setState({ tracks: tracks || [], playlists: playlists || {} });
 
   useDropboxStore.setState({ favoriteFolders: favFolders });
+  useDropboxStore.setState({ folderMetadata: folderMetadata });
   useSettingStore.setState({
     jumpForwardSeconds: settings?.jumpForwardSeconds || 15,
   });

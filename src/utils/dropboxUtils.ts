@@ -210,7 +210,6 @@ export const downloadDropboxFile = async <T>(
     })
     .then((resp) => resp.data)
     .catch((err) => {
-      // error: err;
       console.log("Error Downloading Dropbox File", err.message);
     });
 };

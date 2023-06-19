@@ -4,6 +4,7 @@ import { usePlaybackStore } from "../../../store/store";
 import TrackPlayer from "react-native-track-player";
 import Slider from "@react-native-community/slider";
 import { MotiView } from "moti";
+import { colors } from "../../../constants/Colors";
 
 const TrackPlayerSettingsRate = () => {
   const playbackActions = usePlaybackStore((state) => state.actions);
@@ -42,15 +43,24 @@ const TrackPlayerSettingsRate = () => {
             </TouchableOpacity>
           ))}
           <MotiView
-            from={{ scale: 1, translateX: 0 }}
+            from={{ scale: 1, translateX: 0, backgroundColor: "white" }}
             animate={{
               scale: isSliding ? 2 : 1,
               translateX: isSliding ? -35 : 0,
+              backgroundColor: isSliding ? colors.amber300 : "white",
             }}
             exit={{ scale: 1 }}
-            className="flex-row justify-end flex-grow mr-2"
+            className={`flex-row justify-end flex-grow mr-2 rounded-lg ${
+              isSliding ? "border border-amber-800 justify-center" : ""
+            }`}
           >
-            <Text className="text-amber-900 text-lg">{rate.toFixed(2)}</Text>
+            <Text
+              className={`text-amber-900 text-lg ${
+                isSliding ? "text-black" : ""
+              }`}
+            >
+              {rate.toFixed(2)}
+            </Text>
           </MotiView>
         </View>
         <View className="flex-row w-full ">

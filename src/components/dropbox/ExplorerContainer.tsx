@@ -23,7 +23,10 @@ import { MotiView } from "moti";
 import { times } from "lodash";
 import { Skeleton } from "moti/skeleton";
 import { FolderClosedIcon } from "../common/svg/Icons";
-import { useDropboxStore } from "../../store/store-dropbox";
+import {
+  downloadFolderMetadata,
+  useDropboxStore,
+} from "../../store/store-dropbox";
 
 function filterAudioFiles(filesAndFolders: DropboxDir) {
   const files = filesAndFolders.files;
@@ -51,10 +54,16 @@ type Props = {
   onPathChange: (newPath: string, folderName: string) => void;
 };
 const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
-  const [ilesFolderObj, setFilesFolderObj] = React.useState<DropboxDir>();
+  const [filesFolderObj, setFilesFolderObj] = React.useState<DropboxDir>();
   const [flatlistData, setFlatlistData] = React.useState([]);
   const [downloadAllId, setDownloadAllId] = React.useState<string>();
   const [downloadMetadata, setDownloadMetadata] = React.useState(false);
+
+  const [showMetadata, setShowMetadata] = React.useState<
+    "off" | "on" | "loading"
+  >("off");
+  const allFoldersMetadata = useDropboxStore((state) => state.folderMetadata);
+  // console.log("ALL FOLDERS", Object.keys(allFoldersMetadata));
   const [forceFlag, setForceFlag] = React.useState(false);
   const [currentPath, setCurrentPath] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
@@ -104,14 +113,30 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
     setForceFlag(true);
     setTimeout(() => setForceFlag(false), 500);
   };
+  //~ ====================
   //~ == Navigate forward in Dropbox ==
+  //~ ====================
   const onNavigateForward = (nextPath: string, folderName: string) => {
     onPathChange(nextPath, folderName);
   };
+  //~ ====================
   //~ == download Folder Metadata flag set==
-  const onDownloadMetadata = () => {
-    setDownloadMetadata((prev) => !prev);
+  //~ ====================
+  const onDownloadMetadata = async () => {
+    // If we are showing metadata, then hide and return
+    if (showMetadata !== "off") {
+      setShowMetadata("off");
+      return;
+    }
+    // Call download function and set to show metadata
+    setShowMetadata("loading");
+    await downloadFolderMetadata(filesFolderObj.folders);
+    // console.log("turn on show meta flag");
+    setShowMetadata("on");
   };
+  //~ ====================
+  //~ onDownloadAll
+  //~ ====================
   const onDownloadAll = () => {
     // path WILL equal currentPath and we can just assume
     // the current "files" state variable has the data we need
@@ -169,7 +194,8 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
       <View style={{ zIndex: 5 }}>
         <ExplorerActionBar
           currentPath={pathIn}
-          fileCount={ilesFolderObj?.files?.length || 0}
+          fileCount={filesFolderObj?.files?.length || 0}
+          folderCount={filesFolderObj?.folders?.length || 0}
           handleDownloadAll={onDownloadAll}
           handleDownloadMetadata={onDownloadMetadata}
         />
@@ -180,7 +206,6 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
         refreshControl={
           <RefreshControl refreshing={false} onRefresh={onRefresh} />
         }
-        extraData={forceFlag}
         renderItem={({ item, index }) => {
           if (item[".tag"] === "folder") {
             return (
@@ -189,8 +214,8 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
                 index={index}
                 folder={item}
                 onNavigateForward={onNavigateForward}
-                downloadMetadata={downloadMetadata}
-                forceFlag={forceFlag}
+                showFolderMetadata={showMetadata}
+                // folderMetadata={allFoldersMetadata?.[item.path_lower]}
               />
             );
           } else if (item[".tag"] === "file") {

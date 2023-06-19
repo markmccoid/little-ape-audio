@@ -1,4 +1,4 @@
-import { defaultImages } from "../store/store";
+import { defaultImages } from "../store/storeUtils";
 
 type GoogleData = {
   id?: string;
