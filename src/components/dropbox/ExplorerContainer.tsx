@@ -10,7 +10,7 @@ import {
   FlatList,
   RefreshControl,
 } from "react-native";
-import React from "react";
+import React, { useCallback, useRef, useState } from "react";
 import uuid from "react-native-uuid";
 import { Link } from "expo-router";
 import { listDropboxFiles, DropboxDir } from "../../utils/dropboxUtils";
@@ -70,6 +70,42 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
   const [isError, setIsError] = React.useState(undefined);
   const trackActions = useTrackActions();
   const dropboxActions = useDropboxStore((state) => state.actions);
+
+  const [visibleItems, setVisibleItems] = useState([]);
+
+  const viewabilityConfig = {
+    waitForInteraction: true,
+    // At least one of the viewAreaCoveragePercentThreshold or itemVisiblePercentThreshold is required.
+    viewAreaCoveragePercentThreshold: 95,
+    // itemVisiblePercentThreshold: 75,
+  };
+
+  const onViewableItemsChanged = ({ viewableItems, changed }) => {
+    console.log("Visible items are", viewableItems.length);
+    console.log("Changed in this iteration", changed);
+  };
+
+  const renderItem = useCallback(
+    ({ item, index }) => {
+      if (item[".tag"] === "folder") {
+        return (
+          <ExplorerFolder
+            key={item.id}
+            index={index}
+            folder={item}
+            onNavigateForward={onNavigateForward}
+            showFolderMetadata={showMetadata}
+            folderMetadata={allFoldersMetadata?.[item.path_lower]}
+          />
+        );
+      } else if (item[".tag"] === "file") {
+        return (
+          <ExplorerFile key={item.id} file={item} playlistId={downloadAllId} />
+        );
+      }
+    },
+    [showMetadata, downloadAllId]
+  );
 
   React.useEffect(() => {
     const getFiles = async () => {
@@ -203,33 +239,14 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
 
       <FlatList
         data={flatlistData}
-        refreshControl={
-          <RefreshControl refreshing={false} onRefresh={onRefresh} />
-        }
-        renderItem={({ item, index }) => {
-          if (item[".tag"] === "folder") {
-            return (
-              <ExplorerFolder
-                key={item.id}
-                index={index}
-                folder={item}
-                onNavigateForward={onNavigateForward}
-                showFolderMetadata={showMetadata}
-                // folderMetadata={allFoldersMetadata?.[item.path_lower]}
-              />
-            );
-          } else if (item[".tag"] === "file") {
-            return (
-              <ExplorerFile
-                key={item.id}
-                file={item}
-                playlistId={downloadAllId}
-              />
-            );
-          }
-        }}
+        // refreshControl={
+        //   <RefreshControl refreshing={false} onRefresh={onRefresh} />
+        // }
+        extraData={downloadAllId}
+        renderItem={renderItem}
         keyExtractor={(item) => item.id}
         horizontal={false}
+        maxToRenderPerBatch={10}
       />
 
       {/* <ScrollView

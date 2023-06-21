@@ -127,7 +127,7 @@ export const downloadFolderMetadata = async (folders: FolderEntry[]) => {
   // console.log(`DOWNLOADING META - ${foldersToDownload.length} folders`);
   let chunkedFolders = [];
   // if (foldersToDownload.length > 80) {
-  chunkedFolders = chunkArray(foldersToDownload, 2);
+  chunkedFolders = chunkArray(foldersToDownload, 10);
   // }
   const promises = chunkedFolders.map((chunk) => getArrayOfPromises(chunk));
 
@@ -140,7 +140,7 @@ export const downloadFolderMetadata = async (folders: FolderEntry[]) => {
         setTimeout(() => {
           processPromises(promises[i]);
           resolve(undefined);
-        }, i * 1200)
+        }, i * 800 * 10)
       )
     );
   }

@@ -59,9 +59,15 @@ const ExplorerFolderRow = ({ metadata, index }: Props) => {
             </Text>
           </View>
 
-          <Text className="text-sm font-medium text-center">
-            by {metadata.author}
-          </Text>
+          <View className="flex-row justify-center">
+            <Text
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              className="flex-1 text-sm font-medium text-center pr-2"
+            >
+              by {metadata.author}
+            </Text>
+          </View>
 
           <View>
             {/* **Book Length** */}

@@ -12,6 +12,7 @@ import PlaylistImage from "../common/PlaylistImage";
 import { usePlaybackStore } from "../../store/store";
 import TrackPlayerControlsMinimal from "../trackPlayer/TrackPlayerControlsMinimal";
 import { OpenInNewIcon } from "../common/svg/Icons";
+import { MotiView } from "moti";
 
 export default function PlaylistTrackControl() {
   const currPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);

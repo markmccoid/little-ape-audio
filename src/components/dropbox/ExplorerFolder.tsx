@@ -22,16 +22,18 @@ type Props = {
   index: number;
   onNavigateForward: (path: string, folderName: string) => void;
   showFolderMetadata: "on" | "off" | "loading";
+  folderMetadata: {};
 };
 const ExplorerFolder = ({
   folder,
   index,
   onNavigateForward,
-  showFolderMetadata,
+  showFolderMetadata = "on",
+  folderMetadata: metadataInfo,
 }: Props) => {
   const [isFavorite, setIsFavorite] = useState(!!folder.favorited);
   const actions = useDropboxStore((state) => state.actions);
-  const metadataInfo = useFolderMeta(folder.path_lower);
+  // const metadataInfo = useFolderMeta(folder.path_lower);
   // Stores Metadata info if requested
   // const metadataInfo = useMemo(() => meta, [meta]);
   // const [metadataInfo, setMetadataInfo] = useState();
@@ -40,6 +42,7 @@ const ExplorerFolder = ({
   >("off");
 
   useEffect(() => {
+    // console.log("IN FOLDER FOR ", folder.path_lower);
     setFolderMetaStata(showFolderMetadata);
   }, [showFolderMetadata]);
 
@@ -158,4 +161,4 @@ const ExplorerFolder = ({
   );
 };
 
-export default ExplorerFolder;
+export default React.memo(ExplorerFolder);

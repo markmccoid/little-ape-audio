@@ -2,6 +2,7 @@ import { StyleSheet, View, SafeAreaView } from "react-native";
 import PlaylistContainer from "../../src/components/playlists/PlaylistContainer";
 import { usePlaybackStore } from "../../src/store/store";
 import PlaylistTrackControl from "../../src/components/playlists/PlaylistTrackControl";
+import { MotiView } from "moti";
 
 // const track: Track = {
 //   id: "one",
@@ -15,11 +16,23 @@ export default function AudioScreen() {
 
   return (
     <SafeAreaView
-      className={`flex-1 ${isPlaylistLoaded ? "bg-amber-200" : "bg-amber-50"}`}
+      className={`flex-1 ${isPlaylistLoaded ? "bg-amber-200" : "bg-amber-50"} `}
     >
       <View className="flex-col flex-1 justify-start flex-grow bg-amber-50">
         <PlaylistContainer />
-        {isPlaylistLoaded && <PlaylistTrackControl />}
+        {isPlaylistLoaded && (
+          <MotiView
+            from={{ opacity: 0, translateY: 200 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{
+              type: "timing",
+              duration: 1000,
+              delay: 0,
+            }}
+          >
+            <PlaylistTrackControl />
+          </MotiView>
+        )}
       </View>
     </SafeAreaView>
   );

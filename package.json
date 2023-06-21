@@ -9,6 +9,7 @@
     "@expo-google-fonts/lato": "^0.2.3",
     "@gorhom/bottom-sheet": "^4",
     "@markmccoid/react-native-drag-and-order": "^0.1.10",
+    "@miblanchard/react-native-slider": "^2.3.1",
     "@react-native-async-storage/async-storage": "1.17.11",
     "@react-native-community/slider": "^4.4.2",
     "@types/jsmediatags": "^3.9.3",
@@ -20,6 +21,7 @@
     "expo-auth-session": "~4.0.3",
     "expo-av": "~13.2.1",
     "expo-constants": "~14.2.1",
+    "expo-dev-client": "~2.2.1",
     "expo-linear-gradient": "~12.1.2",
     "expo-linking": "~4.0.1",
     "expo-router": "^1.2.0",
@@ -45,8 +47,7 @@
     "react-native-uuid": "^2.0.1",
     "react-native-web": "~0.18.7",
     "typescript": "^4.9.4",
-    "zustand": "^4.3.8",
-    "expo-dev-client": "~2.2.1"
+    "zustand": "^4.3.8"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",

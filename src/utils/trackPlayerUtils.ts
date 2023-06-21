@@ -55,7 +55,10 @@ export const handleRemoteJumpBackward = async () => {
 export const PlaybackService = async () => {
   // This service needs to be registered for the module to work
   // but it will be used later in the "Receiving Events" section
-  TrackPlayer.addEventListener(Event.RemotePlay, () => TrackPlayer.play());
+  TrackPlayer.addEventListener(
+    Event.RemotePlay,
+    () => console.log("REMOTEPLAY") || TrackPlayer.play()
+  );
   TrackPlayer.addEventListener(Event.RemotePause, () => TrackPlayer.pause());
   TrackPlayer.addEventListener(Event.RemoteNext, handleRemoteNext);
   TrackPlayer.addEventListener(
@@ -73,6 +76,7 @@ export const PlaybackService = async () => {
   );
   TrackPlayer.addEventListener(Event.RemoteDuck, async (event) => {
     const { paused, permanent } = event;
+    console.log("DUCK EVENT", event);
     if (paused) {
       TrackPlayer.pause();
     } else {

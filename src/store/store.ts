@@ -289,11 +289,14 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       TrackPlayer.reset();
     },
     setCurrentPlaylist: async (playlistId) => {
-      if (get().currentPlaylistId === playlistId) return;
       set({ playlistLoaded: false });
       useTracksStore.getState().actions.updatePlaylistFields(playlistId, {
         lastPlayedDateTime: Date.now(),
       });
+      if (get().currentPlaylistId === playlistId) {
+        set({ playlistLoaded: true });
+        return;
+      }
       //----------
       // Pause the player before loading the new track.  Even though
       // store existing playlist information in TrackStore -> playlists
@@ -479,6 +482,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
     },
     goToTrack: async (trackIndex) => {
       await TrackPlayer.skip(trackIndex);
+      await saveCurrentTrackInfo();
     },
   },
 }));
