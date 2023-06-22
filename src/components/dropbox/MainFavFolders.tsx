@@ -1,8 +1,8 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
 import { FavoriteFolders, useDropboxStore } from "../../store/store-dropbox";
 import { Link } from "expo-router";
-import { StarFilledIcon } from "../common/svg/Icons";
+import { DeleteIcon, StarFilledIcon } from "../common/svg/Icons";
 import DragDropEntry, {
   sortArray,
 } from "@markmccoid/react-native-drag-and-order";
@@ -27,15 +27,6 @@ const MainFavFolders = ({ favFolders }) => {
           idField: "id",
         }) as FavoriteFolders[];
         actions.updateFavFolderArray(newFavOrder);
-        // console.log(
-        //   "positions",
-        //   sortArray(positions, favFolders, {
-        //     positionField: "position",
-        //     idField: "id",
-        //   })
-        // )
-
-        // updateItemList(sortArray<ItemType>(positions, items, "pos"))
       }}
       //getScrollFunctions={(functionObj) => setScrollFunctions(functionObj)}
       itemHeight={50}
@@ -43,7 +34,7 @@ const MainFavFolders = ({ favFolders }) => {
       //handle={AltHandle} // This is optional.  leave out if you want the default handle
       handle={() => (
         <View
-          className="justify-center flex-grow  px-2"
+          className="justify-center flex-grow bg-white px-2"
           style={{
             borderWidth: StyleSheet.hairlineWidth,
           }}
@@ -59,7 +50,7 @@ const MainFavFolders = ({ favFolders }) => {
           <View
             key={folder.id}
             id={folder.id}
-            className={`justify-center`}
+            className={`justify-between items-center bg-white flex-row`}
             style={{
               borderWidth: StyleSheet.hairlineWidth,
               borderBottomRightRadius: lastItem ? 10 : 0,
@@ -73,12 +64,24 @@ const MainFavFolders = ({ favFolders }) => {
                 pathname: "./dropbox/newdir",
                 params: { fullPath: folder.folderPath, backTitle: "Back" },
               }}
+              className="flex-1"
             >
-              <View className="flex-row px-2 py-3 items-center">
-                {/* <StarFilledIcon /> */}
-                <Text className="ml-3 text">{folder.folderPath}</Text>
+              <View className="flex-row flex-1 items-center ">
+                <Text
+                  className="ml-3 text"
+                  ellipsizeMode="tail"
+                  numberOfLines={2}
+                >
+                  {folder.folderPath}
+                </Text>
               </View>
             </Link>
+            <TouchableOpacity
+              onPress={() => actions.removeFavorite(folder.folderPath)}
+              className="pr-4"
+            >
+              <DeleteIcon />
+            </TouchableOpacity>
           </View>
         );
       })}

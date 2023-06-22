@@ -86,7 +86,6 @@ const TrackPlayerProgressBar = () => {
         thumbTintColor={colors.amber600}
         value={currPos} // {seeking ? seeking : Math.floor(position)}
         onValueChange={(val) => {
-          console.log("VAL", val);
           setIsSeeking(true);
           setSeeking(val[0]);
         }}

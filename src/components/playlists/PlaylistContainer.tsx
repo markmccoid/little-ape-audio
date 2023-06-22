@@ -21,12 +21,16 @@ import { MotiView } from "moti";
 
 const PlaylistContainer = () => {
   const route = useRouter();
+  const [update, setUpdate] = useState(false);
   const playlists = usePlaylists(); //useTracksStore((state) => state.playlists);
   const currentPlaylistId = usePlaybackStore(
     (state) => state.currentPlaylistId
   );
   const prevPlaylistId = useRef(undefined);
   const scrollRef = useRef(null);
+  const setCurrPlaylist = usePlaybackStore(
+    (state) => state.actions.setCurrentPlaylist
+  );
 
   // Scroll to the active track
   const scrollToRow = () => {
@@ -41,20 +45,33 @@ const PlaylistContainer = () => {
     scrollToRow();
   }, [currentPlaylistId]);
 
-  const renderItem = ({ item, index }) => (
-    <MotiView
-      from={{ opacity: 0 }}
-      key={item.id}
-      animate={{ opacity: 1 }}
-      transition={{
-        type: "timing",
-        duration: 1000,
-        delay: 100 * index,
-      }}
-    >
-      <PlaylistRow key={item.id} playlist={item} />
-    </MotiView>
-  );
+  const handleRowSelect = async (playlistId) => {
+    setUpdate(true);
+    await setCurrPlaylist(playlistId);
+    route.push({ pathname: "/audio/player", params: {} });
+    setUpdate(false);
+  };
+  const renderItem = ({ item, index }) => {
+    return (
+      <MotiView
+        from={{ opacity: 0 }}
+        key={`${item.id}-${index}-${update}`}
+        animate={{ opacity: 1 }}
+        transition={{
+          type: "timing",
+          duration: 800,
+          delay: 100 * index,
+        }}
+        style={{ flex: 1 }}
+      >
+        <PlaylistRow
+          key={item.id}
+          playlist={item}
+          onPlaylistSelect={handleRowSelect}
+        />
+      </MotiView>
+    );
+  };
   return (
     <View className="w-full flex-grow flex-1">
       <FlatList
@@ -62,7 +79,7 @@ const PlaylistContainer = () => {
         contentContainerStyle={{ paddingBottom: 30 }}
         data={playlists}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => `${item.id}-${index}`}
       />
     </View>
     // <ScrollView

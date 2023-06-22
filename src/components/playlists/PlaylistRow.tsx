@@ -8,7 +8,7 @@ import {
   ImageSourcePropType,
   Alert,
 } from "react-native";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { usePlaybackStore, useTrackActions } from "../../store/store";
 import { Playlist, AudioTrack } from "../../store/types";
 import { Link, useRouter } from "expo-router";
@@ -18,8 +18,9 @@ import { DeleteIcon, EditIcon } from "../common/svg/Icons";
 
 type Props = {
   playlist: Playlist;
+  onPlaylistSelect: (playlistId: string) => void;
 };
-const PlaylistRow = ({ playlist }: Props) => {
+const PlaylistRow = ({ playlist, onPlaylistSelect }: Props) => {
   const trackActions = useTrackActions();
   const playbackActions = usePlaybackStore((state) => state.actions);
   const currentPlaylistId = usePlaybackStore(
@@ -29,10 +30,11 @@ const PlaylistRow = ({ playlist }: Props) => {
     (state) => state.actions.setCurrentPlaylist
   );
   const route = useRouter();
-  const onPlaylistSelect = async () => {
-    await setCurrPlaylist(playlist.id);
-    route.push({ pathname: "/audio/player", params: {} });
-  };
+
+  // const onPlaylistSelect = async () => {
+  //   await setCurrPlaylist(playlist.id);
+  //   route.push({ pathname: "/audio/player", params: {} });
+  // };
   const isActive = useMemo(
     () => currentPlaylistId === playlist.id,
     [currentPlaylistId]
@@ -77,7 +79,10 @@ const PlaylistRow = ({ playlist }: Props) => {
         isActive ? "bg-amber-300" : ""
       }`}
     >
-      <Pressable className="flex-1 flex-row" onPress={onPlaylistSelect}>
+      <Pressable
+        className="flex-1 flex-row"
+        onPress={() => onPlaylistSelect(playlist.id)}
+      >
         {/* IMAGE */}
         {/* <Image style={styles.trackImage} source={imageSource} /> */}
         <PlaylistImage style={styles.trackImage} playlistId={playlist.id} />
