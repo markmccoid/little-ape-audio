@@ -17,17 +17,18 @@ type Props = {
   metadata: CleanBookMetadata;
   index: number;
 };
-const ExplorerFolderRow = ({ metadata, index }: Props) => {
+const FileMetadataView = ({ metadata, index }: Props) => {
   const [showDescription, setShowDescription] = useState(false);
   if (!metadata) return null;
+
   return (
     <View
-      className="flex-1 flex-col "
+      className={`items-start flex-col justify-start border-b border-b-amber-900 pb-2 pt-2`}
       style={{
         backgroundColor: index % 2 === 0 ? colors.amber100 : colors.amber50,
       }}
     >
-      <View className="flex-1 flex-row w-full justify-start">
+      <View className="flex-grow flex-row w-full justify-start ">
         {/* **IMAGE** */}
         <Image
           source={metadata.imageURL}
@@ -43,7 +44,7 @@ const ExplorerFolderRow = ({ metadata, index }: Props) => {
         />
         {/* **TITLE AUTHOR OTHER** */}
         <View
-          className="flex flex-col pl-2 flex-grow"
+          className="flex flex-col pl-2 flex-grow "
           style={{
             borderTopWidth: StyleSheet.hairlineWidth,
             borderTopColor: colors.amber300,
@@ -78,7 +79,7 @@ const ExplorerFolderRow = ({ metadata, index }: Props) => {
             <Text className="text-center">{metadata.publishedYear}</Text>
           </View>
           {/* **Show DESCRIPTION Button** */}
-          {metadata.description && (
+          {/* {metadata.description && (
             <Pressable
               onPress={() => setShowDescription((prev) => !prev)}
               className="flex-row justify-center"
@@ -118,19 +119,26 @@ const ExplorerFolderRow = ({ metadata, index }: Props) => {
                 </MotiView>
               </MotiView>
             </Pressable>
-          )}
+          )} */}
         </View>
       </View>
-      {/* **DESCRIPTION** */}
+      {/* **DESCRIPTION**
 
       <AnimateHeight
         hide={!showDescription}
-        style={{ marginHorizontal: 5, flex: 1 }}
+        style={{
+          marginHorizontal: 5,
+          flexDirection: "column",
+          flex: 1,
+          borderWidth: 1,
+          width: "100%",
+        }}
       >
         <Text>{metadata.description}</Text>
-      </AnimateHeight>
+        <Text>here</Text>
+      </AnimateHeight> */}
     </View>
   );
 };
 
-export default ExplorerFolderRow;
+export default FileMetadataView;

@@ -39,6 +39,7 @@ export type Playlist = {
   imageURI: { uri: string } | number | undefined;
   imageType: "uri" | "imported" | "url";
   totalDurationSeconds: number;
+  totalListenedToSeconds: number;
   trackIds?: string[];
   currentPosition?: { trackIndex: number; position: number };
   currentRate: number;

@@ -19,10 +19,10 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
     updateJumpForwardSeconds: async (seconds) => {
       set({ jumpForwardSeconds: seconds });
       await saveToAsyncStorage("settings", { jumpForwardSeconds: seconds });
-      // Update trackplayers interval.  This will update on the remote screen
-      await TrackPlayer.updateOptions({
-        forwardJumpInterval: seconds,
-      });
+      // // Update trackplayers interval.  This will update on the remote screen
+      // await TrackPlayer.updateOptions({
+      //   forwardJumpInterval: seconds,
+      // });
     },
   },
 }));

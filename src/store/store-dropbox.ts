@@ -112,6 +112,7 @@ export const useFolderMeta = (folderId) => {
 export const downloadFolderMetadata = async (folders: FolderEntry[]) => {
   // If we already downloaded metadata do not do it again!
   let foldersToDownload = [];
+
   for (const folder of folders) {
     //! Check if we have metadata in zustand store
     const folderMetadata = useDropboxStore

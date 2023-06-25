@@ -108,6 +108,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         imageURI: undefined,
         imageType: undefined,
         totalDurationSeconds: 0,
+        totalListenedToSeconds: 0,
         currentRate: 1,
       };
 
@@ -556,6 +557,8 @@ const saveCurrentTrackInfo = async () => {
       trackIndex: trackIndex,
       position,
     };
+    playlist.totalListenedToSeconds =
+      usePlaybackStore.getState().actions.getPrevTrackDuration() + position;
     // Create update list of playlists
     const updatedPlaylists = {
       ...useTracksStore.getState().playlists,
@@ -573,7 +576,7 @@ export const onInitialize = async () => {
   // await removeFromAsyncStorage("tracks");
   // await removeFromAsyncStorage("playlists");
   // await removeFromAsyncStorage("favfolders");
-  // await removeFromAsyncStorage("foldermetadata");
+  await removeFromAsyncStorage("foldermetadata");
   const tracks = await loadFromAsyncStorage("tracks");
   const playlists = await loadFromAsyncStorage("playlists");
   const favFolders = await loadFromAsyncStorage("favfolders");

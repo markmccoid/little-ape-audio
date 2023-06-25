@@ -29,22 +29,26 @@ const ExplorerFolder = ({
   index,
   onNavigateForward,
   showFolderMetadata = "on",
-  folderMetadata: metadataInfo,
+  folderMetadata,
 }: Props) => {
   const [isFavorite, setIsFavorite] = useState(!!folder.favorited);
   const actions = useDropboxStore((state) => state.actions);
+  const [metadataInfo, setMetadataInfo] = useState(folderMetadata);
   // const metadataInfo = useFolderMeta(folder.path_lower);
   // Stores Metadata info if requested
   // const metadataInfo = useMemo(() => meta, [meta]);
   // const [metadataInfo, setMetadataInfo] = useState();
-  const [folderMetaState, setFolderMetaStata] = useState<
+  const [folderMetaState, setFolderMetaState] = useState<
     "on" | "off" | "loading"
   >("off");
 
+  // Using local state for passed in show flag and metadata
+  // because we allow reload of metadata from a single row with
+  // a long press
   useEffect(() => {
-    // console.log("IN FOLDER FOR ", folder.path_lower);
-    setFolderMetaStata(showFolderMetadata);
-  }, [showFolderMetadata]);
+    setFolderMetaState(showFolderMetadata);
+    setMetadataInfo(folderMetadata);
+  }, [showFolderMetadata, folderMetadata]);
 
   const setFavorite = async () => {
     if (isFavorite) {
@@ -60,8 +64,9 @@ const ExplorerFolder = ({
   //~ Download Function
   //~ ----------------------------
   const downloadFolderMetadata = async () => {
+    console.log("starting manual download", folder.path_lower);
     // Start download and parse
-    setFolderMetaStata("loading");
+    setFolderMetaState("loading");
     // setMetadataInfo(undefined);
     const dropboxFolder = await listDropboxFiles(folder.path_lower);
     const metadataFile = dropboxFolder.files.find(
@@ -76,10 +81,10 @@ const ExplorerFolder = ({
         `${metadataFile.path_lower}`
       )) as FolderMetadata;
       convertedMeta = cleanOneBook(metadata);
-
       //! Cache in zustand store (store-dropbox)
       // setMetadataInfo(convertedMeta);
       await actions.addFoldersMetadata({ [folder.path_lower]: convertedMeta });
+      setMetadataInfo(convertedMeta);
     } else {
       // This means we did NOT find any ...metadata.json file build minimal info
       const partialMeta = {
@@ -88,9 +93,9 @@ const ExplorerFolder = ({
         imageURL: defaultImages.image10,
       };
       await actions.addFoldersMetadata({ [folder.path_lower]: partialMeta });
-      // setMetadataInfo(partialMeta);
+      setMetadataInfo(partialMeta);
     }
-    setFolderMetaStata("on");
+    setFolderMetaState("on");
   };
 
   return (
@@ -113,9 +118,8 @@ const ExplorerFolder = ({
           animate={{ opacity: 1 }}
           transition={{
             loop:
-              (showFolderMetadata === "loading" ||
-                folderMetaState === "loading") &&
-              !metadataInfo
+              (showFolderMetadata === "loading" && !metadataInfo) ||
+              folderMetaState === "loading"
                 ? true
                 : false,
             type: "timing",
@@ -128,9 +132,8 @@ const ExplorerFolder = ({
             paddingHorizontal: 8,
           }}
           className={`${
-            (showFolderMetadata === "loading" ||
-              folderMetaState === "loading") &&
-            !metadataInfo
+            (showFolderMetadata === "loading" && !metadataInfo) ||
+            folderMetaState === "loading"
               ? "bg-amber-600"
               : ""
           }`}
@@ -153,7 +156,9 @@ const ExplorerFolder = ({
         </MotiView>
       </TouchableOpacity>
       {folderMetaState !== "off" || showFolderMetadata !== "off" ? (
-        <ExplorerFolderRow metadata={metadataInfo} index={index} />
+        <View className="mb-2">
+          <ExplorerFolderRow metadata={metadataInfo} index={index} />
+        </View>
       ) : (
         <ExplorerFolderRow metadata={undefined} index={index} />
       )}

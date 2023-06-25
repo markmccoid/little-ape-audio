@@ -27,6 +27,8 @@ import {
   downloadFolderMetadata,
   useDropboxStore,
 } from "../../store/store-dropbox";
+import FileMetadataView from "./FileMetadataView";
+import ExplorerFolderRow from "./ExplorerFolderRow";
 
 function filterAudioFiles(filesAndFolders: DropboxDir) {
   const files = filesAndFolders.files;
@@ -63,27 +65,12 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
     "off" | "on" | "loading"
   >("off");
   const allFoldersMetadata = useDropboxStore((state) => state.folderMetadata);
-  // console.log("ALL FOLDERS", Object.keys(allFoldersMetadata));
-  const [forceFlag, setForceFlag] = React.useState(false);
-  const [currentPath, setCurrentPath] = React.useState("");
+  // console.log("ALL FOLDERS", Object.keys(allFoldersMetadata || {}));
+
   const [isLoading, setIsLoading] = React.useState(false);
   const [isError, setIsError] = React.useState(undefined);
   const trackActions = useTrackActions();
   const dropboxActions = useDropboxStore((state) => state.actions);
-
-  const [visibleItems, setVisibleItems] = useState([]);
-
-  const viewabilityConfig = {
-    waitForInteraction: true,
-    // At least one of the viewAreaCoveragePercentThreshold or itemVisiblePercentThreshold is required.
-    viewAreaCoveragePercentThreshold: 95,
-    // itemVisiblePercentThreshold: 75,
-  };
-
-  const onViewableItemsChanged = ({ viewableItems, changed }) => {
-    console.log("Visible items are", viewableItems.length);
-    console.log("Changed in this iteration", changed);
-  };
 
   const renderItem = useCallback(
     ({ item, index }) => {
@@ -104,7 +91,7 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
         );
       }
     },
-    [showMetadata, downloadAllId]
+    [showMetadata, downloadAllId, allFoldersMetadata]
   );
 
   React.useEffect(() => {
@@ -121,6 +108,7 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
         const taggedFolders = dropboxActions.isFolderFavorited(
           filteredFoldersFiles.folders
         );
+
         const finalFolderFileList: DropboxDir = {
           folders: taggedFolders, //filteredFoldersFiles.folders,
           files: taggedFiles,
@@ -140,15 +128,6 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
     getFiles();
   }, [pathIn]);
 
-  const onRefresh = () => {
-    // I don't know if this is going to work
-    // If a long list the flat list won't rerender those at the end of
-    // of the list.
-    // Maybe only real way is to remove data from Zustand
-    setDownloadMetadata(true);
-    setForceFlag(true);
-    setTimeout(() => setForceFlag(false), 500);
-  };
   //~ ====================
   //~ == Navigate forward in Dropbox ==
   //~ ====================
@@ -225,7 +204,7 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
       from={{ opacity: 0.5 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0.5 }}
-      style={{ flex: 1 }}
+      style={{ flex: 1, flexDirection: "column", justifyContent: "flex-start" }}
     >
       <View style={{ zIndex: 5 }}>
         <ExplorerActionBar
@@ -237,41 +216,21 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
         />
       </View>
 
+      {filesFolderObj?.files?.length > 0 && (
+        <FileMetadataView metadata={allFoldersMetadata?.[pathIn]} />
+      )}
+
       <FlatList
         data={flatlistData}
         // refreshControl={
         //   <RefreshControl refreshing={false} onRefresh={onRefresh} />
         // }
-        extraData={downloadAllId}
+        extraData={allFoldersMetadata}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         horizontal={false}
         maxToRenderPerBatch={10}
       />
-
-      {/* <ScrollView
-        contentContainerStyle={{ paddingBottom: 30 }}
-        // style={{ flex: 1 }}
-      >
-        {files?.folders.map((folder, index) => (
-          <ExplorerFolder
-            key={folder.id}
-            index={index}
-            folder={folder}
-            onNavigateForward={onNavigateForward}
-            downloadMetadata={downloadMetadata}
-          />
-        ))}
-        {files?.files.map((file) => {
-          return (
-            <ExplorerFile
-              key={file.id}
-              file={file}
-              playlistId={downloadAllId}
-            />
-          );
-        })}
-      </ScrollView> */}
     </MotiView>
   );
 };

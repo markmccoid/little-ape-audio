@@ -26,15 +26,9 @@ const PlaylistRow = ({ playlist, onPlaylistSelect }: Props) => {
   const currentPlaylistId = usePlaybackStore(
     (state) => state.currentPlaylistId
   );
-  const setCurrPlaylist = usePlaybackStore(
-    (state) => state.actions.setCurrentPlaylist
-  );
+
   const route = useRouter();
 
-  // const onPlaylistSelect = async () => {
-  //   await setCurrPlaylist(playlist.id);
-  //   route.push({ pathname: "/audio/player", params: {} });
-  // };
   const isActive = useMemo(
     () => currentPlaylistId === playlist.id,
     [currentPlaylistId]
@@ -49,7 +43,9 @@ const PlaylistRow = ({ playlist, onPlaylistSelect }: Props) => {
           text: "Yes",
           onPress: async () => {
             await trackActions.removePlaylist(playlist.id);
-            await playbackActions.resetPlaybackStore();
+            if (currentPlaylistId === playlist.id) {
+              await playbackActions.resetPlaybackStore();
+            }
           },
         },
         { text: "No", style: "cancel" },
@@ -101,6 +97,7 @@ const PlaylistRow = ({ playlist, onPlaylistSelect }: Props) => {
             </Text>
           </View>
           <Text className="text-sm font-ssp_regular">
+            {formatSeconds(playlist.totalListenedToSeconds, "minimal")} -
             {formatSeconds(playlist.totalDurationSeconds, "minimal")}
           </Text>
         </View>
