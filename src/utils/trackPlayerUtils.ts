@@ -73,7 +73,7 @@ export const PlaybackService = async () => {
   );
   TrackPlayer.addEventListener(Event.RemoteDuck, async (event) => {
     const { paused, permanent } = event;
-    console.log("DUCK EVENT", event);
+
     if (paused) {
       TrackPlayer.pause();
     } else {

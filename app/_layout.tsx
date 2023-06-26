@@ -42,10 +42,13 @@ export default function RootLayout() {
     const setupTP = async () => {
       await onInitialize();
       const jumpForwardSeconds = useSettingStore.getState().jumpForwardSeconds;
+      const jumpBackwardSeconds =
+        useSettingStore.getState().jumpBackwardSeconds;
       await TrackPlayer.setupPlayer();
       await TrackPlayer.updateOptions({
         alwaysPauseOnInterruption: true,
         forwardJumpInterval: jumpForwardSeconds,
+        backwardJumpInterval: jumpBackwardSeconds,
         capabilities: [
           Capability.Play,
           Capability.Pause,

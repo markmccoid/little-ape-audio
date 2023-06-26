@@ -1,7 +1,8 @@
-import { View, Text } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import React from "react";
-import { Stack } from "expo-router";
+import { Link, Stack } from "expo-router";
 import { colors } from "../../src/constants/Colors";
+import { BackIcon, HomeIcon } from "../../src/components/common/svg/Icons";
 
 const SettingsLayout = () => {
   return (
@@ -12,6 +13,11 @@ const SettingsLayout = () => {
           title: "Settings",
           headerStyle: { backgroundColor: colors.amber200 },
           headerTintColor: colors.amber900,
+          headerLeft: () => (
+            <Link href="./audio">
+              <HomeIcon />
+            </Link>
+          ),
         }}
       />
       <Stack.Screen

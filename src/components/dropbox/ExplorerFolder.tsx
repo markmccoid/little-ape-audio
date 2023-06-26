@@ -46,7 +46,7 @@ const ExplorerFolder = ({
   // because we allow reload of metadata from a single row with
   // a long press
   useEffect(() => {
-    setFolderMetaState(showFolderMetadata);
+    // setFolderMetaState(showFolderMetadata);
     setMetadataInfo(folderMetadata);
   }, [showFolderMetadata, folderMetadata]);
 

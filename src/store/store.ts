@@ -576,7 +576,7 @@ export const onInitialize = async () => {
   // await removeFromAsyncStorage("tracks");
   // await removeFromAsyncStorage("playlists");
   // await removeFromAsyncStorage("favfolders");
-  await removeFromAsyncStorage("foldermetadata");
+  // await removeFromAsyncStorage("foldermetadata");
   const tracks = await loadFromAsyncStorage("tracks");
   const playlists = await loadFromAsyncStorage("playlists");
   const favFolders = await loadFromAsyncStorage("favfolders");
@@ -589,6 +589,7 @@ export const onInitialize = async () => {
   useDropboxStore.setState({ folderMetadata: folderMetadata });
   useSettingStore.setState({
     jumpForwardSeconds: settings?.jumpForwardSeconds || 15,
+    jumpBackwardSeconds: settings?.jumpBackwardSeconds || 15,
   });
   // console.log(
   //   "store INIT # of Tracks",
@@ -704,7 +705,7 @@ const mountTrackPlayerListeners = () => {
     Event.PlaybackState,
     async (event) => {
       // console.log("STATE CHANGE", event);
-      // Whenever state chagnes to Paused, then save teh current position
+      // Whenever state chagnes to Paused, then save the current position
       // on PlaybackStore AND TrackStore
       usePlaybackStore.setState({ playerState: event.state });
       if (event.state === State.Stopped) {

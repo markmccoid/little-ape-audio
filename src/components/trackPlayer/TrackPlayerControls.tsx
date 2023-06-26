@@ -29,7 +29,12 @@ type Props = {
 };
 const CONTROLSIZE = 35;
 const TrackPlayerControls = ({ style }: Props) => {
-  const jumpSeconds = useSettingStore((state) => state.jumpForwardSeconds);
+  const jumpSecondsForward = useSettingStore(
+    (state) => state.jumpForwardSeconds
+  );
+  const jumpSecondsBackward = useSettingStore(
+    (state) => state.jumpBackwardSeconds
+  );
   const playbackActions = usePlaybackStore((state) => state.actions);
   // const [playerState, setPlayerState] = useState(null);
   const playerState = usePlaybackStore((state) => state.playerState);
@@ -69,13 +74,13 @@ const TrackPlayerControls = ({ style }: Props) => {
           <BackIcon size={CONTROLSIZE} />
         </TouchableOpacity>
         {/* SEEK BACK */}
-        <TouchableOpacity onPress={() => actions.jumpBack(jumpSeconds)}>
+        <TouchableOpacity onPress={() => actions.jumpBack(jumpSecondsBackward)}>
           <RewindIcon
             size={CONTROLSIZE}
             // style={{ transform: [{ rotateZ: "45deg" }, { scale: 1.2 }] }}
           />
           <Text style={{ position: "absolute", bottom: -10, left: 12 }}>
-            {jumpSeconds}
+            {jumpSecondsBackward}
           </Text>
         </TouchableOpacity>
         {/* PLAY/PAUSE */}
@@ -92,13 +97,15 @@ const TrackPlayerControls = ({ style }: Props) => {
           </View>
         </TouchableOpacity>
         {/* SEEK FORWARD */}
-        <TouchableOpacity onPress={() => actions.jumpForward(jumpSeconds)}>
+        <TouchableOpacity
+          onPress={() => actions.jumpForward(jumpSecondsForward)}
+        >
           <ForwardIcon
             size={CONTROLSIZE}
             // style={{ transform: [{ rotateZ: "45deg" }, { scale: 1.2 }] }}
           />
           <Text style={{ position: "absolute", bottom: -10, right: 12 }}>
-            {jumpSeconds}
+            {jumpSecondsForward}
           </Text>
         </TouchableOpacity>
         {/* NEXT TRACK */}

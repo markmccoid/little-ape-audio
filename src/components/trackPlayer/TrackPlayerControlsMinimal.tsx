@@ -29,7 +29,12 @@ type Props = {
 };
 const CONTROLSIZE = 25;
 const TrackPlayerControls = ({ style }: Props) => {
-  const jumpSeconds = useSettingStore((state) => state.jumpForwardSeconds);
+  const jumpSecondsForward = useSettingStore(
+    (state) => state.jumpForwardSeconds
+  );
+  const jumpSecondsBackward = useSettingStore(
+    (state) => state.jumpBackwardSeconds
+  );
   const playbackActions = usePlaybackStore((state) => state.actions);
   // const [playerState, setPlayerState] = useState(null);
   const playerState = usePlaybackStore((state) => state.playerState);
@@ -55,7 +60,9 @@ const TrackPlayerControls = ({ style }: Props) => {
         style={style}
       >
         {/* SEEK BACKWARD */}
-        <TouchableOpacity onPress={() => actions.jumpForward(jumpSeconds)}>
+        <TouchableOpacity
+          onPress={() => actions.jumpForward(jumpSecondsBackward)}
+        >
           <RewindIcon
             size={CONTROLSIZE}
             // style={{ transform: [{ rotateZ: "45deg" }, { scale: 1.2 }] }}
@@ -64,7 +71,7 @@ const TrackPlayerControls = ({ style }: Props) => {
             style={{ position: "absolute", bottom: -10, right: 6 }}
             className="text-xs"
           >
-            {jumpSeconds}
+            {jumpSecondsBackward}
           </Text>
         </TouchableOpacity>
         {/* PLAY/PAUSE */}
@@ -81,7 +88,9 @@ const TrackPlayerControls = ({ style }: Props) => {
           </View>
         </TouchableOpacity>
         {/* SEEK FORWARD */}
-        <TouchableOpacity onPress={() => actions.jumpForward(jumpSeconds)}>
+        <TouchableOpacity
+          onPress={() => actions.jumpForward(jumpSecondsForward)}
+        >
           <ForwardIcon
             size={CONTROLSIZE}
             // style={{ transform: [{ rotateZ: "45deg" }, { scale: 1.2 }] }}
@@ -90,7 +99,7 @@ const TrackPlayerControls = ({ style }: Props) => {
             style={{ position: "absolute", bottom: -10, right: 6 }}
             className="text-xs"
           >
-            {jumpSeconds}
+            {jumpSecondsForward}
           </Text>
         </TouchableOpacity>
       </View>

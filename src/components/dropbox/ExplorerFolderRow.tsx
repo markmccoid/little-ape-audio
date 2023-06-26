@@ -19,7 +19,25 @@ type Props = {
 };
 const ExplorerFolderRow = ({ metadata, index }: Props) => {
   const [showDescription, setShowDescription] = useState(false);
+  // const [imgDims, setImgDims] = useState({ width: 0, height: 0 });
   if (!metadata) return null;
+
+  const imgDims = metadata.imageURL?.uri
+    ? { width: 100, height: 150 }
+    : { width: 100, height: 100 };
+  // React.useEffect(() => {
+  //   const getDims = async () => {
+  //     Image.getSize(
+  //       metadata.imageURL?.uri,
+  //       (width, height) => {
+  //         const imgConversion = height / width;
+  //         setImgDims({ width: 100, height: 100 * imgConversion });
+  //       },
+  //       () => setImgDims({ width: 100, height: 100 })
+  //     );
+  //   };
+  //   getDims();
+  // }, []);
   return (
     <View
       className="flex-1 flex-col "
@@ -32,8 +50,8 @@ const ExplorerFolderRow = ({ metadata, index }: Props) => {
         <Image
           source={metadata.imageURL}
           style={{
-            width: 100,
-            height: 100,
+            width: imgDims.width,
+            height: imgDims.height,
             resizeMode: "stretch",
             borderWidth: StyleSheet.hairlineWidth,
             borderColor: colors.amber900,
@@ -65,7 +83,7 @@ const ExplorerFolderRow = ({ metadata, index }: Props) => {
               ellipsizeMode="tail"
               className="flex-1 text-sm font-medium text-center pr-2"
             >
-              by {metadata.author}
+              {`${metadata?.author ? `by ${metadata.author}` : ""}`}
             </Text>
           </View>
 
@@ -75,7 +93,7 @@ const ExplorerFolderRow = ({ metadata, index }: Props) => {
               <Text className="text-center">{metadata.bookLength}</Text>
             )}
             {/* **Pub Year** */}
-            <Text className="text-center">{metadata.publishedYear}</Text>
+            <Text className="text-center">{metadata?.publishedYear}</Text>
           </View>
           {/* **Show DESCRIPTION Button** */}
           {metadata.description && (
