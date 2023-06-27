@@ -6,7 +6,8 @@ import { FileEntry } from "../utils/dropboxUtils";
 //~ ================================
 export type AudioTrack = {
   id: string;
-  // Full path to the file
+  // File URI is ONLY the clean filename.  We use it in conjunction with
+  // FileSystem.documentDirectory to build actual full fileURI
   fileURI: string;
   filename: string;
   directory: string;

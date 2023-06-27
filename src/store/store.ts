@@ -22,6 +22,7 @@ import { deleteFromFileSystem } from "./data/fileSystemAccess";
 import { useDropboxStore } from "./store-dropbox";
 import { useSettingStore } from "./store-settings";
 import { defaultImages } from "./storeUtils";
+import * as FileSystem from "expo-file-system";
 
 function getRandomNumber() {
   const randomNumber = Math.floor(Math.random() * 13) + 1; // Generate random number between 1 and 13
@@ -57,7 +58,9 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         // Delete from store
         newTracks = newTracks.filter((el) => el.id !== id);
         // return a promise
-        return await deleteFromFileSystem(trackToDelete?.fileURI);
+        return await deleteFromFileSystem(
+          `${FileSystem.documentDirectory}${trackToDelete?.fileURI}`
+        );
       });
       await Promise.all(deletePromises);
       await saveToAsyncStorage("tracks", newTracks);
@@ -513,12 +516,14 @@ export const useGetQueue = () => {
 const buildTrackPlayerQueue = (trackIds: string[]): ApeTrack[] => {
   const trackActions = useTracksStore.getState().actions;
   let queue = [];
+
   for (const trackId of trackIds) {
     const trackInfo = trackActions.getTrack(trackId);
+
     const trackPlayerTrack = {
       id: trackInfo.id,
       filename: trackInfo.filename,
-      url: trackInfo.fileURI,
+      url: `${FileSystem.documentDirectory}${trackInfo.fileURI}`,
       title: trackInfo.metadata.title,
       artist: trackInfo.metadata.artist,
       album: trackInfo.metadata.album,

@@ -1,6 +1,7 @@
-import { SetState, StateCreator, StoreApi } from "zustand";
+// import { SetState, StateCreator, StoreApi } from "zustand";
 import { getAudioFileTags } from "../utils/audioUtils";
 import { saveToAsyncStorage } from "./data/asyncStorage";
+import * as FileSystem from "expo-file-system";
 import { AudioState } from "./types";
 
 type AddTrack = AudioState["actions"]["addNewTrack"];
@@ -25,7 +26,9 @@ export const addTrack =
     directory = ""
   ) => {
     // Get metadata for passed audio file
-    const tags = await getAudioFileTags(fileURI);
+    const tags = await getAudioFileTags(
+      `${FileSystem.documentDirectory}${fileURI}`
+    );
 
     const id = `${directory}${filename}`;
     const newAudioFile = {

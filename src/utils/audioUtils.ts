@@ -9,13 +9,13 @@ import { AudioMetadata } from "../store/types";
 //--=================================
 //-- getAudioFileTags
 //--=================================
-export const getAudioFileTags = async (fileURI: string) => {
-  const durationSeconds = await getAudioFileDuration(fileURI);
-  // fileURI is the full path to the audio file
+export const getAudioFileTags = async (fullFileURI: string) => {
+  const durationSeconds = await getAudioFileDuration(fullFileURI);
+  // fullFileURI is the full path to the audio file
   // It is expected to be in the apps storage, with the "file:///" in front
   // Strip the "file:///"
 
-  const workingURI = fileURI.slice(8);
+  const workingURI = fullFileURI.slice(8);
   let metadata: AudioMetadata | {} = {
     durationSeconds,
   };

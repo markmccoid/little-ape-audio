@@ -59,7 +59,7 @@ const ExplorerFile = ({ file, playlistId }: Props) => {
       setProgress
     );
     stopDownloadRef.current = pauseDownload;
-    const { fileURI } = await startDownload();
+    const { fileURI, cleanFileName } = await startDownload();
 
     // RESET Progress and other clean up
     setProgress({ downloadProgress: 0, bytesExpected: 0, bytesWritten: 0 });
@@ -73,7 +73,12 @@ const ExplorerFile = ({ file, playlistId }: Props) => {
     }
     setIsDownloaded(true);
     // Add new Track to store
-    trackActions.addNewTrack(fileURI, file.name, file.path_lower, playlistId);
+    trackActions.addNewTrack(
+      cleanFileName,
+      file.name,
+      file.path_lower,
+      playlistId
+    );
   };
 
   return (
