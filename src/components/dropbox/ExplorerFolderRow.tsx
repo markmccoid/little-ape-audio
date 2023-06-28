@@ -15,12 +15,18 @@ import { MotiText, MotiView } from "moti";
 
 type Props = {
   metadata: CleanBookMetadata;
+  showMetadata?: boolean;
   index: number;
 };
-const ExplorerFolderRow = ({ metadata, index }: Props) => {
+const ExplorerFolderRow = ({
+  metadata,
+  showMetadata = false,
+  index,
+}: Props) => {
   const [showDescription, setShowDescription] = useState(false);
   // const [imgDims, setImgDims] = useState({ width: 0, height: 0 });
-  if (!metadata) return null;
+  // console.log("FOLDER ROW", showMetadata, !metadata);
+  if (!metadata || !showMetadata) return null;
 
   const imgDims = metadata.imageURL?.uri
     ? { width: 100, height: 150 }

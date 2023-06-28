@@ -28,6 +28,14 @@ const SettingsLayout = () => {
           headerTintColor: colors.amber900,
         }}
       />
+      <Stack.Screen
+        name="managetracks"
+        options={{
+          title: "Manage Tracks",
+          headerStyle: { backgroundColor: colors.amber200 },
+          headerTintColor: colors.amber900,
+        }}
+      />
     </Stack>
   );
 };

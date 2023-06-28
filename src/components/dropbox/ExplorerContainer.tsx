@@ -59,7 +59,6 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
   const [filesFolderObj, setFilesFolderObj] = React.useState<DropboxDir>();
   const [flatlistData, setFlatlistData] = React.useState([]);
   const [downloadAllId, setDownloadAllId] = React.useState<string>();
-  const [downloadMetadata, setDownloadMetadata] = React.useState(false);
 
   const [showMetadata, setShowMetadata] = React.useState<
     "off" | "on" | "loading"
@@ -75,6 +74,7 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
   const renderItem = useCallback(
     ({ item, index }) => {
       if (item[".tag"] === "folder") {
+        // console.log("RENDER", allFoldersMetadata?.[item.path_lower]?.title);
         return (
           <ExplorerFolder
             key={item.id}
@@ -230,6 +230,7 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
         keyExtractor={(item) => item.id}
         horizontal={false}
         maxToRenderPerBatch={10}
+        windowSize={10}
       />
     </MotiView>
   );

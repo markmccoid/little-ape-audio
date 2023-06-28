@@ -112,12 +112,11 @@ export const useFolderMeta = (folderId) => {
 export const downloadFolderMetadata = async (folders: FolderEntry[]) => {
   // If we already downloaded metadata do not do it again!
   let foldersToDownload = [];
-
+  const foldersMetadata = useDropboxStore.getState().folderMetadata;
   for (const folder of folders) {
     //! Check if we have metadata in zustand store
-    const folderMetadata = useDropboxStore
-      .getState()
-      .actions.getFolderMetadata(folder.path_lower);
+    const folderMetadata = foldersMetadata?.[folder.path_lower];
+    // const folderMetadata = useDropboxStore.getState().actions.getFolderMetadata(folder.path_lower);
     if (!folderMetadata) {
       foldersToDownload.push(folder);
     }

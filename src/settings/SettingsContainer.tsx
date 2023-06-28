@@ -72,6 +72,13 @@ const SettingsContainer = () => {
           </Pressable>
           <Text>{backwardSecs}</Text>
         </View>
+        <View className="px-2 py-3" style={[styles.borderBottom]}>
+          <Link href="./settings/managetracks" asChild>
+            <Pressable>
+              <Text className="text-sm">Manage Tracks</Text>
+            </Pressable>
+          </Link>
+        </View>
       </View>
     </ScrollView>
   );

@@ -17,6 +17,7 @@ import {
 import TrackPlayer, { Capability } from "react-native-track-player";
 import { onInitialize } from "../src/store/store";
 import { useSettingStore } from "../src/store/store-settings";
+import { deactivateKeepAwake } from "expo-keep-awake";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -61,6 +62,9 @@ export default function RootLayout() {
         ],
       });
       // console.log("TrackPlayer SETUP and onInitialize");
+      // This allows the phone to go into sleep mode.  RNTP seems
+      // to keep the phone awake when open.
+      deactivateKeepAwake();
     };
     // Run your initialization code here
     // It can be async

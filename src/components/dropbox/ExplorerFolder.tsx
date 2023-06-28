@@ -105,6 +105,7 @@ const ExplorerFolder = ({
         borderBottomColor: colors.amber700,
         backgroundColor: index % 2 === 0 ? colors.amber100 : colors.amber50,
         flex: 1,
+        paddingBottom: 5,
       }}
     >
       <TouchableOpacity
@@ -155,13 +156,23 @@ const ExplorerFolder = ({
           </TouchableOpacity>
         </MotiView>
       </TouchableOpacity>
-      {folderMetaState !== "off" || showFolderMetadata !== "off" ? (
+      <View className="mb-0">
+        <ExplorerFolderRow
+          showMetadata={
+            folderMetaState !== "off" || showFolderMetadata !== "off"
+          }
+          metadata={metadataInfo}
+          index={index}
+          key="data"
+        />
+      </View>
+      {/* {folderMetaState !== "off" || showFolderMetadata !== "off" ? (
         <View className="mb-2">
-          <ExplorerFolderRow metadata={metadataInfo} index={index} />
+          <ExplorerFolderRow metadata={metadataInfo} index={index} key="data" />
         </View>
       ) : (
-        <ExplorerFolderRow metadata={undefined} index={index} />
-      )}
+        <ExplorerFolderRow metadata={undefined} index={index} key="empty" />
+      )} */}
     </View>
   );
 };

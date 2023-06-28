@@ -15,7 +15,7 @@ export const readFileSystemDir = async (dirName = "") => {
       console.log("Error reading file System Directory", e);
     }
   }
-  // console.log("FILES", filesInSystem, FileSystem.documentDirectory);
+
   return filesInSystem;
 };
 //--============================================================
