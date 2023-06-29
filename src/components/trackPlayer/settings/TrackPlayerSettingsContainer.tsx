@@ -13,10 +13,6 @@ import { useEffect, useMemo } from "react";
 const TrackPlayerSettingsContainer = () => {
   const trackActions = useTrackActions();
   const currPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
-  useEffect(() => {
-    const bookmarks = trackActions.getBookmarksForPlaylist(currPlaylistId);
-    console.log("Bookmarks", bookmarks);
-  });
 
   return (
     <View className="flex flex-col m-1 items-center ">

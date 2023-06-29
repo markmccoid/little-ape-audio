@@ -49,7 +49,7 @@ const TrackPlayerControls = ({ style }: Props) => {
   // Then if bookmark added, it will update in handleAddBookmark
   useEffect(() => {
     const bookmarks = playbackActions.getBookmarks();
-    setBookmarkLength(bookmarks.length);
+    setBookmarkLength(bookmarks?.length);
   }, []);
 
   //~ --- ----
@@ -74,7 +74,7 @@ const TrackPlayerControls = ({ style }: Props) => {
           text: "OK",
           onPress: (bookmarkName) => {
             playbackActions.addBookmark(bookmarkName, currTrackPos);
-            setBookmarkLength((prev) => prev + 1);
+            setBookmarkLength((prev) => prev || 0 + 1);
           },
         },
         { text: "Cancel", onPress: () => {} },
@@ -171,9 +171,7 @@ const TrackPlayerControls = ({ style }: Props) => {
               className="z-30 flex-row justify-center items-center absolute 
           w-[18] h-[18] rounded-lg bg-green-600 border-green-800 border top-[-5] right-[-6]"
             >
-              <Text className=" z-20 text-white text-xs ">
-                {bookmarkLength}
-              </Text>
+              <Text className="z-20 text-white text-xs ">{bookmarkLength}</Text>
             </View>
           )}
           <BookmarkIcon size={CONTROLSIZE} color={CONTROLCOLOR} />

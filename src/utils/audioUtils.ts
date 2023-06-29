@@ -77,7 +77,7 @@ export const jsMediaAsync = async (path: string) => {
   return new Promise((resolve, reject) => {
     new jsmediatags.Reader(path).read({
       onSuccess: (tag) => {
-        console.log("Success!");
+        // console.log("Success!");
         resolve(tag);
       },
       onError: (error) => {
