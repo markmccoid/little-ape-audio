@@ -48,6 +48,7 @@ export default function RootLayout() {
       await TrackPlayer.setupPlayer();
       await TrackPlayer.updateOptions({
         alwaysPauseOnInterruption: true,
+        progressUpdateEventInterval: 1,
         forwardJumpInterval: jumpForwardSeconds,
         backwardJumpInterval: jumpBackwardSeconds,
         capabilities: [

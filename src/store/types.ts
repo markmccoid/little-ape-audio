@@ -42,10 +42,17 @@ export type Playlist = {
   totalDurationSeconds: number;
   totalListenedToSeconds: number;
   trackIds?: string[];
+  bookmarks?: Bookmark[];
   currentPosition?: { trackIndex: number; position: number };
   currentRate: number;
 };
 
+export type Bookmark = {
+  id: string;
+  name: string;
+  trackId: string;
+  positionSeconds: number;
+};
 type PlaylistUpdateObj = {
   name?: string;
   author?: string;
@@ -108,6 +115,13 @@ export type AudioState = {
       playlistId: string,
       newTracksArray: string[]
     ) => Promise<void>;
+    addBookmarkToPlaylist: (
+      bookmarkName: string,
+      playlistId: string,
+      trackId: string,
+      positionSeconds: number
+    ) => Promise<void>;
+    getBookmarksForPlaylist: (playlistId) => Bookmark[];
     clearAll: () => Promise<void>;
   };
 };

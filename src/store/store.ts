@@ -1,4 +1,4 @@
-import { Playlist, AudioState, ApeTrack } from "./types";
+import { Playlist, AudioState, ApeTrack, Bookmark } from "./types";
 import { create } from "zustand";
 import uuid from "react-native-uuid";
 import {
@@ -32,6 +32,7 @@ function getRandomNumber() {
 let eventPlayerTrackChange = undefined;
 let eventEndOfQueue = undefined;
 let eventPlayerStateChange = undefined;
+let eventProgressUpdated = undefined;
 let saveIntervalId = undefined;
 //-- ==================================
 //-- TRACK STORE
@@ -221,6 +222,30 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       set({ playlists });
       await saveToAsyncStorage("playlists", playlists);
     },
+    addBookmarkToPlaylist: async (
+      bookmarkName,
+      playlistId,
+      trackId,
+      positionSeconds
+    ) => {
+      const playlists = { ...get().playlists };
+      const playlist = playlists[playlistId];
+      const bookmarks = playlist?.bookmarks || [];
+      const newBookmark = {
+        id: uuid.v4(),
+        name: bookmarkName,
+        trackId,
+        positionSeconds,
+      } as Bookmark;
+      const newBookmarks = [...bookmarks, newBookmark];
+      playlist.bookmarks = newBookmarks;
+      // set({ playlists });
+      saveToAsyncStorage("playlists", playlists);
+    },
+    getBookmarksForPlaylist: (playlistId) => {
+      const playlist = get().actions.getPlaylist(playlistId);
+      return playlist.bookmarks;
+    },
   },
 }));
 
@@ -263,6 +288,10 @@ type PlaybackState = {
       trackIdArray: string[]
     ) => Promise<void>;
     getPrevTrackDuration: () => number;
+    setCurrentTrackPosition: (positionSeconds: number) => void;
+    getCurrentTrackPosition: () => number;
+    addBookmark: (bookmarkName: string, currPos?: number) => void;
+    getBookmarks: () => Bookmark[];
   };
 };
 
@@ -413,6 +442,32 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       await TrackPlayer.setRate(getCurrentPlaylist().currentRate);
       mountTrackPlayerListeners();
       set({ playlistLoaded: true });
+    },
+    setCurrentTrackPosition: (positionsSeconds) => {
+      set({ currentTrackPosition: positionsSeconds });
+    },
+    getCurrentTrackPosition: () => {
+      return get().currentTrackPosition;
+    },
+    addBookmark: (bookmarkName = "Unknown", currPos) => {
+      const currPlaylistId = get().currentPlaylistId;
+      const currTrack = get().currentTrack;
+      const currPosition = currPos || get().currentTrackPosition;
+      useTracksStore
+        .getState()
+        .actions.addBookmarkToPlaylist(
+          bookmarkName,
+          currPlaylistId,
+          currTrack.id,
+          currPosition
+        );
+    },
+    getBookmarks: () => {
+      const currPlaylistId = get().currentPlaylistId;
+      const bookmarks = useTracksStore
+        .getState()
+        .actions.getBookmarksForPlaylist(currPlaylistId);
+      return bookmarks;
     },
     getPrevTrackDuration: () => {
       // used is calculating progress acroos all tracks in playlist
@@ -596,16 +651,6 @@ export const onInitialize = async () => {
     jumpForwardSeconds: settings?.jumpForwardSeconds || 15,
     jumpBackwardSeconds: settings?.jumpBackwardSeconds || 15,
   });
-  // console.log(
-  //   "store INIT # of Tracks",
-  //   useTracksStore.getState().tracks.length
-  // );
-  // console.log(
-  //   "store INIT Playlists",
-  //   Object.keys(useTracksStore.getState().playlists).map(
-  //     (key) => useTracksStore.getState().playlists[key].id
-  //   )
-  // );
 
   return;
 };
@@ -622,6 +667,9 @@ const unmountTrackListeners = () => {
   }
   if (eventPlayerStateChange) {
     eventPlayerStateChange.remove();
+  }
+  if (eventProgressUpdated) {
+    eventProgressUpdated.remove();
   }
 };
 
@@ -641,16 +689,21 @@ const mountTrackPlayerListeners = () => {
   if (eventEndOfQueue) {
     eventEndOfQueue.remove();
   }
-  eventEndOfQueue = TrackPlayer.addEventListener(
-    Event.PlaybackQueueEnded,
-    async (event) => {
-      const queue = await TrackPlayer.getQueue();
-      if (queue.length > 1) {
-        TrackPlayer.skip(0);
-        TrackPlayer.pause();
-      }
-    }
-  );
+  //! Having some issue this event being called.  Don't know if it is really needed
+  //! If it is, then will need to check "WHY" it is being called.  Seems to be called when going to "NEXT" or
+  //! if on last queue track and go to previous track, it is called.
+  //! I'm sure ways around it.  Check if current track is still last track, etc.
+  // eventEndOfQueue = TrackPlayer.addEventListener(
+  //   Event.PlaybackQueueEnded,
+  //   async (event) => {
+  //     console.log("END OF QUEUE", event);
+  //     const queue = await TrackPlayer.getQueue();
+  //     if (queue.length > 1) {
+  //       TrackPlayer.skip(0);
+  //       TrackPlayer.pause();
+  //     }
+  //   }
+  // );
 
   // -- TRACK CHANGED
   if (eventPlayerTrackChange) {
@@ -725,6 +778,23 @@ const mountTrackPlayerListeners = () => {
         clearAutoSaveInterval(saveIntervalId);
         saveIntervalId = setInterval(async () => saveCurrentTrackInfo(), 10000);
       }
+    }
+  );
+  //-- =================
+  // -- PROGRESS UPDATES
+  //-- =================
+  if (eventProgressUpdated) {
+    eventProgressUpdated.remove();
+  }
+  eventProgressUpdated = TrackPlayer.addEventListener(
+    Event.PlaybackProgressUpdated,
+    async (event) => {
+      // Progress Updates {"buffered": 127.512, "duration": 127.512, "position": 17.216, "track": 0}
+      // console.log("Progress Updates", event);
+
+      usePlaybackStore
+        .getState()
+        .actions.setCurrentTrackPosition(Math.floor(event.position));
     }
   );
 };

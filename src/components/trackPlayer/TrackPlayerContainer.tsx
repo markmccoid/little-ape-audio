@@ -6,22 +6,14 @@ import { AudioTrack } from "../../store/types";
 import TrackPlayerProgressBar from "./TrackPlayerProgressBar";
 import TrackList from "./TrackList";
 import PlaylistImage from "../common/PlaylistImage";
+import TrackPlayerImage from "./TrackPlayerImage";
 
 const { width, height } = Dimensions.get("window");
 
 const TrackPlayerContainer = () => {
   return (
     <View className="flex-1 flex-col">
-      <View>
-        <PlaylistImage
-          style={{
-            width: width / 1.25,
-            height: width / 1.25,
-            resizeMode: "stretch",
-            alignSelf: "center",
-          }}
-        />
-      </View>
+      <TrackPlayerImage />
       <TrackPlayerControls />
       <TrackPlayerProgressBar />
       <TrackList />

@@ -5,12 +5,14 @@ import {
   StyleSheet,
   ViewStyle,
   Dimensions,
+  Alert,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { usePlaybackStore } from "../../store/store";
 import {
   BackIcon,
   BackInTimeIcon,
+  BookmarkIcon,
   ForwardIcon,
   NextIcon,
   PauseIcon,
@@ -19,6 +21,9 @@ import {
 } from "../common/svg/Icons";
 import { Event, State } from "react-native-track-player";
 import { useSettingStore } from "../../store/store-settings";
+import { colors } from "../../constants/Colors";
+import { SpinnerForwardIcon } from "../common/svg/Icons";
+import { formatSeconds } from "../../utils/formatUtils";
 
 const { width, height } = Dimensions.get("window");
 // Subscribing to the following events inside MyComponent
@@ -28,6 +33,8 @@ type Props = {
   style?: ViewStyle;
 };
 const CONTROLSIZE = 35;
+const CONTROLCOLOR = colors.amber800;
+
 const TrackPlayerControls = ({ style }: Props) => {
   const jumpSecondsForward = useSettingStore(
     (state) => state.jumpForwardSeconds
@@ -36,13 +43,21 @@ const TrackPlayerControls = ({ style }: Props) => {
     (state) => state.jumpBackwardSeconds
   );
   const playbackActions = usePlaybackStore((state) => state.actions);
+
   // const [playerState, setPlayerState] = useState(null);
   const playerState = usePlaybackStore((state) => state.playerState);
   const isPlaylistLoaded = usePlaybackStore((state) => state.playlistLoaded);
   const actions = usePlaybackStore((state) => state.actions);
   const currentTrack = usePlaybackStore((state) => state.currentTrack);
-
+  const [bookmarkLength, setBookmarkLength] = useState<number>();
   const isPlaying = playerState === State.Playing;
+
+  // Set bookmark number once on load
+  // Then if bookmark added, it will update in handleAddBookmark
+  useEffect(() => {
+    const bookmarks = actions.getBookmarks();
+    setBookmarkLength(bookmarks.length);
+  }, []);
 
   //~ --- ----
   const play = async () => {
@@ -55,6 +70,25 @@ const TrackPlayerControls = ({ style }: Props) => {
   if (!isPlaylistLoaded) {
     return null;
   }
+
+  const handleAddBookmark = () => {
+    const currTrackPos = actions.getCurrentTrackPosition();
+    Alert.prompt(
+      "Enter Bookmark Name",
+      "Enter a name for the bookmark at " + formatSeconds(currTrackPos),
+      [
+        {
+          text: "OK",
+          onPress: (bookmarkName) => {
+            actions.addBookmark(bookmarkName, currTrackPos);
+            setBookmarkLength((prev) => prev + 1);
+          },
+        },
+        { text: "Cancel", onPress: () => {} },
+      ]
+    );
+  };
+
   return (
     <View className="flex flex-col justify-center items-center">
       <Text
@@ -70,16 +104,32 @@ const TrackPlayerControls = ({ style }: Props) => {
         style={style}
       >
         {/* PREV TRACK */}
-        <TouchableOpacity onPress={() => actions.prev()}>
-          <BackIcon size={CONTROLSIZE} />
-        </TouchableOpacity>
+        {/* <TouchableOpacity onPress={() => actions.prev()}>
+          <BackIcon size={CONTROLSIZE} color={CONTROLCOLOR} />
+        </TouchableOpacity> */}
+
         {/* SEEK BACK */}
         <TouchableOpacity onPress={() => actions.jumpBack(jumpSecondsBackward)}>
-          <RewindIcon
+          <SpinnerForwardIcon
             size={CONTROLSIZE}
-            // style={{ transform: [{ rotateZ: "45deg" }, { scale: 1.2 }] }}
+            color={CONTROLCOLOR}
+            style={{
+              transform: [
+                { rotateZ: "-45deg" },
+                { rotateY: "180deg" },
+                { scale: 1.1 },
+              ],
+            }}
           />
-          <Text style={{ position: "absolute", bottom: -10, left: 12 }}>
+          {/* <Text style={{ position: "absolute", bottom: -10, left: 12 }}> */}
+          <Text
+            style={{
+              position: "absolute",
+              bottom: 8,
+              left: 11,
+              color: colors.amber950,
+            }}
+          >
             {jumpSecondsBackward}
           </Text>
         </TouchableOpacity>
@@ -90,9 +140,9 @@ const TrackPlayerControls = ({ style }: Props) => {
         >
           <View>
             {!isPlaying ? (
-              <PlayIcon size={CONTROLSIZE} />
+              <PlayIcon size={CONTROLSIZE} color={CONTROLCOLOR} />
             ) : (
-              <PauseIcon size={CONTROLSIZE} />
+              <PauseIcon size={CONTROLSIZE} color={CONTROLCOLOR} />
             )}
           </View>
         </TouchableOpacity>
@@ -100,18 +150,44 @@ const TrackPlayerControls = ({ style }: Props) => {
         <TouchableOpacity
           onPress={() => actions.jumpForward(jumpSecondsForward)}
         >
-          <ForwardIcon
+          <SpinnerForwardIcon
             size={CONTROLSIZE}
-            // style={{ transform: [{ rotateZ: "45deg" }, { scale: 1.2 }] }}
+            color={CONTROLCOLOR}
+            style={{ transform: [{ rotateZ: "45deg" }, { scale: 1.1 }] }}
           />
-          <Text style={{ position: "absolute", bottom: -10, right: 12 }}>
+          {/* <Text style={{ position: "absolute", bottom: -10, right: 12 }}> */}
+          <Text
+            style={{
+              position: "absolute",
+              bottom: 8,
+              right: 11,
+              color: colors.amber950,
+            }}
+          >
             {jumpSecondsForward}
           </Text>
         </TouchableOpacity>
-        {/* NEXT TRACK */}
-        <TouchableOpacity onPress={() => actions.next()}>
-          <NextIcon size={CONTROLSIZE} />
+
+        {/* BOOKMARK */}
+
+        <TouchableOpacity onPress={handleAddBookmark}>
+          {bookmarkLength && (
+            <View
+              className="z-30 flex-row justify-center items-center absolute 
+          w-[18] h-[18] rounded-lg bg-green-600 border-green-800 border top-[-5] right-[-6]"
+            >
+              <Text className=" z-20 text-white text-xs ">
+                {bookmarkLength}
+              </Text>
+            </View>
+          )}
+          <BookmarkIcon size={CONTROLSIZE} color={CONTROLCOLOR} />
         </TouchableOpacity>
+
+        {/* NEXT TRACK */}
+        {/* <TouchableOpacity onPress={() => actions.next()}>
+          <NextIcon size={CONTROLSIZE} color={CONTROLCOLOR} />
+        </TouchableOpacity> */}
       </View>
     </View>
   );

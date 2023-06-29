@@ -2,9 +2,22 @@ import { View, Text, Image, TouchableOpacity } from "react-native";
 
 import TrackPlayerSettingsRate from "./TrackPlayerSettingsRate";
 import TrackPlayerSettingsTracks from "./TrackPlayerSettingsTracks";
+import {
+  usePlaybackStore,
+  useTrackActions,
+  useTracksStore,
+} from "../../../store/store";
+import { useEffect, useMemo } from "react";
 // const x = require("../../../../assets/littleapeaudio.png");
 
 const TrackPlayerSettingsContainer = () => {
+  const trackActions = useTrackActions();
+  const currPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
+  useEffect(() => {
+    const bookmarks = trackActions.getBookmarksForPlaylist(currPlaylistId);
+    console.log("Bookmarks", bookmarks);
+  });
+
   return (
     <View className="flex flex-col m-1 items-center ">
       <TrackPlayerSettingsRate />

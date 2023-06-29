@@ -16,9 +16,11 @@ import {
   PauseIcon,
   PlayIcon,
   RewindIcon,
+  SpinnerForwardIcon,
 } from "../common/svg/Icons";
 import { useTrackPlayerEvents, Event, State } from "react-native-track-player";
 import { useSettingStore } from "../../store/store-settings";
+import { colors } from "../../constants/Colors";
 
 const { width, height } = Dimensions.get("window");
 // Subscribing to the following events inside MyComponent
@@ -28,7 +30,9 @@ type Props = {
   style?: ViewStyle;
 };
 const CONTROLSIZE = 25;
-const TrackPlayerControls = ({ style }: Props) => {
+const CONTROLCOLOR = colors.amber800;
+
+const TrackPlayerControlsMinimal = ({ style }: Props) => {
   const jumpSecondsForward = useSettingStore(
     (state) => state.jumpForwardSeconds
   );
@@ -63,12 +67,24 @@ const TrackPlayerControls = ({ style }: Props) => {
         <TouchableOpacity
           onPress={() => actions.jumpForward(jumpSecondsBackward)}
         >
-          <RewindIcon
+          <SpinnerForwardIcon
             size={CONTROLSIZE}
-            // style={{ transform: [{ rotateZ: "45deg" }, { scale: 1.2 }] }}
+            color={CONTROLCOLOR}
+            style={{
+              transform: [
+                { rotateZ: "-45deg" },
+                { rotateY: "180deg" },
+                { scale: 1.1 },
+              ],
+            }}
           />
           <Text
-            style={{ position: "absolute", bottom: -10, right: 6 }}
+            style={{
+              position: "absolute",
+              bottom: 4,
+              right: 5,
+              color: colors.amber950,
+            }}
             className="text-xs"
           >
             {jumpSecondsBackward}
@@ -81,9 +97,9 @@ const TrackPlayerControls = ({ style }: Props) => {
         >
           <View>
             {!isPlaying ? (
-              <PlayIcon size={CONTROLSIZE} />
+              <PlayIcon size={CONTROLSIZE} color={CONTROLCOLOR} />
             ) : (
-              <PauseIcon size={CONTROLSIZE} />
+              <PauseIcon size={CONTROLSIZE} color={CONTROLCOLOR} />
             )}
           </View>
         </TouchableOpacity>
@@ -91,12 +107,18 @@ const TrackPlayerControls = ({ style }: Props) => {
         <TouchableOpacity
           onPress={() => actions.jumpForward(jumpSecondsForward)}
         >
-          <ForwardIcon
+          <SpinnerForwardIcon
             size={CONTROLSIZE}
-            // style={{ transform: [{ rotateZ: "45deg" }, { scale: 1.2 }] }}
+            color={CONTROLCOLOR}
+            style={{ transform: [{ rotateZ: "45deg" }, { scale: 1.1 }] }}
           />
           <Text
-            style={{ position: "absolute", bottom: -10, right: 6 }}
+            style={{
+              position: "absolute",
+              bottom: 4,
+              right: 7,
+              color: colors.amber950,
+            }}
             className="text-xs"
           >
             {jumpSecondsForward}
@@ -130,4 +152,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TrackPlayerControls;
+export default TrackPlayerControlsMinimal;
