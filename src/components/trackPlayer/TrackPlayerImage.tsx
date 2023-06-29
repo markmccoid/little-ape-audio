@@ -1,4 +1,4 @@
-import { View, Text, Dimensions, TouchableOpacity } from "react-native";
+import { View, Dimensions, TouchableOpacity } from "react-native";
 import React from "react";
 import PlaylistImage from "../common/PlaylistImage";
 import { BackIcon, NextIcon } from "../common/svg/Icons";
@@ -12,7 +12,7 @@ const TrackPlayerImage = () => {
   return (
     <View className="flex-row justify-between items-center mx-1">
       <TouchableOpacity onPress={() => actions.prev()}>
-      <BackIcon size={35} color={colors.amber800} />
+        <BackIcon size={35} color={colors.amber800} />
       </TouchableOpacity>
       <PlaylistImage
         style={{

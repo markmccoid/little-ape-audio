@@ -10,11 +10,7 @@ import {
 import React, { useEffect, useMemo, useState } from "react";
 import { usePlaybackStore } from "../../store/store";
 import {
-  BackIcon,
-  BackInTimeIcon,
   BookmarkIcon,
-  ForwardIcon,
-  NextIcon,
   PauseIcon,
   PlayIcon,
   RewindIcon,
@@ -26,8 +22,6 @@ import { SpinnerForwardIcon } from "../common/svg/Icons";
 import { formatSeconds } from "../../utils/formatUtils";
 
 const { width, height } = Dimensions.get("window");
-// Subscribing to the following events inside MyComponent
-const events = [Event.PlaybackState, Event.PlaybackError];
 
 type Props = {
   style?: ViewStyle;
@@ -47,7 +41,6 @@ const TrackPlayerControls = ({ style }: Props) => {
   // const [playerState, setPlayerState] = useState(null);
   const playerState = usePlaybackStore((state) => state.playerState);
   const isPlaylistLoaded = usePlaybackStore((state) => state.playlistLoaded);
-  const actions = usePlaybackStore((state) => state.actions);
   const currentTrack = usePlaybackStore((state) => state.currentTrack);
   const [bookmarkLength, setBookmarkLength] = useState<number>();
   const isPlaying = playerState === State.Playing;
@@ -55,7 +48,7 @@ const TrackPlayerControls = ({ style }: Props) => {
   // Set bookmark number once on load
   // Then if bookmark added, it will update in handleAddBookmark
   useEffect(() => {
-    const bookmarks = actions.getBookmarks();
+    const bookmarks = playbackActions.getBookmarks();
     setBookmarkLength(bookmarks.length);
   }, []);
 
@@ -72,7 +65,7 @@ const TrackPlayerControls = ({ style }: Props) => {
   }
 
   const handleAddBookmark = () => {
-    const currTrackPos = actions.getCurrentTrackPosition();
+    const currTrackPos = playbackActions.getCurrentTrackPosition();
     Alert.prompt(
       "Enter Bookmark Name",
       "Enter a name for the bookmark at " + formatSeconds(currTrackPos),
@@ -80,7 +73,7 @@ const TrackPlayerControls = ({ style }: Props) => {
         {
           text: "OK",
           onPress: (bookmarkName) => {
-            actions.addBookmark(bookmarkName, currTrackPos);
+            playbackActions.addBookmark(bookmarkName, currTrackPos);
             setBookmarkLength((prev) => prev + 1);
           },
         },
@@ -109,7 +102,9 @@ const TrackPlayerControls = ({ style }: Props) => {
         </TouchableOpacity> */}
 
         {/* SEEK BACK */}
-        <TouchableOpacity onPress={() => actions.jumpBack(jumpSecondsBackward)}>
+        <TouchableOpacity
+          onPress={() => playbackActions.jumpBack(jumpSecondsBackward)}
+        >
           <SpinnerForwardIcon
             size={CONTROLSIZE}
             color={CONTROLCOLOR}
@@ -148,7 +143,7 @@ const TrackPlayerControls = ({ style }: Props) => {
         </TouchableOpacity>
         {/* SEEK FORWARD */}
         <TouchableOpacity
-          onPress={() => actions.jumpForward(jumpSecondsForward)}
+          onPress={() => playbackActions.jumpForward(jumpSecondsForward)}
         >
           <SpinnerForwardIcon
             size={CONTROLSIZE}

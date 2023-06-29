@@ -686,9 +686,9 @@ const mountTrackPlayerListeners = () => {
   //   }
   // );
   // -- END OF QUEUE
-  if (eventEndOfQueue) {
-    eventEndOfQueue.remove();
-  }
+  // if (eventEndOfQueue) {
+  //   eventEndOfQueue.remove();
+  // }
   //! Having some issue this event being called.  Don't know if it is really needed
   //! If it is, then will need to check "WHY" it is being called.  Seems to be called when going to "NEXT" or
   //! if on last queue track and go to previous track, it is called.
