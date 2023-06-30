@@ -242,6 +242,15 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       // set({ playlists });
       saveToAsyncStorage("playlists", playlists);
     },
+    deleteBookmarkFromPlaylist: async (playlistId, bookmarkId) => {
+      const playlists = { ...get().playlists };
+      const playlist = playlists[playlistId];
+      const bookmarks = playlist?.bookmarks;
+
+      playlist.bookmarks = bookmarks.filter((el) => el.id !== bookmarkId);
+      set({ playlists });
+      saveToAsyncStorage("playlists", playlists);
+    },
     getBookmarksForPlaylist: (playlistId) => {
       const playlist = get().actions.getPlaylist(playlistId);
       return playlist.bookmarks;
@@ -291,6 +300,7 @@ type PlaybackState = {
     setCurrentTrackPosition: (positionSeconds: number) => void;
     getCurrentTrackPosition: () => number;
     addBookmark: (bookmarkName: string, currPos?: number) => void;
+    deleteBookmark: (bookmarkId: string) => void;
     getBookmarks: () => Bookmark[];
     applyBookmark: (bookmarkId: string) => Promise<void>;
   };
@@ -462,6 +472,13 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
           currTrack.id,
           currPosition
         );
+    },
+    deleteBookmark: async (bookmarkId) => {
+      const currPlaylistId = get().currentPlaylistId;
+
+      await useTracksStore
+        .getState()
+        .actions.deleteBookmarkFromPlaylist(currPlaylistId, bookmarkId);
     },
     getBookmarks: () => {
       const currPlaylistId = get().currentPlaylistId;

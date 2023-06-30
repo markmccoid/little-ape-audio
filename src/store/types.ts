@@ -122,6 +122,10 @@ export type AudioState = {
       positionSeconds: number
     ) => Promise<void>;
     getBookmarksForPlaylist: (playlistId) => Bookmark[];
+    deleteBookmarkFromPlaylist: (
+      playlistId: string,
+      bookmarkId: string
+    ) => Promise<void>;
     clearAll: () => Promise<void>;
   };
 };

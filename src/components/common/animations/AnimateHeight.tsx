@@ -37,11 +37,15 @@ function AnimateHeight({
 
   const containerStyle = useAnimatedStyle(() => {
     return {
-      height: withTiming(hide ? 0 : measuredHeight.value, transition, () => {
-        if (onHeightDidAnimate) {
-          runOnJS(onHeightDidAnimate)(measuredHeight.value);
+      height: withTiming(
+        hide ? 0 : measuredHeight.value || 0,
+        transition,
+        () => {
+          if (onHeightDidAnimate) {
+            runOnJS(onHeightDidAnimate)(measuredHeight.value);
+          }
         }
-      }),
+      ),
     };
   }, [hide, measuredHeight]);
 

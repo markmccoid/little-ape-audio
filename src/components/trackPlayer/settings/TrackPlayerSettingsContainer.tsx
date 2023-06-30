@@ -13,30 +13,44 @@ import { AnimateHeight } from "../../common/animations/AnimateHeight";
 // const x = require("../../../../assets/littleapeaudio.png");
 
 const TrackPlayerSettingsContainer = () => {
-  const trackActions = useTrackActions();
-  const currPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
   const [showTracks, setShowTrack] = useState(false);
   const [showBookmarks, setShowBookmarks] = useState(false);
+  const [showItem, setShowItem] = useState<"bookmarks" | "tracks">("bookmarks");
   return (
     <View className="flex-1 flex-col m-1 items-center">
       <TrackPlayerSettingsRate />
-      <TouchableOpacity
-        onPress={() => setShowTrack((prev) => !prev)}
-        className="flex-row justify-start w-full"
+
+      {/* TRACKS and BOOKMARKS Buttons */}
+      <View className="flex-row justify-between w-full mt-3 mb-2 pr-4">
+        <TouchableOpacity onPress={() => setShowItem("bookmarks")}>
+          <Text
+            className={`text-lg ml-2 font-semibold ${
+              showItem === "bookmarks" ? "text-amber-600 font-bold" : ""
+            }`}
+          >
+            Bookmarks
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setShowItem("tracks")}>
+          <Text
+            className={`text-lg ml-2 font-bold ${
+              showItem === "tracks" ? "text-amber-600 font-bold" : ""
+            }`}
+          >
+            Tracks
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <AnimateHeight
+        key="tracks"
+        hide={showItem !== "tracks"}
+        style={{ width: "100%" }}
       >
-        <Text className="text-lg ml-2 font-bold">Tracks</Text>
-      </TouchableOpacity>
-      <AnimateHeight key="tracks" hide={!showTracks} style={{ width: "100%" }}>
         <TrackPlayerSettingsTracks />
       </AnimateHeight>
 
-      <TouchableOpacity
-        onPress={() => setShowBookmarks((prev) => !prev)}
-        className="flex-row justify-start w-full"
-      >
-        <Text className="text-lg ml-2 font-bold">Bookmarks</Text>
-      </TouchableOpacity>
-      <AnimateHeight hide={showBookmarks} style={{ width: "100%" }}>
+      <AnimateHeight hide={showItem !== "bookmarks"} style={{ width: "100%" }}>
         <TrackPlayerSettingsBookmarks />
       </AnimateHeight>
     </View>
