@@ -74,7 +74,7 @@ const TrackPlayerControls = ({ style }: Props) => {
           text: "OK",
           onPress: (bookmarkName) => {
             playbackActions.addBookmark(bookmarkName, currTrackPos);
-            setBookmarkLength((prev) => prev || 0 + 1);
+            setBookmarkLength((prev) => (prev ? prev + 1 : 1));
           },
         },
         { text: "Cancel", onPress: () => {} },
@@ -83,7 +83,7 @@ const TrackPlayerControls = ({ style }: Props) => {
   };
 
   return (
-    <View className="flex flex-col justify-center items-center">
+    <View className="flex-col justify-center items-center ">
       <Text
         className="text-sm text-center py-2"
         style={{ width: width / 1.25 }}
@@ -92,80 +92,75 @@ const TrackPlayerControls = ({ style }: Props) => {
       >
         {currentTrack?.title}
       </Text>
-      <View
-        className="flex-row gap-10 items-center justify-center"
-        style={style}
-      >
-        {/* PREV TRACK */}
-        {/* <TouchableOpacity onPress={() => actions.prev()}>
-          <BackIcon size={CONTROLSIZE} color={CONTROLCOLOR} />
-        </TouchableOpacity> */}
-
-        {/* SEEK BACK */}
-        <TouchableOpacity
-          onPress={() => playbackActions.jumpBack(jumpSecondsBackward)}
-        >
-          <SpinnerForwardIcon
-            size={CONTROLSIZE}
-            color={CONTROLCOLOR}
-            style={{
-              transform: [
-                { rotateZ: "-45deg" },
-                { rotateY: "180deg" },
-                { scale: 1.1 },
-              ],
-            }}
-          />
-          {/* <Text style={{ position: "absolute", bottom: -10, left: 12 }}> */}
-          <Text
-            style={{
-              position: "absolute",
-              bottom: 8,
-              left: 11,
-              color: colors.amber950,
-            }}
+      <View className="flex-row w-full justify-between items-center">
+        <View className="flex-row  items-center justify-center flex-grow ml-[55]">
+          {/* SEEK BACK */}
+          <TouchableOpacity
+            onPress={() => playbackActions.jumpBack(jumpSecondsBackward)}
+            className="mx-3"
           >
-            {jumpSecondsBackward}
-          </Text>
-        </TouchableOpacity>
-        {/* PLAY/PAUSE */}
-        <TouchableOpacity
-          onPress={isPlaying ? () => pause() : () => play()}
-          style={styles.actionButton}
-        >
-          <View>
-            {!isPlaying ? (
-              <PlayIcon size={CONTROLSIZE} color={CONTROLCOLOR} />
-            ) : (
-              <PauseIcon size={CONTROLSIZE} color={CONTROLCOLOR} />
-            )}
-          </View>
-        </TouchableOpacity>
-        {/* SEEK FORWARD */}
-        <TouchableOpacity
-          onPress={() => playbackActions.jumpForward(jumpSecondsForward)}
-        >
-          <SpinnerForwardIcon
-            size={CONTROLSIZE}
-            color={CONTROLCOLOR}
-            style={{ transform: [{ rotateZ: "45deg" }, { scale: 1.1 }] }}
-          />
-          {/* <Text style={{ position: "absolute", bottom: -10, right: 12 }}> */}
-          <Text
-            style={{
-              position: "absolute",
-              bottom: 8,
-              right: 11,
-              color: colors.amber950,
-            }}
+            <SpinnerForwardIcon
+              size={CONTROLSIZE}
+              color={CONTROLCOLOR}
+              style={{
+                transform: [
+                  { rotateZ: "-45deg" },
+                  { rotateY: "180deg" },
+                  { scale: 1.1 },
+                ],
+              }}
+            />
+            {/* <Text style={{ position: "absolute", bottom: -10, left: 12 }}> */}
+            <Text
+              style={{
+                position: "absolute",
+                bottom: 8,
+                left: 11,
+                color: colors.amber950,
+              }}
+            >
+              {jumpSecondsBackward}
+            </Text>
+          </TouchableOpacity>
+          {/* PLAY/PAUSE */}
+          <TouchableOpacity
+            onPress={isPlaying ? () => pause() : () => play()}
+            style={styles.actionButton}
+            className="mx-3"
           >
-            {jumpSecondsForward}
-          </Text>
-        </TouchableOpacity>
-
+            <View>
+              {!isPlaying ? (
+                <PlayIcon size={CONTROLSIZE} color={CONTROLCOLOR} />
+              ) : (
+                <PauseIcon size={CONTROLSIZE} color={CONTROLCOLOR} />
+              )}
+            </View>
+          </TouchableOpacity>
+          {/* SEEK FORWARD */}
+          <TouchableOpacity
+            onPress={() => playbackActions.jumpForward(jumpSecondsForward)}
+            className="mx-3"
+          >
+            <SpinnerForwardIcon
+              size={CONTROLSIZE}
+              color={CONTROLCOLOR}
+              style={{ transform: [{ rotateZ: "45deg" }, { scale: 1.1 }] }}
+            />
+            {/* <Text style={{ position: "absolute", bottom: -10, right: 12 }}> */}
+            <Text
+              style={{
+                position: "absolute",
+                bottom: 8,
+                right: 11,
+                color: colors.amber950,
+              }}
+            >
+              {jumpSecondsForward}
+            </Text>
+          </TouchableOpacity>
+        </View>
         {/* BOOKMARK */}
-
-        <TouchableOpacity onPress={handleAddBookmark}>
+        <TouchableOpacity onPress={handleAddBookmark} className="mr-10 ">
           {bookmarkLength && (
             <View
               className="z-30 flex-row justify-center items-center absolute 
@@ -176,11 +171,6 @@ const TrackPlayerControls = ({ style }: Props) => {
           )}
           <BookmarkIcon size={CONTROLSIZE} color={CONTROLCOLOR} />
         </TouchableOpacity>
-
-        {/* NEXT TRACK */}
-        {/* <TouchableOpacity onPress={() => actions.next()}>
-          <NextIcon size={CONTROLSIZE} color={CONTROLCOLOR} />
-        </TouchableOpacity> */}
       </View>
     </View>
   );

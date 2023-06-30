@@ -29,7 +29,7 @@ const SettingsLayout = () => {
         }}
       />
       <Stack.Screen
-        name="managetracks"
+        name="managetracksroute"
         options={{
           title: "Manage Tracks",
           headerStyle: { backgroundColor: colors.amber200 },

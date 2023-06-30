@@ -10,6 +10,7 @@ import React from "react";
 import { colors } from "../constants/Colors";
 import { Link } from "expo-router";
 import { useSettingStore } from "../store/store-settings";
+import { MotiView } from "moti";
 
 const SettingsContainer = () => {
   const actions = useSettingStore((state) => state.actions);
@@ -43,9 +44,15 @@ const SettingsContainer = () => {
   };
   return (
     <ScrollView className="mx-2">
-      <View
+      <MotiView
         className="border rounded-lg bg-white border-gray-200"
         style={styles.shadow}
+        from={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{
+          type: "timing",
+          duration: 500,
+        }}
       >
         <View className="px-2 py-3" style={[styles.borderBottom]}>
           <Link href="./settings/dropboxauth" asChild>
@@ -73,13 +80,13 @@ const SettingsContainer = () => {
           <Text>{backwardSecs}</Text>
         </View>
         <View className="px-2 py-3" style={[styles.borderBottom]}>
-          <Link href="./settings/managetracks" asChild>
+          <Link href="./settings/managetracksroute" asChild>
             <Pressable>
               <Text className="text-sm">Manage Tracks</Text>
             </Pressable>
           </Link>
         </View>
-      </View>
+      </MotiView>
     </ScrollView>
   );
 };

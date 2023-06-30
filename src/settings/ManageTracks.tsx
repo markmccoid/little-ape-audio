@@ -13,6 +13,7 @@ import {
   readFileSystemDir,
 } from "../../src/store/data/fileSystemAccess";
 import { AudioTrack } from "../../src/store/types";
+import { colors } from "../../src/constants/Colors";
 
 const getOutliers = (tracks: AudioTrack[], files) => {
   // { filename: "", orphaned: boolean}
@@ -51,7 +52,10 @@ const ManageTracks = () => {
       <ScrollView
         // ref={scrollRef}
         className="mx-2  rounded-lg bg-white"
-        style={{ borderWidth: StyleSheet.hairlineWidth }}
+        style={{
+          borderWidth: StyleSheet.hairlineWidth,
+          borderColor: colors.amber900,
+        }}
       >
         {files &&
           files?.map(
@@ -61,8 +65,12 @@ const ManageTracks = () => {
                 className={`flex-row justify-between  px-1 py-2 ${
                   file.orphaned ? "bg-red-500" : "bg-white"
                 }`}
+                style={{
+                  borderBottomColor: colors.amber800,
+                  borderBottomWidth: StyleSheet.hairlineWidth,
+                }}
               >
-                <Text className={` ${file.orphaned ? "text-white" : ""}`}>
+                <Text className={`flex-1 ${file.orphaned ? "text-white" : ""}`}>
                   {file.filename}
                 </Text>
                 <TouchableOpacity

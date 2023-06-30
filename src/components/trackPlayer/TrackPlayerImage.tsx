@@ -9,9 +9,26 @@ const { width, height } = Dimensions.get("window");
 
 const TrackPlayerImage = () => {
   const actions = usePlaybackStore((state) => state.actions);
+  const queue = usePlaybackStore((state) => state.trackPlayerQueue);
+  const currTrackIndex = usePlaybackStore((state) => state.currentTrackIndex);
+
+  /**
+   * if qLength === 1 don't show or disable BOTH
+   * if qLenght !== 1 && currTrackIndex === 0 disable PREV
+   */
+  const displayPrev = !(
+    queue.length === 1 ||
+    (queue.length !== 1 && currTrackIndex === 0)
+  );
+  const displayNext = queue.length !== 1;
+
   return (
     <View className="flex-row justify-between items-center mx-1">
-      <TouchableOpacity onPress={() => actions.prev()}>
+      <TouchableOpacity
+        onPress={() => actions.prev()}
+        disabled={!displayPrev}
+        className={`${displayPrev ? "opacity-100" : "opacity-40"}`}
+      >
         <BackIcon size={35} color={colors.amber800} />
       </TouchableOpacity>
       <PlaylistImage
@@ -22,7 +39,11 @@ const TrackPlayerImage = () => {
           alignSelf: "center",
         }}
       />
-      <TouchableOpacity onPress={() => actions.next()}>
+      <TouchableOpacity
+        onPress={() => actions.next()}
+        disabled={!displayNext}
+        className={`${displayNext ? "opacity-100" : "opacity-40"}`}
+      >
         <NextIcon size={35} color={colors.amber800} />
       </TouchableOpacity>
     </View>

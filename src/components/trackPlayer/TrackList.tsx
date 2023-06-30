@@ -60,7 +60,9 @@ const TrackList = () => {
             <TouchableOpacity
               key={el.id}
               onPress={() => {
-                playbackActions.goToTrack(index);
+                if (!isCurrentTrack) {
+                  playbackActions.goToTrack(index);
+                }
               }}
               className=""
             >

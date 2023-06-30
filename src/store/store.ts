@@ -292,6 +292,7 @@ type PlaybackState = {
     getCurrentTrackPosition: () => number;
     addBookmark: (bookmarkName: string, currPos?: number) => void;
     getBookmarks: () => Bookmark[];
+    applyBookmark: (bookmarkId: string) => Promise<void>;
   };
 };
 
@@ -468,6 +469,16 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
         .getState()
         .actions.getBookmarksForPlaylist(currPlaylistId);
       return bookmarks;
+    },
+    applyBookmark: async (bookmarkId) => {
+      const bookmarks = get().actions.getBookmarks();
+      const { positionSeconds, trackId } = bookmarks.find(
+        (el) => el.id === bookmarkId
+      );
+      const trackQ = get().trackPlayerQueue;
+      const trackIndex = trackQ.findIndex((el) => el.id === trackId);
+      await TrackPlayer.skip(trackIndex);
+      await get().actions.seekTo(positionSeconds);
     },
     getPrevTrackDuration: () => {
       // used is calculating progress acroos all tracks in playlist
