@@ -1,4 +1,10 @@
-import { View, Text, Image, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  SafeAreaView,
+} from "react-native";
 
 import TrackPlayerSettingsRate from "./TrackPlayerSettingsRate";
 import TrackPlayerSettingsTracks from "./TrackPlayerSettingsTracks";
@@ -10,14 +16,16 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import TrackPlayerSettingsBookmarks from "./TrackPlayerSettingsBookmarks";
 import { AnimateHeight } from "../../common/animations/AnimateHeight";
+import { MotiView } from "moti";
 // const x = require("../../../../assets/littleapeaudio.png");
 
 const TrackPlayerSettingsContainer = () => {
   const [showTracks, setShowTrack] = useState(false);
   const [showBookmarks, setShowBookmarks] = useState(false);
   const [showItem, setShowItem] = useState<"bookmarks" | "tracks">("bookmarks");
+
   return (
-    <View className="flex-1 flex-col m-1 items-center">
+    <View className="flex-1 flex-col m-1 items-center justify-start">
       <TrackPlayerSettingsRate />
 
       {/* TRACKS and BOOKMARKS Buttons */}
@@ -42,17 +50,36 @@ const TrackPlayerSettingsContainer = () => {
         </TouchableOpacity>
       </View>
 
-      <AnimateHeight
-        key="tracks"
-        hide={showItem !== "tracks"}
-        style={{ width: "100%" }}
-      >
-        <TrackPlayerSettingsTracks />
-      </AnimateHeight>
+      {showItem === "tracks" && (
+        <MotiView
+          key="a"
+          from={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{
+            type: "timing",
+            duration: 500,
+          }}
+          className="border border-black"
+          style={{ flex: 1, width: "100%" }}
+        >
+          <TrackPlayerSettingsTracks />
+        </MotiView>
+      )}
 
-      <AnimateHeight hide={showItem !== "bookmarks"} style={{ width: "100%" }}>
-        <TrackPlayerSettingsBookmarks />
-      </AnimateHeight>
+      {showItem === "bookmarks" && (
+        <MotiView
+          key="b"
+          from={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{
+            type: "timing",
+            duration: 500,
+          }}
+          className="flex-1 w-full"
+        >
+          <TrackPlayerSettingsBookmarks />
+        </MotiView>
+      )}
     </View>
   );
 };

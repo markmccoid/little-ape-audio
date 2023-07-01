@@ -32,8 +32,8 @@ const TrackPlayerSettingsTracks = () => {
       scrollStyles={{
         width: "100%",
         // height: "30%",
-        borderWidth: 1,
-        borderColor: "#aaa",
+        // borderWidth: 1,
+        // borderColor: "#aaa",
       }}
       updatePositions={async (positions) => {
         // console.log("POSITIONS", sortArray(positions, items, "id"));

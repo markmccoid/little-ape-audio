@@ -535,14 +535,21 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
     jumpForward: async (jumpForwardSeconds: number) => {
       const currPos = await TrackPlayer.getPosition();
       const currDuration = await TrackPlayer.getDuration();
+      const trackIndex = await TrackPlayer.getCurrentTrack();
+      const qLength = get().trackPlayerQueue.length;
       const newPos = currPos + jumpForwardSeconds;
       if (newPos > currDuration) {
-        // go to next track.  You could get crazy and calculate how much "seekTo" is in
+        // go to next track.   calculate how much "seekTo" is in
         // currtrack and how much in next track.
         // currPos = 25 currDuration = 30, seekTo = 10
         // We go to next track and start 5 seconds in next track
-        //!  Right now, just go to next track
         await get().actions.next();
+
+        if (trackIndex !== qLength - 1) {
+          await TrackPlayer.seekTo(
+            jumpForwardSeconds - (currDuration - currPos)
+          );
+        }
       } else {
         await TrackPlayer.seekTo(newPos);
       }
@@ -555,10 +562,13 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
         // currtrack and how much in prev track.
         // currPos = 25 currDuration = 30, seekTo = 10
         // We go to prev track and start 5 seconds in prev track
-        //!  Right now, just go to Prev track
+        //!  IMPLEMENTED Below
+        const trackIndex = await TrackPlayer.getCurrentTrack();
         await get().actions.prev();
-        const duration = await TrackPlayer.getDuration();
-        await TrackPlayer.seekTo(duration + newPos);
+        if (trackIndex !== 0) {
+          const duration = await TrackPlayer.getDuration();
+          await TrackPlayer.seekTo(duration + newPos);
+        }
       } else {
         await TrackPlayer.seekTo(newPos);
       }

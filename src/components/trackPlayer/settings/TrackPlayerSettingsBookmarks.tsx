@@ -33,7 +33,11 @@ const TrackPlayerSettingsBookmarks = () => {
     );
   }
   return (
-    <ScrollView className="w-full border border-amber-900 rounded-md bg-white">
+    <ScrollView
+      className="w-full border border-amber-900 rounded-md bg-white flex-grow"
+      contentContainerStyle={{ marginBottom: 300 }}
+      style={{ paddingBottom: 300 }}
+    >
       {bookmarks &&
         bookmarks.map((el) => {
           return (
