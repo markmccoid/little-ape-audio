@@ -5,6 +5,7 @@ import {
   DropboxDir,
   FolderEntry,
   downloadDropboxFile,
+  getDropboxFileLink,
   listDropboxFiles,
 } from "../utils/dropboxUtils";
 import {
@@ -12,7 +13,11 @@ import {
   FolderMetadata,
   cleanOneBook,
 } from "./../utils/audiobookMetadata";
-import { defaultImages } from "./storeUtils";
+import { defaultImages, getRandomNumber } from "./storeUtils";
+import {
+  downloadToFileSystem,
+  getCleanFileName,
+} from "./data/fileSystemAccess";
 
 //-- ==================================
 //-- DROPBOX STORE
@@ -41,6 +46,7 @@ type DropboxState = {
       newFoldersObj: Record<string, Partial<CleanBookMetadata>>
     ) => Promise<void>;
     getFolderMetadata: (path_lower: string) => Partial<CleanBookMetadata>;
+    clearFolderMetadata: () => Promise<void>;
   };
 };
 export const useDropboxStore = create<DropboxState>((set, get) => ({
@@ -84,9 +90,9 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
     },
     addFolderMetadata: (newFolderMetadata, path_lower) => {
       const currMetadata = get().folderMetadata;
-
+      const metadataKey = createFolderMetadataKey(path_lower);
       set({
-        folderMetadata: { ...currMetadata, [path_lower]: newFolderMetadata },
+        folderMetadata: { ...currMetadata, [metadataKey]: newFolderMetadata },
       });
     },
     addFoldersMetadata: async (newFoldersObj) => {
@@ -99,6 +105,10 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
     getFolderMetadata: (path_lower: string) => {
       return get().folderMetadata?.[path_lower];
     },
+    clearFolderMetadata: async () => {
+      set({ folderMetadata: {} });
+      await saveToAsyncStorage("foldermetadata", {});
+    },
   },
 }));
 
@@ -106,9 +116,10 @@ export const useFolderMeta = (folderId) => {
   const currMeta = useDropboxStore.getState().folderMetadata;
   return currMeta?.[folderId];
 };
-//~ ----------------------------
-//~ Download Function
-//~ ----------------------------
+//~ ===================================
+//~ Download Function Metadata FUNCIONS
+//~ ===================================
+//~ downloadFolderMetadata
 export const downloadFolderMetadata = async (folders: FolderEntry[]) => {
   // If we already downloaded metadata do not do it again!
   let foldersToDownload = [];
@@ -116,63 +127,97 @@ export const downloadFolderMetadata = async (folders: FolderEntry[]) => {
   for (const folder of folders) {
     //! Check if we have metadata in zustand store
     const folderMetadata = foldersMetadata?.[folder.path_lower];
-    // const folderMetadata = useDropboxStore.getState().actions.getFolderMetadata(folder.path_lower);
     if (!folderMetadata) {
       foldersToDownload.push(folder);
     }
   }
-
+  // Bail there are no folders to download (i.e. they exist in the store)
   if (foldersToDownload.length === 0) return;
-
-  // console.log(`DOWNLOADING META - ${foldersToDownload.length} folders`);
+  // START DOWNLOAD
   let chunkedFolders = [];
-  // if (foldersToDownload.length > 80) {
-  chunkedFolders = chunkArray(foldersToDownload, 10);
-  // }
-  const promises = chunkedFolders.map((chunk) => getArrayOfPromises(chunk));
+  const CHUNK_SIZE = 10;
+  chunkedFolders = chunkArray(foldersToDownload, CHUNK_SIZE);
 
-  // console.log(`PROCESS ${promises.length} promises`);
+  const promises = chunkedFolders.map((chunk) => getArrayOfPromises(chunk));
 
   const delayedPromises = [];
   for (let i = 0; i < promises.length; i++) {
     delayedPromises.push(
-      new Promise((resolve) =>
-        setTimeout(() => {
-          processPromises(promises[i]);
-          resolve(undefined);
-        }, i * 800 * 10)
+      new Promise(
+        (resolve) =>
+          setTimeout(() => {
+            processPromises(promises[i]);
+            resolve(undefined);
+          }, i * 800 * CHUNK_SIZE) // Give each record in chunk 900 ms to process (keeps rate limit error from api at bay)
       )
     );
   }
   await Promise.all(delayedPromises);
 };
-
+//~ -------------------------
+//~ downloadFolderMetadata
+//~ -------------------------
 export const getSingleFolderMetadata = async (folder) => {
   //! Since we didn't have it in the store, download it
   // Start download and parse
+  const randomNum = getRandomNumber();
   const dropboxFolder = await listDropboxFiles(folder.path_lower);
   const metadataFile = dropboxFolder.files.find(
     (entry) => entry.name.includes("metadata") && entry.name.endsWith(".json")
   );
+  // Look for local image file
+  const localImage = dropboxFolder.files.find(
+    (entry) => entry.name.endsWith(".jpg") || entry.name.endsWith(".png")
+  );
+
+  let finalCleanFileName = "";
 
   let convertedMeta;
   if (metadataFile) {
-    // console.log("PATH", metadataFile?.path_lower);
     const metadata = (await downloadDropboxFile(
       `${metadataFile.path_lower}`
     )) as FolderMetadata;
-    convertedMeta = cleanOneBook(metadata);
+    //-- LOCAL IMAGE CHECK
+    // Check to see if there is a google image, if not look for one it directory
+    // Don't want to check every time, dropbox will throw 429 rate limit error
+    if (!metadata.googleAPIData?.imageURL && localImage) {
+      finalCleanFileName = await getLocalImage(localImage, folder.name);
+    }
+    convertedMeta = cleanOneBook(metadata, finalCleanFileName);
   } else {
     // This means we did NOT find any ...metadata.json file build minimal info
+    if (localImage) {
+      finalCleanFileName = await getLocalImage(localImage, folder.name);
+    }
     convertedMeta = {
       id: folder.path_lower,
       title: folder.name,
-      imageURL: defaultImages.image11,
-    };
+      localImageName: finalCleanFileName,
+      defaultImage: defaultImages[`image${randomNum}`],
+    } as Partial<CleanBookMetadata>;
   }
   return convertedMeta;
 };
 
+//~===========================================
+//~ GET LOCAL IMAGE --
+//~===========================================
+async function getLocalImage(localImage, folderName) {
+  // Get extension
+  const localImageExt = localImage.name.slice(localImage.name.length - 4);
+  // Create full file name
+  //NOTE: we are using the base folder name for the image name NOT the actual filename
+  //    this is why we are tacking on the extension
+  const localImageName = `localimages_${folderName}${localImageExt}`;
+  // Get the dropbox link to image file
+  const localImageURI = await getDropboxFileLink(`${localImage.path_lower}`);
+  // Download and store the image locally
+  const { uri, cleanFileName } = await downloadToFileSystem(
+    localImageURI,
+    localImageName
+  );
+  return cleanFileName;
+}
 //~ ------------------------------
 //~ Chunk passed array into smaller arrays
 //~ ------------------------------
@@ -184,13 +229,25 @@ function chunkArray(array: any[], chunkSize: number) {
   return chunks;
 }
 
+//~===========================================
+//~ getArrayOfPromises --
+//~ Creates an array of promises with the getSingleFolderMetadata function
+//~ We will be getting "chunks" as arrays of promises (default 10 at a time)
+//~===========================================
 function getArrayOfPromises(arr: FolderEntry[]) {
   return arr.map(async (folder) => {
     const returnMeta = await getSingleFolderMetadata(folder);
-    return { [folder.path_lower]: returnMeta };
+    const metadataKey = createFolderMetadataKey(folder.path_lower);
+    return { [metadataKey]: returnMeta };
   });
 }
 
+//~===========================================
+//~ processPromises --
+//~ When called it resolves the promises and processes
+//~ the return data into folder Metadat object
+//~ Lastly it stores that data to the Zustand store (and to async storage)
+//~===========================================
 async function processPromises(promises) {
   const folderMetadataArray = await Promise.all(promises);
   const folderMetaObj = folderMetadataArray.reduce(
@@ -200,4 +257,18 @@ async function processPromises(promises) {
   // console.log("in PROCESS PROMISES", folderMetadataArray.length);
   // Save to store
   await useDropboxStore.getState().actions.addFoldersMetadata(folderMetaObj);
+}
+
+//~ -------------------------
+//~ createFolderMetadataKey
+//~ -------------------------
+export function createFolderMetadataKey(pathIn: string) {
+  const pathArr = pathIn.split("/");
+  let finalKey = [];
+  for (var i = pathArr.length - 1; i >= pathArr.length - 2; i--) {
+    if (pathArr[i]) {
+      finalKey.push(getCleanFileName(pathArr[i]));
+    }
+  }
+  return finalKey.reverse().join("_");
 }

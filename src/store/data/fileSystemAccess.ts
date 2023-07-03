@@ -48,13 +48,13 @@ export const downloadToFileSystem = async (
   dirName = ""
 ) => {
   // "Clean" filename by only allowing upper/lower chars, digits, and underscores
-  const cleanFileName = filename.replace(/[^\w.]/g, "_");
+  const cleanFileName = getCleanFileName(filename);
   let documentDirectoryUri = FileSystem.documentDirectory + cleanFileName;
   const { uri } = await FileSystem.downloadAsync(
     downloadLink,
     documentDirectoryUri
   );
-  return uri;
+  return { uri, cleanFileName };
 };
 export type DownloadProgress = {
   downloadProgress: number;
@@ -95,7 +95,7 @@ export const downloadWithProgress = (
     });
   };
   // Clean filename for storage in system
-  const cleanFileName = filename.replace(/[^\w.]/g, "_");
+  const cleanFileName = getCleanFileName(filename);
   // Create the downloadResumable object
   const downloadResumable = FileSystem.createDownloadResumable(
     downloadLink,
@@ -152,3 +152,8 @@ export const fileOrDirectory = async (fullPath: string) => {
   const { exists, isDirectory } = await FileSystem.getInfoAsync(fullPath);
   return { exists, isDirectory };
 };
+
+// Clean the filename.  Replace any non word chars or . with an underscore
+// and if the last char is an underscore, remove it.
+export const getCleanFileName = (filename: string) =>
+  filename.replace(/[^\w.]+/g, "_").replace(/_$/, "");

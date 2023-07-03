@@ -36,6 +36,14 @@ const SettingsLayout = () => {
           headerTintColor: colors.amber900,
         }}
       />
+      <Stack.Screen
+        name="foldermetadataroute"
+        options={{
+          title: "Folder Metadata Storage",
+          headerStyle: { backgroundColor: colors.amber200 },
+          headerTintColor: colors.amber900,
+        }}
+      />
     </Stack>
   );
 };

@@ -86,6 +86,14 @@ const SettingsContainer = () => {
             </Pressable>
           </Link>
         </View>
+        {/* FOLDER METADATA */}
+        <View className="px-2 py-3" style={[styles.borderBottom]}>
+          <Link href="./settings/foldermetadataroute" asChild>
+            <Pressable>
+              <Text className="text-sm">Manage Folder Metadata</Text>
+            </Pressable>
+          </Link>
+        </View>
       </MotiView>
     </ScrollView>
   );

@@ -27,7 +27,7 @@ const TrackPlayerImage = () => {
       <TouchableOpacity
         onPress={() => actions.prev()}
         disabled={!displayPrev}
-        className={`${displayPrev ? "opacity-100" : "opacity-40"}`}
+        className={`${displayPrev ? "opacity-100" : "opacity-10"}`}
       >
         <BackIcon size={35} color={colors.amber800} />
       </TouchableOpacity>
@@ -42,7 +42,7 @@ const TrackPlayerImage = () => {
       <TouchableOpacity
         onPress={() => actions.next()}
         disabled={!displayNext}
-        className={`${displayNext ? "opacity-100" : "opacity-40"}`}
+        className={`${displayNext ? "opacity-100" : "opacity-10"}`}
       >
         <NextIcon size={35} color={colors.amber800} />
       </TouchableOpacity>

@@ -21,13 +21,13 @@ import { addTrack } from "./store-functions";
 import { deleteFromFileSystem } from "./data/fileSystemAccess";
 import { useDropboxStore } from "./store-dropbox";
 import { useSettingStore } from "./store-settings";
-import { defaultImages } from "./storeUtils";
+import { defaultImages, getRandomNumber } from "./storeUtils";
 import * as FileSystem from "expo-file-system";
 
-function getRandomNumber() {
-  const randomNumber = Math.floor(Math.random() * 13) + 1; // Generate random number between 1 and 13
-  return randomNumber.toString().padStart(2, "0"); // Pad number with leading zero if less than 10
-}
+// export function getRandomNumber() {
+//   const randomNumber = Math.floor(Math.random() * 13) + 1; // Generate random number between 1 and 13
+//   return randomNumber.toString().padStart(2, "0"); // Pad number with leading zero if less than 10
+// }
 
 let eventPlayerTrackChange = undefined;
 let eventEndOfQueue = undefined;

@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   FolderEntry,
   downloadDropboxFile,
+  getDropboxFileLink,
   listDropboxFiles,
 } from "../../utils/dropboxUtils";
 import {
@@ -10,20 +11,32 @@ import {
   FolderClosedIcon,
   MDHeartIcon,
 } from "../common/svg/Icons";
-import { useDropboxStore, useFolderMeta } from "../../store/store-dropbox";
+import {
+  createFolderMetadataKey,
+  getSingleFolderMetadata,
+  useDropboxStore,
+  useFolderMeta,
+} from "../../store/store-dropbox";
 import { colors } from "../../constants/Colors";
-import { FolderMetadata, cleanOneBook } from "../../utils/audiobookMetadata";
+import {
+  CleanBookMetadata,
+  FolderMetadata,
+  cleanOneBook,
+} from "../../utils/audiobookMetadata";
 import ExplorerFolderRow from "./ExplorerFolderRow";
 import { MotiView } from "moti";
 import { defaultImages } from "../../store/storeUtils";
+import * as FileSystem from "expo-file-system";
+import { downloadToFileSystem } from "../../store/data/fileSystemAccess";
 
 type Props = {
   folder: FolderEntry;
   index: number;
   onNavigateForward: (path: string, folderName: string) => void;
   showFolderMetadata: "on" | "off" | "loading";
-  folderMetadata: {};
+  folderMetadata: Partial<CleanBookMetadata>;
 };
+
 const ExplorerFolder = ({
   folder,
   index,
@@ -64,37 +77,16 @@ const ExplorerFolder = ({
   //~ Download Function
   //~ ----------------------------
   const downloadFolderMetadata = async () => {
-    console.log("starting manual download", folder.path_lower);
+    // console.log("starting manual download", folder.path_lower);
     // Start download and parse
     setFolderMetaState("loading");
-    // setMetadataInfo(undefined);
-    const dropboxFolder = await listDropboxFiles(folder.path_lower);
-    const metadataFile = dropboxFolder.files.find(
-      (entry) => entry.name.includes("metadata") && entry.name.endsWith(".json")
-    );
 
-    if (metadataFile) {
-      let convertedMeta;
-      // console.log("PATH", metadataFile?.path_lower);
+    const convertedMetadata = await getSingleFolderMetadata(folder);
+    // Create key and store the data in the dropbox store
+    const metadataKey = createFolderMetadataKey(folder.path_lower);
+    actions.addFoldersMetadata({ [metadataKey]: convertedMetadata });
 
-      const metadata = (await downloadDropboxFile(
-        `${metadataFile.path_lower}`
-      )) as FolderMetadata;
-      convertedMeta = cleanOneBook(metadata);
-      //! Cache in zustand store (store-dropbox)
-      // setMetadataInfo(convertedMeta);
-      await actions.addFoldersMetadata({ [folder.path_lower]: convertedMeta });
-      setMetadataInfo(convertedMeta);
-    } else {
-      // This means we did NOT find any ...metadata.json file build minimal info
-      const partialMeta = {
-        id: folder.path_lower,
-        title: folder.name,
-        imageURL: defaultImages.image10,
-      };
-      await actions.addFoldersMetadata({ [folder.path_lower]: partialMeta });
-      setMetadataInfo(partialMeta);
-    }
+    setMetadataInfo(convertedMetadata);
     setFolderMetaState("on");
   };
 

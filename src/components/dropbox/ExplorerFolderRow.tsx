@@ -12,6 +12,8 @@ import { colors } from "../../constants/Colors";
 import { AnimateHeight } from "../common/animations/AnimateHeight";
 import { PowerIcon } from "../common/svg/Icons";
 import { MotiText, MotiView } from "moti";
+import * as FileSystem from "expo-file-system";
+import ExplorerImage from "./ExplorerImage";
 
 type Props = {
   metadata: CleanBookMetadata;
@@ -28,22 +30,6 @@ const ExplorerFolderRow = ({
   // console.log("FOLDER ROW", showMetadata, !metadata);
   if (!metadata || !showMetadata) return null;
 
-  const imgDims = metadata.imageURL?.uri
-    ? { width: 100, height: 150 }
-    : { width: 100, height: 100 };
-  // React.useEffect(() => {
-  //   const getDims = async () => {
-  //     Image.getSize(
-  //       metadata.imageURL?.uri,
-  //       (width, height) => {
-  //         const imgConversion = height / width;
-  //         setImgDims({ width: 100, height: 100 * imgConversion });
-  //       },
-  //       () => setImgDims({ width: 100, height: 100 })
-  //     );
-  //   };
-  //   getDims();
-  // }, []);
   return (
     <View
       className="flex-1 flex-col "
@@ -53,18 +39,8 @@ const ExplorerFolderRow = ({
     >
       <View className="flex-1 flex-row w-full justify-start">
         {/* **IMAGE** */}
-        <Image
-          source={metadata.imageURL}
-          style={{
-            width: imgDims.width,
-            height: imgDims.height,
-            resizeMode: "stretch",
-            borderWidth: StyleSheet.hairlineWidth,
-            borderColor: colors.amber900,
-            borderRadius: 10,
-            marginLeft: 10,
-          }}
-        />
+        <ExplorerImage metadata={metadata} width={100} />
+
         {/* **TITLE AUTHOR OTHER** */}
         <View
           className="flex flex-col pl-2 flex-grow"
@@ -99,7 +75,9 @@ const ExplorerFolderRow = ({
               <Text className="text-center">{metadata.bookLength}</Text>
             )}
             {/* **Pub Year** */}
-            <Text className="text-center">{metadata?.publishedYear}</Text>
+            {!!metadata?.publishedYear && (
+              <Text className="text-center">{metadata?.publishedYear}</Text>
+            )}
           </View>
           {/* **Show DESCRIPTION Button** */}
           {metadata.description && (

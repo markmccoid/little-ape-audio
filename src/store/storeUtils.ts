@@ -16,6 +16,11 @@ export const defaultImages = {
   image13: require("../../assets/images/LittleApAudio13.png"),
 };
 
+export function getRandomNumber() {
+  const randomNumber = Math.floor(Math.random() * 13) + 1; // Generate random number between 1 and 13
+  return randomNumber.toString().padStart(2, "0"); // Pad number with leading zero if less than 10
+}
+
 export const analyzePlaylistTracks = (
   storedTracks: AudioTrack[],
   tracks: string[]

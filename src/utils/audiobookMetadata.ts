@@ -1,4 +1,4 @@
-import { defaultImages } from "../store/storeUtils";
+import { defaultImages, getRandomNumber } from "../store/storeUtils";
 
 type GoogleData = {
   id?: string;
@@ -47,14 +47,16 @@ export type FolderMetadata = {
   forceMongoUpdate?: boolean | undefined;
 };
 export type CleanBookMetadata = ReturnType<typeof cleanOneBook>;
-export function cleanOneBook(book: FolderMetadata) {
+export function cleanOneBook(book: FolderMetadata, localImageName?: string) {
   if (!book) return undefined;
   // decide on data for fields that come from multiple sources
   // if infoFileData available use it for the following:
+  const googleAuthor = book?.googleAPIData?.authors
+    ? book.googleAPIData.authors[0]
+    : undefined;
   const author =
-    book?.infoFileData?.author ||
-    book?.folderNameData?.author ||
-    book?.googleAPIData?.authors[0];
+    book?.infoFileData?.author || book?.folderNameData?.author || googleAuthor;
+
   const title =
     book?.infoFileData?.title ||
     book?.folderNameData?.title ||
@@ -76,6 +78,8 @@ export function cleanOneBook(book: FolderMetadata) {
   ].filter((el) => el);
 
   const bookLength = book?.infoFileData?.length;
+  const randomNum = getRandomNumber();
+
   return {
     id: book.id,
     fullPath: book.fullPath,
@@ -83,14 +87,16 @@ export function cleanOneBook(book: FolderMetadata) {
     title,
     description,
     author,
-    authors: book.googleAPIData?.authors,
+    authors: book?.googleAPIData?.authors,
     narratedBy: book?.infoFileData?.narratedBy,
     publishedYear,
     releaseDate,
-    publisher: book.googleAPIData?.publisher,
-    pageCount: parseInt(book.googleAPIData?.pageCount) || undefined,
+    publisher: book?.googleAPIData?.publisher,
+    pageCount: parseInt(book?.googleAPIData?.pageCount) || undefined,
     bookLength,
-    imageURL: imageURL ? { uri: imageURL } : defaultImages.image01,
+    imageURL: imageURL ? { uri: imageURL } : undefined,
+    defaultImage: defaultImages[`image${randomNum}`],
+    localImageName: localImageName,
     categories: Array.from(new Set(categories)),
   };
 }

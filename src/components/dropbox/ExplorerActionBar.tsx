@@ -15,6 +15,7 @@ type Props = {
   handleDownloadAll: () => void;
   handleDownloadMetadata: () => void;
 };
+
 const ExplorerActionBar = ({
   currentPath,
   fileCount,

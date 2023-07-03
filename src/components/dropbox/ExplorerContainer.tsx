@@ -24,6 +24,7 @@ import { times } from "lodash";
 import { Skeleton } from "moti/skeleton";
 import { FolderClosedIcon } from "../common/svg/Icons";
 import {
+  createFolderMetadataKey,
   downloadFolderMetadata,
   useDropboxStore,
 } from "../../store/store-dropbox";
@@ -64,7 +65,6 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
     "off" | "on" | "loading"
   >("off");
   const allFoldersMetadata = useDropboxStore((state) => state.folderMetadata);
-  // console.log("ALL FOLDERS", Object.keys(allFoldersMetadata || {}));
 
   const [isLoading, setIsLoading] = React.useState(false);
   const [isError, setIsError] = React.useState(undefined);
@@ -74,7 +74,7 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
   const renderItem = useCallback(
     ({ item, index }) => {
       if (item[".tag"] === "folder") {
-        // console.log("RENDER", allFoldersMetadata?.[item.path_lower]?.title);
+        const metadataKey = createFolderMetadataKey(item.path_lower);
         return (
           <ExplorerFolder
             key={item.id}
@@ -82,7 +82,7 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
             folder={item}
             onNavigateForward={onNavigateForward}
             showFolderMetadata={showMetadata}
-            folderMetadata={allFoldersMetadata?.[item.path_lower]}
+            folderMetadata={allFoldersMetadata?.[metadataKey]}
           />
         );
       } else if (item[".tag"] === "file") {
