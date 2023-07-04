@@ -2,7 +2,7 @@
 import { getAudioFileTags } from "../utils/audioUtils";
 import { saveToAsyncStorage } from "./data/asyncStorage";
 import * as FileSystem from "expo-file-system";
-import { AudioState } from "./types";
+import { AudioMetadata, AudioState } from "./types";
 
 type AddTrack = AudioState["actions"]["addNewTrack"];
 type ZSetGet<T> = {
@@ -26,10 +26,18 @@ export const addTrack =
     directory = ""
   ) => {
     // Get metadata for passed audio file
-    const tags = await getAudioFileTags(
+    const tags = (await getAudioFileTags(
       `${FileSystem.documentDirectory}${fileURI}`
-    );
-
+    )) as AudioMetadata;
+    // process track number info
+    const trackNumInfo = tags.trackRaw ? tags.trackRaw.split("/") : [];
+    const trackNum = parseInt(trackNumInfo[0]) || undefined;
+    const totalTracks = parseInt(trackNumInfo[1]) || undefined;
+    const finalTagInfo = {
+      ...tags,
+      trackNum,
+      totalTracks,
+    };
     const id = `${directory}${filename}`;
     const newAudioFile = {
       id,
@@ -37,7 +45,9 @@ export const addTrack =
       directory,
       filename,
       sourceLocation,
-      metadata: { ...tags },
+      metadata: {
+        ...finalTagInfo,
+      },
     };
     // If title is blank then use filename
     newAudioFile.metadata.title =

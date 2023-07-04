@@ -1,6 +1,7 @@
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
 import React from "react";
 import { useDropboxStore } from "../store/store-dropbox";
+import { colors } from "../constants/Colors";
 
 const SettingsFolderMetadata = () => {
   const actions = useDropboxStore((state) => state.actions);
@@ -8,10 +9,18 @@ const SettingsFolderMetadata = () => {
 
   return (
     <View>
-      <Text>SettingsFolderMetadata</Text>
-      <Pressable onPress={() => actions.clearFolderMetadata()}>
-        <Text>Clear All</Text>
-      </Pressable>
+      <View className="flex-row m-2">
+        <Pressable
+          onPress={() => actions.clearFolderMetadata()}
+          className="p-2 bg-amber-400 rounded-md"
+          style={{
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.amber900,
+          }}
+        >
+          <Text>Clear All</Text>
+        </Pressable>
+      </View>
       <ScrollView>
         {Object.keys(folderMetadata).map((key) => {
           return (

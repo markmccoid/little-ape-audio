@@ -23,10 +23,12 @@ export const getAudioFileTags = async (fullFileURI: string) => {
     const tag = (await jsMediaAsync(workingURI)) as TagType;
 
     metadata = {
-      title: tag.tags.title,
-      artist: tag.tags.artist,
-      album: tag.tags.album,
-      genre: tag.tags.genre,
+      title: tag.tags?.title,
+      artist: tag.tags?.artist,
+      album: tag.tags?.album,
+      genre: tag.tags?.genre,
+      trackRaw: tag.tags?.track,
+      year: tag.tags?.year,
       durationSeconds: durationSeconds,
       pictureURI: undefined,
     };

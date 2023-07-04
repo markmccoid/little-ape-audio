@@ -131,7 +131,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       const uniqueTracksPlaylist = [
         ...new Set([...tracks, ...(playlist.trackIds || [])]),
       ];
-      const { images, totalDuration } = analyzePlaylistTracks(
+      const { images, genres, totalDuration } = analyzePlaylistTracks(
         storedTracks,
         uniqueTracksPlaylist
       );
@@ -141,6 +141,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
 
       playlist.imageURI = images[0] || defaultImages[`image${randomNum}`];
       playlist.imageType = images[0] ? "uri" : "imported";
+      playlist.genre = genres[0];
       playlist.totalDurationSeconds = totalDuration;
       playlist.trackIds = sortBy(uniqueTracksPlaylist);
 
@@ -221,6 +222,16 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       };
       set({ playlists });
       await saveToAsyncStorage("playlists", playlists);
+    },
+    getPlaylistTracks: (playlistId) => {
+      const playlist = get().actions.getPlaylist(playlistId);
+      const trackIds = [...playlist.trackIds];
+      let trackArray = [];
+      for (const trackId of trackIds) {
+        const track = get().actions.getTrack(trackId);
+        trackArray.push(track);
+      }
+      return trackArray;
     },
     addBookmarkToPlaylist: async (
       bookmarkName,
@@ -621,6 +632,7 @@ const buildTrackPlayerQueue = (trackIds: string[]): ApeTrack[] => {
       artist: trackInfo.metadata.artist,
       album: trackInfo.metadata.album,
       genre: trackInfo.metadata.album,
+      trackNum: trackInfo.metadata.trackNum,
       artwork: trackInfo.metadata.pictureURI,
       duration: trackInfo.metadata.durationSeconds,
       pitchAlgorithm: PitchAlgorithm.Voice,

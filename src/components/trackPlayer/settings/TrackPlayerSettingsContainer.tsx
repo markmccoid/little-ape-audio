@@ -59,7 +59,7 @@ const TrackPlayerSettingsContainer = () => {
             type: "timing",
             duration: 500,
           }}
-          className="border border-black"
+          className=""
           style={{ flex: 1, width: "100%" }}
         >
           <TrackPlayerSettingsTracks />

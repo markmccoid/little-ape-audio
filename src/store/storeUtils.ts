@@ -21,20 +21,32 @@ export function getRandomNumber() {
   return randomNumber.toString().padStart(2, "0"); // Pad number with leading zero if less than 10
 }
 
+//~ -----------------------------------
+//~ analyzePlaylistTracks
+//~ Takes the current tracks for a playlist and returns
+//~ the unique images and genres on the track and the total duration
+//~ of tracks added together.
+//~ -----------------------------------
 export const analyzePlaylistTracks = (
   storedTracks: AudioTrack[],
   tracks: string[]
 ) => {
   let totalDuration = 0;
   let imageSet = new Set();
+  let genreSet = new Set();
 
   for (let trackId of tracks) {
     const track = storedTracks.find((el) => el.id === trackId);
     imageSet.add(track?.metadata?.pictureURI);
+    genreSet.add(track?.metadata?.genre);
     totalDuration = totalDuration + (track?.metadata?.durationSeconds || 0);
   }
 
-  return { images: [...imageSet] as string[], totalDuration };
+  return {
+    images: [...imageSet] as string[],
+    genres: [...genreSet] as string[],
+    totalDuration,
+  };
 };
 
 /**

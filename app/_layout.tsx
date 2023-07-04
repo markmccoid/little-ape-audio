@@ -18,6 +18,7 @@ import TrackPlayer, { Capability } from "react-native-track-player";
 import { onInitialize } from "../src/store/store";
 import { useSettingStore } from "../src/store/store-settings";
 import { deactivateKeepAwake } from "expo-keep-awake";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -92,9 +93,11 @@ function RootLayoutNav() {
 
   return (
     <>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      {/* <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}> */}
+      <GestureHandlerRootView style={{ flex: 1 }}>
         <Slot />
-      </ThemeProvider>
+      </GestureHandlerRootView>
+      {/* </ThemeProvider> */}
     </>
   );
 }

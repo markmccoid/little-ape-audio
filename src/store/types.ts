@@ -19,6 +19,10 @@ export type AudioMetadata = {
   album?: string;
   artist?: string;
   genre?: string;
+  trackRaw?: string;
+  trackNum?: number;
+  totalTracks?: number;
+  year?: number;
   durationSeconds?: number;
   pictureURI?: string;
 };
@@ -29,6 +33,8 @@ export type AudioMetadata = {
 export interface ApeTrack extends Track {
   id: string;
   filename: string;
+  // The track number pulled from the metadata info
+  trackNum: number;
 }
 
 type PlaylistId = string;
@@ -39,6 +45,7 @@ export type Playlist = {
   lastPlayedDateTime: number;
   imageURI: { uri: string } | number | undefined;
   imageType: "uri" | "imported" | "url";
+  genre: string;
   totalDurationSeconds: number;
   totalListenedToSeconds: number;
   trackIds?: string[];
@@ -106,6 +113,8 @@ export type AudioState = {
     ) => Promise<void>;
     getPlaylist: (playlistId: string) => Playlist | undefined;
     getTrack: (trackId: string) => AudioTrack | undefined;
+    // Given a playlist ID, will return an array of tracks (with metadata,etc)
+    getPlaylistTracks: (playlistId: string) => AudioTrack[];
     updatePlaylistRate: (playlistId: string, newRate: number) => void;
     updatePlaylistFields: (
       playlistId: string,

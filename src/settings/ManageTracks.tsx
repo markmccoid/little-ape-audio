@@ -20,6 +20,8 @@ const getOutliers = (tracks: AudioTrack[], files) => {
   let filesProcessed = [];
   const tracksFileNames = tracks.map((el) => el.fileURI);
   for (const file of files) {
+    // Don't include the local images in this track list
+    if (file.includes("localimages_")) continue;
     filesProcessed.push({
       filename: file,
       orphaned: !tracksFileNames.includes(file),

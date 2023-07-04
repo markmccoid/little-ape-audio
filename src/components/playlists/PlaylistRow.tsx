@@ -68,7 +68,7 @@ const PlaylistRow = ({ playlist, onPlaylistSelect }: Props) => {
     playlist?.imageType === "uri"
       ? { uri: playlist.imageURI }
       : playlist.imageURI;
-  // console.log("IMAE URI", image5, playlist.imageURI);
+
   return (
     <View
       className={`flex-row flex-1 py-2 px-2 border-b border-b-amber-700 ${

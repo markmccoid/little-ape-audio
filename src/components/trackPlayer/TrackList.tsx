@@ -91,11 +91,14 @@ const TrackList = () => {
                     </Text>
                   </View>
                 </View>
-                <Text
-                  className="text-xs"
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >{`${el.filename}`}</Text>
+                <View className="flex-row items-center justify-between">
+                  <Text
+                    className="text-xs"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >{`${el.filename}`}</Text>
+                  {/* <Text className="text-xs">id3 track - {el.trackNum}</Text> */}
+                </View>
               </View>
             </TouchableOpacity>
           );

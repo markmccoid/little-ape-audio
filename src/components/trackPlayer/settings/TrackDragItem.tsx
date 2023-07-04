@@ -11,6 +11,7 @@ const TrackDragItem = ({
   name,
   id,
   itemHeight,
+  trackNum,
   onRemoveItem,
   onEditItem,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -19,6 +20,7 @@ const TrackDragItem = ({
   name: string;
   id: string;
   itemHeight: number;
+  trackNum: number;
   onRemoveItem?: () => void;
   onEditItem?: (val: string) => void;
   isMoving?: boolean;
@@ -41,21 +43,26 @@ const TrackDragItem = ({
         flex: 1,
       }}
     >
-      <View className="flex-col flex-1">
-        <Text
-          className="font-bold mr-3 text-base"
-          ellipsizeMode="tail"
-          numberOfLines={1}
-        >
-          {name}
-        </Text>
-        <Text
-          className="font-semibold mr-3 text-gray-600 text-xs"
-          ellipsizeMode="tail"
-          numberOfLines={1}
-        >
-          {id}
-        </Text>
+      <View className="flex-row flex-1 items-center">
+        <View className="flex-col flex-1">
+          <Text
+            className="font-bold mr-3 text-base"
+            ellipsizeMode="tail"
+            numberOfLines={1}
+          >
+            {name}
+          </Text>
+          <Text
+            className="font-semibold mr-3 text-gray-600 text-xs"
+            ellipsizeMode="tail"
+            numberOfLines={1}
+          >
+            {id}
+          </Text>
+        </View>
+        <View className="pr-2">
+          <Text className="text-green-900 p-1"> {trackNum}</Text>
+        </View>
       </View>
 
       {/* <TouchableOpacity
