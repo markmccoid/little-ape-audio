@@ -7,7 +7,7 @@ import {
 import { useFonts } from "expo-font";
 import { Slot, SplashScreen, useRouter } from "expo-router";
 import { useEffect } from "react";
-import { useColorScheme } from "react-native";
+import { View, useColorScheme } from "react-native";
 import {
   Lato_100Thin,
   Lato_400Regular,
@@ -94,9 +94,9 @@ function RootLayoutNav() {
   return (
     <>
       {/* <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}> */}
-      <GestureHandlerRootView style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
         <Slot />
-      </GestureHandlerRootView>
+      </View>
       {/* </ThemeProvider> */}
     </>
   );

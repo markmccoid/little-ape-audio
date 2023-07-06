@@ -6,7 +6,7 @@ type Props = {
   children: ReactNode;
 };
 
-export const HeaderIconPressable = ({ onPress, children }: Props) => {
+export const AnimatedPressable = ({ onPress, children }: Props) => {
   return (
     <MotiPressable
       onPress={onPress}
@@ -15,8 +15,8 @@ export const HeaderIconPressable = ({ onPress, children }: Props) => {
           ({ hovered, pressed }) => {
             "worklet";
             return {
-              opacity: hovered || pressed ? 0.5 : 1,
-              transform: [{ scale: hovered || pressed ? 0.85 : 1 }],
+              opacity: hovered || pressed ? 0.8 : 1,
+              transform: [{ scale: hovered || pressed ? 0.99 : 1 }],
             };
           },
         []

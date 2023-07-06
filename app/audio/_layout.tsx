@@ -21,9 +21,6 @@ const AudioLayout = () => {
                 <Pressable>
                   <AddBook size={25} />
                 </Pressable>
-                {/* <HeaderIconPressable>
-            <AddBook size={25} />
-          </HeaderIconPressable> */}
               </Link>
             );
           },

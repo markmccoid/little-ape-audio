@@ -1,14 +1,23 @@
-import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
-import React from "react";
+import { View, Text, Pressable, StyleSheet } from "react-native";
+import React, { useRef, useState } from "react";
 import { useDropboxStore } from "../store/store-dropbox";
 import { colors } from "../constants/Colors";
+import {
+  PanGestureHandlerProps,
+  ScrollView,
+} from "react-native-gesture-handler";
+
+import MetadataRow from "./MetadataRow";
+import { useSharedValue } from "react-native-reanimated";
 
 const SettingsFolderMetadata = () => {
   const actions = useDropboxStore((state) => state.actions);
   const folderMetadata = useDropboxStore((state) => state.folderMetadata);
-
+  const scrollRef = useRef<ScrollView>(null);
+  const activeKey = useSharedValue(undefined);
+  console.log("ACITVEKEY", activeKey.value);
   return (
-    <View>
+    <>
       <View className="flex-row m-2">
         <Pressable
           onPress={() => actions.clearFolderMetadata()}
@@ -21,19 +30,20 @@ const SettingsFolderMetadata = () => {
           <Text>Clear All</Text>
         </Pressable>
       </View>
-      <ScrollView>
+      <ScrollView ref={scrollRef}>
         {Object.keys(folderMetadata).map((key) => {
           return (
-            <View key={key} className="border-b border-amber-600 py-1 px-2">
-              <Text className="text-sm font-semibold">
-                {folderMetadata[key]?.title}
-              </Text>
-              <Text className="text-xs">{key}</Text>
-            </View>
+            <MetadataRow
+              folderMetadata={folderMetadata[key]}
+              key={key}
+              simultaneousHandler={scrollRef}
+              currentKey={key}
+              activeKey={activeKey}
+            />
           );
         })}
       </ScrollView>
-    </View>
+    </>
   );
 };
 
