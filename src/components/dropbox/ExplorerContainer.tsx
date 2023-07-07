@@ -199,6 +199,7 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
     );
   }
   //~ == FINAL JSX ===
+
   return (
     <MotiView
       from={{ opacity: 0.5 }}
@@ -217,7 +218,9 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
       </View>
 
       {filesFolderObj?.files?.length > 0 && (
-        <FileMetadataView metadata={allFoldersMetadata?.[pathIn]} />
+        <FileMetadataView
+          metadata={allFoldersMetadata?.[createFolderMetadataKey(pathIn)]}
+        />
       )}
 
       <FlatList

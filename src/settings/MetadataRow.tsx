@@ -38,6 +38,7 @@ const MetadataRow = ({
   const offsetX = useSharedValue(0);
   const isOpen = useSharedValue(false);
   const iconOpacity = useSharedValue(0);
+  const iconPos = useSharedValue(0);
 
   const animatedStyles = useAnimatedStyle(() => {
     return {
@@ -54,7 +55,8 @@ const MetadataRow = ({
     return {
       opacity: iconOpacity.value,
       transform: [
-        { translateX: offsetX.value + 90 < 0 ? 0 : offsetX.value + 90 },
+        { translateX: iconPos.value },
+        // { translateX: offsetX.value + 90 <= 0 ? 0 : offsetX.value + 90 },
       ],
     };
   });
@@ -70,6 +72,7 @@ const MetadataRow = ({
       if (result !== currentKey && activeKey.value !== undefined) {
         offsetX.value = withSpring(0);
         iconOpacity.value = withTiming(0);
+        iconPos.value = withTiming(90);
         isOpen.value = false;
       }
     }
@@ -82,34 +85,44 @@ const MetadataRow = ({
     onStart(event, context) {
       // console.log(event.translationX, event.absoluteX);
       // If the slide is open, then close it
-      activeKey.value = currentKey;
+      activeKey.value = currentKey; // Whenever the activeKey changes useAnimatedReaction runs above
+
       iconOpacity.value = withTiming(1, { duration: 1000 });
       if (isOpen.value) {
         offsetX.value = withSpring(0);
-        iconOpacity.value = withTiming(0, { duration: 2000 });
+        iconPos.value = withTiming(90);
         isOpen.value = false;
       }
     },
     onActive(event, context) {
       // Only allow to be pulled to the left
-      console.log(event.translationX + 90);
       if (event.translationX <= 0) {
         offsetX.value = event.translationX;
+
+        if (event.translationX <= TRANSLATE_X_THRESHOLD && !isOpen.value) {
+          iconPos.value = withSpring(0);
+          isOpen.value = true;
+        } else if (event.translationX > TRANSLATE_X_THRESHOLD) {
+          iconPos.value = event.translationX + 90;
+        }
       }
     },
     onEnd(event, context) {
       // We are pulling left, so values will be negative.
       // If offsetX is > than the threshold, than we need to close the slide
       // If not, then we will hold the slide open at the threshold.
+      // This means if threshold is -120 and offsetX is -56 it IS greater than threshold
       const shouldBeDismissed = offsetX.value > TRANSLATE_X_THRESHOLD;
-      // consoler.log(shouldBeDismissed, offsetX.value, TRANSLATE_X_THRESHOLD);
+      // console.log(shouldBeDismissed, offsetX.value, TRANSLATE_X_THRESHOLD);
       if (shouldBeDismissed) {
         offsetX.value = withSpring(0);
         iconOpacity.value = withTiming(0);
+        iconPos.value = withTiming(90);
         isOpen.value = false;
         activeKey.value = undefined;
       } else {
         offsetX.value = withSpring(TRANSLATE_X_THRESHOLD);
+        iconPos.value = withSpring(0);
         iconOpacity.value = withTiming(1);
         isOpen.value = true;
       }
