@@ -1,10 +1,19 @@
-import { View, Text, StyleSheet, Dimensions, Pressable } from "react-native";
-import React, { Ref } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  Pressable,
+  TouchableOpacity,
+} from "react-native";
+import React, { Ref, useState } from "react";
 import {
   PanGestureHandler,
   PanGestureHandlerGestureEvent,
   PanGestureHandlerProps,
+  TapGesture,
   ScrollView,
+  TapGestureHandler,
 } from "react-native-gesture-handler";
 import Animated, {
   SharedValue,
@@ -15,30 +24,37 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import { CleanBookMetadata } from "../utils/audiobookMetadata";
-import { DeleteIcon, EditIcon } from "../components/common/svg/Icons";
-import { AnimatedPressable } from "../components/common/buttons/Pressables";
+import { DeleteIcon, EditIcon, EnterKeyIcon } from "../../common/svg/Icons";
+import { AnimatedPressable } from "../../common/buttons/Pressables";
+import { Bookmark } from "../../../store/types";
+import { AnimatePresence } from "moti";
+import { formatSeconds } from "../../../utils/formatUtils";
 
 const { width: SCREEN_WIDTH, height } = Dimensions.get("window");
 
-const TRANSLATE_X_THRESHOLD = SCREEN_WIDTH * 0.3 * -1;
+const TRANSLATE_X_THRESHOLD = SCREEN_WIDTH * 0.15 * -1;
 
 type Props = {
-  folderMetadata: Partial<CleanBookMetadata>;
+  bookmark: Bookmark;
   simultaneousHandler: ScrollView;
   currentKey: string;
   activeKey: SharedValue<string>;
+  onDeleteBookmark: (bookmarkId: string) => void;
+  onApplyBookmark: (bookmarkId: string) => void;
 };
-const MetadataRow = ({
-  folderMetadata,
+const BookmarkRow = ({
+  bookmark,
   simultaneousHandler,
   currentKey,
   activeKey,
+  onDeleteBookmark,
+  onApplyBookmark,
 }: Props) => {
   const offsetX = useSharedValue(0);
   const isOpen = useSharedValue(false);
   const iconOpacity = useSharedValue(0);
   const iconPos = useSharedValue(0);
+  const [isPanActive, setIsPanActive] = useState(false);
 
   const animatedStyles = useAnimatedStyle(() => {
     return {
@@ -69,7 +85,7 @@ const MetadataRow = ({
       return activeKey.value;
     },
     (result, previous) => {
-      if (result !== currentKey && activeKey.value !== undefined) {
+      if (result !== bookmark.id && activeKey.value !== undefined) {
         offsetX.value = withSpring(0);
         iconOpacity.value = withTiming(0);
         iconPos.value = withTiming(90);
@@ -85,7 +101,7 @@ const MetadataRow = ({
     onStart(event, context) {
       // console.log(event.translationX, event.absoluteX);
       // If the slide is open, then close it
-      activeKey.value = currentKey; // Whenever the activeKey changes useAnimatedReaction runs above
+      activeKey.value = bookmark.id; // Whenever the activeKey changes useAnimatedReaction runs above
 
       iconOpacity.value = withTiming(1, { duration: 1000 });
       if (isOpen.value) {
@@ -130,8 +146,9 @@ const MetadataRow = ({
   });
 
   return (
-    <View className="w-full h-[50]">
-      <AnimatedPressable onPress={() => console.log("HI")}>
+    <View className="w-full ">
+      {/* START -- ICONS REVEALED ON SWIPE */}
+      <AnimatedPressable onPress={() => onDeleteBookmark(bookmark.id)}>
         <Animated.View
           style={rIconStyle}
           className="absolute rounded-lg w-[35] bg-red-800 h-[35] flex-row justify-center items-center right-[10] top-[3]"
@@ -139,24 +156,39 @@ const MetadataRow = ({
           <DeleteIcon color="white" size={18} />
         </Animated.View>
       </AnimatedPressable>
-      <AnimatedPressable onPress={() => console.log("HI")}>
+      {/* <AnimatedPressable onPress={() => console.log("HI")}>
         <Animated.View
           style={rIconStyle}
           className="absolute rounded-lg w-[35] bg-amber-800 h-[35] flex-row justify-center items-center right-[50] top-[3]"
         >
           <EditIcon color="white" size={18} />
         </Animated.View>
-      </AnimatedPressable>
+      </AnimatedPressable> */}
+      {/* END -- ICONS REVEALED ON SWIPE */}
+
       <PanGestureHandler
         onGestureEvent={gestureHandler}
         simultaneousHandlers={simultaneousHandler}
+        onActivated={() => setIsPanActive(true)}
+        onEnded={() => setIsPanActive(false)}
       >
         <Animated.View
           style={animatedStyles}
-          className="border border-amber-600 py-1 px-2 bg-white mb-1"
+          className="border border-amber-600 py-1 px-2 bg-white mb-0"
         >
-          <Text className="text-sm font-semibold">{folderMetadata.title}</Text>
-          <Text className="text-xs">{folderMetadata?.id}</Text>
+          <View className="flex-row items-center">
+            <AnimatedPressable onPress={() => onApplyBookmark(bookmark.id)}>
+              <View className="mr-4 p-1 border border-amber-800 bg-amber-200 rounded-lg">
+                <EnterKeyIcon />
+              </View>
+            </AnimatedPressable>
+            <View>
+              <Text className="text-sm font-semibold">{bookmark.name}</Text>
+              <Text className="text-xs">
+                {formatSeconds(bookmark.positionSeconds)}
+              </Text>
+            </View>
+          </View>
         </Animated.View>
       </PanGestureHandler>
     </View>
@@ -168,4 +200,23 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
 });
-export default MetadataRow;
+export default BookmarkRow;
+
+{
+  /* <TouchableOpacity
+              key={el.id}
+              onPress={async () => handleApplyBookmark(el.id)}
+              onLongPress={async () => handleDeleteBookmark(el.id)}
+              className="flex-col justify-between px-1 py-2"
+              style={{
+                borderBottomColor: colors.amber800,
+                borderBottomWidth: StyleSheet.hairlineWidth,
+              }}
+            >
+              <View className="flex-row justify-between flex-1">
+                <Text className="font-semibold">{el.name}</Text>
+                <Text>{formatSeconds(el.positionSeconds)}</Text>
+              </View>
+              <Text>Track: {el.trackId}</Text>
+            </TouchableOpacity> */
+}

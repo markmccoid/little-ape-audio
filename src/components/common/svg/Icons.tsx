@@ -28,6 +28,16 @@ export const DragHandleIcon = ({ size = 25, color, style }: Props) => {
     <MaterialIcons name="drag-handle" size={size} color={color} style={style} />
   );
 };
+export const EnterKeyIcon = ({ size = 25, color, style }: Props) => {
+  return (
+    <Ionicons
+      name="ios-return-down-back"
+      size={size}
+      color={color}
+      style={style}
+    />
+  );
+};
 export const BookmarkIcon = ({ size = 25, color, style }: Props) => {
   return <Fontisto name="favorite" size={size} color={color} style={style} />;
 };

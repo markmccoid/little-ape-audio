@@ -8,7 +8,7 @@ import {
   Alert,
 } from "react-native";
 import React, { useEffect, useMemo, useState } from "react";
-import { usePlaybackStore } from "../../store/store";
+import { usePlaybackStore, useTracksStore } from "../../store/store";
 import {
   BookmarkIcon,
   PauseIcon,
@@ -41,6 +41,7 @@ const TrackPlayerControls = ({ style }: Props) => {
   // const [playerState, setPlayerState] = useState(null);
   const playerState = usePlaybackStore((state) => state.playerState);
   const isPlaylistLoaded = usePlaybackStore((state) => state.playlistLoaded);
+  const pl = useTracksStore((state) => state.playlists);
   const currentTrack = usePlaybackStore((state) => state.currentTrack);
   const [bookmarkLength, setBookmarkLength] = useState<number>();
   const isPlaying = playerState === State.Playing;
@@ -50,7 +51,7 @@ const TrackPlayerControls = ({ style }: Props) => {
   useEffect(() => {
     const bookmarks = playbackActions.getBookmarks();
     setBookmarkLength(bookmarks?.length);
-  }, []);
+  }, [pl]);
 
   //~ --- ----
   const play = async () => {
@@ -74,7 +75,9 @@ const TrackPlayerControls = ({ style }: Props) => {
           text: "OK",
           onPress: (bookmarkName) => {
             playbackActions.addBookmark(bookmarkName, currTrackPos);
-            setBookmarkLength((prev) => (prev ? prev + 1 : 1));
+            const bookmarks = playbackActions.getBookmarks();
+
+            setBookmarkLength(bookmarks?.length);
           },
         },
         { text: "Cancel", onPress: () => {} },
