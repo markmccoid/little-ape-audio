@@ -10,16 +10,40 @@ import React, { useState } from "react";
 import { CleanBookMetadata } from "../../utils/audiobookMetadata";
 import { colors } from "../../constants/Colors";
 import { AnimateHeight } from "../common/animations/AnimateHeight";
-import { PowerIcon } from "../common/svg/Icons";
+import {
+  BookIcon,
+  EmptyMDHeartIcon,
+  MDHeartIcon,
+  PowerIcon,
+  ReadIcon,
+} from "../common/svg/Icons";
 import { MotiText, MotiView } from "moti";
 import ExplorerImage from "./ExplorerImage";
+import {
+  FolderMetadataDetails,
+  useDropboxStore,
+} from "../../store/store-dropbox";
+import { AnimatedPressable } from "../common/buttons/Pressables";
 
 type Props = {
-  metadata: Partial<CleanBookMetadata>;
+  metadata: FolderMetadataDetails;
+  path_lower: string;
 };
-const FileMetadataView = ({ metadata }: Props) => {
+const FileMetadataView = ({ metadata, path_lower }: Props) => {
+  const dropboxActions = useDropboxStore((state) => state.actions);
   if (!metadata) return null;
-
+  const handleToggleFavorite = async () => {
+    await dropboxActions.addFolderMetadata(
+      { isFavorite: !!!metadata.isFavorite },
+      path_lower
+    );
+  };
+  const handleToggleRead = async () => {
+    await dropboxActions.addFolderMetadata(
+      { isRead: !!!metadata.isRead },
+      path_lower
+    );
+  };
   return (
     <View
       className={`items-start flex-col justify-start border-b border-b-amber-900 pb-2 pt-2`}
@@ -66,6 +90,28 @@ const FileMetadataView = ({ metadata }: Props) => {
             )}
             {/* **Pub Year** */}
             <Text className="text-center">{metadata.publishedYear}</Text>
+          </View>
+          <View className="flex-row justify-center mt-4">
+            <TouchableOpacity onPress={handleToggleFavorite}>
+              {metadata.isFavorite ? (
+                <MDHeartIcon color="red" size={30} />
+              ) : (
+                <EmptyMDHeartIcon size={30} />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleToggleRead} className="ml-4">
+              {metadata.isRead ? (
+                <View>
+                  <BookIcon color="green" size={30} />
+                  <ReadIcon
+                    style={{ position: "absolute", top: 2, left: 5 }}
+                    size={20}
+                  />
+                </View>
+              ) : (
+                <BookIcon size={30} />
+              )}
+            </TouchableOpacity>
           </View>
         </View>
       </View>

@@ -220,6 +220,7 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
       {filesFolderObj?.files?.length > 0 && (
         <FileMetadataView
           metadata={allFoldersMetadata?.[createFolderMetadataKey(pathIn)]}
+          path_lower={pathIn}
         />
       )}
 

@@ -9,6 +9,7 @@ import DragDropEntry, {
 import { usePlaybackStore, useTrackActions } from "../../../store/store";
 import TrackDragItem from "./TrackDragItem";
 import { ApeTrack } from "../../../store/types";
+import { colors } from "../../../constants/Colors";
 
 function buildList(queue: ApeTrack[]) {
   return queue.map((el, index) => {
@@ -46,7 +47,7 @@ const TrackPlayerSettingsTracks = () => {
 
   return (
     <View
-      className="flex-1"
+      className="w-full mb-10"
       style={{
         borderBottomColor: "black",
         borderBottomWidth: StyleSheet.hairlineWidth,
@@ -70,6 +71,7 @@ const TrackPlayerSettingsTracks = () => {
         scrollStyles={{
           width: "100%",
           borderLeftWidth: StyleSheet.hairlineWidth,
+          backgroundColor: colors.amber100,
           // height: "30%",
           // borderWidth: 1,
           // borderColor: "#aaa",

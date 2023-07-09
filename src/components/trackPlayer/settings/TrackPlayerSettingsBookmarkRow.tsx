@@ -146,7 +146,7 @@ const BookmarkRow = ({
   });
 
   return (
-    <View className="w-full ">
+    <View className="w-full bg-amber-200">
       {/* START -- ICONS REVEALED ON SWIPE */}
       <AnimatedPressable onPress={() => onDeleteBookmark(bookmark.id)}>
         <Animated.View

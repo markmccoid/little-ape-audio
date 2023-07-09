@@ -75,7 +75,7 @@ const TrackPlayerSettingsContainer = () => {
             type: "timing",
             duration: 500,
           }}
-          className="flex-1 w-full"
+          className="w-full"
         >
           <TrackPlayerSettingsBookmarks />
         </MotiView>

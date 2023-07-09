@@ -12,6 +12,7 @@ import {
   MDHeartIcon,
 } from "../common/svg/Icons";
 import {
+  FolderMetadataDetails,
   createFolderMetadataKey,
   getSingleFolderMetadata,
   useDropboxStore,
@@ -34,7 +35,7 @@ type Props = {
   index: number;
   onNavigateForward: (path: string, folderName: string) => void;
   showFolderMetadata: "on" | "off" | "loading";
-  folderMetadata: Partial<CleanBookMetadata>;
+  folderMetadata: FolderMetadataDetails;
 };
 
 const ExplorerFolder = ({
@@ -85,11 +86,28 @@ const ExplorerFolder = ({
     // Create key and store the data in the dropbox store
     const metadataKey = createFolderMetadataKey(folder.path_lower);
     actions.addFoldersMetadata({ [metadataKey]: convertedMetadata });
+    // actions.addFolderMetadata(convertedMetadata, folder.path_lower);
 
     setMetadataInfo(convertedMetadata);
     setFolderMetaState("on");
   };
 
+  // isFav and isRead -> red
+  // isRead only -> green
+  // else black
+  const folderColor = folderMetadata?.isFavorite
+    ? "#991b1b"
+    : folderMetadata?.isRead
+    ? "green"
+    : "#d97706";
+  // isFav and isRead -> green
+  // isFav only -> red
+  // else black
+  const textColor = folderMetadata?.isRead
+    ? "green"
+    : folderMetadata?.isFavorite
+    ? "#991b1b"
+    : "black";
   return (
     <View
       style={{
@@ -131,9 +149,12 @@ const ExplorerFolder = ({
               : ""
           }`}
         >
-          <FolderClosedIcon color="#d97706" />
+          <FolderClosedIcon
+            color={folderColor}
+            // style={{ backgroundColor: "#fca5a5" }}
+          />
           <Text
-            style={{ marginLeft: 10, flex: 1 }}
+            style={{ marginLeft: 10, flex: 1, color: textColor }}
             numberOfLines={1}
             ellipsizeMode="tail"
           >

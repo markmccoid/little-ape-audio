@@ -29,9 +29,14 @@ export type FavoriteFolders = {
   position: number;
 };
 
+export type FolderMetadataDetails = Partial<CleanBookMetadata> & {
+  isFavorite?: boolean;
+  isRead?: boolean;
+};
+
 type DropboxState = {
   favoriteFolders: FavoriteFolders[];
-  folderMetadata: Record<string, Partial<CleanBookMetadata>>;
+  folderMetadata: Record<string, FolderMetadataDetails>;
   actions: {
     addFavorite: (favPath: string) => Promise<void>;
     removeFavorite: (favPath: string) => Promise<void>;
@@ -39,13 +44,14 @@ type DropboxState = {
     updateFavFolderArray: (favFolders: FavoriteFolders[]) => void;
     // --  FOLDER METADATA ---
     addFolderMetadata: (
-      newFolderMetadata: Partial<CleanBookMetadata>,
-      path_lower: string
-    ) => void;
-    addFoldersMetadata: (
-      newFoldersObj: Record<string, Partial<CleanBookMetadata>>
+      newFolderMetadata: FolderMetadataDetails,
+      path_lower: string,
+      saveToStorage?: boolean
     ) => Promise<void>;
-    getFolderMetadata: (path_lower: string) => Partial<CleanBookMetadata>;
+    addFoldersMetadata: (
+      newFoldersObj: Record<string, FolderMetadataDetails>
+    ) => Promise<void>;
+    getFolderMetadata: (path_lower: string) => FolderMetadataDetails;
     clearFolderMetadata: () => Promise<void>;
   };
 };
@@ -88,12 +94,17 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
 
       return taggedFolders as FolderEntry[];
     },
-    addFolderMetadata: (newFolderMetadata, path_lower) => {
+    addFolderMetadata: async (newFolderMetadata, path_lower) => {
       const currMetadata = get().folderMetadata;
       const metadataKey = createFolderMetadataKey(path_lower);
-      set({
-        folderMetadata: { ...currMetadata, [metadataKey]: newFolderMetadata },
-      });
+
+      const newData = { ...currMetadata[metadataKey], ...newFolderMetadata };
+
+      const folderMetadata = { ...currMetadata, [metadataKey]: newData };
+      set({ folderMetadata });
+      // if (saveToStorage) {
+      await saveToAsyncStorage("foldermetadata", folderMetadata);
+      // }
     },
     addFoldersMetadata: async (newFoldersObj) => {
       const folderMetadata = { ...get().folderMetadata, ...newFoldersObj };
@@ -103,7 +114,8 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       await saveToAsyncStorage("foldermetadata", folderMetadata);
     },
     getFolderMetadata: (path_lower: string) => {
-      return get().folderMetadata?.[path_lower];
+      const key = createFolderMetadataKey(path_lower);
+      return get().folderMetadata?.[key];
     },
     clearFolderMetadata: async () => {
       set({ folderMetadata: {} });
@@ -237,6 +249,7 @@ function chunkArray(array: any[], chunkSize: number) {
 function getArrayOfPromises(arr: FolderEntry[]) {
   return arr.map(async (folder) => {
     const returnMeta = await getSingleFolderMetadata(folder);
+
     const metadataKey = createFolderMetadataKey(folder.path_lower);
     return { [metadataKey]: returnMeta };
   });
@@ -245,15 +258,34 @@ function getArrayOfPromises(arr: FolderEntry[]) {
 //~===========================================
 //~ processPromises --
 //~ When called it resolves the promises and processes
-//~ the return data into folder Metadat object
+//~ the return data. That data goes into folder Metadata object
 //~ Lastly it stores that data to the Zustand store (and to async storage)
 //~===========================================
+/**
+ *
+ * [{
+ *  "book_key": {
+ *      id: "",
+ *      title: "",
+ *      other book metadata...
+ *      Maybe-isFavorite
+ *      Maybe-hasRead
+ *    }
+ * },
+ *  ...
+ * ]
+ */
 async function processPromises(promises) {
   const folderMetadataArray = await Promise.all(promises);
-  const folderMetaObj = folderMetadataArray.reduce(
-    (final, el) => ({ ...final, ...el }),
-    {}
-  );
+  // console.log("FMD", folderMetadataArray[0]);
+  const currMetadata = useDropboxStore.getState().folderMetadata;
+  const folderMetaObj = folderMetadataArray.reduce((final, el) => {
+    const path_lower = Object.keys(el)[0];
+    const metadataKey = createFolderMetadataKey(path_lower);
+    const newData = { ...currMetadata[metadataKey], ...el[metadataKey] };
+
+    return { ...final, [metadataKey]: newData };
+  }, {});
   // console.log("in PROCESS PROMISES", folderMetadataArray.length);
   // Save to store
   await useDropboxStore.getState().actions.addFoldersMetadata(folderMetaObj);
