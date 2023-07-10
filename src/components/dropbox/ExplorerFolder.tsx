@@ -10,6 +10,9 @@ import {
   EmptyMDHeartIcon,
   FolderClosedIcon,
   MDHeartIcon,
+  ReadIcon,
+  StarFilledIcon,
+  StarUnFilledIcon,
 } from "../common/svg/Icons";
 import {
   FolderMetadataDetails,
@@ -48,10 +51,6 @@ const ExplorerFolder = ({
   const [isFavorite, setIsFavorite] = useState(!!folder.favorited);
   const actions = useDropboxStore((state) => state.actions);
   const [metadataInfo, setMetadataInfo] = useState(folderMetadata);
-  // const metadataInfo = useFolderMeta(folder.path_lower);
-  // Stores Metadata info if requested
-  // const metadataInfo = useMemo(() => meta, [meta]);
-  // const [metadataInfo, setMetadataInfo] = useState();
   const [folderMetaState, setFolderMetaState] = useState<
     "on" | "off" | "loading"
   >("off");
@@ -149,10 +148,16 @@ const ExplorerFolder = ({
               : ""
           }`}
         >
-          <FolderClosedIcon
-            color={folderColor}
-            // style={{ backgroundColor: "#fca5a5" }}
-          />
+          {folderMetadata?.isFavorite ? (
+            <MDHeartIcon color={textColor} />
+          ) : folderMetadata?.isRead ? (
+            <ReadIcon color={folderColor} />
+          ) : (
+            <FolderClosedIcon
+              color={folderColor}
+              // style={{ backgroundColor: "#fca5a5" }}
+            />
+          )}
           <Text
             style={{ marginLeft: 10, flex: 1, color: textColor }}
             numberOfLines={1}
@@ -164,8 +169,8 @@ const ExplorerFolder = ({
             className="border-l border-l-gray-400 pl-2 w-[35] py-2"
             onPress={setFavorite}
           >
-            {isFavorite && <MDHeartIcon color="#74be73" />}
-            {!isFavorite && <EmptyMDHeartIcon color="gray" />}
+            {isFavorite && <StarFilledIcon color="#74be73" />}
+            {!isFavorite && <StarUnFilledIcon color="gray" />}
           </TouchableOpacity>
         </MotiView>
       </TouchableOpacity>
@@ -179,13 +184,6 @@ const ExplorerFolder = ({
           key="data"
         />
       </View>
-      {/* {folderMetaState !== "off" || showFolderMetadata !== "off" ? (
-        <View className="mb-2">
-          <ExplorerFolderRow metadata={metadataInfo} index={index} key="data" />
-        </View>
-      ) : (
-        <ExplorerFolderRow metadata={undefined} index={index} key="empty" />
-      )} */}
     </View>
   );
 };

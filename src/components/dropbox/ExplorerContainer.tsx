@@ -9,6 +9,8 @@ import {
   Dimensions,
   FlatList,
   RefreshControl,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from "react-native";
 import React, { useCallback, useRef, useState } from "react";
 import uuid from "react-native-uuid";
@@ -70,6 +72,14 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
   const [isError, setIsError] = React.useState(undefined);
   const trackActions = useTrackActions();
   const dropboxActions = useDropboxStore((state) => state.actions);
+
+  const flatlistRef = useRef<ScrollView>();
+  const [currYOffset, setCurrYOffset] = useState(0);
+  // const [currYOffset, setCurrYOffset] = useState(0);
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const contentOffsetY = event.nativeEvent.contentOffset.y;
+    setCurrYOffset(contentOffsetY);
+  };
 
   const renderItem = useCallback(
     ({ item, index }) => {
@@ -134,6 +144,7 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
   const onNavigateForward = (nextPath: string, folderName: string) => {
     onPathChange(nextPath, folderName);
   };
+
   //~ ====================
   //~ == download Folder Metadata flag set==
   //~ ====================
@@ -229,12 +240,15 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
         // refreshControl={
         //   <RefreshControl refreshing={false} onRefresh={onRefresh} />
         // }
+        ref={flatlistRef}
         extraData={allFoldersMetadata}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         horizontal={false}
         maxToRenderPerBatch={10}
         windowSize={10}
+        // scrollEventThrottle={16}
+        onScroll={handleScroll}
       />
     </MotiView>
   );

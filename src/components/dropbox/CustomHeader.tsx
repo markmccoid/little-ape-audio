@@ -5,12 +5,14 @@ import {
   TouchableOpacity,
   useWindowDimensions,
 } from "react-native";
-import { useNavigation } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import { ChevronBackIcon } from "../common/svg/Icons";
 
 function CustomHeader({ title, backText }) {
   const navigation = useNavigation();
+  const route = useRouter();
   const { width, height } = useWindowDimensions();
+
   return (
     <View
       style={{ flexDirection: "row", alignItems: "center" }}
@@ -35,3 +37,10 @@ function CustomHeader({ title, backText }) {
 }
 
 export default CustomHeader;
+function goBackInPath(path: string, delimiter: string = "/") {
+  const lastSlash = path.lastIndexOf(delimiter);
+  if (lastSlash < 0) {
+    return "";
+  }
+  return path.slice(0, lastSlash);
+}

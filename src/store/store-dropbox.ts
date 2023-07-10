@@ -18,6 +18,7 @@ import {
   downloadToFileSystem,
   getCleanFileName,
 } from "./data/fileSystemAccess";
+import { Alert } from "react-native";
 
 //-- ==================================
 //-- DROPBOX STORE
@@ -186,16 +187,23 @@ export const getSingleFolderMetadata = async (folder) => {
 
   let convertedMeta;
   if (metadataFile) {
-    const metadata = (await downloadDropboxFile(
-      `${metadataFile.path_lower}`
-    )) as FolderMetadata;
-    //-- LOCAL IMAGE CHECK
-    // Check to see if there is a google image, if not look for one it directory
-    // Don't want to check every time, dropbox will throw 429 rate limit error
-    if (!metadata.googleAPIData?.imageURL && localImage) {
-      finalCleanFileName = await getLocalImage(localImage, folder.name);
+    try {
+      const metadata = (await downloadDropboxFile(
+        `${metadataFile.path_lower}`
+      )) as FolderMetadata;
+      //-- LOCAL IMAGE CHECK
+      // Check to see if there is a google image, if not look for one it directory
+      // Don't want to check every time, dropbox will throw 429 rate limit error
+      if (!metadata.googleAPIData?.imageURL && localImage) {
+        finalCleanFileName = await getLocalImage(localImage, folder.name);
+      }
+      convertedMeta = cleanOneBook(metadata, finalCleanFileName);
+    } catch (error) {
+      Alert.alert(
+        "Error Downloading Metadata File",
+        `Error downloading "${metadataFile.name}" with ${error.message}`
+      );
     }
-    convertedMeta = cleanOneBook(metadata, finalCleanFileName);
   } else {
     // This means we did NOT find any ...metadata.json file build minimal info
     if (localImage) {

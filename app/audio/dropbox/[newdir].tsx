@@ -8,11 +8,14 @@ import CustomHeader from "../../../src/components/dropbox/CustomHeader";
 const NewDirectory = () => {
   const navigation = useNavigation();
   const router = useRouter();
+
   const { newdir, fullPath, backTitle } = useSearchParams();
 
-  //  console.log("NEWDIR - fullPath/backTitle", fullPath, backTitle);
-
-  const onPathChange = (newPath: string, folderName: string) => {
+  const onPathChange = (
+    newPath: string,
+    folderName: string,
+    previousYOffset?: number
+  ) => {
     // const trailingPath = newPath.slice(newPath.lastIndexOf("/") + 1);
     router.push({
       pathname: `./${folderName}`,
