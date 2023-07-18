@@ -61,7 +61,7 @@ const MainFavFolders = ({ favFolders }) => {
           >
             <Link
               href={{
-                pathname: "./dropbox/newdir",
+                pathname: "/audio/dropbox/newdir",
                 params: { fullPath: folder.folderPath, backTitle: "Back" },
               }}
               className="flex-1"

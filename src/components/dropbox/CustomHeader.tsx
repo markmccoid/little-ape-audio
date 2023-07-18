@@ -4,6 +4,7 @@ import {
   Text,
   TouchableOpacity,
   useWindowDimensions,
+  SafeAreaView,
 } from "react-native";
 import { useNavigation, useRouter } from "expo-router";
 import { ChevronBackIcon } from "../common/svg/Icons";
@@ -14,7 +15,7 @@ function CustomHeader({ title, backText }) {
   const { width, height } = useWindowDimensions();
 
   return (
-    <View
+    <SafeAreaView
       style={{ flexDirection: "row", alignItems: "center" }}
       className="h-12 border-b border-b-black bg-amber-300"
     >
@@ -32,7 +33,7 @@ function CustomHeader({ title, backText }) {
         </View>
       </TouchableOpacity>
       {/* <Text style={{ fontWeight: "bold", fontSize: 18 }}>{title}</Text> */}
-    </View>
+    </SafeAreaView>
   );
 }
 

@@ -5,8 +5,15 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Slot, SplashScreen, useRouter } from "expo-router";
-import { useEffect } from "react";
+import {
+  Slot,
+  SplashScreen,
+  useRouter,
+  useRootNavigationState,
+  Redirect,
+  useNavigation,
+} from "expo-router";
+import { useEffect, useState } from "react";
 import { View, useColorScheme } from "react-native";
 import {
   Lato_100Thin,
@@ -18,7 +25,6 @@ import TrackPlayer, { Capability } from "react-native-track-player";
 import { onInitialize } from "../src/store/store";
 import { useSettingStore } from "../src/store/store-settings";
 import { deactivateKeepAwake } from "expo-keep-awake";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -32,6 +38,8 @@ export default function RootLayout() {
     Lato_400Regular,
     Lato_700Bold,
   });
+  const [isLoaded, setIsLoaded] = useState(false);
+  const rootNavState = useRootNavigationState();
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
@@ -66,38 +74,33 @@ export default function RootLayout() {
       // console.log("TrackPlayer SETUP and onInitialize");
       // This allows the phone to go into sleep mode.  RNTP seems
       // to keep the phone awake when open.
-      deactivateKeepAwake();
+      await deactivateKeepAwake();
+      setIsLoaded(true);
     };
     // Run your initialization code here
     // It can be async
     setupTP();
   }, []);
 
-  return (
-    <>
-      {/* Keep the splash screen open until the assets have loaded. In the future, we should just support async font loading with a native version of font-display. */}
-      {!loaded && <SplashScreen />}
-      {loaded && <RootLayoutNav />}
-    </>
-  );
+  useEffect(() => {
+    if (isLoaded && loaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [isLoaded, loaded]);
+
+  if (!isLoaded || !loaded) {
+    return null;
+  }
+
+  return <RootLayoutNav />;
 }
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-  const router = useRouter();
-  // Redirect to what I want to be the initial screen.
-  // Could leverage this to let the user save the start screen.
-  useEffect(() => {
-    router.replace("./audio");
-  }, []);
-
   return (
     <>
-      {/* <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}> */}
       <View style={{ flex: 1 }}>
         <Slot />
       </View>
-      {/* </ThemeProvider> */}
     </>
   );
 }

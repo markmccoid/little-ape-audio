@@ -55,7 +55,7 @@ const SettingsContainer = () => {
         }}
       >
         <View className="px-2 py-3" style={[styles.borderBottom]}>
-          <Link href="./settings/dropboxauth" asChild>
+          <Link href="/settings/dropboxauth" asChild>
             <Pressable>
               <Text className="text-sm">Dropbox Authorization</Text>
             </Pressable>
@@ -80,7 +80,7 @@ const SettingsContainer = () => {
           <Text>{backwardSecs}</Text>
         </View>
         <View className="px-2 py-3" style={[styles.borderBottom]}>
-          <Link href="./settings/managetracksroute" asChild>
+          <Link href="/settings/managetracksroute" asChild>
             <Pressable>
               <Text className="text-sm">Manage Tracks</Text>
             </Pressable>
@@ -88,7 +88,7 @@ const SettingsContainer = () => {
         </View>
         {/* FOLDER METADATA */}
         <View className="px-2 py-3" style={[styles.borderBottom]}>
-          <Link href="./settings/foldermetadataroute" asChild>
+          <Link href="/settings/foldermetadataroute" asChild>
             <Pressable>
               <Text className="text-sm">Manage Folder Metadata</Text>
             </Pressable>

@@ -1,6 +1,6 @@
 import { View, Text, SafeAreaView } from "react-native";
 import React, { useLayoutEffect } from "react";
-import { Link, Stack, useRouter, useSearchParams } from "expo-router";
+import { Link, Stack, useRouter, useLocalSearchParams } from "expo-router";
 import ExplorerContainer from "../../../src/components/dropbox/ExplorerContainer";
 import { useNavigation } from "expo-router";
 import CustomHeader from "../../../src/components/dropbox/CustomHeader";
@@ -9,7 +9,7 @@ const NewDirectory = () => {
   const navigation = useNavigation();
   const router = useRouter();
 
-  const { newdir, fullPath, backTitle } = useSearchParams();
+  const { newdir, fullPath, backTitle } = useLocalSearchParams();
 
   const onPathChange = (
     newPath: string,
@@ -18,7 +18,7 @@ const NewDirectory = () => {
   ) => {
     // const trailingPath = newPath.slice(newPath.lastIndexOf("/") + 1);
     router.push({
-      pathname: `./${folderName}`,
+      pathname: `/audio/dropbox/${folderName}`,
       params: {
         fullPath: newPath,
         backTitle: folderName,

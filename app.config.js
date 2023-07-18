@@ -48,6 +48,7 @@ export default {
     bundler: "metro",
     favicon: "./assets/images/favicon.png",
   },
+  plugins: ["expo-router"],
   // THIS IS WHAT WE READ IN THE CODE
   // uses the expo contstancs package
   extra: {

@@ -25,7 +25,7 @@ const DropboxScreens = () => {
         >
           <Link
             href={{
-              pathname: "./dropbox/dropboxstart",
+              pathname: "audio/dropbox/dropboxstart",
               params: { fullPath: "", backTitle: "Back" },
             }}
           >

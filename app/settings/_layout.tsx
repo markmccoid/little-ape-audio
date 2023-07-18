@@ -14,7 +14,7 @@ const SettingsLayout = () => {
           headerStyle: { backgroundColor: colors.amber200 },
           headerTintColor: colors.amber900,
           headerLeft: () => (
-            <Link href="./audio">
+            <Link href="/audio">
               <HomeIcon />
             </Link>
           ),

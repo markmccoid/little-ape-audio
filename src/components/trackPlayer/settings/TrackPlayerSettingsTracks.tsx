@@ -92,6 +92,7 @@ const TrackPlayerSettingsTracks = () => {
         enableDragIndicator={true}
       >
         {items.map((item, idx) => {
+          console.log("ITEM", item.id, item.name);
           return (
             <TrackDragItem
               key={item.id}

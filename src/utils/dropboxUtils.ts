@@ -14,8 +14,8 @@ type AuthToken = {
   error?: string;
 };
 
-const APP_KEY = Constants?.manifest?.extra?.dropboxAppKey;
-const APP_SECRECT = Constants?.manifest?.extra?.dropboxSecret;
+const APP_KEY = Constants?.expoConfig?.extra?.dropboxAppKey;
+const APP_SECRECT = Constants?.expoConfig?.extra?.dropboxSecret;
 //* refreshToken ----------------------
 /**
  *

@@ -20,15 +20,18 @@ const PlaylistScreen = () => {
     <View className="flex-1 bg-amber-50 pt-2">
       <Stack.Screen
         options={{
+          headerBackTitle: "Back",
           headerTitle: () => (
-            <Text
-              className="text-base font-bold text-amber-950 text-center"
-              style={{ width: width / 1.35 }}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {playlist?.name}
-            </Text>
+            <View className="flex">
+              <Text
+                className="text-base font-bold text-amber-950 flex-1 text-center"
+                style={{ width: width / 1.45 }}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {playlist?.name}
+              </Text>
+            </View>
           ),
         }}
       />
