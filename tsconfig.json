@@ -1,6 +1,19 @@
 {
   "compilerOptions": {
-
+    "baseUrl": "src/",
+    "paths": {
+      "@components/*": ["components/*"],
+      "@store/*": ["store/*"],
+      "@app/*": ["app/*"],
+      "@utils/*": ["utils/*"],
+      "@constants/*": ["constants/*"],
+    }
   },
-  "extends": "expo/tsconfig.base"
+  "extends": "expo/tsconfig.base",
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ]
 }

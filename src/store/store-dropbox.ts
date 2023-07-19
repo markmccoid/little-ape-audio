@@ -74,8 +74,12 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
     removeFavorite: async (favPath) => {
       const currFavs = [...(get().favoriteFolders || [])];
       const updatedFavs = currFavs.filter((el) => el.folderPath !== favPath);
-      set({ favoriteFolders: updatedFavs });
-      saveToAsyncStorage("favfolders", updatedFavs);
+      const finalFavs = updatedFavs.map((fav, index) => ({
+        ...fav,
+        position: index + 1,
+      }));
+      set({ favoriteFolders: finalFavs });
+      saveToAsyncStorage("favfolders", finalFavs);
     },
     updateFavFolderArray: (favFolders) => {
       set({ favoriteFolders: favFolders });

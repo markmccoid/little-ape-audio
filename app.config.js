@@ -11,7 +11,7 @@ export default {
   scheme: "littleapeaudio",
   privacy: "unlisted",
   platforms: ["ios"],
-  version: "0.1.8",
+  version: "0.1.9",
   orientation: "portrait",
   icon: "./assets/littleapeaudiocolor.png",
   userInterfaceStyle: "automatic",
@@ -33,7 +33,7 @@ export default {
     },
     supportsTablet: false,
     bundleIdentifier: "com.markmccoid.little-ape-audio",
-    buildNumber: "0.1.8",
+    buildNumber: "0.1.9",
     infoPlist: {
       RCTAsyncStorageExcludeFromBackup: false,
       NSMicrophoneUsageDescription:
@@ -49,6 +49,10 @@ export default {
     favicon: "./assets/images/favicon.png",
   },
   plugins: ["expo-router"],
+  experiments: {
+    tsconfigPaths: true,
+    typedRoutes: true,
+  },
   // THIS IS WHAT WE READ IN THE CODE
   // uses the expo contstancs package
   extra: {

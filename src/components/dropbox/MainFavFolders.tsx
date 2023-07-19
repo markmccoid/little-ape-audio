@@ -1,91 +1,103 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Pressable } from "react-native";
 import React from "react";
-import { FavoriteFolders, useDropboxStore } from "../../store/store-dropbox";
+import { FavoriteFolders, useDropboxStore } from "@store/store-dropbox";
+import DraggableFlatList, {
+  OpacityDecorator,
+} from "react-native-draggable-flatlist";
+import {
+  DeleteIcon,
+  DragHandleIcon,
+  StarFilledIcon,
+} from "@components/common/svg/Icons";
 import { Link } from "expo-router";
-import { DeleteIcon, StarFilledIcon } from "../common/svg/Icons";
-import DragDropEntry, {
-  sortArray,
-} from "@markmccoid/react-native-drag-and-order";
 
 type Props = {
   favFolders: FavoriteFolders[];
 };
-const MainFavFolders = ({ favFolders }) => {
+const MainFavFolders = ({ favFolders }: Props) => {
   const actions = useDropboxStore((state) => state.actions);
-  return (
-    <DragDropEntry
-      scrollStyles={{
-        // width: "100%",
-        // height: "30%",
-        borderWidth: 1,
-        borderColor: "#aaa",
-        borderRadius: 10,
-      }}
-      updatePositions={(positions) => {
-        const newFavOrder = sortArray(positions, favFolders, {
-          positionField: "position",
-          idField: "id",
-        }) as FavoriteFolders[];
-        actions.updateFavFolderArray(newFavOrder);
-      }}
-      //getScrollFunctions={(functionObj) => setScrollFunctions(functionObj)}
-      itemHeight={50}
-      handlePosition="left"
-      //handle={AltHandle} // This is optional.  leave out if you want the default handle
-      handle={() => (
+  const renderItem = ({
+    item,
+    drag,
+    isActive,
+  }: {
+    item: FavoriteFolders;
+    drag: any;
+    isActive: boolean;
+  }) => {
+    // console.log("item", item);
+    const isFirst = item.position === 1;
+    const isLast = item.position === favFolders.length;
+
+    return (
+      <OpacityDecorator>
         <View
-          className="justify-center flex-grow bg-white px-2"
-          style={{
-            borderWidth: StyleSheet.hairlineWidth,
-          }}
+          id={item.id}
+          className={`bg-white w-full flex-row h-[50] border border-amber-900 items-center
+          ${isFirst ? "rounded-t-lg border-b-0" : "border-b-0"}
+          ${isLast ? "rounded-b-lg border-b" : ""}
+          ${isActive ? "border border-amber-500 bg-white" : ""}`}
         >
-          <StarFilledIcon />
-        </View>
-      )}
-      enableDragIndicator={true}
-    >
-      {favFolders.map((folder, index) => {
-        const lastItem = favFolders.length === index + 1;
-        return (
-          <View
-            key={folder.id}
-            id={folder.id}
-            className={`justify-between items-center bg-white flex-row`}
-            style={{
-              borderWidth: StyleSheet.hairlineWidth,
-              borderBottomRightRadius: lastItem ? 10 : 0,
-              borderTopRightRadius: index === 0 ? 10 : 0,
-              height: 50,
-              flex: 1,
-            }}
+          <Pressable
+            onPressIn={drag}
+            disabled={isActive}
+            key={item.id}
+            className="px-2 border-r border-amber-900 h-full justify-center"
           >
-            <Link
-              href={{
-                pathname: "/audio/dropbox/newdir",
-                params: { fullPath: folder.folderPath, backTitle: "Back" },
-              }}
-              className="flex-1"
-            >
-              <View className="flex-row flex-1 items-center ">
-                <Text
-                  className="ml-3 text"
-                  ellipsizeMode="tail"
-                  numberOfLines={2}
-                >
-                  {folder.folderPath}
-                </Text>
-              </View>
-            </Link>
-            <TouchableOpacity
-              onPress={() => actions.removeFavorite(folder.folderPath)}
-              className="pr-4"
-            >
-              <DeleteIcon />
-            </TouchableOpacity>
+            <StarFilledIcon />
+          </Pressable>
+          <Link
+            href={{
+              pathname: "/audio/dropbox/newdir",
+              params: { fullPath: item.folderPath, backTitle: "Back" },
+            }}
+            className="flex-1"
+          >
+            <View className="flex-row flex-1 items-center ">
+              <Text
+                className="ml-3 text"
+                ellipsizeMode="tail"
+                numberOfLines={2}
+              >
+                {item.folderPath}
+              </Text>
+            </View>
+          </Link>
+          <TouchableOpacity
+            onPress={() => actions.removeFavorite(item.folderPath)}
+            className="pr-4"
+          >
+            <DeleteIcon />
+          </TouchableOpacity>
+        </View>
+      </OpacityDecorator>
+    );
+  };
+  //~ Drag End
+  const onDragEnd = (data: FavoriteFolders[]) => {
+    let newData = [];
+    for (let i = 0; i < data.length; i++) {
+      newData.push({ ...data[i], position: i + 1 });
+    }
+    // save to store
+    actions.updateFavFolderArray(newData);
+  };
+  return (
+    <View>
+      <DraggableFlatList
+        extraData={favFolders}
+        data={favFolders}
+        renderPlaceholder={() => (
+          <View className="bg-amber-500 w-full h-full">
+            <Text></Text>
           </View>
-        );
-      })}
-    </DragDropEntry>
+        )}
+        onDragEnd={({ data }) => onDragEnd(data)}
+        // onDragEnd={({ data }) => actions.updateFavFolderArray(data)}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+      ></DraggableFlatList>
+    </View>
   );
 };
 
