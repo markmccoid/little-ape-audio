@@ -38,19 +38,19 @@ const DropboxScreens = () => {
         </View>
       </View>
       <View className="h-2" />
-      <View className="m-4">
+      <View className="flex-1 m-4">
         <Text className="text-amber-800 font-semibold mb-1 ml-2">
           Favorites
         </Text>
         <View
-          className="rounded-xl bg-white"
-          style={{
-            borderWidth: StyleSheet.hairlineWidth,
-            borderColor: colors.amber900,
-          }}
+          className="bg-white"
+          // style={{
+          //   borderWidth: StyleSheet.hairlineWidth,
+          //   borderColor: colors.amber900,
+          // }}
         >
           {/* <MainFavFolders favFolders={favFolders} /> */}
-          <MainFavFolders favFolders={favFolders} />
+          <MainFavFolders />
         </View>
         <View className="h-4" />
       </View>

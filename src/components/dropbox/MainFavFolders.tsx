@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, Pressable } from "react-native";
-import React from "react";
+import React, { useRef, useState } from "react";
 import { FavoriteFolders, useDropboxStore } from "@store/store-dropbox";
 import DraggableFlatList, {
   OpacityDecorator,
@@ -10,12 +10,21 @@ import {
   StarFilledIcon,
 } from "@components/common/svg/Icons";
 import { Link } from "expo-router";
+import MainFavFoldersRow from "./MainFavFoldersRow";
+import { useSharedValue } from "react-native-reanimated";
+import SwipeableItem, {
+  useSwipeableItemParams,
+} from "react-native-swipeable-item";
 
 type Props = {
   favFolders: FavoriteFolders[];
 };
-const MainFavFolders = ({ favFolders }: Props) => {
+const MainFavFolders = () => {
+  const favFolders = useDropboxStore((state) => state.favoriteFolders) || [];
+  const activeKey = useSharedValue(undefined);
   const actions = useDropboxStore((state) => state.actions);
+  const [extra, setExtra] = useState(false);
+  const flatRef = useRef();
   const renderItem = ({
     item,
     drag,
@@ -25,12 +34,12 @@ const MainFavFolders = ({ favFolders }: Props) => {
     drag: any;
     isActive: boolean;
   }) => {
-    // console.log("item", item);
     const isFirst = item.position === 1;
     const isLast = item.position === favFolders.length;
+    // console.log(`${isFirst ? "--->" : ""} ${item.id}`);
 
     return (
-      <OpacityDecorator>
+      <OpacityDecorator activeOpacity={0.9}>
         <View
           id={item.id}
           className={`bg-white w-full flex-row h-[50] border border-amber-900 items-center
@@ -81,23 +90,23 @@ const MainFavFolders = ({ favFolders }: Props) => {
     }
     // save to store
     actions.updateFavFolderArray(newData);
+    setExtra((prev) => !prev);
   };
   return (
-    <View>
-      <DraggableFlatList
-        extraData={favFolders}
-        data={favFolders}
-        renderPlaceholder={() => (
-          <View className="bg-amber-500 w-full h-full">
-            <Text></Text>
-          </View>
-        )}
-        onDragEnd={({ data }) => onDragEnd(data)}
-        // onDragEnd={({ data }) => actions.updateFavFolderArray(data)}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-      ></DraggableFlatList>
-    </View>
+    <DraggableFlatList
+      extraData={extra}
+      ref={flatRef}
+      data={favFolders}
+      renderPlaceholder={() => (
+        <View className="bg-amber-300 w-full h-full">
+          <Text></Text>
+        </View>
+      )}
+      onDragEnd={({ data }) => onDragEnd(data)}
+      // onDragEnd={({ data }) => actions.updateFavFolderArray(data)}
+      keyExtractor={(item) => item.id}
+      renderItem={renderItem}
+    />
   );
 };
 
