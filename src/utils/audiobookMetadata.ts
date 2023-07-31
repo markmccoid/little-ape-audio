@@ -47,7 +47,11 @@ export type FolderMetadata = {
   forceMongoUpdate?: boolean | undefined;
 };
 export type CleanBookMetadata = ReturnType<typeof cleanOneBook>;
-export function cleanOneBook(book: FolderMetadata, localImageName?: string) {
+export function cleanOneBook(
+  book: FolderMetadata,
+  path_lower: string,
+  localImageName?: string
+) {
   if (!book) return undefined;
   // decide on data for fields that come from multiple sources
   // if infoFileData available use it for the following:
@@ -79,9 +83,11 @@ export function cleanOneBook(book: FolderMetadata, localImageName?: string) {
 
   const bookLength = book?.infoFileData?.length;
   const randomNum = getRandomNumber();
+  const [categoryOne, categoryTwo] = getCategoriesFromPath(path_lower);
 
   return {
     id: book.id,
+    dropboxPathLower: path_lower,
     fullPath: book.fullPath,
     audioFileCount: book.audioFileCount,
     title,
@@ -98,5 +104,31 @@ export function cleanOneBook(book: FolderMetadata, localImageName?: string) {
     defaultImage: defaultImages[`image${randomNum}`],
     localImageName: localImageName,
     categories: Array.from(new Set(categories)),
+    categoryOne,
+    categoryTwo,
   };
+}
+
+function getCategoriesFromPath(pathIn: string) {
+  // Final output var
+  let categoryOne = "";
+  let categoryTwo = "";
+
+  // Split path into pieces
+  const pathArr = pathIn.split("/");
+  // Get rid of bookname
+  pathArr.pop();
+  const lastItem = pathArr[pathArr.length - 1];
+  //Regex to check if "A-N", "N-Z" etc.
+  const regEx = /^[a-zA-Z]\s*?-\s*?[a-zA-Z]$/; // /a-z\s*-.*$/
+
+  if (regEx.test(lastItem)) {
+    categoryOne = pathArr[pathArr.length - 3];
+    categoryTwo = pathArr[pathArr.length - 2];
+  } else {
+    categoryOne = pathArr[pathArr.length - 2];
+    categoryTwo = pathArr[pathArr.length - 1];
+  }
+
+  return [categoryOne, categoryTwo];
 }

@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, Dimensions, Pressable } from "react-native";
 import React, { Ref } from "react";
 import {
+  FlatList,
   PanGestureHandler,
   PanGestureHandlerGestureEvent,
   PanGestureHandlerProps,
@@ -25,7 +26,7 @@ const TRANSLATE_X_THRESHOLD = SCREEN_WIDTH * 0.3 * -1;
 
 type Props = {
   folderMetadata: Partial<CleanBookMetadata>;
-  simultaneousHandler: ScrollView;
+  simultaneousHandler: any;
   currentKey: string;
   activeKey: SharedValue<string>;
 };
@@ -130,7 +131,7 @@ const MetadataRow = ({
   });
 
   return (
-    <View className="w-full h-[50]">
+    <View className="w-full h-[80]">
       <AnimatedPressable onPress={() => console.log("HI")}>
         <Animated.View
           style={rIconStyle}
@@ -156,7 +157,8 @@ const MetadataRow = ({
           className="border border-amber-600 py-1 px-2 bg-white mb-1"
         >
           <Text className="text-sm font-semibold">{folderMetadata.title}</Text>
-          <Text className="text-xs">{folderMetadata?.id}</Text>
+          <Text className="text-xs">{folderMetadata.dropboxPathLower}</Text>
+          <Text className="text-xs">{currentKey}</Text>
         </Animated.View>
       </PanGestureHandler>
     </View>

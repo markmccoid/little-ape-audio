@@ -35,9 +35,12 @@ export type FolderMetadataDetails = Partial<CleanBookMetadata> & {
   isRead?: boolean;
 };
 
+export type FolderMetadataArrayItem = FolderMetadataDetails & { key: string };
+
 type DropboxState = {
   favoriteFolders: FavoriteFolders[];
   folderMetadata: Record<string, FolderMetadataDetails>;
+  folderMetadataArray: FolderMetadataArrayItem[];
   actions: {
     addFavorite: (favPath: string) => Promise<void>;
     removeFavorite: (favPath: string) => Promise<void>;
@@ -54,11 +57,16 @@ type DropboxState = {
     ) => Promise<void>;
     getFolderMetadata: (path_lower: string) => FolderMetadataDetails;
     clearFolderMetadata: () => Promise<void>;
+    // convert folderMetadata object into an array to facilitate
+    // displaying the information and searching
+    generateFolderMetadataArray: () => void;
+    getFavoritedBooks: () => FolderMetadataArrayItem[];
   };
 };
 export const useDropboxStore = create<DropboxState>((set, get) => ({
   favoriteFolders: [],
   folderMetadata: {},
+  folderMetadataArray: [],
   actions: {
     addFavorite: async (favPath) => {
       const favs = [...(get().favoriteFolders || [])];
@@ -103,19 +111,22 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       const currMetadata = get().folderMetadata;
       const metadataKey = createFolderMetadataKey(path_lower);
 
-      const newData = { ...currMetadata[metadataKey], ...newFolderMetadata };
+      const newData = {
+        ...currMetadata[metadataKey],
+        ...newFolderMetadata,
+      };
 
       const folderMetadata = { ...currMetadata, [metadataKey]: newData };
       set({ folderMetadata });
-      // if (saveToStorage) {
+      get().actions.generateFolderMetadataArray();
       await saveToAsyncStorage("foldermetadata", folderMetadata);
-      // }
     },
     addFoldersMetadata: async (newFoldersObj) => {
       const folderMetadata = { ...get().folderMetadata, ...newFoldersObj };
       set((state) => ({
         folderMetadata,
       }));
+      get().actions.generateFolderMetadataArray();
       await saveToAsyncStorage("foldermetadata", folderMetadata);
     },
     getFolderMetadata: (path_lower: string) => {
@@ -124,11 +135,33 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
     },
     clearFolderMetadata: async () => {
       set({ folderMetadata: {} });
+      set({ folderMetadataArray: [] });
       await saveToAsyncStorage("foldermetadata", {});
+    },
+    generateFolderMetadataArray: () => {
+      let folderMetadataArray = [];
+      for (const [key, value] of Object.entries(get().folderMetadata)) {
+        folderMetadataArray.push({ key, ...value });
+      }
+      set({ folderMetadataArray });
+    },
+    getFavoritedBooks: () => {
+      let favBooks = [];
+      const books = get().folderMetadataArray;
+      for (const book of books) {
+        if (book.isFavorite) {
+          favBooks.push(book);
+        }
+      }
+      return favBooks;
     },
   },
 }));
+export const useFavoriteBooks = () => {
+  // const data = useDropboxStore.getState().folderMetadataArray;
 
+  return useDropboxStore.getState().actions.getFavoritedBooks();
+};
 export const useFolderMeta = (folderId) => {
   const currMeta = useDropboxStore.getState().folderMetadata;
   return currMeta?.[folderId];
@@ -143,13 +176,15 @@ export const downloadFolderMetadata = async (folders: FolderEntry[]) => {
   const foldersMetadata = useDropboxStore.getState().folderMetadata;
   for (const folder of folders) {
     //! Check if we have metadata in zustand store
-    const folderMetadata = foldersMetadata?.[folder.path_lower];
+    const folderMetadata =
+      foldersMetadata?.[createFolderMetadataKey(folder.path_lower)];
     if (!folderMetadata) {
       foldersToDownload.push(folder);
     }
   }
   // Bail there are no folders to download (i.e. they exist in the store)
   if (foldersToDownload.length === 0) return;
+
   // START DOWNLOAD
   let chunkedFolders = [];
   const CHUNK_SIZE = 10;
@@ -187,7 +222,7 @@ export const getSingleFolderMetadata = async (folder) => {
     (entry) => entry.name.endsWith(".jpg") || entry.name.endsWith(".png")
   );
 
-  let finalCleanFileName = "";
+  let finalCleanImageName = "";
 
   let convertedMeta;
   if (metadataFile) {
@@ -199,9 +234,13 @@ export const getSingleFolderMetadata = async (folder) => {
       // Check to see if there is a google image, if not look for one it directory
       // Don't want to check every time, dropbox will throw 429 rate limit error
       if (!metadata.googleAPIData?.imageURL && localImage) {
-        finalCleanFileName = await getLocalImage(localImage, folder.name);
+        finalCleanImageName = await getLocalImage(localImage, folder.name);
       }
-      convertedMeta = cleanOneBook(metadata, finalCleanFileName);
+      convertedMeta = cleanOneBook(
+        metadata,
+        folder.path_lower,
+        finalCleanImageName
+      );
     } catch (error) {
       Alert.alert(
         "Error Downloading Metadata File",
@@ -211,12 +250,12 @@ export const getSingleFolderMetadata = async (folder) => {
   } else {
     // This means we did NOT find any ...metadata.json file build minimal info
     if (localImage) {
-      finalCleanFileName = await getLocalImage(localImage, folder.name);
+      finalCleanImageName = await getLocalImage(localImage, folder.name);
     }
     convertedMeta = {
       id: folder.path_lower,
       title: folder.name,
-      localImageName: finalCleanFileName,
+      localImageName: finalCleanImageName,
       defaultImage: defaultImages[`image${randomNum}`],
     } as Partial<CleanBookMetadata>;
   }
@@ -294,7 +333,10 @@ async function processPromises(promises) {
   const folderMetaObj = folderMetadataArray.reduce((final, el) => {
     const path_lower = Object.keys(el)[0];
     const metadataKey = createFolderMetadataKey(path_lower);
-    const newData = { ...currMetadata[metadataKey], ...el[metadataKey] };
+    const newData = {
+      ...currMetadata[metadataKey],
+      ...el[metadataKey],
+    };
 
     return { ...final, [metadataKey]: newData };
   }, {});

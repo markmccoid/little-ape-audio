@@ -697,6 +697,7 @@ export const onInitialize = async () => {
 
   useDropboxStore.setState({ favoriteFolders: favFolders });
   useDropboxStore.setState({ folderMetadata: folderMetadata });
+  useDropboxStore.getState().actions.generateFolderMetadataArray();
   useSettingStore.setState({
     jumpForwardSeconds: settings?.jumpForwardSeconds || 15,
     jumpBackwardSeconds: settings?.jumpBackwardSeconds || 15,

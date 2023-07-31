@@ -22,11 +22,7 @@ import {
   useFolderMeta,
 } from "../../store/store-dropbox";
 import { colors } from "../../constants/Colors";
-import {
-  CleanBookMetadata,
-  FolderMetadata,
-  cleanOneBook,
-} from "../../utils/audiobookMetadata";
+
 import ExplorerFolderRow from "./ExplorerFolderRow";
 import { MotiView } from "moti";
 import { defaultImages } from "../../store/storeUtils";

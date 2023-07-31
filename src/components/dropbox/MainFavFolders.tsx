@@ -1,4 +1,10 @@
-import { View, Text, TouchableOpacity, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Pressable,
+  StyleSheet,
+} from "react-native";
 import React, { useRef, useState } from "react";
 import { FavoriteFolders, useDropboxStore } from "@store/store-dropbox";
 import DraggableFlatList, {
@@ -15,6 +21,7 @@ import { useSharedValue } from "react-native-reanimated";
 import SwipeableItem, {
   useSwipeableItemParams,
 } from "react-native-swipeable-item";
+import { colors } from "@constants/Colors";
 
 type Props = {
   favFolders: FavoriteFolders[];
@@ -42,9 +49,9 @@ const MainFavFolders = () => {
       <OpacityDecorator activeOpacity={0.9}>
         <View
           id={item.id}
-          className={`bg-white w-full flex-row h-[50] border border-amber-900 items-center
-          ${isFirst ? "rounded-t-lg border-b-0" : "border-b-0"}
-          ${isLast ? "rounded-b-lg border-b" : ""}
+          className={`bg-white w-full flex-row h-[50] border-t border-amber-900 items-center
+          ${isFirst ? "border-b-0" : "border-b-0"}
+           ${isLast ? "border-b" : ""}
           ${isActive ? "border border-amber-500 bg-white" : ""}`}
         >
           <Pressable
@@ -94,6 +101,7 @@ const MainFavFolders = () => {
   };
   return (
     <DraggableFlatList
+      nestedScrollEnabled={true}
       extraData={extra}
       ref={flatRef}
       data={favFolders}
@@ -106,6 +114,12 @@ const MainFavFolders = () => {
       // onDragEnd={({ data }) => actions.updateFavFolderArray(data)}
       keyExtractor={(item) => item.id}
       renderItem={renderItem}
+      style={{
+        maxHeight: 220,
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: colors.amber900,
+        borderRadius: 10,
+      }}
     />
   );
 };

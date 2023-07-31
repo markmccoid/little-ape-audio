@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import React from "react";
 import { Link } from "expo-router";
 import {
@@ -9,13 +9,15 @@ import { useDropboxStore } from "../../../store/store-dropbox";
 import { colors } from "../../../constants/Colors";
 // import MainFavFolders from "../../../components/dropbox/MainFavFoldersOLD";
 import MainFavFolders from "@components/dropbox/MainFavFolders";
+import Animated from "react-native-reanimated";
+import ShowFavoritedBooks from "@components/dropbox/ShowFavoritedBooks";
 
 const DropboxScreens = () => {
   const favFolders = useDropboxStore((state) => state.favoriteFolders) || [];
 
   return (
     <View className="flex-1 flex-col bg-amber-50">
-      <View className="m-4">
+      <View className="mx-4 my-2">
         <Text className="text-amber-800 font-semibold mb-1 ml-2">Cloud</Text>
         <View
           className="rounded-xl bg-white"
@@ -38,21 +40,22 @@ const DropboxScreens = () => {
         </View>
       </View>
       <View className="h-2" />
-      <View className="flex-1 m-4">
+      {/* FAVORITE FOLDERS  */}
+      {/* ---------- */}
+      <View className="mx-4 my-2">
         <Text className="text-amber-800 font-semibold mb-1 ml-2">
-          Favorites
+          Favorite Folders
         </Text>
-        <View
-          className="bg-white"
-          // style={{
-          //   borderWidth: StyleSheet.hairlineWidth,
-          //   borderColor: colors.amber900,
-          // }}
-        >
-          {/* <MainFavFolders favFolders={favFolders} /> */}
+        <View className="bg-white">
           <MainFavFolders />
         </View>
-        <View className="h-4" />
+      </View>
+      {/*  */}
+      <View className="flex-1 mx-4 my-2 mb-10">
+        <Text className="text-amber-800 font-semibold mb-1 ml-2">
+          Favorited Books
+        </Text>
+        <ShowFavoritedBooks />
       </View>
     </View>
   );
