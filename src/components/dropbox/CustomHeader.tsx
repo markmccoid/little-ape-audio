@@ -22,6 +22,7 @@ function CustomHeader({ title, backText }) {
   const pathname = usePathname();
   const { width, height } = useWindowDimensions();
 
+  // Use folderNavigation info stored in dropbox store to navigate back
   const onNavigateBack = () => {
     const newPathInfo = actions.popFolderNavigation();
 
@@ -37,6 +38,7 @@ function CustomHeader({ title, backText }) {
       },
     });
   };
+
   return (
     <SafeAreaView
       style={{ flexDirection: "row", alignItems: "center" }}

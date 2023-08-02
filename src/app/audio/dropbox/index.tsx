@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, Dimensions } from "react-native";
 import React, { useState } from "react";
 import { Link } from "expo-router";
 import {
@@ -18,7 +18,7 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 // import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-
+const { width, height } = Dimensions.get("window");
 const DropboxScreens = () => {
   const favFolders = useDropboxStore((state) => state.favoriteFolders) || [];
   const [currTab, setCurrTab] = useState<"folders" | "books">("folders");
@@ -29,6 +29,7 @@ const DropboxScreens = () => {
       className="flex-1 flex-col bg-amber-50"
       // style={{ bottom: insets.bottom }}
     >
+      {/* DROPBOX LINK  */}
       <View className="mx-4 my-2">
         <Text className="text-amber-800 font-semibold mb-1 ml-2">Cloud</Text>
         <View
@@ -53,15 +54,23 @@ const DropboxScreens = () => {
       </View>
       <View className="h-2" />
 
+      {/* FAVORITE Folders and Books */}
       <View
-        className="flex-col mx-3 flex-1"
+        className="flex-col mx-[11] flex-1"
         style={{ marginBottom: insets.bottom }}
       >
         <View className="flex-row justify-between mb-2">
+          <MotiView
+            className="absolute w-[125] h-[2] bottom-0 left-0 bg-amber-800"
+            from={{ translateX: 0 }}
+            animate={{ translateX: currTab === "folders" ? 0 : width - 147 }}
+          />
           <AnimatedPressable onPress={() => setCurrTab("folders")}>
             <Text
               className={`text-base ${
-                currTab === "folders" ? "font-semibold" : "font-normal"
+                currTab === "folders"
+                  ? "font-semibold text-amber-800"
+                  : "font-normal"
               }`}
             >
               Favorite Folders
@@ -71,7 +80,9 @@ const DropboxScreens = () => {
           <AnimatedPressable onPress={() => setCurrTab("books")}>
             <Text
               className={`text-base ${
-                currTab === "books" ? "font-semibold" : "font-normal"
+                currTab === "books"
+                  ? "font-semibold text-amber-800"
+                  : "font-normal"
               }`}
             >
               Favorited Books

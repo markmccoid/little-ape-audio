@@ -1,23 +1,21 @@
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import React from "react";
-import { useDropboxStore, useFavoriteBooks } from "@store/store-dropbox";
+import { useDropboxStore } from "@store/store-dropbox";
 import { ScrollView } from "react-native-gesture-handler";
 import { Link, useRouter } from "expo-router";
 import { colors } from "@constants/Colors";
-import PlaylistImage from "@components/common/PlaylistImage";
 
 const ShowFavoritedBooks = () => {
   // const dropboxActions = useDropboxStore(state => state.actions)
-  const favBooks = useFavoriteBooks();
+  // const favBooks = useFavoriteBooks();
+  const favBooks = useDropboxStore((state) => state.favoritedBooks);
   const router = useRouter();
   return (
     <ScrollView
-      nestedScrollEnabled
       style={{ flexGrow: 1 }}
       // contentContainerStyle={{ flex: 1, width: "100%", height: "100%" }}
     >
       {favBooks?.map((book) => {
-        console.log("book", book.imageURL);
         return (
           <View
             className="flex-1 bg-white w-full h-[60]"
@@ -45,13 +43,13 @@ const ShowFavoritedBooks = () => {
                     source={book.imageURL}
                   />
                 </View>
-                <View className="flex-col justify-center w-full">
-                  <Text className="font-semibold text-sm text-center bg-amber-500">
+                <View className="flex-col justify-start w-full ">
+                  <Text className="font-semibold text-sm pl-3 bg-amber-500">
                     {book.categoryOne} - {book.categoryTwo}
                   </Text>
                   <Text
                     className="text-base font-bold px-2"
-                    style={{ marginTop: -5 }}
+                    style={{ marginTop: -3 }}
                   >
                     {book.title}
                   </Text>
