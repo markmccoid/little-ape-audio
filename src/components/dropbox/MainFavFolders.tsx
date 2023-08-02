@@ -49,10 +49,17 @@ const MainFavFolders = () => {
       <OpacityDecorator activeOpacity={0.9}>
         <View
           id={item.id}
-          className={`bg-white w-full flex-row h-[50] border-t border-amber-900 items-center
+          className={`bg-white w-full flex-row h-[50]  items-center
           ${isFirst ? "border-b-0" : "border-b-0"}
-           ${isLast ? "border-b" : ""}
+           
           ${isActive ? "border border-amber-500 bg-white" : ""}`}
+          style={{
+            borderTopWidth: StyleSheet.hairlineWidth,
+            borderTopColor: colors.amber900,
+            borderBottomWidth:
+              isActive || isLast ? StyleSheet.hairlineWidth : 0,
+            borderBottomColor: colors.amber900,
+          }}
         >
           <Pressable
             onPressIn={drag}
@@ -63,9 +70,14 @@ const MainFavFolders = () => {
             <StarFilledIcon />
           </Pressable>
           <Link
+            push
             href={{
               pathname: "/audio/dropbox/newdir",
-              params: { fullPath: item.folderPath, backTitle: "Back" },
+              params: {
+                fullPath: item.folderPath,
+                backTitle: "Back",
+                baseFolder: item.folderPath,
+              },
             }}
             className="flex-1"
           >
@@ -115,10 +127,11 @@ const MainFavFolders = () => {
       keyExtractor={(item) => item.id}
       renderItem={renderItem}
       style={{
-        maxHeight: 220,
+        // maxHeight: 220,
         borderWidth: StyleSheet.hairlineWidth,
-        borderColor: colors.amber900,
-        borderRadius: 10,
+        borderColor: colors.amber700,
+
+        // borderRadius: 10,
       }}
     />
   );

@@ -1,15 +1,21 @@
 import { View, Text, SafeAreaView } from "react-native";
-import React, { useLayoutEffect } from "react";
+import React, { useEffect, useLayoutEffect } from "react";
 import { Link, Stack, useRouter, useLocalSearchParams } from "expo-router";
 import ExplorerContainer from "../../../components/dropbox/ExplorerContainer";
 import { useNavigation } from "expo-router";
 import CustomHeader from "../../../components/dropbox/CustomHeader";
+import { useDropboxStore } from "@store/store-dropbox";
 
+type SearchParms = { fullPath: string; backTitle: string };
 const NewDirectory = () => {
+  const actions = useDropboxStore((state) => state.actions);
   const navigation = useNavigation();
   const router = useRouter();
 
-  const { newdir, fullPath, backTitle } = useLocalSearchParams();
+  const { newdir, fullPath, backTitle } = useLocalSearchParams<SearchParms>();
+  useEffect(() => {
+    actions.pushFolderNavigation({ fullPath, backTitle });
+  }, [newdir]);
 
   const onPathChange = (
     newPath: string,
@@ -17,6 +23,7 @@ const NewDirectory = () => {
     previousYOffset?: number
   ) => {
     // const trailingPath = newPath.slice(newPath.lastIndexOf("/") + 1);
+
     router.push({
       pathname: `/audio/dropbox/${folderName}`,
       params: {

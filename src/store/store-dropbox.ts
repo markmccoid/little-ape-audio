@@ -36,12 +36,22 @@ export type FolderMetadataDetails = Partial<CleanBookMetadata> & {
 };
 
 export type FolderMetadataArrayItem = FolderMetadataDetails & { key: string };
-
+type FolderNavigation = { fullPath: string; backTitle: string };
 type DropboxState = {
+  // Array of objects that contain folders that were starred by user in app
   favoriteFolders: FavoriteFolders[];
+  // When a user tell a directory to be "read" the metadata for every folder
+  // is stored in this object.
   folderMetadata: Record<string, FolderMetadataDetails>;
+  // This is a derived array created from the folderMetadata object
+  // created for easier display of folderMetadata
   folderMetadataArray: FolderMetadataArrayItem[];
+  // When navigating audio sources (right now dropbox), this store the
+  // directories so that the user can navigate backwards along same path
+  folderNavigation: FolderNavigation[];
   actions: {
+    pushFolderNavigation: (nextPath: FolderNavigation) => void;
+    popFolderNavigation: () => FolderNavigation;
     addFavorite: (favPath: string) => Promise<void>;
     removeFavorite: (favPath: string) => Promise<void>;
     isFolderFavorited: (folders: FolderEntry[]) => FolderEntry[];
@@ -67,7 +77,21 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
   favoriteFolders: [],
   folderMetadata: {},
   folderMetadataArray: [],
+  folderNavigation: [],
   actions: {
+    pushFolderNavigation: (nextPathInfo) => {
+      const nav = [...get().folderNavigation];
+      nav.push(nextPathInfo);
+      // console.log("folderNav", nav);
+      set({ folderNavigation: nav });
+    },
+    popFolderNavigation: () => {
+      const nav = [...get().folderNavigation];
+      nav.pop();
+      const prevPath = nav.pop();
+      set({ folderNavigation: nav || [] });
+      return prevPath;
+    },
     addFavorite: async (favPath) => {
       const favs = [...(get().favoriteFolders || [])];
       const newFav: FavoriteFolders = {

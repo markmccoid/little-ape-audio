@@ -6,20 +6,43 @@ import {
   useWindowDimensions,
   SafeAreaView,
 } from "react-native";
-import { useNavigation, useRouter } from "expo-router";
+import {
+  useNavigation,
+  usePathname,
+  useRouter,
+  useSegments,
+} from "expo-router";
 import { ChevronBackIcon } from "../common/svg/Icons";
+import { useDropboxStore } from "@store/store-dropbox";
 
 function CustomHeader({ title, backText }) {
+  const actions = useDropboxStore((state) => state.actions);
   const navigation = useNavigation();
-  const route = useRouter();
+  const router = useRouter();
+  const pathname = usePathname();
   const { width, height } = useWindowDimensions();
 
+  const onNavigateBack = () => {
+    const newPathInfo = actions.popFolderNavigation();
+
+    if (!newPathInfo) {
+      navigation.goBack();
+      return;
+    }
+    router.push({
+      pathname: `/audio/dropbox/${newPathInfo.backTitle}`,
+      params: {
+        fullPath: newPathInfo.fullPath,
+        backTitle: newPathInfo.backTitle,
+      },
+    });
+  };
   return (
     <SafeAreaView
       style={{ flexDirection: "row", alignItems: "center" }}
       className="h-12 border-b border-b-black bg-amber-300"
     >
-      <TouchableOpacity onPress={() => navigation.goBack()}>
+      <TouchableOpacity onPress={onNavigateBack}>
         <View className="flex-row items-center flex-1 ">
           <ChevronBackIcon size={30} />
           <Text
