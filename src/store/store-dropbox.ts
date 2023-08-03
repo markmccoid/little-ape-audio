@@ -36,7 +36,13 @@ export type FolderMetadataDetails = Partial<CleanBookMetadata> & {
 };
 
 export type FolderMetadataArrayItem = FolderMetadataDetails & { key: string };
-type FolderNavigation = { fullPath: string; backTitle: string };
+
+type FolderNavigation = {
+  fullPath: string;
+  backTitle: string;
+  yOffset?: number;
+};
+
 type DropboxState = {
   // Array of objects that contain folders that were starred by user in app
   favoriteFolders: FavoriteFolders[];
@@ -53,6 +59,7 @@ type DropboxState = {
   folderNavigation: FolderNavigation[];
   actions: {
     pushFolderNavigation: (nextPath: FolderNavigation) => void;
+    updateFolderNavOffset: (yOffset: number) => void;
     popFolderNavigation: () => FolderNavigation;
     addFavorite: (favPath: string) => Promise<void>;
     removeFavorite: (favPath: string) => Promise<void>;
@@ -86,6 +93,11 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       const nav = [...get().folderNavigation];
       nav.push(nextPathInfo);
       // console.log("folderNav", nav);
+      set({ folderNavigation: nav });
+    },
+    updateFolderNavOffset: (yOffset) => {
+      const nav = [...get().folderNavigation];
+      nav[nav.length - 1] = { ...nav[nav.length - 1], yOffset };
       set({ folderNavigation: nav });
     },
     popFolderNavigation: () => {

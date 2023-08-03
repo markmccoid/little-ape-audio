@@ -12,7 +12,7 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from "react-native";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import uuid from "react-native-uuid";
 import { Link } from "expo-router";
 import { listDropboxFiles, DropboxDir } from "../../utils/dropboxUtils";
@@ -57,29 +57,43 @@ const { height, width } = Dimensions.get("screen");
 type Props = {
   pathIn: string;
   onPathChange: (newPath: string, folderName: string) => void;
+  yOffset?: number;
 };
-const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
+const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
   const [filesFolderObj, setFilesFolderObj] = React.useState<DropboxDir>();
   const [flatlistData, setFlatlistData] = React.useState([]);
   const [downloadAllId, setDownloadAllId] = React.useState<string>();
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [isError, setIsError] = React.useState(undefined);
 
   const [showMetadata, setShowMetadata] = React.useState<
     "off" | "on" | "loading"
   >("off");
   const allFoldersMetadata = useDropboxStore((state) => state.folderMetadata);
 
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [isError, setIsError] = React.useState(undefined);
   const trackActions = useTrackActions();
   const dropboxActions = useDropboxStore((state) => state.actions);
 
-  const flatlistRef = useRef<ScrollView>();
-  const [currYOffset, setCurrYOffset] = useState(0);
-  // const [currYOffset, setCurrYOffset] = useState(0);
+  const flatlistRef = useRef<FlatList>();
+
+  // ------------------------------------------------------------------------
+  // -- HANDLE SCROLL and Save to Dropbox Store's FolderNavigation array
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const contentOffsetY = event.nativeEvent.contentOffset.y;
-    setCurrYOffset(contentOffsetY);
+    dropboxActions.updateFolderNavOffset(contentOffsetY);
   };
+
+  // SCROLL TO OFFSET
+  // Need to wait until loading is finished before flatlistRef will
+  // be available.  Then we can scroll
+  useEffect(() => {
+    if (flatlistRef.current && !isLoading) {
+      flatlistRef.current.scrollToOffset({
+        offset: Math.floor(yOffset),
+      });
+    }
+  }, [flatlistRef.current, isLoading]);
+  // ------------------------------------------------------------------------
 
   const renderItem = useCallback(
     ({ item, index }) => {
@@ -249,6 +263,9 @@ const ExplorerContainer = ({ pathIn, onPathChange }: Props) => {
         windowSize={10}
         // scrollEventThrottle={16}
         onScroll={handleScroll}
+        getItemLayout={(data, index) => {
+          return { length: 50, offset: 50 * index, index };
+        }}
       />
     </MotiView>
   );

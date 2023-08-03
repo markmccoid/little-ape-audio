@@ -6,22 +6,19 @@ import { useNavigation } from "expo-router";
 import CustomHeader from "../../../components/dropbox/CustomHeader";
 import { useDropboxStore } from "@store/store-dropbox";
 
-type SearchParms = { fullPath: string; backTitle: string };
+type SearchParms = { fullPath: string; backTitle: string; yOffset: string };
+
 const NewDirectory = () => {
   const actions = useDropboxStore((state) => state.actions);
-  const navigation = useNavigation();
   const router = useRouter();
 
-  const { newdir, fullPath, backTitle } = useLocalSearchParams<SearchParms>();
+  const { newdir, fullPath, backTitle, yOffset } =
+    useLocalSearchParams<SearchParms>();
   useEffect(() => {
     actions.pushFolderNavigation({ fullPath, backTitle });
   }, [newdir]);
 
-  const onPathChange = (
-    newPath: string,
-    folderName: string,
-    previousYOffset?: number
-  ) => {
+  const onPathChange = (newPath: string, folderName: string) => {
     // const trailingPath = newPath.slice(newPath.lastIndexOf("/") + 1);
 
     router.push({
@@ -42,7 +39,11 @@ const NewDirectory = () => {
         }}
       />
 
-      <ExplorerContainer pathIn={fullPath} onPathChange={onPathChange} />
+      <ExplorerContainer
+        pathIn={fullPath}
+        onPathChange={onPathChange}
+        yOffset={yOffset}
+      />
     </SafeAreaView>
   );
 };

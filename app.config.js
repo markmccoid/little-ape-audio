@@ -11,7 +11,7 @@ export default {
   scheme: "littleapeaudio",
   privacy: "unlisted",
   platforms: ["ios"],
-  version: "0.1.9",
+  version: "0.2.0",
   orientation: "portrait",
   icon: "./assets/littleapeaudiocolor.png",
   userInterfaceStyle: "automatic",
@@ -33,7 +33,7 @@ export default {
     },
     supportsTablet: false,
     bundleIdentifier: "com.markmccoid.little-ape-audio",
-    buildNumber: "0.1.9",
+    buildNumber: "0.2.0",
     infoPlist: {
       RCTAsyncStorageExcludeFromBackup: false,
       NSMicrophoneUsageDescription:
