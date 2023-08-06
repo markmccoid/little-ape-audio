@@ -7,6 +7,14 @@ import {
   useTrackActions,
 } from "../../store/store";
 import { colors } from "../../constants/Colors";
+import Animated, {
+  BounceInDown,
+  SlideInLeft,
+  ZoomIn,
+  ZoomInEasyDown,
+  ZoomInEasyUp,
+  ZoomOut,
+} from "react-native-reanimated";
 
 // Common image dims 128x164 (W * 1.28)
 
@@ -14,8 +22,9 @@ type Props = {
   // IF not playlistId passed, then currentPlaylist is used
   playlistId?: string;
   style?: StyleProp<ImageStyle>;
+  noTransition?: boolean;
 };
-const PlaylistImage = ({ playlistId, style }: Props) => {
+const PlaylistImage = ({ playlistId, style, noTransition = false }: Props) => {
   const actions = useTrackActions();
   // let playlist = usePlaybackStore((state) => state.currentPlaylist);
   let playlist = getCurrentPlaylist();
@@ -23,16 +32,15 @@ const PlaylistImage = ({ playlistId, style }: Props) => {
     playlist = actions.getPlaylist(playlistId);
   }
 
-  const imageSource =
-    playlist?.imageType === "uri"
-      ? { uri: playlist.imageURI }
-      : playlist.imageURI;
   return (
     <>
       {playlist.id && (
-        <View style={[styles.shadow, style]}>
-          <Image style={[styles.trackImage, style]} source={imageSource} />
-        </View>
+        <Animated.View entering={ZoomInEasyUp} style={[styles.shadow, style]}>
+          <Animated.Image
+            style={[styles.trackImage, style]}
+            source={{ uri: playlist.imageURI }}
+          />
+        </Animated.View>
       )}
     </>
   );

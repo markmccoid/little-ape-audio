@@ -15,6 +15,7 @@ import { Link, useRouter } from "expo-router";
 import { formatSeconds } from "../../utils/formatUtils";
 import PlaylistImage from "../common/PlaylistImage";
 import { DeleteIcon, EditIcon } from "../common/svg/Icons";
+import Animated from "react-native-reanimated";
 
 type Props = {
   playlist: Playlist;
@@ -80,8 +81,12 @@ const PlaylistRow = ({ playlist, onPlaylistSelect }: Props) => {
         onPress={() => onPlaylistSelect(playlist.id)}
       >
         {/* IMAGE */}
-        {/* <Image style={styles.trackImage} source={imageSource} /> */}
-        <PlaylistImage style={styles.trackImage} playlistId={playlist.id} />
+
+        <PlaylistImage
+          style={styles.trackImage}
+          playlistId={playlist.id}
+          noTransition
+        />
         {/* TITLE AUTHOR LENGTH */}
         <View className="flex-col flex-1 ml-2 justify-between pb-1 ">
           <View className="flex-col flex-shrink">

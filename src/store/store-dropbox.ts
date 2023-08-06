@@ -19,6 +19,7 @@ import {
   getCleanFileName,
 } from "./data/fileSystemAccess";
 import { Alert } from "react-native";
+import sortBy from "lodash/sortBy";
 
 //-- ==================================
 //-- DROPBOX STORE
@@ -33,9 +34,13 @@ export type FavoriteFolders = {
 export type FolderMetadataDetails = Partial<CleanBookMetadata> & {
   isFavorite?: boolean;
   isRead?: boolean;
+  position?: number;
 };
 
-export type FolderMetadataArrayItem = FolderMetadataDetails & { key: string };
+export type FolderMetadataArrayItem = FolderMetadataDetails & {
+  key: string;
+  position?: number;
+};
 
 type FolderNavigation = {
   fullPath: string;
@@ -58,8 +63,11 @@ type DropboxState = {
   // directories so that the user can navigate backwards along same path
   folderNavigation: FolderNavigation[];
   actions: {
+    // Add a folder navigation entry to the folderNavigation array
     pushFolderNavigation: (nextPath: FolderNavigation) => void;
+    // Update the current foldernavigation entry with the yOffset value
     updateFolderNavOffset: (yOffset: number) => void;
+    // Returns the dropbox path to go to when the back button is pressed.
     popFolderNavigation: () => FolderNavigation;
     addFavorite: (favPath: string) => Promise<void>;
     removeFavorite: (favPath: string) => Promise<void>;
@@ -73,6 +81,9 @@ type DropboxState = {
     ) => Promise<void>;
     addFoldersMetadata: (
       newFoldersObj: Record<string, FolderMetadataDetails>
+    ) => Promise<void>;
+    updateFoldersMetadataPosition: (
+      newInfo: FolderMetadataArrayItem[]
     ) => Promise<void>;
     getFolderMetadata: (path_lower: string) => FolderMetadataDetails;
     clearFolderMetadata: () => Promise<void>;
@@ -168,6 +179,18 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       get().actions.generateFolderMetadataArray();
       await saveToAsyncStorage("foldermetadata", folderMetadata);
     },
+    updateFoldersMetadataPosition: async (newInfo) => {
+      // const { key, position } = newInfo;
+      const folderMetadata = { ...get().folderMetadata };
+      for (const book of newInfo) {
+        const { key, position } = book;
+        // folderMetadata[key] = { ...folderMetadata[key], position };
+        folderMetadata[key].position = position;
+      }
+      set({ folderMetadata });
+      get().actions.generateFolderMetadataArray();
+      await saveToAsyncStorage("foldermetadata", folderMetadata);
+    },
     getFolderMetadata: (path_lower: string) => {
       const key = createFolderMetadataKey(path_lower);
       return get().folderMetadata?.[key];
@@ -183,12 +206,18 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
         folderMetadataArray.push({ key, ...value });
       }
       // Get favorite books
-      let favBooks = [];
+      let favBooks = [] as FolderMetadataArrayItem[];
+      let i = 1;
       for (const book of folderMetadataArray) {
         if (book.isFavorite) {
           favBooks.push(book);
         }
       }
+      // Sort by position field
+      favBooks = sortBy(favBooks, ["position"]);
+      // If no position give it one
+      favBooks.map((el, index) => ({ position: index + 1, ...el }));
+
       set({ folderMetadataArray, favoritedBooks: favBooks });
     },
     getFavoritedBooks: () => {

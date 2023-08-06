@@ -130,5 +130,20 @@ function getCategoriesFromPath(pathIn: string) {
     categoryTwo = pathArr[pathArr.length - 1];
   }
 
-  return [categoryOne, categoryTwo];
+  return [properCase(categoryOne), properCase(categoryTwo)];
+}
+
+function properCase(word) {
+  // Check if the word is already capitalized.
+  if (word[0].toUpperCase() === word[0]) {
+    return word;
+  }
+
+  // Lowercase the entire word.
+  word = word.toLowerCase();
+
+  // Capitalize the first letter.
+  word = word[0].toUpperCase() + word.slice(1);
+
+  return word;
 }

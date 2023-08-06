@@ -69,6 +69,7 @@ const styles = StyleSheet.create({
   },
   hidden: {
     overflow: "hidden",
+    zIndex: 20,
   },
 });
 

@@ -22,6 +22,7 @@ type Props = {
 };
 const ExplorerFolderRow = ({
   metadata,
+
   showMetadata = false,
   index,
 }: Props) => {

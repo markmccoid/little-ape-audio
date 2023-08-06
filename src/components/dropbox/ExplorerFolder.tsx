@@ -111,6 +111,7 @@ const ExplorerFolder = ({
         backgroundColor: index % 2 === 0 ? colors.amber100 : colors.amber50,
         flex: 1,
         paddingBottom: 5,
+        height: showFolderMetadata === "off" ? 45 : 200,
       }}
     >
       <TouchableOpacity
@@ -170,7 +171,7 @@ const ExplorerFolder = ({
           </TouchableOpacity>
         </MotiView>
       </TouchableOpacity>
-      <View className="mb-0">
+      <View className="mb-0 flex-1">
         <ExplorerFolderRow
           showMetadata={
             folderMetaState !== "off" || showFolderMetadata !== "off"

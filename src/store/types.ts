@@ -43,7 +43,7 @@ export type Playlist = {
   name: string;
   author: string;
   lastPlayedDateTime: number;
-  imageURI: { uri: string } | number | undefined;
+  imageURI: string; //{ uri: string } | number | undefined;
   imageType: "uri" | "imported" | "url";
   genre: string;
   totalDurationSeconds: number;

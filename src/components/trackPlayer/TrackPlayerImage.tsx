@@ -4,6 +4,7 @@ import PlaylistImage from "../common/PlaylistImage";
 import { BackIcon, NextIcon } from "../common/svg/Icons";
 import { colors } from "../../constants/Colors";
 import { usePlaybackStore } from "../../store/store";
+import Animated from "react-native-reanimated";
 
 const { width, height } = Dimensions.get("window");
 

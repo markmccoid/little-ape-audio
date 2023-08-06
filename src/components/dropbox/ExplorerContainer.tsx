@@ -230,7 +230,11 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
       from={{ opacity: 0.5 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0.5 }}
-      style={{ flex: 1, flexDirection: "column", justifyContent: "flex-start" }}
+      style={{
+        flex: 1,
+        flexDirection: "column",
+        justifyContent: "flex-start",
+      }}
     >
       <View style={{ zIndex: 5 }}>
         <ExplorerActionBar
@@ -255,7 +259,7 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
         //   <RefreshControl refreshing={false} onRefresh={onRefresh} />
         // }
         ref={flatlistRef}
-        extraData={allFoldersMetadata}
+        extraData={[allFoldersMetadata, showMetadata]}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         horizontal={false}
@@ -263,8 +267,13 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
         windowSize={10}
         // scrollEventThrottle={16}
         onScroll={handleScroll}
+        //! Need to update the length based on if it is open or not
         getItemLayout={(data, index) => {
-          return { length: 50, offset: 50 * index, index };
+          let offset = showMetadata === "off" ? 45 : 200;
+          if (filesFolderObj?.files?.length > 0) {
+            offset = 45;
+          }
+          return { length: offset, offset: offset * index, index };
         }}
       />
     </MotiView>

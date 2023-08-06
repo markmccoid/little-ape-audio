@@ -1,5 +1,6 @@
 import { Playlist, AudioState, ApeTrack, Bookmark } from "./types";
 import { create } from "zustand";
+import { Image } from "react-native";
 import uuid from "react-native-uuid";
 import {
   loadFromAsyncStorage,
@@ -139,8 +140,13 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       // Example usage
       const randomNum = getRandomNumber();
 
-      playlist.imageURI = images[0] || defaultImages[`image${randomNum}`];
-      playlist.imageType = images[0] ? "uri" : "imported";
+      // If no image found use a random local image for playlist
+      playlist.imageURI =
+        images[0] ||
+        Image.resolveAssetSource(defaultImages[`image${randomNum}`]).uri;
+      // Image type is depricated because we are using the resolveAssetSource
+      // to standardize local images
+      // playlist.imageType = images[0] ? "uri" : "imported";
       playlist.genre = genres[0];
       playlist.totalDurationSeconds = totalDuration;
       playlist.trackIds = sortBy(uniqueTracksPlaylist);
