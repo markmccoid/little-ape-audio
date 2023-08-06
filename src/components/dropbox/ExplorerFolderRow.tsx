@@ -22,7 +22,6 @@ type Props = {
 };
 const ExplorerFolderRow = ({
   metadata,
-
   showMetadata = false,
   index,
 }: Props) => {
@@ -81,7 +80,7 @@ const ExplorerFolderRow = ({
             )}
           </View>
           {/* **Show DESCRIPTION Button** */}
-          {metadata.description && (
+          {/* {metadata.description && (
             <Pressable
               onPress={() => setShowDescription((prev) => !prev)}
               className="flex-row justify-center"
@@ -121,7 +120,7 @@ const ExplorerFolderRow = ({
                 </MotiView>
               </MotiView>
             </Pressable>
-          )}
+          )} */}
         </View>
       </View>
       {/* **DESCRIPTION** */}

@@ -69,6 +69,7 @@ type DropboxState = {
     updateFolderNavOffset: (yOffset: number) => void;
     // Returns the dropbox path to go to when the back button is pressed.
     popFolderNavigation: () => FolderNavigation;
+    clearFolderNavigation: () => void;
     addFavorite: (favPath: string) => Promise<void>;
     removeFavorite: (favPath: string) => Promise<void>;
     isFolderFavorited: (folders: FolderEntry[]) => FolderEntry[];
@@ -117,6 +118,9 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       const prevPath = nav.pop();
       set({ folderNavigation: nav || [] });
       return prevPath;
+    },
+    clearFolderNavigation: () => {
+      set({ folderNavigation: [] });
     },
     addFavorite: async (favPath) => {
       const favs = [...(get().favoriteFolders || [])];

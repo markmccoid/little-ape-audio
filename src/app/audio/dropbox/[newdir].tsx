@@ -11,16 +11,20 @@ type SearchParms = { fullPath: string; backTitle: string; yOffset: string };
 const NewDirectory = () => {
   const actions = useDropboxStore((state) => state.actions);
   const router = useRouter();
-
+  const navigation = useNavigation();
   const { newdir, fullPath, backTitle, yOffset } =
     useLocalSearchParams<SearchParms>();
   useEffect(() => {
     actions.pushFolderNavigation({ fullPath, backTitle });
   }, [newdir]);
 
+  // Need a listener that will clear the dropbox store folderNavigation array
+  navigation.addListener("beforeRemove", () => {
+    actions.clearFolderNavigation();
+  });
+
   const onPathChange = (newPath: string, folderName: string) => {
     // const trailingPath = newPath.slice(newPath.lastIndexOf("/") + 1);
-
     router.push({
       pathname: `/audio/dropbox/${folderName}`,
       params: {

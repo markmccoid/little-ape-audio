@@ -100,7 +100,7 @@ const ShowFavoritedBooks = () => {
     for (let i = 0; i < data.length; i++) {
       newData.push({ ...data[i], position: i + 1 });
     }
-    console.log(newData.map((el) => `${el.title}--${el.position}`));
+
     // save to store
     //!  Need to update all items positions
     //! how to send and how to update???
