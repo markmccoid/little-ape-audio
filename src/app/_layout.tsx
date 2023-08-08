@@ -21,7 +21,10 @@ import {
   Lato_700Bold,
 } from "@expo-google-fonts/lato";
 
-import TrackPlayer, { Capability } from "react-native-track-player";
+import TrackPlayer, {
+  Capability,
+  IOSCategoryMode,
+} from "react-native-track-player";
 import { onInitialize } from "../store/store";
 import { useSettingStore } from "../store/store-settings";
 import { deactivateKeepAwake } from "expo-keep-awake";
@@ -54,7 +57,9 @@ export default function RootLayout() {
       const jumpForwardSeconds = useSettingStore.getState().jumpForwardSeconds;
       const jumpBackwardSeconds =
         useSettingStore.getState().jumpBackwardSeconds;
-      await TrackPlayer.setupPlayer();
+      await TrackPlayer.setupPlayer({
+        iosCategoryMode: IOSCategoryMode.SpokenAudio,
+      });
       await TrackPlayer.updateOptions({
         alwaysPauseOnInterruption: true,
         progressUpdateEventInterval: 1,

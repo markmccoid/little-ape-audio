@@ -11,8 +11,10 @@ import { colors } from "../../constants/Colors";
 import { Link } from "expo-router";
 import { useSettingStore } from "../../store/store-settings";
 import { MotiView } from "moti";
+import Constants from "expo-constants";
 
 const SettingsContainer = () => {
+  const version = Constants?.expoConfig?.version;
   const actions = useSettingStore((state) => state.actions);
   const forwardSecs = useSettingStore((state) => state.jumpForwardSeconds);
   const backwardSecs = useSettingStore((state) => state.jumpBackwardSeconds);
@@ -54,6 +56,13 @@ const SettingsContainer = () => {
           duration: 500,
         }}
       >
+        <View
+          className="flex-row justify-between px-2 py-3"
+          style={[styles.borderBottom]}
+        >
+          <Text>Version</Text>
+          <Text>{version}</Text>
+        </View>
         <View className="px-2 py-3" style={[styles.borderBottom]}>
           <Link href="/settings/dropboxauth" asChild>
             <Pressable>

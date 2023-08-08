@@ -3,8 +3,10 @@ import React from "react";
 import { Link, Stack } from "expo-router";
 import { colors } from "../../constants/Colors";
 import { BackIcon, HomeIcon } from "../../components/common/svg/Icons";
+import Constants from "expo-constants";
 
 const SettingsLayout = () => {
+  const version = Constants?.expoConfig?.version;
   return (
     <Stack>
       <Stack.Screen

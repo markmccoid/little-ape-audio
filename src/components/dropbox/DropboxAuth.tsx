@@ -27,6 +27,7 @@ import Monkey from "../common/svg/Monkey";
 
 const APP_KEY = Constants?.expoConfig?.extra?.dropboxAppKey;
 const APP_SECRET = Constants?.expoConfig?.extra?.dropboxSecret;
+
 const redirectURL = makeRedirectUri({
   scheme: "littleapeaudio",
   path: "settings",
