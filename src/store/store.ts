@@ -661,7 +661,7 @@ const buildTrackPlayerQueue = (trackIds: string[]): ApeTrack[] => {
 const saveCurrentTrackInfo = async () => {
   const trackIndex = await TrackPlayer.getCurrentTrack();
   if (trackIndex !== null && trackIndex !== undefined) {
-    console.log("Saving Track Progress");
+    // console.log("Saving Track Progress");
     const position = await TrackPlayer.getPosition();
     usePlaybackStore.setState({ currentTrackPosition: position });
     const playlist = {

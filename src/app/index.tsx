@@ -12,7 +12,7 @@ const RootIndex = () => {
   return (
     <SafeAreaView>
       <Link href="/audio">
-        <Text>START APP</Text>
+        <Text></Text>
       </Link>
     </SafeAreaView>
   );

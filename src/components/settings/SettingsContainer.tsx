@@ -103,6 +103,13 @@ const SettingsContainer = () => {
             </Pressable>
           </Link>
         </View>
+        <View className="px-2 py-3" style={[styles.borderBottom]}>
+          <Link href="/settings/playarea" asChild>
+            <Pressable>
+              <Text className="text-sm">Play Area</Text>
+            </Pressable>
+          </Link>
+        </View>
       </MotiView>
     </ScrollView>
   );

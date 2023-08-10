@@ -46,6 +46,12 @@ const SettingsLayout = () => {
           headerTintColor: colors.amber900,
         }}
       />
+      <Stack.Screen
+        name="playarea"
+        options={{
+          title: "Play Area",
+        }}
+      />
     </Stack>
   );
 };

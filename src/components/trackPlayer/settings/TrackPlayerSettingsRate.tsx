@@ -1,10 +1,14 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Dimensions } from "react-native";
 import React, { useEffect, useState } from "react";
 import { usePlaybackStore } from "../../../store/store";
 import TrackPlayer from "react-native-track-player";
 import Slider from "@react-native-community/slider";
 import { MotiView } from "moti";
 import { colors } from "../../../constants/Colors";
+
+const { width, height } = Dimensions.get("window");
+const COMPONENT_WIDTH = width - 20;
+const COMPONENT_PADDING = 10;
 
 const TrackPlayerSettingsRate = () => {
   const playbackActions = usePlaybackStore((state) => state.actions);
@@ -27,7 +31,10 @@ const TrackPlayerSettingsRate = () => {
   const fixedRates = [1, 1.25, 1.5, 1.75, 2];
 
   return (
-    <View className="flex-col">
+    <View
+      className="flex-col"
+      style={{ width: width, paddingHorizontal: COMPONENT_PADDING }}
+    >
       <Text className="ml-2 text-lg font-bold">Audio Speed:</Text>
       <View className="flex flex-col p-2 bg-white border border-amber-950 rounded-lg">
         <View className="flex-row justify-start space-x-2 w-full items-center mb-2">
