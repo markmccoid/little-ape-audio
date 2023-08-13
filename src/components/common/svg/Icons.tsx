@@ -300,3 +300,18 @@ export const PowerIcon = ({ size = 25, color, style }: Props) => {
     />
   );
 };
+
+export const SpeedIcon = ({ size = 25, color, style }: Props) => {
+  return <MaterialIcons name="speed" size={size} color={color} style={style} />;
+};
+
+export const TimerSandIcon = ({ size = 25, color, style }: Props) => {
+  return (
+    <MaterialCommunityIcons
+      name="timer-sand-complete"
+      size={size}
+      color={color}
+      style={style}
+    />
+  );
+};

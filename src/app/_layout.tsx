@@ -84,8 +84,7 @@ export default function RootLayout() {
     };
     // Run your initialization code here
     // It can be async
-    // setupTP();
-    setIsLoaded(true);
+    setupTP();
   }, []);
 
   useEffect(() => {

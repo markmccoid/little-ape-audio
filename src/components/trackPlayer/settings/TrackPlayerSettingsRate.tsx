@@ -35,7 +35,7 @@ const TrackPlayerSettingsRate = () => {
       className="flex-col"
       style={{ width: width, paddingHorizontal: COMPONENT_PADDING }}
     >
-      <Text className="ml-2 text-lg font-bold">Audio Speed:</Text>
+      {/* <Text className="ml-2 text-lg font-bold">Audio Speed:</Text> */}
       <View className="flex flex-col p-2 bg-white border border-amber-950 rounded-lg">
         <View className="flex-row justify-start space-x-2 w-full items-center mb-2">
           {fixedRates.map((el) => (
