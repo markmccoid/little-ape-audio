@@ -1,11 +1,14 @@
 import {
   View,
   Text,
-  FlatList,
   Dimensions,
   TouchableOpacity,
+  FlatList,
 } from "react-native";
 import React, { useCallback, useRef, useState } from "react";
+import TrackPlayerSettingsRate from "./TrackPlayerSettingsRate";
+import TrackPlayerSettingsSleepTimer from "./TrackPlayerSettingsSleepTimer";
+import { SpeedIcon, TimerSandIcon } from "@components/common/svg/Icons";
 import Animated, {
   interpolate,
   runOnJS,
@@ -13,60 +16,48 @@ import Animated, {
   useAnimatedRef,
   useAnimatedScrollHandler,
   useAnimatedStyle,
-  useDerivedValue,
   useSharedValue,
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import TrackPlayerSettingsRate from "@components/trackPlayer/settings/TrackPlayerSettingsRate";
-import { transform } from "lodash";
-import { MotiText, MotiView } from "moti";
-import { SpeedIcon, TimerSandIcon } from "@components/common/svg/Icons";
+import { MotiView } from "moti";
 import { colors } from "@constants/Colors";
 
+//-- COMPONENT ARRAY holds the info for the components --------------
+//-- used in scroller
+type ComponentArray = {
+  component: React.JSX.Element[];
+  icon: React.JSX.Element[];
+  label: string[];
+};
+
+const componentArray = [
+  {
+    component: TrackPlayerSettingsRate,
+    icon: SpeedIcon,
+    label: "Audio Speed",
+  },
+  {
+    component: TrackPlayerSettingsSleepTimer,
+    icon: TimerSandIcon,
+    label: "Sleep Timer",
+  },
+];
+
+//## Constants
 const { width, height } = Dimensions.get("window");
 const INDICATOR_WIDTH = 25;
 const INDICATOR_SPACING = 20;
+const INDICATORS_CENTER =
+  width / 2 -
+  ((INDICATOR_WIDTH + INDICATOR_SPACING) * componentArray.length) / 2;
 
-const playarea = () => {
+const TPSettingsScroller = () => {
   const flatRef = useRef<FlatList>();
   const flatLabelRef = useAnimatedRef<FlatList>();
-
   const [flIndex, setFLIndex] = useState(0);
-  const flSharedIndex = useSharedValue(0);
   const scrollX = useSharedValue(0);
 
-  //-- COMPONENT ARRAY --------------
-  type ComponentArray = {
-    component: React.JSX.Element[];
-    icon: React.JSX.Element[];
-    label: string[];
-  };
-
-  const componentArray = [
-    {
-      component: <TrackPlayerSettingsRate />,
-      icon: SpeedIcon,
-      label: "Audio Speed",
-    },
-  ];
-  const components = [
-    <TrackPlayerSettingsRate />,
-    <View style={{ width: width - 20, marginHorizontal: 10, borderWidth: 1 }}>
-      <Text>This is the second component.</Text>
-    </View>,
-    <TrackPlayerSettingsRate />,
-    <TrackPlayerSettingsRate />,
-  ];
-  //-- LABEL ARRAY --------------
-  const compLabels = ["Audio Speed", "Comp 2", "Speed 3", "The Matrix"];
-  const compIcons = [SpeedIcon, TimerSandIcon, SpeedIcon, TimerSandIcon];
-  // const compIcons = [
-  //   (color) => <SpeedIcon color={color} />,
-  //   (color) => <TimerSandIcon color={color} />,
-  //   (color) => <SpeedIcon color={color} />,
-  //   (color) => <TimerSandIcon color={color} />,
-  // ];
   //~ Handle the scrolling --------------
   const handleScroll = useAnimatedScrollHandler({
     onScroll: (e) => {
@@ -78,21 +69,14 @@ const playarea = () => {
     },
   });
 
-  //~ Animated Styles
-  const INDICATORS_CENTER =
-    width / 2 - ((INDICATOR_WIDTH + INDICATOR_SPACING) * components.length) / 2;
-
+  //~ Animated Styles -------------------
   const animatedStyles = useAnimatedStyle(() => {
-    const dotPos = interpolate(scrollX.value / width, [0, 1], [0, 45], {
-      // const dotPos = interpolate(scrollX.value, [0, width], [-78, -33], {
-      // extrapolateRight: Extrapolation.CLAMP,
-    });
-    // console.log("DOT", dotPos, scrollX.value / width);
+    const dotPos = interpolate(scrollX.value / width, [0, 1], [0, 45]);
     return {
       transform: [{ translateX: dotPos }],
     };
   });
-
+  // onPress in Icons
   const onIndicatorPress = (idx) => {
     flatRef?.current.scrollToIndex({ animated: true, index: idx });
     setFLIndex(idx);
@@ -179,10 +163,10 @@ const playarea = () => {
   return (
     <View className="flex-col">
       <View
-        className="flex-row mt-2 h-[35]"
+        className="flex-1 flex-row mt-2 h-[35]"
         style={{ transform: [{ translateX: INDICATORS_CENTER }] }}
       >
-        {compIcons.map((El, index) => {
+        {componentArray.map((el, index) => {
           let color = colors.amber950;
           if (index === flIndex) {
             color = colors.amber600;
@@ -198,7 +182,7 @@ const playarea = () => {
                 animate={{ opacity: index === flIndex ? 1 : 0.4 }}
               >
                 {/* {el(color)} */}
-                <El color={color} />
+                <el.icon color={color} />
               </MotiView>
             </TouchableOpacity>
           );
@@ -215,9 +199,9 @@ const playarea = () => {
 
       <Animated.FlatList
         ref={flatLabelRef}
-        data={compLabels}
+        data={componentArray.map((el) => el.label)}
         horizontal
-        style={{ width }}
+        style={{ width, flex: 1 }}
         scrollEnabled={false}
         snapToInterval={width}
         keyExtractor={(_, index) => index.toString()}
@@ -229,19 +213,25 @@ const playarea = () => {
       />
       <Animated.FlatList
         ref={flatRef}
-        data={components}
+        data={componentArray}
         horizontal
         showsHorizontalScrollIndicator={false}
         snapToInterval={width}
+        style={{ width, height: 80 }}
         keyExtractor={(_, index) => index.toString()}
         decelerationRate="fast"
         onScroll={handleScroll}
         renderItem={({ item, index }) => {
-          return item;
+          const Comp = item.component;
+          return (
+            <View style={{ width }}>
+              <Comp />
+            </View>
+          );
         }}
       />
     </View>
   );
 };
 
-export default playarea;
+export default TPSettingsScroller;
