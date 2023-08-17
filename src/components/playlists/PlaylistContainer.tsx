@@ -101,13 +101,14 @@ const PlaylistContainer = () => {
       <AnimatePresence>
         {onShow && (
           <MotiView
+            className="border border-red-900 h-[40]"
             from={{ opacity: 0, height: 40 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, height: 0 }}
             transition={{
               type: "timing",
               duration: 300,
-              opacity: { type: "timing", duration: 400 },
+              opacity: { type: "timing", duration: 300 },
             }}
             exitTransition={{
               type: "timing",
