@@ -25,6 +25,7 @@ export const formatSeconds = (
   showHours = showHours ?? true;
   // if (!secondsIn) return 0;
   const d = Number(secondsIn);
+  if (isNaN(d)) return undefined;
   const h = Math.floor(d / 3600);
   const m = Math.floor((d % 3600) / 60);
   const s = Math.floor((d % 3600) % 60);

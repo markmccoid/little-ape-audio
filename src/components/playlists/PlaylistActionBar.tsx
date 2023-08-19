@@ -1,6 +1,8 @@
 import { View, Text, TouchableOpacity, TextInput } from "react-native";
 import React, { useEffect } from "react";
 import { useSettingStore } from "@store/store-settings";
+import { AnimatePresence, MotiText, MotiView } from "moti";
+import TimerCountdown from "@components/common/sleepTimer/TimerCountdown";
 
 type Props = {
   // closes the action bar
@@ -12,26 +14,10 @@ const PlaylistActionBar = ({ closeActionBar, barHeight }) => {
   const sleepStartDateTime = useSettingStore(
     (state) => state.sleepStartDateTime
   );
-  const cancelCountdown = useSettingStore((state) => state.cancelSleepInterval);
-  const sleepCountDown = useSettingStore((state) => state.sleepCountDown);
-  const {
-    updateSleepTime,
-    startSleepTimer,
-    runSleepCountdown,
-    stopSleepTimer,
-  } = useSettingStore((state) => state.actions);
-
-  useEffect(() => {
-    if (sleepStartDateTime && !cancelCountdown) {
-      runSleepCountdown();
-    }
-    return () => {
-      if (cancelCountdown) {
-        console.log("running cancel countdown");
-        cancelCountdown();
-      }
-    };
-  }, [cancelCountdown]);
+  const countdownActive = useSettingStore((state) => state.countdownActive);
+  const { updateSleepTime, startSleepTimer, stopSleepTimer } = useSettingStore(
+    (state) => state.actions
+  );
 
   const handleSleepTimeUpdate = (minutesString: string) => {
     const minutes = isNaN(parseInt(minutesString))
@@ -42,34 +28,76 @@ const PlaylistActionBar = ({ closeActionBar, barHeight }) => {
 
   return (
     <View
-      className={`flex-row w-full justify-between items-center px-2 border h-[${barHeight}] `}
+      className={`flex-row  justify-start items-center px-2 border h-[${barHeight}] `}
     >
-      <Text>Sleep Timer - {sleepCountDown}</Text>
+      <Text>Sleep Timer Minutes {sleepTime}</Text>
+      <TimerCountdown />
+
+      {/* <AnimatePresence exitBeforeEnter>
+        {Boolean(sleepStartDateTime) && (
+          <MotiView
+            key="countdown"
+            className="w-[50] h-[30] bg-red-400 border-red-500"
+          >
+            <Text className="p-1 text-center">{formattedOutput || "..."}</Text>
+          </MotiView>
+        )}
+        {!Boolean(sleepStartDateTime) && (
+          <MotiView
+            key="input"
+            className="w-[30] h-[30] bg-white border"
+            from={{ opacity: 0.5, width: 30 }}
+            animate={{ opacity: 1 }}
+            transition={{
+              type: "timing",
+              duration: 1000,
+            }}
+            exit={{ opacity: 0, width: 50 }}
+            exitTransition={{
+              type: "timing",
+              duration: 1000,
+            }}
+          >
+            <TextInput
+              keyboardType="number-pad"
+              onChangeText={handleSleepTimeUpdate}
+              // className="w-[30] h-[30] bg-white border p-1 text-center"
+              className="p-1 text-center"
+              value={sleepTime.toString()}
+              editable={!Boolean(sleepStartDateTime)}
+            />
+          </MotiView>
+        )}
+      </AnimatePresence>*/}
       <TextInput
         keyboardType="number-pad"
         onChangeText={handleSleepTimeUpdate}
-        className="w-[30] h-[30] bg-white border p-1"
+        className="w-[30] h-[30] bg-white border p-1 text-center"
+        // className="p-1 text-center"
         value={sleepTime.toString()}
+        editable={!Boolean(sleepStartDateTime)}
       />
-      {sleepTime > 0 && !sleepStartDateTime && (
-        <TouchableOpacity
-          onPress={() => {
-            startSleepTimer();
-            runSleepCountdown();
-          }}
-        >
-          <Text>Start</Text>
-        </TouchableOpacity>
-      )}
-      {sleepStartDateTime && (
-        <TouchableOpacity
-          onPress={() => {
-            stopSleepTimer();
-          }}
-        >
-          <Text>Stop</Text>
-        </TouchableOpacity>
-      )}
+      <View className="flex-row justify-end flex-grow">
+        {!countdownActive && sleepTime > 0 && (
+          <TouchableOpacity
+            onPress={() => {
+              startSleepTimer();
+              // runSleepCountdown();
+            }}
+          >
+            <Text>Start</Text>
+          </TouchableOpacity>
+        )}
+        {countdownActive && (
+          <TouchableOpacity
+            onPress={() => {
+              stopSleepTimer();
+            }}
+          >
+            <Text>Stop</Text>
+          </TouchableOpacity>
+        )}
+      </View>
       {/* <TouchableOpacity onPress={closeActionBar}>
         <Text>Close</Text>
       </TouchableOpacity> */}

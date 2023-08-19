@@ -14,7 +14,11 @@ type SettingsState = {
   sleepTimeMinutes: number;
   sleepStartDateTime: Date;
   cancelSleepTimeout: () => void;
-  sleepCountDown: string;
+  countdownActive: boolean;
+  sleepCountDown: {
+    secondsLeft: number;
+    formattedOutput: string;
+  };
   cancelSleepInterval: () => void;
   actions: {
     updateJumpForwardSeconds: (seconds: number) => Promise<void>;
@@ -30,7 +34,11 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
   jumpBackwardSeconds: 15,
   sleepTimeMinutes: 0,
   sleepStartDateTime: undefined,
-  sleepCountDown: "",
+  countdownActive: false,
+  sleepCountDown: {
+    secondsLeft: undefined,
+    formattedOutput: "",
+  },
   cancelSleepTimeout: undefined,
   cancelSleepInterval: undefined,
   actions: {
@@ -115,14 +123,24 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
           "minimal",
           get().sleepTimeMinutes > 59
         );
-        set({ sleepCountDown });
+        set({
+          sleepCountDown: {
+            secondsLeft,
+            formattedOutput: sleepCountDown,
+          },
+        });
       }, 1000);
 
       set({
+        countdownActive: true,
         cancelSleepInterval: () => {
           clearInterval(sleepInterval);
           set({
-            sleepCountDown: undefined,
+            countdownActive: false,
+            sleepCountDown: {
+              secondsLeft: undefined,
+              formattedOutput: undefined,
+            },
             cancelSleepInterval: undefined,
           });
         },
