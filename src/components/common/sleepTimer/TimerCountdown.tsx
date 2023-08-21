@@ -6,7 +6,8 @@ import { AnimatePresence, MotiText, MotiView } from "moti";
 import { useSettingStore } from "@store/store-settings";
 
 const TimerCountdown = () => {
-  const { secondsLeft } = useSleepTimer();
+  const { secondsLeft, formattedOutput } = useSleepTimer();
+
   const countdownActive = useSettingStore((state) => state.countdownActive);
   const [viewWidth, setViewWidth] = useState(undefined);
   const viewRef = useRef<View>();
@@ -17,18 +18,6 @@ const TimerCountdown = () => {
     [countdownActive]
   );
 
-  const handleFormatSeconds = (seconds: number) => {
-    // if more than one hour include the hours
-    if (secondsLeft > 60 * 60) {
-      return formatSeconds(secondsLeft, "minimal", true);
-    } else {
-      return formatSeconds(secondsLeft, "minimal", false);
-    }
-  };
-
-  // if (!countdownActive) {
-  //   return null;
-  // }
   return (
     <View>
       {!countdownActive && null}
@@ -37,7 +26,7 @@ const TimerCountdown = () => {
           key="b"
           ref={viewRef}
           onLayout={(event) => {
-            if (!viewWidth && handleFormatSeconds(secondsLeft)) {
+            if (!viewWidth && formattedOutput) {
               setViewWidth(event.nativeEvent.layout.width + 20);
             }
           }}
@@ -60,7 +49,7 @@ const TimerCountdown = () => {
             }}
             className="text-center text-base font-semibold"
           >
-            {handleFormatSeconds(secondsLeft) || "??:??"}
+            {formattedOutput || "??:??"}
           </MotiText>
         </MotiView>
       )}

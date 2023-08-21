@@ -7,9 +7,7 @@ import { MotiView } from "moti";
 const SleepTimeEntry = () => {
   const sleepTime = useSettingStore((state) => state.sleepTimeMinutes);
   const [viewWidth, setViewWidth] = useState(0);
-  const sleepStartDateTime = useSettingStore(
-    (state) => state.sleepStartDateTime
-  );
+
   const countdownActive = useSettingStore((state) => state.countdownActive);
   const { updateSleepTime } = useSettingStore((state) => state.actions);
 

@@ -1,17 +1,15 @@
 import React, { useEffect } from "react";
 import { useSettingStore } from "@store/store-settings";
-
+//
 const useSleepTimer = () => {
-  const sleepTime = useSettingStore((state) => state.sleepTimeMinutes);
   const sleepStartDateTime = useSettingStore(
     (state) => state.sleepStartDateTime
   );
   const cancelCountdown = useSettingStore((state) => state.cancelSleepInterval);
-  const { secondsLeft } = useSettingStore((state) => state.sleepCountDown);
-  const countdownActive = useSettingStore((state) => state.countdownActive);
-  const { startSleepTimer, runSleepCountdown } = useSettingStore(
-    (state) => state.actions
+  const { secondsLeft, formattedOutput } = useSettingStore(
+    (state) => state.sleepCountDown
   );
+  const { runSleepCountdown } = useSettingStore((state) => state.actions);
 
   // UseEffect start countdown IF it hasn't been started yet
   // and a sleep timer has been start
@@ -30,7 +28,7 @@ const useSleepTimer = () => {
     };
   }, [cancelCountdown, sleepStartDateTime]);
   return {
-    countdownActive,
+    formattedOutput,
     secondsLeft,
   };
 };
