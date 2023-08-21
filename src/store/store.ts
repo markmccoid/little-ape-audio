@@ -705,6 +705,7 @@ export const onInitialize = async () => {
   useDropboxStore.setState({ folderMetadata: folderMetadata });
   useDropboxStore.getState().actions.generateFolderMetadataArray();
   useSettingStore.setState({
+    ...settings,
     jumpForwardSeconds: settings?.jumpForwardSeconds || 15,
     jumpBackwardSeconds: settings?.jumpBackwardSeconds || 15,
   });

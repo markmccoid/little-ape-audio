@@ -15,6 +15,7 @@ type SettingsState = {
   sleepStartDateTime: Date;
   cancelSleepTimeout: () => void;
   countdownActive: boolean;
+  intervalActive: boolean;
   sleepCountDown: {
     secondsLeft: number;
     formattedOutput: string;
@@ -35,6 +36,7 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
   sleepTimeMinutes: 0,
   sleepStartDateTime: undefined,
   countdownActive: false,
+  intervalActive: false,
   sleepCountDown: {
     secondsLeft: undefined,
     formattedOutput: "",
@@ -67,9 +69,14 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
       });
     },
     updateSleepTime: async (sleepTime) => {
+      if (sleepTime < 0) {
+        sleepTime = 0;
+      }
+      sleepTime = Math.floor(sleepTime);
       set({ sleepTimeMinutes: sleepTime });
       const newSettingsData = { ...get() };
       delete newSettingsData.actions;
+      // Save to settings store
       await saveToAsyncStorage("settings", newSettingsData);
     },
     startSleepTimer: () => {
@@ -79,11 +86,19 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
         get().cancelSleepTimeout();
       }
 
-      set({ sleepStartDateTime: new Date(), cancelSleepTimeout: undefined });
+      set({
+        countdownActive: true,
+        sleepStartDateTime: new Date(),
+        cancelSleepTimeout: undefined,
+      });
       const sleepTime = get().sleepTimeMinutes * 60 * 1000;
       const cancelSleepTimeoutId = setTimeout(() => {
         TrackPlayer.pause();
-        set({ sleepStartDateTime: undefined, cancelSleepTimeout: undefined });
+        set({
+          countdownActive: false,
+          sleepStartDateTime: undefined,
+          cancelSleepTimeout: undefined,
+        });
         // stop the countdown if active
         if (get().cancelSleepInterval) {
           get().cancelSleepInterval();
@@ -104,7 +119,11 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
         get().cancelSleepInterval();
       }
       // clear the sleep timer fields that indicate a sleep timer is active
-      set({ sleepStartDateTime: undefined, cancelSleepTimeout: undefined });
+      set({
+        countdownActive: false,
+        sleepStartDateTime: undefined,
+        cancelSleepTimeout: undefined,
+      });
     },
     runSleepCountdown: () => {
       // Clear interval if it exists
@@ -132,11 +151,11 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
       }, 1000);
 
       set({
-        countdownActive: true,
+        intervalActive: true,
         cancelSleepInterval: () => {
           clearInterval(sleepInterval);
           set({
-            countdownActive: false,
+            intervalActive: false,
             sleepCountDown: {
               secondsLeft: undefined,
               formattedOutput: undefined,

@@ -25,7 +25,6 @@ const useSleepTimer = () => {
     // Clear the countdown interval if component unmounts
     return () => {
       if (cancelCountdown) {
-        console.log("running cancel countdown");
         cancelCountdown();
       }
     };

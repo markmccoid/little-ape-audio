@@ -5,15 +5,25 @@ import AddBook from "../../components/common/svg/AddBook";
 import Monkey from "../../components/common/svg/Monkey";
 import { SettingsIcon } from "../../components/common/svg/Icons";
 import { colors } from "../../constants/Colors";
+import useSleepTimer from "@components/common/sleepTimer/useSleepTimer";
+import { useSettingStore } from "@store/store-settings";
 
 const AudioLayout = () => {
+  const countdownActive = useSettingStore((state) => state.countdownActive);
+
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: countdownActive ? "#feb9b9" : colors.amber200,
+        },
+      }}
+    >
       <Stack.Screen
         name="index"
         options={{
           title: "Audio Books",
-          headerStyle: { backgroundColor: colors.amber200 },
+          // headerStyle: { backgroundColor: colors.amber200 },
           headerTintColor: colors.amber900,
           headerRight: () => {
             return (
@@ -39,7 +49,7 @@ const AudioLayout = () => {
         name="player"
         options={{
           headerShown: true,
-          headerStyle: { backgroundColor: colors.amber200 },
+          // headerStyle: { backgroundColor: colors.amber200 },
           headerTintColor: colors.amber900,
           headerRight: () => (
             <Link href="/audio/playersettings">
