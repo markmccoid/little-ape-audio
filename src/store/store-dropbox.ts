@@ -10,7 +10,7 @@ import {
 } from "../utils/dropboxUtils";
 import {
   CleanBookMetadata,
-  FolderMetadata,
+  BookJSONMetadata,
   cleanOneBook,
 } from "./../utils/audiobookMetadata";
 import { defaultImages, getRandomNumber } from "./storeUtils";
@@ -308,7 +308,7 @@ export const getSingleFolderMetadata = async (folder) => {
     try {
       const metadata = (await downloadDropboxFile(
         `${metadataFile.path_lower}`
-      )) as FolderMetadata;
+      )) as BookJSONMetadata;
       //-- LOCAL IMAGE CHECK
       // Check to see if there is a google image, if not look for one it directory
       // Don't want to check every time, dropbox will throw 429 rate limit error

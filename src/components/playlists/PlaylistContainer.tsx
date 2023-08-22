@@ -56,14 +56,18 @@ const PlaylistContainer = () => {
   // Top menu items
   const handleShowInput = (nativeEvent: NativeScrollEvent) => {
     const scrollY = nativeEvent.contentOffset.y;
-    const contentHeight = nativeEvent.contentSize.height;
+    let contentHeight = nativeEvent.contentSize.height;
     // console.log("Native", contentHeight, screenHeight, scrollY);
     // console.log("CALCS", contentHeight - scrollY, layoutHeight);
-
-    if (scrollY < -5) {
+    if (scrollY < -10) {
       setOnShow(true);
+      return;
     }
-    if (contentHeight - scrollY < layoutHeight - 30) {
+    // If we don't have a full screen of content in the flatlist, then
+    // contentHeight the check will always fail.  So we check if content < layout height
+    // if so, just make them the same number.
+    if (contentHeight < layoutHeight) contentHeight = layoutHeight;
+    if (contentHeight - scrollY < layoutHeight - 20) {
       setOnShow(false);
     }
   };

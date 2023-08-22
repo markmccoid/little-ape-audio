@@ -27,7 +27,7 @@ type BookInfo = {
   otherCategories?: string[];
   stopFlag?: boolean;
 };
-export type FolderMetadata = {
+export type BookJSONMetadata = {
   id: string;
   folderName: string;
   fullPath: string;
@@ -48,7 +48,7 @@ export type FolderMetadata = {
 };
 export type CleanBookMetadata = ReturnType<typeof cleanOneBook>;
 export function cleanOneBook(
-  book: FolderMetadata,
+  book: BookJSONMetadata,
   path_lower: string,
   localImageName?: string
 ) {
