@@ -7,6 +7,8 @@ import TrackPlayerProgressBar from "./TrackPlayerProgressBar";
 import TrackList from "./TrackList";
 import PlaylistImage from "../common/PlaylistImage";
 import TrackPlayerImage from "./TrackPlayerImage";
+import { useCurrentPlaylist, useTracksStore } from "@store/store";
+import { shallow } from "zustand/shallow";
 
 const { width, height } = Dimensions.get("window");
 

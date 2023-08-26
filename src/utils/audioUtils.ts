@@ -5,6 +5,7 @@ import { TagType } from "jsmediatags/types";
 const base64 = require("base-64");
 import { AVPlaybackStatusSuccess, Audio } from "expo-av";
 import { AudioMetadata } from "../store/types";
+import { Image } from "react-native";
 
 //--=================================
 //-- getAudioFileTags
@@ -16,7 +17,7 @@ export const getAudioFileTags = async (fullFileURI: string) => {
   // Strip the "file:///"
 
   const workingURI = fullFileURI.slice(8);
-  let metadata: AudioMetadata | {} = {
+  let metadata: AudioMetadata = {
     durationSeconds,
   };
   try {
@@ -28,9 +29,12 @@ export const getAudioFileTags = async (fullFileURI: string) => {
       album: tag.tags?.album,
       genre: tag.tags?.genre,
       trackRaw: tag.tags?.track,
-      year: tag.tags?.year,
+      year: isNaN(parseInt(tag.tags?.year))
+        ? undefined
+        : parseInt(tag.tags?.year),
       durationSeconds: durationSeconds,
       pictureURI: undefined,
+      pictureAspectRatio: undefined,
     };
     if (tag.tags.picture) {
       const { data, format } = tag.tags.picture;
@@ -43,7 +47,15 @@ export const getAudioFileTags = async (fullFileURI: string) => {
         const base64String = base64.encode(base64StringStart);
 
         const uri = `data:${format};base64,${base64String}`;
+        // Create a new property on teh metadata that is the aspect ratio of the image
+        // aspectRatio = width/height
+        const { width, height, aspectRatio } = await getImageSize(uri);
+        let pictureAspectRatio = undefined;
+        if (width > 0 && height > 0) {
+          pictureAspectRatio = width / height;
+        }
         metadata.pictureURI = uri;
+        metadata.pictureAspectRatio = pictureAspectRatio;
         // updateBase64Image(uri);
       } catch (err) {
         console.log("ERROR GETTING IMAGE", err);
@@ -88,4 +100,28 @@ export const jsMediaAsync = async (path: string) => {
       },
     });
   });
+};
+
+//--=================================
+//-- getImageSize
+//--=================================
+export const getImageSize = async (
+  uri: string
+): Promise<{ width: number; height: number; aspectRatio: number }> => {
+  const promise = new Promise((resolve, reject) => {
+    Image.getSize(
+      uri,
+      (width, height) => {
+        resolve({ width, height, aspectRatio: width / height });
+      },
+      // reject
+      (err) => resolve({ width: undefined, height: undefined })
+    );
+  });
+
+  return (await promise) as {
+    width: number;
+    height: number;
+    aspectRatio: number;
+  };
 };

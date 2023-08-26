@@ -24,26 +24,37 @@ export function getRandomNumber() {
 //~ -----------------------------------
 //~ analyzePlaylistTracks
 //~ Takes the current tracks for a playlist and returns
-//~ the unique images and genres on the track and the total duration
+//~ the unique genres on the track and the total duration
 //~ of tracks added together.
+//~ it used to return only unique images, but with the addition of
+//~ aspectRatio, I decided to return all images with their aspect ratio
+//~ in an object
 //~ -----------------------------------
 export const analyzePlaylistTracks = (
   storedTracks: AudioTrack[],
   tracks: string[]
 ) => {
   let totalDuration = 0;
-  let imageSet = new Set();
+  // let imageSet = new Set();
   let genreSet = new Set();
-
+  let images = [] as { image: string; aspectRatio: number }[];
   for (let trackId of tracks) {
     const track = storedTracks.find((el) => el.id === trackId);
-    imageSet.add(track?.metadata?.pictureURI);
+    // imageSet.add(track?.metadata?.pictureURI);
+    // Only push an image if it exists!
+    if (track?.metadata?.pictureURI) {
+      images.push({
+        image: track?.metadata?.pictureURI,
+        aspectRatio: track?.metadata?.pictureAspectRatio,
+      });
+    }
     genreSet.add(track?.metadata?.genre);
     totalDuration = totalDuration + (track?.metadata?.durationSeconds || 0);
   }
 
   return {
-    images: [...imageSet] as string[],
+    // images: [...imageSet] as string[],
+    images,
     genres: [...genreSet] as string[],
     totalDuration,
   };

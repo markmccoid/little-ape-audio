@@ -15,7 +15,7 @@ import {
   PlayIcon,
   RewindIcon,
 } from "../common/svg/Icons";
-import { Event, State } from "react-native-track-player";
+import { State } from "react-native-track-player";
 import { useSettingStore } from "../../store/store-settings";
 import { colors } from "../../constants/Colors";
 import { SpinnerForwardIcon } from "../common/svg/Icons";

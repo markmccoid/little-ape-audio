@@ -8,14 +8,17 @@ import {
   ImageSourcePropType,
   Alert,
 } from "react-native";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { usePlaybackStore, useTrackActions } from "../../store/store";
 import { Playlist, AudioTrack } from "../../store/types";
 import { Link, useRouter } from "expo-router";
 import { formatSeconds } from "../../utils/formatUtils";
 import PlaylistImage from "../common/PlaylistImage";
-import { DeleteIcon, EditIcon } from "../common/svg/Icons";
-import Animated from "react-native-reanimated";
+import { DeleteIcon, EditIcon, ImageIcon } from "../common/svg/Icons";
+import { getImageFromWeb } from "@utils/otherUtils";
+// import * as WebBrowser from "expo-web-browser";
+// import * as Clipboard from "expo-clipboard";
+// import { getImageSize } from "@utils/audioUtils";
 
 type Props = {
   playlist: Playlist;
@@ -34,6 +37,12 @@ const PlaylistRow = ({ playlist, onPlaylistSelect }: Props) => {
     () => currentPlaylistId === playlist.id,
     [currentPlaylistId]
   );
+  const [copiedText, setCopiedText] = useState("");
+
+  const handleWebviewClose = async () => {
+    const clipboardContent = await Clipboard.getStringAsync();
+    setCopiedText(clipboardContent);
+  };
 
   const handleRemovePlaylist = async () => {
     Alert.alert(
@@ -65,6 +74,14 @@ const PlaylistRow = ({ playlist, onPlaylistSelect }: Props) => {
     ]);
   };
 
+  // const handleImagePick = () => {
+  //   const url = "https://google.com"; // Replace with your desired URL
+
+  //   const openWebview = async () => {
+  //     await WebBrowser.openBrowserAsync(url);
+  //   };
+  //   console.log("webview", openWebview);
+  // };
   const imageSource =
     playlist?.imageType === "uri"
       ? { uri: playlist.imageURI }
@@ -118,6 +135,12 @@ const PlaylistRow = ({ playlist, onPlaylistSelect }: Props) => {
           onPress={handleEditPlaylist}
         >
           <EditIcon />
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="flex-1 justify-center"
+          onPress={async () => getImageFromWeb(playlist.id, playlist.name)}
+        >
+          <ImageIcon />
         </TouchableOpacity>
         <TouchableOpacity
           className="flex-1 justify-center"

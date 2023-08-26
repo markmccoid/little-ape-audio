@@ -8,7 +8,12 @@ import {
 import React, { useCallback, useRef, useState } from "react";
 import TrackPlayerSettingsRate from "./TrackPlayerSettingsRate";
 import TrackPlayerSettingsSleepTimer from "./TrackPlayerSettingsSleepTimer";
-import { SpeedIcon, TimerSandIcon } from "@components/common/svg/Icons";
+import TPImagePicker from "./TPImagePicker";
+import {
+  ImageIcon,
+  SpeedIcon,
+  TimerSandIcon,
+} from "@components/common/svg/Icons";
 import Animated, {
   interpolate,
   runOnJS,
@@ -42,6 +47,11 @@ const componentArray = [
     icon: TimerSandIcon,
     label: "Sleep Timer",
   },
+  {
+    component: TPImagePicker,
+    icon: ImageIcon,
+    label: "Image Picker",
+  },
 ];
 
 //## Constants
@@ -56,6 +66,8 @@ const TPSettingsScroller = () => {
   const flatRef = useRef<FlatList>();
   const flatLabelRef = useAnimatedRef<FlatList>();
   const [flIndex, setFLIndex] = useState(0);
+  const [componentHeight, setComponentHeight] = useState();
+
   const scrollX = useSharedValue(0);
 
   //~ Handle the scrolling --------------
@@ -163,7 +175,7 @@ const TPSettingsScroller = () => {
   return (
     <View className="flex-col">
       <View
-        className="flex-1 flex-row mt-2 h-[35]"
+        className="flex-row mt-2 h-[35]"
         style={{ transform: [{ translateX: INDICATORS_CENTER }] }}
       >
         {componentArray.map((el, index) => {
@@ -197,39 +209,55 @@ const TPSettingsScroller = () => {
         />
       </View>
 
-      <Animated.FlatList
-        ref={flatLabelRef}
-        data={componentArray.map((el) => el.label)}
-        horizontal
-        style={{ width, flex: 1 }}
-        scrollEnabled={false}
-        snapToInterval={width}
-        keyExtractor={(_, index) => index.toString()}
-        decelerationRate="fast"
-        // extraData={flIndex}
-        renderItem={({ item, index }) => (
-          <LabelItem item={item} index={index} />
-        )}
-      />
-      <Animated.FlatList
-        ref={flatRef}
-        data={componentArray}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        snapToInterval={width}
-        style={{ width, height: 80 }}
-        keyExtractor={(_, index) => index.toString()}
-        decelerationRate="fast"
-        onScroll={handleScroll}
-        renderItem={({ item, index }) => {
-          const Comp = item.component;
-          return (
-            <View style={{ width }}>
-              <Comp />
+      <View>
+        <Animated.FlatList
+          ref={flatLabelRef}
+          data={componentArray.map((el) => el.label)}
+          horizontal
+          style={{ width }}
+          // contentContainerStyle={{ borderWidth: 1 }}
+          scrollEnabled={false}
+          snapToInterval={width}
+          keyExtractor={(_, index) => index.toString()}
+          decelerationRate="fast"
+          // extraData={flIndex}
+          renderItem={({ item, index }) => (
+            <View className="flex ">
+              <LabelItem item={item} index={index} />
             </View>
-          );
-        }}
-      />
+          )}
+        />
+      </View>
+      <View>
+        <Animated.FlatList
+          ref={flatRef}
+          data={componentArray}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={width}
+          style={{ width }}
+          keyExtractor={(_, index) => index.toString()}
+          decelerationRate="fast"
+          onScroll={handleScroll}
+          renderItem={({ item, index }) => {
+            const Comp = item.component;
+            return (
+              <View style={{ width }}>
+                {index !== 2 && flIndex === index && <Comp />}
+                {index === 2 && flIndex === index && (
+                  <MotiView
+                    from={{ opacity: 0, height: 5 }}
+                    animate={{ opacity: 1, height: 250 }}
+                    // exit={{ height: 0 }}
+                  >
+                    <Comp />
+                  </MotiView>
+                )}
+              </View>
+            );
+          }}
+        />
+      </View>
     </View>
   );
 };

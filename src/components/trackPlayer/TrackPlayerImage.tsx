@@ -1,9 +1,9 @@
-import { View, Dimensions, TouchableOpacity } from "react-native";
+import { View, Dimensions, TouchableOpacity, Image } from "react-native";
 import React from "react";
 import PlaylistImage from "../common/PlaylistImage";
 import { BackIcon, NextIcon } from "../common/svg/Icons";
 import { colors } from "../../constants/Colors";
-import { usePlaybackStore } from "../../store/store";
+import { useCurrentPlaylist, usePlaybackStore } from "../../store/store";
 import Animated from "react-native-reanimated";
 
 const { width, height } = Dimensions.get("window");
@@ -12,7 +12,8 @@ const TrackPlayerImage = () => {
   const actions = usePlaybackStore((state) => state.actions);
   const queue = usePlaybackStore((state) => state.trackPlayerQueue);
   const currTrackIndex = usePlaybackStore((state) => state.currentTrackIndex);
-
+  // const playlist = useCurrentPlaylist();
+  const playlist = actions.getCurrentPlaylist();
   /**
    * if qLength === 1 don't show or disable BOTH
    * if qLenght !== 1 && currTrackIndex === 0 disable PREV
@@ -32,7 +33,8 @@ const TrackPlayerImage = () => {
       >
         <BackIcon size={35} color={colors.amber800} />
       </TouchableOpacity>
-      <PlaylistImage
+      <Image
+        source={{ uri: playlist?.imageURI }}
         style={{
           width: width / 1.35,
           height: width / 1.35,
@@ -40,6 +42,14 @@ const TrackPlayerImage = () => {
           alignSelf: "center",
         }}
       />
+      {/* <PlaylistImage
+        style={{
+          width: width / 1.35,
+          height: width / 1.35,
+          resizeMode: "stretch",
+          alignSelf: "center",
+        }}
+      /> */}
       <TouchableOpacity
         onPress={() => actions.next()}
         disabled={!displayNext}

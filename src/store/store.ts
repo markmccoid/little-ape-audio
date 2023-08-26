@@ -24,8 +24,11 @@ import { useDropboxStore } from "./store-dropbox";
 import { useSettingStore } from "./store-settings";
 import { defaultImages, getRandomNumber } from "./storeUtils";
 import * as FileSystem from "expo-file-system";
+import { getImageSize } from "@utils/audioUtils";
 
+import { shallow } from "zustand/shallow";
 // export function getRandomNumber() {
+
 //   const randomNumber = Math.floor(Math.random() * 13) + 1; // Generate random number between 1 and 13
 //   return randomNumber.toString().padStart(2, "0"); // Pad number with leading zero if less than 10
 // }
@@ -41,6 +44,7 @@ let saveIntervalId = undefined;
 export const useTracksStore = create<AudioState>((set, get) => ({
   tracks: [],
   playlists: {},
+  playlistUpdated: new Date(),
   actions: {
     addNewTrack: addTrack(set, get),
     removeTracks: async (ids) => {
@@ -111,7 +115,9 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         author,
         lastPlayedDateTime: Date.now(),
         imageURI: undefined,
+        imageAspectRatio: undefined,
         imageType: undefined,
+        genre: undefined,
         totalDurationSeconds: 0,
         totalListenedToSeconds: 0,
         currentRate: 1,
@@ -136,17 +142,27 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         storedTracks,
         uniqueTracksPlaylist
       );
-      // console.log("IN STORE", image5);
-      // Example usage
-      const randomNum = getRandomNumber();
-
+      //-- Add Image to playlist
       // If no image found use a random local image for playlist
-      playlist.imageURI =
-        images[0] ||
-        Image.resolveAssetSource(defaultImages[`image${randomNum}`]).uri;
+      if (images.length === 0) {
+        const randomNum = getRandomNumber();
+        const randomImageInfo = Image.resolveAssetSource(
+          defaultImages[`image${randomNum}`]
+        );
+        const randomImageAspect =
+          randomImageInfo.width / randomImageInfo.height;
+        playlist.imageURI = randomImageInfo.uri;
+        playlist.imageAspectRatio = randomImageAspect;
+      } else {
+        // There was an image, store the first one on the playlist
+        playlist.imageURI = images[0].image;
+        playlist.imageAspectRatio = images[0].aspectRatio;
+      }
       // Image type is depricated because we are using the resolveAssetSource
       // to standardize local images
       // playlist.imageType = images[0] ? "uri" : "imported";
+      //-- Add Image to playlist
+
       playlist.genre = genres[0];
       playlist.totalDurationSeconds = totalDuration;
       playlist.trackIds = sortBy(uniqueTracksPlaylist);
@@ -193,9 +209,16 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       set({ playlists });
       saveToAsyncStorage("playlists", playlists);
     },
-    updatePlaylistFields: (playlistId, updateObj) => {
-      const { name, author, lastPlayedDateTime, imageType, imageURI } =
-        updateObj;
+    updatePlaylistFields: async (playlistId, updateObj) => {
+      const {
+        name,
+        author,
+        lastPlayedDateTime,
+        imageType,
+        imageURI,
+        imageAspectRatio,
+      } = updateObj;
+
       const playlists = { ...get().playlists };
       // lastPlayedDateTime processing
       if (lastPlayedDateTime && !isNaN(lastPlayedDateTime)) {
@@ -211,11 +234,21 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       }
 
       // Image Processing
-      if (imageType && imageURI) {
-        playlists[playlistId].imageType = imageType;
-        playlists[playlistId].imageURI = imageURI;
+      let newPlaylists = {};
+      if (imageURI) {
+        let aspectRatio = imageAspectRatio;
+        // If the aspectRatio was passed use it instead of calculating it
+        if (!imageAspectRatio) {
+          const { aspectRatio: aspectCalced } = await getImageSize(imageURI);
+          aspectRatio = aspectCalced;
+        }
+        // Only process if we get a valid aspectRatio
+        if (!isNaN(aspectRatio)) {
+          playlists[playlistId].imageAspectRatio = aspectRatio;
+          playlists[playlistId].imageURI = imageURI;
+        }
       }
-      set({ playlists });
+      set({ playlists, playlistUpdated: new Date() });
       saveToAsyncStorage("playlists", playlists);
     },
     updatePlaylistTracks: async (playlistId, newTracksArray) => {
@@ -280,6 +313,25 @@ export const usePlaylists = () =>
   useTracksStore((state) =>
     orderBy(map(state.playlists), ["lastPlayedDateTime"], ["desc"])
   );
+//!! NEED TO Make sure to update playlistUpdated whenever a change is made to
+//!! playlist that we want to track state changes.
+export const useCurrentPlaylist = () => {
+  const x = useTracksStore((state) => state.playlistUpdated);
+  const actions = useTrackActions();
+  const playlists = useTracksStore(
+    (state) => state.playlists,
+    () => true
+  );
+
+  const currPlaylistId = usePlaybackStore.getState().currentPlaylistId;
+  const [currPlaylist, setCurrentPlaylist] = useState<Playlist>();
+  useEffect(() => {
+    const playlist = actions.getPlaylist(currPlaylistId);
+    setCurrentPlaylist(playlist);
+  }, [x]);
+
+  return currPlaylist;
+};
 //-- ==================================
 //-- PLAYBACK STORE
 //-- ==================================

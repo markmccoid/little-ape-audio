@@ -17,6 +17,9 @@ type Props = {
   color?: string;
   style?: ViewStyle;
 };
+export const ImageIcon = ({ size = 25, color, style }: Props) => {
+  return <Entypo name="image" size={size} color={color} style={style} />;
+};
 export const SearchIcon = ({ size = 25, color, style }: Props) => {
   return (
     <MaterialIcons name="search" size={size} color={color} style={style} />

@@ -3,6 +3,7 @@ import React, { useMemo } from "react";
 import { Playlist } from "../../store/types";
 import {
   getCurrentPlaylist,
+  useCurrentPlaylist,
   usePlaybackStore,
   useTrackActions,
 } from "../../store/store";
@@ -26,15 +27,17 @@ type Props = {
 };
 const PlaylistImage = ({ playlistId, style, noTransition = false }: Props) => {
   const actions = useTrackActions();
+
   // let playlist = usePlaybackStore((state) => state.currentPlaylist);
   let playlist = getCurrentPlaylist();
   if (playlistId) {
     playlist = actions.getPlaylist(playlistId);
   }
+  const aspectRatio = playlist?.imageAspectRatio || 1.28;
 
   return (
     <>
-      {playlist.id && (
+      {playlist && playlist.id && (
         <Animated.View entering={ZoomInEasyUp} style={[styles.shadow, style]}>
           <Animated.Image
             style={[styles.trackImage, style]}
@@ -51,7 +54,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100 * 1.28,
     borderRadius: 10,
-    resizeMode: "stretch",
+    resizeMode: "cover",
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.amber900,
   },

@@ -25,6 +25,7 @@ export type AudioMetadata = {
   year?: number;
   durationSeconds?: number;
   pictureURI?: string;
+  pictureAspectRatio?: number;
 };
 
 //~ ================================
@@ -44,6 +45,8 @@ export type Playlist = {
   author: string;
   lastPlayedDateTime: number;
   imageURI: string; //{ uri: string } | number | undefined;
+  imageAspectRatio: number;
+  //! imageType is depricated TEST GETTING RID OF
   imageType: "uri" | "imported" | "url";
   genre: string;
   totalDurationSeconds: number;
@@ -64,7 +67,8 @@ type PlaylistUpdateObj = {
   name?: string;
   author?: string;
   lastPlayedDateTime?: number;
-  imageURI?: { uri: string } | number | undefined;
+  imageURI?: string | undefined;
+  imageAspectRatio?: number;
   imageType?: "uri" | "imported" | "url";
   //~ Current Position is updated separately
   // currentPosition?: { trackIndex: number; position: number };
@@ -81,6 +85,7 @@ type PlaylistUpdateObj = {
 export type AudioState = {
   tracks: AudioTrack[];
   playlists: Record<PlaylistId, Playlist>;
+  playlistUpdated: Date;
   actions: {
     // given the audio file location in storage, look up metadata and create
     // record in AudioState.audioFiles store array
@@ -119,7 +124,7 @@ export type AudioState = {
     updatePlaylistFields: (
       playlistId: string,
       updateObj: PlaylistUpdateObj
-    ) => void;
+    ) => Promise<void>;
     updatePlaylistTracks: (
       playlistId: string,
       newTracksArray: string[]
