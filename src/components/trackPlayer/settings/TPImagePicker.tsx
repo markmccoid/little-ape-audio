@@ -1,4 +1,11 @@
-import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
 import React, { useMemo, useState } from "react";
 import { usePlaybackStore, useTracksStore } from "@store/store";
 import { getImageSize } from "@utils/audioUtils";
@@ -7,9 +14,10 @@ import { colors } from "@constants/Colors";
 type Props = {
   setHeight: (height: number) => void;
 };
-const TPImagePicker = () => {
-  const currPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
+const TPImagePicker = ({ currPlaylistId }) => {
+  // const currPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
   const trackActions = useTracksStore((state) => state.actions);
+  const playlistUpdated = useTracksStore((state) => state.playlistUpdated);
   // THis is just used when a new pic is made the default on playlist
   // it forces playlistImage memo to update
   const [picUpdate, setPicUpdate] = useState(false);
@@ -21,7 +29,7 @@ const TPImagePicker = () => {
       pictureURI: plImage.imageURI,
       pictureAspectRatio: plImage.imageAspectRatio,
     };
-  }, [currPlaylistId, picUpdate]);
+  }, [currPlaylistId, picUpdate, playlistUpdated]);
 
   const tracks = useMemo(() => {
     const tracks = trackActions.getPlaylistTracks(currPlaylistId);
@@ -64,16 +72,20 @@ const TPImagePicker = () => {
     <ScrollView
       style={{
         // flex: 1,
-        height: 250,
-        backgroundColor: colors.amber400,
-        marginHorizontal: 8,
-        marginBottom: 10,
+        height: 130,
+        backgroundColor: "white", //colors.amber400,
+        marginBottom: 8,
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: colors.amber900,
+        borderRadius: 10,
       }}
       contentContainerStyle={{
         flexDirection: "row",
         flexWrap: "wrap",
         justifyContent: "center",
+        padding: 8,
       }}
+      horizontal
       // onLayout={(event) => {
       //   console.log(event.nativeEvent.layout.height);
       //   setHeight(event.nativeEvent.layout.height);

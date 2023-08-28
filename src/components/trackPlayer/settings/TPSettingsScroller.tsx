@@ -27,6 +27,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { MotiView } from "moti";
 import { colors } from "@constants/Colors";
+import { usePlaybackStore } from "@store/store";
 
 //-- COMPONENT ARRAY holds the info for the components --------------
 //-- used in scroller
@@ -67,6 +68,8 @@ const TPSettingsScroller = () => {
   const flatLabelRef = useAnimatedRef<FlatList>();
   const [flIndex, setFLIndex] = useState(0);
   const [componentHeight, setComponentHeight] = useState();
+
+  const currPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
 
   const scrollX = useSharedValue(0);
 
@@ -247,10 +250,11 @@ const TPSettingsScroller = () => {
                 {index === 2 && flIndex === index && (
                   <MotiView
                     from={{ opacity: 0, height: 5 }}
-                    animate={{ opacity: 1, height: 250 }}
+                    animate={{ opacity: 1, height: 135 }}
                     // exit={{ height: 0 }}
+                    style={{ marginHorizontal: 8 }}
                   >
-                    <Comp />
+                    <Comp currPlaylistId={currPlaylistId} />
                   </MotiView>
                 )}
               </View>

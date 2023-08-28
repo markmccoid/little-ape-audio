@@ -73,6 +73,14 @@ const AudioLayout = () => {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="playlistedit"
+        options={{
+          title: "Edit Playlist",
+          presentation: "modal",
+          headerShown: true,
+        }}
+      />
     </Stack>
   );
 };

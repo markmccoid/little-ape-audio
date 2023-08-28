@@ -22,5 +22,6 @@ export const getImageFromWeb = async (playlistId, searchString) => {
       imageURI: clipboardContent.data,
       imageAspectRatio: aspectRatio,
     });
+    Clipboard.setStringAsync("");
   }
 };

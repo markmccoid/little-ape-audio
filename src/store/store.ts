@@ -316,19 +316,16 @@ export const usePlaylists = () =>
 //!! NEED TO Make sure to update playlistUpdated whenever a change is made to
 //!! playlist that we want to track state changes.
 export const useCurrentPlaylist = () => {
-  const x = useTracksStore((state) => state.playlistUpdated);
+  const dateUpdated = useTracksStore((state) => state.playlistUpdated);
   const actions = useTrackActions();
-  const playlists = useTracksStore(
-    (state) => state.playlists,
-    () => true
-  );
 
   const currPlaylistId = usePlaybackStore.getState().currentPlaylistId;
   const [currPlaylist, setCurrentPlaylist] = useState<Playlist>();
+
   useEffect(() => {
     const playlist = actions.getPlaylist(currPlaylistId);
     setCurrentPlaylist(playlist);
-  }, [x]);
+  }, [dateUpdated]);
 
   return currPlaylist;
 };

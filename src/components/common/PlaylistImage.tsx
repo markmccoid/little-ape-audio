@@ -29,7 +29,8 @@ const PlaylistImage = ({ playlistId, style, noTransition = false }: Props) => {
   const actions = useTrackActions();
 
   // let playlist = usePlaybackStore((state) => state.currentPlaylist);
-  let playlist = getCurrentPlaylist();
+  // let playlist = getCurrentPlaylist();
+  let playlist = useCurrentPlaylist();
   if (playlistId) {
     playlist = actions.getPlaylist(playlistId);
   }

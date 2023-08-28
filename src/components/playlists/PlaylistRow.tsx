@@ -11,7 +11,7 @@ import {
 import React, { useEffect, useMemo, useState } from "react";
 import { usePlaybackStore, useTrackActions } from "../../store/store";
 import { Playlist, AudioTrack } from "../../store/types";
-import { Link, useRouter } from "expo-router";
+import { Link, router, useRouter } from "expo-router";
 import { formatSeconds } from "../../utils/formatUtils";
 import PlaylistImage from "../common/PlaylistImage";
 import { DeleteIcon, EditIcon, ImageIcon } from "../common/svg/Icons";
@@ -132,16 +132,23 @@ const PlaylistRow = ({ playlist, onPlaylistSelect }: Props) => {
       >
         <TouchableOpacity
           className="flex-1 justify-center"
-          onPress={handleEditPlaylist}
+          // onPress={handleEditPlaylist}
+          onPress={() => {
+            // router.setParams({ playlistId: playlist.id });
+            router.push({
+              pathname: "/audio/playlistedit",
+              params: { playlistId: playlist.id },
+            });
+          }}
         >
           <EditIcon />
         </TouchableOpacity>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           className="flex-1 justify-center"
           onPress={async () => getImageFromWeb(playlist.id, playlist.name)}
         >
           <ImageIcon />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity
           className="flex-1 justify-center"
           onPress={handleRemovePlaylist}

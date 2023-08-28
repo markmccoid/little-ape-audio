@@ -12,8 +12,9 @@ const TrackPlayerImage = () => {
   const actions = usePlaybackStore((state) => state.actions);
   const queue = usePlaybackStore((state) => state.trackPlayerQueue);
   const currTrackIndex = usePlaybackStore((state) => state.currentTrackIndex);
-  // const playlist = useCurrentPlaylist();
-  const playlist = actions.getCurrentPlaylist();
+  const playlist = useCurrentPlaylist();
+  // const playlist = actions.getCurrentPlaylist();
+
   /**
    * if qLength === 1 don't show or disable BOTH
    * if qLenght !== 1 && currTrackIndex === 0 disable PREV
