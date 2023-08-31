@@ -41,6 +41,11 @@ export type FolderMetadataArrayItem = FolderMetadataDetails & {
   key: string;
   position?: number;
 };
+export type MetadataErrorObj = {
+  dropboxPath: string;
+  folderName: string;
+  metadataFileName: string;
+};
 
 type FolderNavigation = {
   fullPath: string;
@@ -54,6 +59,7 @@ type DropboxState = {
   // When a user tell a directory to be "read" the metadata for every folder
   // is stored in this object.
   folderMetadata: Record<string, FolderMetadataDetails>;
+  folderMetadataErrors: MetadataErrorObj[];
   // This is a derived array created from the folderMetadata object
   // created for easier display of folderMetadata
   folderMetadataArray: FolderMetadataArrayItem[];
@@ -92,12 +98,15 @@ type DropboxState = {
     // displaying the information and searching
     generateFolderMetadataArray: () => void;
     getFavoritedBooks: () => FolderMetadataArrayItem[];
+    addMetadataError: (errorerror: MetadataErrorObj) => void;
+    clearMetadataError: () => void;
   };
 };
 export const useDropboxStore = create<DropboxState>((set, get) => ({
   favoriteFolders: [],
   folderMetadata: {},
   folderMetadataArray: [],
+  folderMetadataErrors: [],
   favoritedBooks: [],
   folderNavigation: [],
   actions: {
@@ -234,6 +243,12 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       }
       return favBooks;
     },
+    addMetadataError: (error) => {
+      set({ folderMetadataErrors: [error, ...get().folderMetadataErrors] });
+    },
+    clearMetadataError: () => {
+      set({ folderMetadataErrors: [] });
+    },
   },
 }));
 export const useFavoriteBooks = () => {
@@ -321,10 +336,16 @@ export const getSingleFolderMetadata = async (folder) => {
         finalCleanImageName
       );
     } catch (error) {
-      Alert.alert(
-        "Error Downloading Metadata File",
-        `Error downloading "${metadataFile.name}" with ${error.message}`
-      );
+      const errorObj = {
+        dropboxPath: folder.path_lower,
+        folderName: folder.name,
+        metadataFileName: metadataFile.name,
+      };
+      useDropboxStore.getState().actions.addMetadataError(errorObj);
+      // Alert.alert(
+      //   "Error Downloading Metadata File",
+      //   `Error downloading "${metadataFile.name}" with ${error.message}`
+      // );
     }
   } else {
     // This means we did NOT find any ...metadata.json file build minimal info

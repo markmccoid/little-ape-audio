@@ -33,7 +33,9 @@ type Props = {
 const FileMetadataView = ({ metadata, path_lower }: Props) => {
   const [showDescription, setShowDescription] = useState(false);
   const dropboxActions = useDropboxStore((state) => state.actions);
+
   if (!metadata) return null;
+
   const handleToggleFavorite = async () => {
     await dropboxActions.addFolderMetadata(
       { isFavorite: !!!metadata.isFavorite },

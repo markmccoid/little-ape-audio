@@ -1,3 +1,6 @@
+import uuid from "react-native-uuid";
+import { useTracksStore } from "@store/store";
+import { FileEntry, getDropboxFileLink } from "@utils/dropboxUtils";
 import * as FileSystem from "expo-file-system";
 
 //--============================================================
@@ -144,6 +147,43 @@ export const downloadWithProgress = (
   };
 };
 
+//! -------------------------------------------------
+//! Download all EXPERIMENT
+//! -------------------------------------------------
+// export const startDownloadAll = async (
+//   files: FileEntry[],
+//   progressUpdater: React.Dispatch<React.SetStateAction<string[]>>,
+//   setProgress
+// ) => {
+//   console.log("files", files.length);
+//   let dlLinks = [];
+
+//   for (const file of files) {
+//     const downloadLink = await getDropboxFileLink(file.path_lower);
+
+//     //const res = await downloadToFileSystem(downloadLink, file.name);
+//     const { startDownload, pauseDownload } = downloadWithProgress(
+//       downloadLink,
+//       file.name,
+//       setProgress
+//     );
+//     const { cleanFileName, fileURI } = await startDownload();
+//     useTracksStore.getState().actions.addNewTrack(
+//       //res.cleanFileName,
+//       cleanFileName,
+//       file.name,
+//       file.path_lower,
+//       uuid.v4() as string
+//     );
+//     dlLinks.push(downloadLink);
+
+//     progressUpdater((prev) => [...(prev || []), file.id]);
+//   }
+
+//   console.log("DONE");
+// };
+
+//! -------------------------------------------------
 //! -------------------------------------------------
 //--============================================================
 //-- File Or Directory

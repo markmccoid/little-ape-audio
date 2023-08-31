@@ -34,12 +34,25 @@ const ExplorerFile = ({ file, playlistId }: Props) => {
   const stopDownloadRef = useRef<() => Promise<DownloadPauseState>>();
 
   useEffect(() => {
-    if (playlistId) {
-      if (!isDownloaded) {
-        downloadFile(file);
+    // Using the playlistId as the trigger to download a file
+    // If the playlistId is populated, then start downloading this file
+    const checkAndDownload = async () => {
+      if (playlistId) {
+        if (!isDownloaded) {
+          await downloadFile(file);
+        }
       }
-    }
+    };
+    checkAndDownload();
   }, [playlistId]);
+  //! Uncomment to stop all downloads when moving away from folder
+  // useEffect(() => {
+  //   return () => {
+  //     if (stopDownloadRef?.current) {
+  //       stopDownloadRef.current();
+  //     }
+  //   };
+  // }, []);
   //~ --- Download All Trigger -----
   const downloadAll = () => {};
   //~ --- stopDownload of file -----
@@ -53,7 +66,7 @@ const ExplorerFile = ({ file, playlistId }: Props) => {
     setIsDownloading(true);
 
     const downloadLink = await getDropboxFileLink(file.path_lower);
-    const { startDownload, pauseDownload } = await downloadWithProgress(
+    const { startDownload, pauseDownload } = downloadWithProgress(
       downloadLink,
       file.name,
       setProgress
@@ -147,4 +160,4 @@ const ExplorerFile = ({ file, playlistId }: Props) => {
   );
 };
 
-export default ExplorerFile;
+export default React.memo(ExplorerFile);

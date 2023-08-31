@@ -15,7 +15,12 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import uuid from "react-native-uuid";
 import { Link } from "expo-router";
-import { listDropboxFiles, DropboxDir } from "../../utils/dropboxUtils";
+import {
+  listDropboxFiles,
+  DropboxDir,
+  FileEntry,
+  FolderEntry,
+} from "../../utils/dropboxUtils";
 import ExplorerActionBar from "./ExplorerActionBar";
 // import { useTrackActions } from "../../store/store";
 import ExplorerFile from "./ExplorerFile";
@@ -32,6 +37,7 @@ import {
 } from "../../store/store-dropbox";
 import FileMetadataView from "./FileMetadataView";
 import ExplorerFolderRow from "./ExplorerFolderRow";
+import { startDownloadAll } from "@store/data/fileSystemAccess";
 
 function filterAudioFiles(filesAndFolders: DropboxDir) {
   const files = filesAndFolders.files;
@@ -61,7 +67,9 @@ type Props = {
 };
 const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
   const [filesFolderObj, setFilesFolderObj] = React.useState<DropboxDir>();
-  const [flatlistData, setFlatlistData] = React.useState([]);
+  const [flatlistData, setFlatlistData] = React.useState<
+    FileEntry[] | FolderEntry[]
+  >([]);
   const [downloadAllId, setDownloadAllId] = React.useState<string>();
   const [isLoading, setIsLoading] = React.useState(false);
   const [isError, setIsError] = React.useState(undefined);
@@ -174,10 +182,19 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
     // console.log("turn on show meta flag");
     setShowMetadata("on");
   };
-  //~ ====================
-  //~ onDownloadAll
-  //~ ====================
-  const onDownloadAll = () => {
+  //! ~ ====================
+  //! ~ onDownloadAll
+  //! ~ ====================
+  const onDownloadAll = async () => {
+    //-- This was an expirment to download outside of components and then
+    //-- update component as things finished.
+    //-- useEffect used when "setFilesDone" updated which updated the
+    //-- flatlistData so the file.isAlreadyDownloaded was set to true
+    //-- Next step would have been to pass on the progress
+    // const files = flatlistData.filter((el) => el[".tag"] === "file");
+    // await startDownloadAll(files, setFilesDone, setProgress);
+    // return;
+    //--
     // path WILL equal currentPath and we can just assume
     // the current "files" state variable has the data we need
     // When this function is called, we will set a download state
@@ -247,10 +264,12 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
       </View>
 
       {filesFolderObj?.files?.length > 0 && (
-        <FileMetadataView
-          metadata={allFoldersMetadata?.[createFolderMetadataKey(pathIn)]}
-          path_lower={pathIn}
-        />
+        <>
+          <FileMetadataView
+            metadata={allFoldersMetadata?.[createFolderMetadataKey(pathIn)]}
+            path_lower={pathIn}
+          />
+        </>
       )}
 
       <FlatList
