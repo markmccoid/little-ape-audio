@@ -33,10 +33,12 @@ const ShowFavoritedBooks = () => {
     drag: any;
     isActive: boolean;
   }) => {
-    const imageURI =
-      item.imageURL ||
-      item.localImageName ||
-      `${FileSystem.documentDirectory}${item.defaultImage}`;
+    const imageURI = item?.imageURL
+      ? item.imageURL
+      : item?.localImageName
+      ? `${FileSystem.documentDirectory}${item.localImageName}`
+      : item.defaultImage;
+
     return (
       <ScaleDecorator activeScale={0.98}>
         <View
