@@ -1,3 +1,4 @@
+import { Image } from "react-native";
 import uuid from "react-native-uuid";
 import { create } from "zustand";
 import { saveToAsyncStorage } from "./data/asyncStorage";
@@ -98,8 +99,8 @@ type DropboxState = {
     // displaying the information and searching
     generateFolderMetadataArray: () => void;
     getFavoritedBooks: () => FolderMetadataArrayItem[];
-    addMetadataError: (errorerror: MetadataErrorObj) => void;
-    clearMetadataError: () => void;
+    addMetadataError: (error: MetadataErrorObj) => Promise<void>;
+    clearMetadataError: () => Promise<void>;
   };
 };
 export const useDropboxStore = create<DropboxState>((set, get) => ({
@@ -243,11 +244,17 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       }
       return favBooks;
     },
-    addMetadataError: (error) => {
-      set({ folderMetadataErrors: [error, ...get().folderMetadataErrors] });
+    addMetadataError: async (error) => {
+      const folderMetadataErrors = [
+        error,
+        ...(get().folderMetadataErrors || []),
+      ];
+      set({ folderMetadataErrors });
+      await saveToAsyncStorage("foldermetadataerrors", folderMetadataErrors);
     },
-    clearMetadataError: () => {
+    clearMetadataError: async () => {
       set({ folderMetadataErrors: [] });
+      await saveToAsyncStorage("foldermetadataerrors", []);
     },
   },
 }));
@@ -341,7 +348,7 @@ export const getSingleFolderMetadata = async (folder) => {
         folderName: folder.name,
         metadataFileName: metadataFile.name,
       };
-      useDropboxStore.getState().actions.addMetadataError(errorObj);
+      await useDropboxStore.getState().actions.addMetadataError(errorObj);
       // Alert.alert(
       //   "Error Downloading Metadata File",
       //   `Error downloading "${metadataFile.name}" with ${error.message}`
@@ -356,7 +363,8 @@ export const getSingleFolderMetadata = async (folder) => {
       id: folder.path_lower,
       title: folder.name,
       localImageName: finalCleanImageName,
-      defaultImage: defaultImages[`image${randomNum}`],
+      defaultImage: Image.resolveAssetSource(defaultImages[`image${randomNum}`])
+        .uri,
     } as Partial<CleanBookMetadata>;
   }
   return convertedMeta;

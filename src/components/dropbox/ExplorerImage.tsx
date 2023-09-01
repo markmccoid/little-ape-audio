@@ -18,13 +18,16 @@ const ExplorerImage = ({ metadata, width, style }: Props) => {
   const finalImage = metadata?.imageURL
     ? metadata.imageURL
     : metadata?.localImageName
-    ? { uri: `${FileSystem.documentDirectory}${metadata.localImageName}` }
+    ? `${FileSystem.documentDirectory}${metadata.localImageName}`
     : metadata.defaultImage;
 
+  if (!metadata) {
+    return null;
+  }
   return (
     <View>
       <Image
-        source={finalImage}
+        source={{ uri: finalImage }}
         style={[
           {
             width: imgDims.width,

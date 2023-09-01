@@ -746,12 +746,18 @@ export const onInitialize = async () => {
   const playlists = await loadFromAsyncStorage("playlists");
   const favFolders = await loadFromAsyncStorage("favfolders");
   const folderMetadata = await loadFromAsyncStorage("foldermetadata");
+  const folderMetadataErrors = await loadFromAsyncStorage(
+    "foldermetadataerrors"
+  );
   const settings = await loadFromAsyncStorage("settings");
 
   useTracksStore.setState({ tracks: tracks || [], playlists: playlists || {} });
 
   useDropboxStore.setState({ favoriteFolders: favFolders });
-  useDropboxStore.setState({ folderMetadata: folderMetadata });
+  useDropboxStore.setState({
+    folderMetadata: folderMetadata,
+    folderMetadataErrors,
+  });
   useDropboxStore.getState().actions.generateFolderMetadataArray();
   useSettingStore.setState({
     ...settings,

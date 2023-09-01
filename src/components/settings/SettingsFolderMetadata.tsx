@@ -25,7 +25,7 @@ const SettingsFolderMetadata = () => {
   const [showErrors, setShowErrors] = useState(false);
   return (
     <>
-      {folderMetadataErrors.length > 0 && (
+      {folderMetadataErrors?.length > 0 && (
         <View className="flex-row justify-center mr-2 mt-1">
           <TouchableOpacity
             onPress={() => setShowErrors((prev) => !prev)}

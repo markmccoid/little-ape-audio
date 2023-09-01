@@ -1,5 +1,5 @@
 import { defaultImages, getRandomNumber } from "../store/storeUtils";
-
+import { Image } from "react-native";
 type GoogleData = {
   id?: string;
   title?: string;
@@ -100,8 +100,9 @@ export function cleanOneBook(
     publisher: book?.googleAPIData?.publisher,
     pageCount: parseInt(book?.googleAPIData?.pageCount) || undefined,
     bookLength,
-    imageURL: imageURL ? { uri: imageURL } : undefined,
-    defaultImage: defaultImages[`image${randomNum}`],
+    imageURL: imageURL,
+    defaultImage: Image.resolveAssetSource(defaultImages[`image${randomNum}`])
+      .uri,
     localImageName: localImageName,
     categories: Array.from(new Set(categories)),
     categoryOne,
