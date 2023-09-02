@@ -5,6 +5,7 @@ import { BackIcon, NextIcon } from "../common/svg/Icons";
 import { colors } from "../../constants/Colors";
 import { useCurrentPlaylist, usePlaybackStore } from "../../store/store";
 import Animated from "react-native-reanimated";
+import TrackPlayerScoller from "./TrackPlayerScoller";
 
 const { width, height } = Dimensions.get("window");
 
@@ -26,7 +27,12 @@ const TrackPlayerImage = () => {
   const displayNext = queue.length !== 1;
 
   return (
-    <View className="flex-row justify-between items-center mx-1">
+    <View
+      className="flex-row justify-between items-center "
+      style={{
+        marginHorizontal: 5,
+      }}
+    >
       <TouchableOpacity
         onPress={() => actions.prev()}
         disabled={!displayPrev}
@@ -34,7 +40,7 @@ const TrackPlayerImage = () => {
       >
         <BackIcon size={35} color={colors.amber800} />
       </TouchableOpacity>
-      <Image
+      {/* <Image
         source={{ uri: playlist?.imageURI }}
         style={{
           width: width / 1.35,
@@ -42,15 +48,10 @@ const TrackPlayerImage = () => {
           resizeMode: "stretch",
           alignSelf: "center",
         }}
-      />
-      {/* <PlaylistImage
-        style={{
-          width: width / 1.35,
-          height: width / 1.35,
-          resizeMode: "stretch",
-          alignSelf: "center",
-        }}
       /> */}
+
+      <TrackPlayerScoller />
+
       <TouchableOpacity
         onPress={() => actions.next()}
         disabled={!displayNext}

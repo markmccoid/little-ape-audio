@@ -46,6 +46,7 @@ export type MetadataErrorObj = {
   dropboxPath: string;
   folderName: string;
   metadataFileName: string;
+  error: string;
 };
 
 type FolderNavigation = {
@@ -328,13 +329,15 @@ export const getSingleFolderMetadata = async (folder) => {
   let convertedMeta;
   if (metadataFile) {
     try {
+      // console.log("PATH", metadataFile.path_lower);
       const metadata = (await downloadDropboxFile(
         `${metadataFile.path_lower}`
       )) as BookJSONMetadata;
+
       //-- LOCAL IMAGE CHECK
       // Check to see if there is a google image, if not look for one it directory
       // Don't want to check every time, dropbox will throw 429 rate limit error
-      if (!metadata.googleAPIData?.imageURL && localImage) {
+      if (!metadata?.googleAPIData?.imageURL && localImage) {
         finalCleanImageName = await getLocalImage(localImage, folder.name);
       }
       convertedMeta = cleanOneBook(
@@ -347,6 +350,7 @@ export const getSingleFolderMetadata = async (folder) => {
         dropboxPath: folder.path_lower,
         folderName: folder.name,
         metadataFileName: metadataFile.name,
+        error,
       };
       await useDropboxStore.getState().actions.addMetadataError(errorObj);
       // Alert.alert(

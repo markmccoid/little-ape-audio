@@ -34,6 +34,9 @@ type Props = {
   index: number;
   onNavigateForward: (path: string, folderName: string) => void;
   showFolderMetadata: "on" | "off" | "loading";
+  setShowMetadata: React.Dispatch<
+    React.SetStateAction<"on" | "off" | "loading">
+  >;
   folderMetadata: FolderMetadataDetails;
 };
 
@@ -42,6 +45,7 @@ const ExplorerFolder = ({
   index,
   onNavigateForward,
   showFolderMetadata = "on",
+  setShowMetadata,
   folderMetadata,
 }: Props) => {
   const [isFavorite, setIsFavorite] = useState(!!folder.favorited);
@@ -76,7 +80,6 @@ const ExplorerFolder = ({
     // console.log("starting manual download", folder.path_lower);
     // Start download and parse
     setFolderMetaState("loading");
-
     const convertedMetadata = await getSingleFolderMetadata(folder);
     // Create key and store the data in the dropbox store
     const metadataKey = createFolderMetadataKey(folder.path_lower);
@@ -85,6 +88,7 @@ const ExplorerFolder = ({
 
     setMetadataInfo(convertedMetadata);
     setFolderMetaState("on");
+    setShowMetadata("on");
   };
 
   // isFav and isRead -> red
@@ -173,9 +177,7 @@ const ExplorerFolder = ({
       </TouchableOpacity>
       <View className="mb-0 flex-1">
         <ExplorerFolderRow
-          showMetadata={
-            folderMetaState !== "off" || showFolderMetadata !== "off"
-          }
+          showMetadata={showFolderMetadata !== "off"}
           metadata={metadataInfo}
           index={index}
           key="data"

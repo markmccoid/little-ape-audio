@@ -135,6 +135,7 @@ function getCategoriesFromPath(pathIn: string) {
 }
 
 function properCase(word) {
+  if (!word) return "Misc";
   // Check if the word is already capitalized.
   if (word[0].toUpperCase() === word[0]) {
     return word;

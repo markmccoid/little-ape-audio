@@ -114,6 +114,7 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
             folder={item}
             onNavigateForward={onNavigateForward}
             showFolderMetadata={showMetadata}
+            setShowMetadata={setShowMetadata}
             folderMetadata={allFoldersMetadata?.[metadataKey]}
           />
         );
@@ -178,6 +179,11 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
     }
     // Call download function and set to show metadata
     setShowMetadata("loading");
+    // console.log("PATH IN", pathIn);
+    // pathIn will be the full path to the current folder
+    // So filesFolderObj.folders will be the folders IN the pathIn path.
+    // BUT the folders object being sent has the .path_lower property on it
+    // and it has the full path including the folder name
     await downloadFolderMetadata(filesFolderObj.folders);
     // console.log("turn on show meta flag");
     setShowMetadata("on");

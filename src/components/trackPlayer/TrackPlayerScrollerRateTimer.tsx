@@ -1,16 +1,18 @@
 import { View, Text, TouchableOpacity, Dimensions } from "react-native";
 import React, { useEffect, useState } from "react";
-import { usePlaybackStore } from "../../../store/store";
+
 import TrackPlayer from "react-native-track-player";
 import Slider from "@react-native-community/slider";
 import { MotiView } from "moti";
-import { colors } from "../../../constants/Colors";
+import { colors } from "@constants/Colors";
+import { usePlaybackStore } from "@store/store";
+import TrackPlayerScrollerSleepTime from "./TrackPlayerScrollerSleepTime";
 
 const { width, height } = Dimensions.get("window");
-const COMPONENT_WIDTH = width - 20;
+const COMPONENT_WIDTH = width - 90;
 const COMPONENT_PADDING = 10;
 
-const TrackPlayerSettingsRate = () => {
+const TrackPlayerScrollerRateTimer = () => {
   const playbackActions = usePlaybackStore((state) => state.actions);
   const [rate, setRate] = useState<number>(1);
   const [isSliding, setIsSliding] = useState(false);
@@ -31,9 +33,13 @@ const TrackPlayerSettingsRate = () => {
   const fixedRates = [1, 1.25, 1.5, 1.75, 2];
 
   return (
-    <View style={{ width: width, paddingHorizontal: COMPONENT_PADDING }}>
+    <View
+      className="flex-col justify-center  flex-1"
+      style={{ width: COMPONENT_WIDTH, paddingHorizontal: COMPONENT_PADDING }}
+    >
       {/* <Text className="ml-2 text-lg font-bold">Audio Speed:</Text> */}
-      <View className="flex flex-col p-2 bg-white border border-amber-950 rounded-lg">
+      <View className="flex flex-col p-2 mb-2 bg-amber-200 border border-amber-950 rounded-lg">
+        {/* RATE COMPONENT */}
         <View className="flex-row justify-start space-x-2 w-full items-center mb-2">
           {fixedRates.map((el) => (
             <TouchableOpacity
@@ -46,20 +52,47 @@ const TrackPlayerSettingsRate = () => {
               <Text>{el.toFixed(2)}</Text>
             </TouchableOpacity>
           ))}
+        </View>
+
+        <Slider
+          style={{
+            width: COMPONENT_WIDTH - 40,
+            paddingHorizontal: COMPONENT_PADDING,
+          }}
+          minimumTrackTintColor={colors.amber700}
+          maximumTrackTintColor={colors.amber400}
+          thumbTintColor={colors.amber600}
+          minimumValue={50}
+          maximumValue={400}
+          step={5}
+          tapToSeek
+          value={rate * 100}
+          onValueChange={(val) => {
+            setRate(val / 100);
+          }}
+          onSlidingStart={() => setIsSliding(true)}
+          onSlidingComplete={(val) => {
+            updateRate(val / 100);
+            setIsSliding(false);
+          }}
+        />
+
+        <View className="flex-row justify-end z-20">
           <MotiView
             from={{ scale: 1, translateX: 0, backgroundColor: "white" }}
             animate={{
-              scale: isSliding ? 2 : 1,
-              translateX: isSliding ? -35 : 0,
+              scale: isSliding ? 1.5 : 1,
+              translateX: isSliding ? -10 : 0,
+              translateY: isSliding ? 10 : 0,
               backgroundColor: isSliding ? colors.amber300 : "white",
             }}
             exit={{ scale: 1 }}
-            className={`flex-row justify-end flex-grow mr-2 rounded-lg ${
+            className={`flex-row justify-end mr-2 rounded-lg border border-amber-900  ${
               isSliding ? "border border-amber-800 justify-center" : ""
             }`}
           >
             <Text
-              className={`text-amber-900 text-lg ${
+              className={`text-amber-900 text-lg px-2  ${
                 isSliding ? "text-black" : ""
               }`}
             >
@@ -67,30 +100,12 @@ const TrackPlayerSettingsRate = () => {
             </Text>
           </MotiView>
         </View>
-        <View className="flex-row w-full ">
-          <Slider
-            style={{ width: "100%" }}
-            minimumTrackTintColor={colors.amber700}
-            maximumTrackTintColor={colors.amber400}
-            thumbTintColor={colors.amber600}
-            minimumValue={50}
-            maximumValue={400}
-            step={5}
-            tapToSeek
-            value={rate * 100}
-            onValueChange={(val) => {
-              setRate(val / 100);
-            }}
-            onSlidingStart={() => setIsSliding(true)}
-            onSlidingComplete={(val) => {
-              updateRate(val / 100);
-              setIsSliding(false);
-            }}
-          />
-        </View>
       </View>
+      {/* RATE COMPONENT END */}
+
+      <TrackPlayerScrollerSleepTime />
     </View>
   );
 };
 
-export default TrackPlayerSettingsRate;
+export default TrackPlayerScrollerRateTimer;

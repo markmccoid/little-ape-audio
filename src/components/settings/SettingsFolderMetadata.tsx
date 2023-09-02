@@ -38,7 +38,7 @@ const SettingsFolderMetadata = () => {
         </View>
       )}
       {showErrors ? (
-        <SettingsMetadataErrors />
+        <SettingsMetadataErrors closeShowErrors={() => setShowErrors(false)} />
       ) : (
         <>
           <View className="flex-row m-2">
