@@ -50,7 +50,9 @@ const TrackPlayerImage = () => {
         }}
       /> */}
 
-      <TrackPlayerScoller />
+      <View className="flex-1">
+        <TrackPlayerScoller />
+      </View>
 
       <TouchableOpacity
         onPress={() => actions.next()}

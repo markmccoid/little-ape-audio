@@ -13,7 +13,7 @@ const TrackPlayerScrollerSleepTime = () => {
   );
 
   return (
-    <View className="mt-2 flex-col bg-white border border-amber-900 rounded-lg">
+    <View className="flex-col flex-grow bg-white border border-amber-900 rounded-lg">
       <View className="flex-row justify-center p-2">
         <Text className="font-bold text-lg">Sleep in {sleepTime} min</Text>
         {/* START and STOP Buttons */}

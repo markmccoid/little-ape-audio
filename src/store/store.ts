@@ -332,10 +332,14 @@ export const useCurrentPlaylist = () => {
 //-- ==================================
 //-- PLAYBACK STORE
 //-- ==================================
+type TrackAttributes = {
+  currentPosition: number;
+};
 type PlaybackState = {
   currentPlaylistId: string;
   // currentPlaylist: Playlist;
   trackPlayerQueue: ApeTrack[];
+  trackAttributes: TrackAttributes[];
   currentTrack: ApeTrack;
   currentTrackIndex: number;
   playerState: State;
@@ -376,6 +380,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
   currentPlaylistId: undefined,
   // currentPlaylist: undefined,
   trackPlayerQueue: undefined,
+  trackAttributes: [],
   currentTrack: undefined,
   currentTrackIndex: 0,
   currentTrackPosition: 0,

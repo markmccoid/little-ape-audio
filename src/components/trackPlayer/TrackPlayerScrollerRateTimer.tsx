@@ -34,7 +34,7 @@ const TrackPlayerScrollerRateTimer = () => {
 
   return (
     <View
-      className="flex-col justify-center  flex-1"
+      className="flex-col justify-center flex-grow"
       style={{ width: COMPONENT_WIDTH, paddingHorizontal: COMPONENT_PADDING }}
     >
       {/* <Text className="ml-2 text-lg font-bold">Audio Speed:</Text> */}

@@ -6,11 +6,18 @@ import {
   Image,
   Dimensions,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import TrackPlayerSettingsRate from "./settings/TrackPlayerSettingsRate";
 import TrackPlayerSettingsSleepTimer from "./settings/TrackPlayerSettingsSleepTimer";
 import { useCurrentPlaylist } from "@store/store";
 import TrackPlayerScrollerRateTimer from "./TrackPlayerScrollerRateTimer";
+import Animated, {
+  FadeIn,
+  runOnJS,
+  useAnimatedScrollHandler,
+  useSharedValue,
+} from "react-native-reanimated";
+import { MotiView } from "moti";
 
 const { width, height } = Dimensions.get("window");
 
@@ -37,25 +44,70 @@ const componentArray = [
   },
 ];
 
+const COMPONENT_WIDTH = width - 80;
+
 const TrackPlayerScoller = () => {
   const playlist = useCurrentPlaylist();
+  const scrollX = useSharedValue(0);
+  const [currIndex, setCurrIndex] = useState(0);
+
+  //~ Handle the scrolling --------------
+  const handleScroll = useAnimatedScrollHandler({
+    onScroll: (e) => {
+      scrollX.value = e.contentOffset.x;
+      // scrollTo(flatLabelRef, scrollX.value, 0, false);
+    },
+    onEndDrag: (e) => {
+      runOnJS(setCurrIndex)(e.targetContentOffset.x / COMPONENT_WIDTH);
+    },
+  });
 
   return (
-    <FlatList
+    <Animated.FlatList
       data={componentArray}
       horizontal
       showsHorizontalScrollIndicator={false}
-      snapToInterval={width - 80}
-      style={{ width: width - 80 }}
+      snapToInterval={COMPONENT_WIDTH}
+      style={{
+        width: COMPONENT_WIDTH,
+        flexGrow: 1,
+      }}
+      contentContainerStyle={{
+        justifyContent: "center",
+        alignItems: "center",
+      }}
       keyExtractor={(_, index) => index.toString()}
       decelerationRate="fast"
-      // onScroll={handleScroll}
+      bounces={false}
+      onScroll={handleScroll}
       renderItem={({ item, index }) => {
         const Comp = item.component;
         return (
-          <View style={{ width: width - 80 }}>
-            {index === 0 && <Comp imageURI={playlist?.imageURI} />}
-            {index !== 0 && <Comp />}
+          <View style={{ width: COMPONENT_WIDTH }}>
+            {index === 0 && (
+              <MotiView
+                from={{ opacity: 0, scale: 0.8 }}
+                animate={{
+                  opacity: currIndex === index ? 1 : 0.4,
+                  scale: currIndex === index ? 1 : 0.7,
+                }}
+                transition={{ type: "timing", duration: 500 }}
+              >
+                <Comp imageURI={playlist?.imageURI} />
+              </MotiView>
+            )}
+            {index !== 0 && (
+              <MotiView
+                from={{ opacity: 0.5, scale: 0.8 }}
+                animate={{
+                  opacity: currIndex === index ? 1 : 0.5,
+                  scale: currIndex === index ? 1 : 0.5,
+                }}
+                transition={{ type: "timing", duration: 300 }}
+              >
+                <Comp />
+              </MotiView>
+            )}
             {/* {index !== 2 && flIndex === index && <Comp />}
           {index === 2 && flIndex === index && (
             <MotiView
@@ -70,9 +122,7 @@ const TrackPlayerScoller = () => {
           </View>
         );
       }}
-    >
-      <Text>TrackPlayerScoller</Text>
-    </FlatList>
+    />
   );
 };
 
