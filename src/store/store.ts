@@ -1,4 +1,10 @@
-import { Playlist, AudioState, ApeTrack, Bookmark } from "./types";
+import {
+  Playlist,
+  AudioState,
+  ApeTrack,
+  Bookmark,
+  TrackAttributes,
+} from "./types";
 import { create } from "zustand";
 import { Image } from "react-native";
 import uuid from "react-native-uuid";
@@ -117,6 +123,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         imageURI: undefined,
         imageAspectRatio: undefined,
         imageType: undefined,
+        trackAttributes: undefined,
         genre: undefined,
         totalDurationSeconds: 0,
         totalListenedToSeconds: 0,
@@ -332,18 +339,16 @@ export const useCurrentPlaylist = () => {
 //-- ==================================
 //-- PLAYBACK STORE
 //-- ==================================
-type TrackAttributes = {
-  currentPosition: number;
-};
+
 type PlaybackState = {
   currentPlaylistId: string;
   // currentPlaylist: Playlist;
   trackPlayerQueue: ApeTrack[];
-  trackAttributes: TrackAttributes[];
   currentTrack: ApeTrack;
   currentTrackIndex: number;
   playerState: State;
   playlistLoaded: boolean;
+  // Seconds into current track that is playing
   currentTrackPosition: number;
   // The TOTAL number of seconds into the queue
   currentQueuePosition: number;
@@ -380,7 +385,6 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
   currentPlaylistId: undefined,
   // currentPlaylist: undefined,
   trackPlayerQueue: undefined,
-  trackAttributes: [],
   currentTrack: undefined,
   currentTrackIndex: 0,
   currentTrackPosition: 0,
@@ -424,6 +428,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       const currPlaylist = useTracksStore
         .getState()
         .actions.getPlaylist(playlistId);
+      console.log("setCurrentPlaylist trackid", currPlaylist.trackIds);
       const queue = buildTrackPlayerQueue(currPlaylist.trackIds);
       set({
         currentPlaylistId: playlistId,
@@ -830,32 +835,93 @@ const mountTrackPlayerListeners = () => {
   eventPlayerTrackChange = TrackPlayer.addEventListener(
     Event.PlaybackTrackChanged,
     async (event) => {
-      // console.log("TRACK CHANGE", event);
+      // event = { nextTrack, position (in seconds), track (current track)}
+      console.log("TRACK CHANGE", event);
+      // If there is no next track OR if we are in a loading state, just return
       if (event?.nextTrack === undefined) return;
+      if (!usePlaybackStore.getState().playlistLoaded) return;
       // ON TRACK CHANGE -
       // Get Next Track (if there is one) and update
       // PlaybackStore -> currentTrack, currentTrackIndex
       // TrackStore -> playlists object for current playlist
       //     update the playlists current position
-      // if (event.nextTrack != null) {
-      const track = (await TrackPlayer.getTrack(event.nextTrack)) as ApeTrack;
+      // =======================================
+      // Get the event params
+      const {
+        nextTrack: nextTrackIndex,
+        position: prevPositionSeconds,
+        track: prevTrackIndex,
+      } = event;
+      const track = (await TrackPlayer.getTrack(nextTrackIndex)) as ApeTrack;
+
+      const prevTrack = (await TrackPlayer.getTrack(
+        prevTrackIndex
+      )) as ApeTrack;
+
+      // Track has reached end of track (at least 1 second from end of track)
+      // We take this to assume we are moving to the next track "naturally"
+      // we will use this to start at the beginning of the next track instead of
+      // looking at its set current position
+      const naturalTrackChange =
+        Math.floor(prevTrack.duration - prevPositionSeconds) < 1;
+
+      // update playback store's info
+      // used in track playback components track list, etc
       usePlaybackStore.setState({
         currentTrack: track,
-        currentTrackIndex: event.nextTrack,
+        currentTrackIndex: nextTrackIndex,
       });
+
+      // Get the current playlist object from the track store
       const playlist =
         useTracksStore.getState().playlists[
           usePlaybackStore.getState().currentPlaylistId
         ];
+
+      //~~START TrackAttributes
+      //~~ Code to store and prevTracks position and restore "next" tracks position
+      //~~ if one exists this exists on the playlist
+      const prevTrackId = playlist.trackIds[prevTrackIndex];
+      const nextTrackId = playlist.trackIds[nextTrackIndex];
+      const prevTrackAtrributes = playlist?.trackAttributes?.[prevTrackId];
+      const nextTrackAtrributes = playlist?.trackAttributes?.[nextTrackId];
+
+      // If it was a natural track change, then reset to zero
+      // otherwise use the stored trackAttributes
+      const nextTrackPosition = naturalTrackChange
+        ? 0
+        : nextTrackAtrributes?.currentPosition ?? 0;
+
       playlist.currentPosition = {
-        trackIndex: event.nextTrack,
-        position: 0,
+        trackIndex: nextTrackIndex,
+        position: nextTrackPosition,
       };
+
+      TrackPlayer.seekTo(nextTrackPosition);
+
+      // Update a copy of the trackattributes object, updating the prevTrackId's entry
+      // We will RESET the prevTrack's position to zero IF we have reached the end of the track
+      // naturalTrackChange = true will cause the reset to zero
+      const newTrackAttributes = {
+        ...playlist?.trackAttributes,
+        [prevTrackId]: {
+          ...prevTrackAtrributes,
+          currentPosition: naturalTrackChange ? 0 : prevPositionSeconds,
+        },
+      };
+
+      const uipdatedPlaylist = {
+        ...playlist,
+        trackAttributes: newTrackAttributes,
+      };
+      //~~END TrackAttributes
+
       const updatedPlaylists = {
         ...useTracksStore.getState().playlists,
-        [playlist.id]: playlist,
+        [playlist.id]: uipdatedPlaylist,
       };
       useTracksStore.setState({ playlists: updatedPlaylists });
+
       await saveToAsyncStorage("playlists", updatedPlaylists);
       // when a track changes, set the currentQueuePosition.  This is the total of all
       // track durations in queue UP TO, but NOT including the current track
@@ -863,12 +929,10 @@ const mountTrackPlayerListeners = () => {
         event.nextTrack === 0
           ? 0
           : usePlaybackStore.getState().actions.getPrevTrackDuration();
-      usePlaybackStore.setState({ currentQueuePosition: prevTracksDuration });
-      // console.log("PLAYBACKSTORE", Object.keys(usePlaybackStore.getState()));
-      // } else {
-      //   TrackPlayer.seekTo(0);
-      //   TrackPlayer.pause();
-      // }
+
+      usePlaybackStore.setState({
+        currentQueuePosition: prevTracksDuration,
+      });
     }
   );
   //-- =================

@@ -15,6 +15,7 @@ import Constants from "expo-constants";
 
 const SettingsContainer = () => {
   const version = Constants?.expoConfig?.version;
+  const isDevelopmentMode = process?.env?.NODE_ENV === "development";
   const actions = useSettingStore((state) => state.actions);
   const forwardSecs = useSettingStore((state) => state.jumpForwardSeconds);
   const backwardSecs = useSettingStore((state) => state.jumpBackwardSeconds);
@@ -103,13 +104,15 @@ const SettingsContainer = () => {
             </Pressable>
           </Link>
         </View>
-        <View className="px-2 py-3" style={[styles.borderBottom]}>
-          <Link href="/settings/playarea" asChild>
-            <Pressable>
-              <Text className="text-sm">Play Area</Text>
-            </Pressable>
-          </Link>
-        </View>
+        {isDevelopmentMode && (
+          <View className="px-2 py-3" style={[styles.borderBottom]}>
+            <Link href="/settings/playarea" asChild>
+              <Pressable>
+                <Text className="text-sm">Play Area</Text>
+              </Pressable>
+            </Link>
+          </View>
+        )}
       </MotiView>
     </ScrollView>
   );

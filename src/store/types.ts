@@ -37,6 +37,10 @@ export interface ApeTrack extends Track {
   // The track number pulled from the metadata info
   trackNum: number;
 }
+export type TrackAttributes = {
+  currentPosition: number;
+};
+type TrackId = string;
 
 type PlaylistId = string;
 export type Playlist = {
@@ -52,6 +56,8 @@ export type Playlist = {
   totalDurationSeconds: number;
   totalListenedToSeconds: number;
   trackIds?: string[];
+  // Array of attributes that lines up with the tracks in the trackplayer queue
+  trackAttributes: Record<TrackId, TrackAttributes>;
   bookmarks?: Bookmark[];
   currentPosition?: { trackIndex: number; position: number };
   currentRate: number;
