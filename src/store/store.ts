@@ -269,6 +269,15 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       set({ playlists });
       await saveToAsyncStorage("playlists", playlists);
     },
+    deleteTrackFromPlaylist: async (playlistId, trackToDeleteId) => {
+      const playlists = { ...get().playlists };
+      const updatedTracks = playlists[playlistId].trackIds.filter(
+        (trackId) => trackId !== trackToDeleteId
+      );
+      playlists[playlistId].trackIds = updatedTracks;
+      set({ playlists });
+      await saveToAsyncStorage("playlists", playlists);
+    },
     getPlaylistTracks: (playlistId) => {
       const playlist = get().actions.getPlaylist(playlistId);
       const trackIds = [...playlist.trackIds];
@@ -371,6 +380,10 @@ type PlaybackState = {
       playlistId: string,
       trackIdArray: string[]
     ) => Promise<void>;
+    removePlaylistTrack: (
+      playlistId: string,
+      trackIdToDelete: string
+    ) => Promise<void>;
     getPrevTrackDuration: () => number;
     setCurrentTrackPosition: (positionSeconds: number) => void;
     getCurrentTrackPosition: () => number;
@@ -428,7 +441,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       const currPlaylist = useTracksStore
         .getState()
         .actions.getPlaylist(playlistId);
-      console.log("setCurrentPlaylist trackid", currPlaylist.trackIds);
+
       const queue = buildTrackPlayerQueue(currPlaylist.trackIds);
       set({
         currentPlaylistId: playlistId,
@@ -528,6 +541,20 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       await TrackPlayer.seekTo(get().currentTrackPosition);
       await TrackPlayer.setRate(getCurrentPlaylist().currentRate);
       mountTrackPlayerListeners();
+      set({ playlistLoaded: true });
+    },
+    removePlaylistTrack: async (playlistId, trackIdToDelete) => {
+      set({ playlistLoaded: false });
+      const playlistTrackIds =
+        useTracksStore.getState().playlists[playlistId].trackIds;
+      const newTrackIds = playlistTrackIds.filter(
+        (trackId) => trackId !== trackIdToDelete
+      );
+      await useTracksStore
+        .getState()
+        .actions.deleteTrackFromPlaylist(playlistId, trackIdToDelete);
+      await get().actions.updatePlaylistTracks(playlistId, newTrackIds);
+
       set({ playlistLoaded: true });
     },
     setCurrentTrackPosition: (positionsSeconds) => {

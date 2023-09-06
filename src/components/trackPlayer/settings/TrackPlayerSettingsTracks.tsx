@@ -5,21 +5,22 @@ import {
   StyleSheet,
   Pressable,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
-import DragDropEntry, {
-  DragItem,
-  sortArray,
-  TScrollFunctions,
-} from "@markmccoid/react-native-drag-and-order";
 import { usePlaybackStore, useTrackActions } from "../../../store/store";
-import TrackDragItem from "./TrackDragItem";
 import { ApeTrack } from "../../../store/types";
 import { colors } from "../../../constants/Colors";
 import DraggableFlatList, {
   OpacityDecorator,
 } from "react-native-draggable-flatlist";
-import { DragHandleIcon } from "@components/common/svg/Icons";
+import {
+  DeleteIcon,
+  DragHandleIcon,
+  EditIcon,
+} from "@components/common/svg/Icons";
+import { RectButton, Swipeable } from "react-native-gesture-handler";
+import Animated from "react-native-reanimated";
+import TrackPlayerSettingsTracksRow from "./TrackPlayerSettingsTracksRow";
 
 function buildList(queue: ApeTrack[]) {
   return queue.map((el, index) => {
@@ -32,7 +33,7 @@ function buildList(queue: ApeTrack[]) {
   });
 }
 
-type BuildList = ReturnType<typeof buildList>;
+export type BuildList = ReturnType<typeof buildList>;
 
 const TrackPlayerSettingsTracks = () => {
   const queue = usePlaybackStore((state) => state.trackPlayerQueue);
@@ -57,76 +58,43 @@ const TrackPlayerSettingsTracks = () => {
     setTracksMetaSorted(sortedTracks);
   }, [queue]);
 
+  let prevOpenedRow = undefined;
+  let renderRowRefs: Swipeable[] = [];
+
+  const closeRow = (index) => {
+    if (prevOpenedRow && prevOpenedRow !== renderRowRefs[index]) {
+      prevOpenedRow.close();
+    }
+    prevOpenedRow = renderRowRefs[index];
+  };
+
+  type Unpacked<T> = T extends (infer U)[] ? U : T;
+
   const renderItem = ({
     item,
     drag,
     isActive,
+    getIndex,
   }: {
-    item: any;
+    item: Unpacked<BuildList>;
     drag: any;
     isActive: boolean;
+    getIndex: () => number;
   }) => {
-    const isFirst = item.pos === 0;
-
+    const index = getIndex();
     return (
-      <View
-        style={{
-          flexDirection: "row",
-          width: "100%",
-          borderBottomWidth: StyleSheet.hairlineWidth,
-          borderTopWidth: isActive || isFirst ? StyleSheet.hairlineWidth : 0,
-          backgroundColor: "white",
-        }}
-        // className={`flex-row flex-1 w-full border-b border-amber-800 ${
-        //   isActive ? "border-t" : " border-t-0"
-        // }`}
-      >
-        <Pressable
-          onPressIn={drag}
-          disabled={isActive}
-          key={item.id}
-          className=" px-2 border-r border-amber-900 h-[50] justify-center items-center"
-        >
-          <DragHandleIcon />
-        </Pressable>
-        <View className="flex-row flex-1 items-center ">
-          <View className="flex-col flex-1 ml-2">
-            <Text
-              className="font-bold mr-3 text-base"
-              ellipsizeMode="tail"
-              numberOfLines={1}
-            >
-              {item.name}
-            </Text>
-            <Text
-              className="font-semibold mr-3 text-gray-600 text-xs"
-              ellipsizeMode="tail"
-              numberOfLines={1}
-            >
-              {item.id}
-            </Text>
-          </View>
-          <View className="pr-2">
-            <Text className="text-green-900 p-1"> {item.trackNum}</Text>
-          </View>
-        </View>
-        {/* <TrackDragItem
-            key={item.id}
-            name={item.name}
-            id={item.id}
-            trackNum={item.trackNum}
-            itemHeight={50}
-            onEditItem={(val) => console.log("edit", val)}
-            // onRemoveItem={() => removeItemById(item.id)}
-            // firstItem={idx === 0 ? true : false}
-          /> */}
-      </View>
+      <TrackPlayerSettingsTracksRow
+        item={item}
+        drag={drag}
+        isActive={isActive}
+        index={index}
+        renderRowRefs={renderRowRefs}
+        closeRow={closeRow}
+      />
     );
   };
+
   const onDragEnd = async (data) => {
-    // console.log("POSITIONS", sortArray(positions, items, "id"));
-    //  const sortedItems = sortArray(positions, items, "id");
-    // console.log(sortedItems.map((el) => el.id));
     await actions.updatePlaylistTracks(
       playlistId,
       data.map((el) => el.id)

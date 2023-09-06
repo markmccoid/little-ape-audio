@@ -103,6 +103,7 @@ export type AudioState = {
       directory?: string
     ) => void;
     // given passed id of audioFile, remove it from list AND Delete it from FileSystem storage
+    //!! Need to make sure to remove from any playlist if we actually use this function anywhere
     removeTracks: (ids: string[]) => Promise<void>;
     // Will take an array of files (FileEntry[]) and see if that track has already been downloaded
     // to the "tracks" array.  Returns the same array with a "alreadyDownload" key set to true or false
@@ -134,6 +135,10 @@ export type AudioState = {
     updatePlaylistTracks: (
       playlistId: string,
       newTracksArray: string[]
+    ) => Promise<void>;
+    deleteTrackFromPlaylist: (
+      playlistId: string,
+      trackToDeleteId: string
     ) => Promise<void>;
     addBookmarkToPlaylist: (
       bookmarkName: string,

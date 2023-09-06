@@ -38,9 +38,9 @@ const TrackPlayerScrollerRateTimer = () => {
       style={{ width: COMPONENT_WIDTH, paddingHorizontal: COMPONENT_PADDING }}
     >
       {/* <Text className="ml-2 text-lg font-bold">Audio Speed:</Text> */}
-      <View className="flex flex-col p-2 mb-2 bg-amber-200 border border-amber-950 rounded-lg">
+      <View className="flex flex-col p-2 mb-2 bg-amber-200 border border-amber-950 rounded-lg z-20">
         {/* RATE COMPONENT */}
-        <View className="flex-row justify-start space-x-2 w-full items-center mb-2">
+        <View className="flex-row justify-center space-x-1 w-full items-center mb-2">
           {fixedRates.map((el) => (
             <TouchableOpacity
               key={el}
@@ -77,7 +77,7 @@ const TrackPlayerScrollerRateTimer = () => {
           }}
         />
 
-        <View className="flex-row justify-end z-20">
+        <View className="flex-row justify-end">
           <MotiView
             from={{ scale: 1, translateX: 0, backgroundColor: "white" }}
             animate={{
@@ -87,7 +87,7 @@ const TrackPlayerScrollerRateTimer = () => {
               backgroundColor: isSliding ? colors.amber300 : "white",
             }}
             exit={{ scale: 1 }}
-            className={`flex-row justify-end mr-2 rounded-lg border border-amber-900  ${
+            className={`flex-row justify-end mr-2 rounded-lg border border-amber-900 ${
               isSliding ? "border border-amber-800 justify-center" : ""
             }`}
           >
