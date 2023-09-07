@@ -126,7 +126,7 @@ const TrackPlayerSettingsTracks = () => {
       <View className="border border-amber-800 mb-[30]">
         <DraggableFlatList
           data={items}
-          // containerStyle={{ marginBottom: 30 }}
+          containerStyle={{ backgroundColor: colors.amber400 }}
           renderPlaceholder={() => (
             <View className="bg-amber-300 w-full h-full">
               <Text></Text>

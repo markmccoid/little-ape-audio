@@ -863,7 +863,7 @@ const mountTrackPlayerListeners = () => {
     Event.PlaybackTrackChanged,
     async (event) => {
       // event = { nextTrack, position (in seconds), track (current track)}
-      console.log("TRACK CHANGE", event);
+      // console.log("TRACK CHANGE", event);
       // If there is no next track OR if we are in a loading state, just return
       if (event?.nextTrack === undefined) return;
       if (!usePlaybackStore.getState().playlistLoaded) return;
