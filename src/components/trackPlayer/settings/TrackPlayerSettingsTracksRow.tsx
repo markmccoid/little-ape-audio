@@ -4,6 +4,7 @@ import {
   Text,
   Pressable,
   StyleSheet,
+  Alert,
 } from "react-native";
 import React from "react";
 import { Swipeable } from "react-native-gesture-handler";
@@ -128,7 +129,6 @@ const RenderRight = ({
       <Pressable
         onPress={() => {
           playbackActions.removePlaylistTrack(currPlaylistId, item.id);
-          console.log("Deleted", item.id);
         }}
         className="h-full justify-center bg-amber-400 border-r border-l border-amber-600"
       >
@@ -141,7 +141,7 @@ const RenderRight = ({
       </Pressable>
       <Pressable
         onPress={() => {
-          console.log("Edit", item.id);
+          Alert.alert("Edit Not Implemented Yet");
         }}
         className="h-full justify-center bg-amber-400"
       >

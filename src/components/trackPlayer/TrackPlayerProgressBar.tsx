@@ -16,7 +16,7 @@ const TrackPlayerProgressBar = () => {
   const { position, duration } = useProgress();
 
   const queuePos = usePlaybackStore((state) => state.currentQueuePosition);
-  const queueDuration = getCurrentPlaylist().totalDurationSeconds;
+  const queueDuration = getCurrentPlaylist()?.totalDurationSeconds;
   const [seeking, setSeeking] = useState<number>();
   const [isSeeking, setIsSeeking] = useState(false);
   const [currPos, setCurrPos] = useState(position);

@@ -21,10 +21,10 @@ const TrackPlayerImage = () => {
    * if qLenght !== 1 && currTrackIndex === 0 disable PREV
    */
   const displayPrev = !(
-    queue.length === 1 ||
-    (queue.length !== 1 && currTrackIndex === 0)
+    queue?.length === 1 ||
+    (queue?.length !== 1 && currTrackIndex === 0)
   );
-  const displayNext = queue.length !== 1;
+  const displayNext = queue?.length !== 1;
 
   return (
     <View

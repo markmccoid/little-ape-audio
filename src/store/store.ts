@@ -6,7 +6,7 @@ import {
   TrackAttributes,
 } from "./types";
 import { create } from "zustand";
-import { Image } from "react-native";
+import { Alert, Image } from "react-native";
 import uuid from "react-native-uuid";
 import {
   loadFromAsyncStorage,
@@ -33,6 +33,7 @@ import * as FileSystem from "expo-file-system";
 import { getImageSize } from "@utils/audioUtils";
 
 import { shallow } from "zustand/shallow";
+import { router } from "expo-router";
 // export function getRandomNumber() {
 
 //   const randomNumber = Math.floor(Math.random() * 13) + 1; // Generate random number between 1 and 13
@@ -276,6 +277,8 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       );
       playlists[playlistId].trackIds = updatedTracks;
       set({ playlists });
+      // Remove track from device
+      await get().actions.removeTracks([trackToDeleteId]);
       await saveToAsyncStorage("playlists", playlists);
     },
     getPlaylistTracks: (playlistId) => {
@@ -319,7 +322,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
     },
     getBookmarksForPlaylist: (playlistId) => {
       const playlist = get().actions.getPlaylist(playlistId);
-      return playlist.bookmarks;
+      return playlist?.bookmarks;
     },
   },
 }));
@@ -547,14 +550,32 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       set({ playlistLoaded: false });
       const playlistTrackIds =
         useTracksStore.getState().playlists[playlistId].trackIds;
-      const newTrackIds = playlistTrackIds.filter(
-        (trackId) => trackId !== trackIdToDelete
-      );
-      await useTracksStore
-        .getState()
-        .actions.deleteTrackFromPlaylist(playlistId, trackIdToDelete);
-      await get().actions.updatePlaylistTracks(playlistId, newTrackIds);
 
+      // ~~ Function to be called from Alert if One track left and playlist is to be deleted
+      const deletePlaylistRoute = async () => {
+        set({ playlistLoaded: false });
+        // console.log("NAV TO ROUTE");
+        router.replace("/audio");
+        await useTracksStore.getState().actions.removePlaylist(playlistId);
+        get().actions.resetPlaybackStore();
+      };
+      // Check if only one track in playlist, if so, we are deleting
+      // the last track.  Delete the whole playlist
+      if (playlistTrackIds.length === 1) {
+        Alert.alert(
+          "Delete Playlist",
+          "This is the last track in the playlist.  If you delete it, the playlist will also be deleted.",
+          [{ text: "Ok", onPress: deletePlaylistRoute }, { text: "Cancel" }]
+        );
+      } else {
+        const newTrackIds = playlistTrackIds.filter(
+          (trackId) => trackId !== trackIdToDelete
+        );
+        await useTracksStore
+          .getState()
+          .actions.deleteTrackFromPlaylist(playlistId, trackIdToDelete);
+        await get().actions.updatePlaylistTracks(playlistId, newTrackIds);
+      }
       set({ playlistLoaded: true });
     },
     setCurrentTrackPosition: (positionsSeconds) => {
