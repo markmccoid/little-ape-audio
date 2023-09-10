@@ -758,6 +758,7 @@ const buildTrackPlayerQueue = (trackIds: string[]): ApeTrack[] => {
 //~ ------------------------------------
 //~ HELPERS
 //~ ------------------------------------
+
 /**
  * saveCurrentTrackInfo
  * Inquires the TrackPlayer to get the current track and position
@@ -1033,3 +1034,41 @@ function clearAutoSaveInterval(intervalId: number) {
   clearInterval(intervalId);
   intervalId = undefined;
 }
+
+//----------------------------
+//-- TRY at my own useProgress to
+//-- help with duration bug.
+// export const useMyProgress = () => {
+//   const queue = usePlaybackStore().trackPlayerQueue;
+//   const [returnVal, setReturnVal] = useState({ position: 0, duration: 0 });
+//   const [myPos, setMyPos] = useState(0);
+
+//   useEffect(() => {
+//     const progressListener = TrackPlayer.addEventListener(
+//       Event.PlaybackProgressUpdated,
+//       async (event) => {
+//         const duration = queue[event.track]?.duration;
+//         let pos = await TrackPlayer.getPosition();
+//         // |- - - - - - - - ! - - - - |
+//         //    e.p           e.d       duration
+//         let position = event.position;
+//         console.log("EVENT POS", Math.floor(pos), Math.floor(event.position));
+
+//         if (Math.floor(duration) !== Math.floor(event.duration)) {
+//           if (Math.floor(event.position) === Math.floor(event.duration)) {
+//             pos = myPos + 1;
+//             setMyPos((prev) => prev + 1);
+//           } else {
+//             setMyPos(Math.floor(event.position));
+//           }
+//         }
+//         setReturnVal({ position: pos, duration });
+//       }
+//     );
+//     return () => {
+//       console.log("Remove Progress Listener");
+//       progressListener.remove();
+//     };
+//   }, []);
+//   return returnVal;
+// };

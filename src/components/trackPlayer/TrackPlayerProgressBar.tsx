@@ -1,7 +1,11 @@
 import { View, Text, Dimensions } from "react-native";
 import React, { useEffect, useMemo, useState } from "react";
 import TrackPlayer, { useProgress } from "react-native-track-player";
-import { getCurrentPlaylist, usePlaybackStore } from "../../store/store";
+import {
+  getCurrentPlaylist,
+  useMyProgress,
+  usePlaybackStore,
+} from "../../store/store";
 import { formatSeconds } from "../../utils/formatUtils";
 import { colors } from "../../constants/Colors";
 import { AnimatePresence, MotiView } from "moti";
@@ -14,9 +18,10 @@ const leftOffset = (width - width / 2.25) / 2;
 const TrackPlayerProgressBar = () => {
   const playbackActions = usePlaybackStore((state) => state.actions);
   const { position, duration } = useProgress();
-
+  // const { position } = useMyProgress();
   const queuePos = usePlaybackStore((state) => state.currentQueuePosition);
   const queueDuration = getCurrentPlaylist()?.totalDurationSeconds;
+  const myDuration = usePlaybackStore((state) => state.currentTrack.duration);
   const [seeking, setSeeking] = useState<number>();
   const [isSeeking, setIsSeeking] = useState(false);
   const [currPos, setCurrPos] = useState(position);

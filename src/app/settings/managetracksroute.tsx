@@ -15,6 +15,7 @@ import {
 import { AudioTrack } from "../../store/types";
 import { colors } from "../../constants/Colors";
 import ManageTracks from "../../components/settings/ManageTracks";
+import { useRouter } from "expo-router";
 
 const getOutliers = (tracks: AudioTrack[], files) => {
   // { filename: "", orphaned: boolean}
@@ -29,7 +30,22 @@ const getOutliers = (tracks: AudioTrack[], files) => {
   return filesProcessed;
 };
 const ManageTracksRoute = () => {
-  return <ManageTracks />;
+  const route = useRouter();
+  return (
+    <View>
+      <TouchableOpacity
+        onPress={() =>
+          route.push({
+            pathname: "/settings/managetracksmodal",
+            params: { trackId: "x" },
+          })
+        }
+      >
+        <Text>Modal</Text>
+      </TouchableOpacity>
+      <ManageTracks />
+    </View>
+  );
 };
 
 export default ManageTracksRoute;

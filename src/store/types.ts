@@ -1,5 +1,7 @@
+import { Chapters } from "./../utils/audioUtils";
 import { Track } from "react-native-track-player";
 import { FileEntry } from "../utils/dropboxUtils";
+import { Chapters } from "@utils/audioUtils";
 
 //~ ================================
 //~ AudioTrack Type
@@ -26,8 +28,17 @@ export type AudioMetadata = {
   durationSeconds?: number;
   pictureURI?: string;
   pictureAspectRatio?: number;
+  comment?: string;
+  chapters?: Chapters[];
 };
 
+export type Chapters = {
+  id: string;
+  description: string;
+  startTime: number;
+  endTime: number;
+  duration: number;
+};
 //~ ================================
 //~ Playlist Type
 //~ ================================

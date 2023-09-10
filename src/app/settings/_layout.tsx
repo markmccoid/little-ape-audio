@@ -39,6 +39,16 @@ const SettingsLayout = () => {
         }}
       />
       <Stack.Screen
+        name="managetracksmodal"
+        options={{
+          title: "Manage Tracks Modal",
+          headerStyle: { backgroundColor: colors.amber200 },
+          headerTintColor: colors.amber900,
+          presentation: "modal",
+          // headerShown: false,
+        }}
+      />
+      <Stack.Screen
         name="foldermetadataroute"
         options={{
           title: "Folder Metadata Storage",

@@ -7,21 +7,23 @@ import {
   Dimensions,
 } from "react-native";
 import React, { useState } from "react";
-import TrackPlayerSettingsRate from "./settings/TrackPlayerSettingsRate";
-import TrackPlayerSettingsSleepTimer from "./settings/TrackPlayerSettingsSleepTimer";
 import { useCurrentPlaylist } from "@store/store";
-import TrackPlayerScrollerRateTimer from "./TrackPlayerScrollerRateTimer";
 import Animated, {
-  FadeIn,
   runOnJS,
   useAnimatedScrollHandler,
   useSharedValue,
 } from "react-native-reanimated";
 import { MotiView } from "moti";
+import TrackPlayerScrollerRateTimer from "./TrackPlayerScrollerRateTimer";
+import TrackPlayerScrollerComments from "./TrackPlayerScrollerComments";
 
 const { width, height } = Dimensions.get("window");
 
 const componentArray = [
+  {
+    component: TrackPlayerScrollerComments,
+    label: "",
+  },
   {
     component: ({ imageURI }) => (
       <Image
@@ -48,8 +50,9 @@ const COMPONENT_WIDTH = width - 80;
 
 const TrackPlayerScoller = () => {
   const playlist = useCurrentPlaylist();
+
   const scrollX = useSharedValue(0);
-  const [currIndex, setCurrIndex] = useState(0);
+  const [currIndex, setCurrIndex] = useState(1);
 
   //~ Handle the scrolling --------------
   const handleScroll = useAnimatedScrollHandler({
@@ -62,12 +65,21 @@ const TrackPlayerScoller = () => {
     },
   });
 
+  const getItemLayout = (_, index) => {
+    return {
+      length: COMPONENT_WIDTH + 10,
+      offset: (COMPONENT_WIDTH + 10) * (index - 1),
+      index,
+    };
+  };
   return (
     <Animated.FlatList
       data={componentArray}
       horizontal
       showsHorizontalScrollIndicator={false}
       snapToInterval={COMPONENT_WIDTH}
+      getItemLayout={getItemLayout}
+      initialScrollIndex={2}
       style={{
         width: COMPONENT_WIDTH,
         flexGrow: 1,
@@ -75,6 +87,7 @@ const TrackPlayerScoller = () => {
       contentContainerStyle={{
         justifyContent: "center",
         alignItems: "center",
+        height: COMPONENT_WIDTH,
       }}
       keyExtractor={(_, index) => index.toString()}
       decelerationRate="fast"
@@ -83,8 +96,12 @@ const TrackPlayerScoller = () => {
       renderItem={({ item, index }) => {
         const Comp = item.component;
         return (
-          <View style={{ width: COMPONENT_WIDTH }}>
-            {index === 0 && (
+          <View
+            style={{
+              width: COMPONENT_WIDTH,
+            }}
+          >
+            {index === 1 && (
               <MotiView
                 from={{ opacity: 0, scale: 0.8 }}
                 animate={{
@@ -96,29 +113,18 @@ const TrackPlayerScoller = () => {
                 <Comp imageURI={playlist?.imageURI} />
               </MotiView>
             )}
-            {index !== 0 && (
+            {index !== 1 && (
               <MotiView
                 from={{ opacity: 0.5, scale: 0.8 }}
                 animate={{
                   opacity: currIndex === index ? 1 : 0.5,
-                  scale: currIndex === index ? 1 : 0.5,
+                  scale: currIndex === index ? 1 : 0.7,
                 }}
                 transition={{ type: "timing", duration: 300 }}
               >
                 <Comp />
               </MotiView>
             )}
-            {/* {index !== 2 && flIndex === index && <Comp />}
-          {index === 2 && flIndex === index && (
-            <MotiView
-              from={{ opacity: 0, height: 5 }}
-              animate={{ opacity: 1, height: 135 }}
-              // exit={{ height: 0 }}
-              style={{ marginHorizontal: 8 }}
-            >
-              <Comp currPlaylistId={currPlaylistId} />
-            </MotiView>
-          )} */}
           </View>
         );
       }}

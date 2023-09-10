@@ -14,30 +14,36 @@ import {
 } from "../../store/data/fileSystemAccess";
 import { AudioTrack } from "../../store/types";
 import { colors } from "../../constants/Colors";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 const getOutliers = (tracks: AudioTrack[], files) => {
   // { filename: "", orphaned: boolean}
   let filesProcessed = [];
+
   const tracksFileNames = tracks.map((el) => el.fileURI);
   for (const file of files) {
     // Don't include the local images in this track list
     if (file.includes("localimages_")) continue;
+    const foundTrack = tracks.find((el) => el.fileURI === file);
+
     filesProcessed.push({
       filename: file,
       orphaned: !tracksFileNames.includes(file),
+      foundTrack,
     });
   }
-  return filesProcessed;
+  return { filesProcessed };
 };
 const ManageTracks = () => {
+  const route = useRouter();
   const tracks = useTracksStore((state) => state.tracks);
   const [files, setFiles] = useState(undefined);
 
   useEffect(() => {
     const readFiles = async () => {
       const files = await readFileSystemDir();
-      const outliers = getOutliers(tracks, files);
-      setFiles(outliers);
+      const { filesProcessed } = getOutliers(tracks, files);
+      setFiles(filesProcessed);
     };
     readFiles();
   }, []);
@@ -61,7 +67,14 @@ const ManageTracks = () => {
       >
         {files &&
           files?.map(
-            (file: { filename: string; orphaned: boolean }, idx: number) => (
+            (
+              file: {
+                filename: string;
+                orphaned: boolean;
+                foundTrack: AudioTrack;
+              },
+              idx: number
+            ) => (
               <View
                 key={idx}
                 className={`flex-row justify-between  px-1 py-2 ${
@@ -72,11 +85,30 @@ const ManageTracks = () => {
                   borderBottomWidth: StyleSheet.hairlineWidth,
                 }}
               >
-                <Text className={`flex-1 ${file.orphaned ? "text-white" : ""}`}>
-                  {file.filename}
+                <TouchableOpacity
+                  onPress={() =>
+                    route.push({
+                      pathname: "/settings/managetracksmodal",
+                      params: { trackId: file.filename },
+                    })
+                  }
+                >
+                  <Text
+                    className={`flex-1 ${file.orphaned ? "text-white" : ""}`}
+                  >
+                    {file.filename}
+                  </Text>
+                </TouchableOpacity>
+                <Text className={`flex-1 font-semibold`}>
+                  {file.foundTrack &&
+                    file.foundTrack?.metadata?.chapters &&
+                    file.foundTrack?.metadata?.chapters.map(
+                      (el) => el?.description
+                    )}
                 </Text>
                 <TouchableOpacity
                   onPress={async () => await deleteAnOrphan(file.filename)}
+                  disabled={!file.orphaned}
                 >
                   <Text>{file.orphaned ? "Delete Orphan" : "Good"}</Text>
                 </TouchableOpacity>
