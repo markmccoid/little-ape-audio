@@ -124,13 +124,13 @@ const ExplorerFolderRow = ({
         </View>
       </View>
       {/* **DESCRIPTION** */}
-
+      {/* 
       <AnimateHeight
         hide={!showDescription}
         style={{ marginHorizontal: 5, flex: 1 }}
       >
         <Text>{metadata.description}</Text>
-      </AnimateHeight>
+      </AnimateHeight> */}
     </View>
   );
 };

@@ -33,31 +33,12 @@ import { FolderClosedIcon } from "../common/svg/Icons";
 import {
   createFolderMetadataKey,
   downloadFolderMetadata,
+  folderFileReader,
   useDropboxStore,
 } from "../../store/store-dropbox";
 import FileMetadataView from "./FileMetadataView";
 import ExplorerFolderRow from "./ExplorerFolderRow";
-import { startDownloadAll } from "@store/data/fileSystemAccess";
-
-function filterAudioFiles(filesAndFolders: DropboxDir) {
-  const files = filesAndFolders.files;
-  const AUDIO_FORMATS = [
-    "mp3",
-    "mb4",
-    "m4a",
-    "m4b",
-    "wav",
-    "aiff",
-    "aac",
-    "ogg",
-    "wma",
-    "flac",
-  ];
-  const newFiles = files.filter((file) =>
-    AUDIO_FORMATS.includes(file.name.slice(file.name.lastIndexOf(".") + 1))
-  );
-  return { folders: filesAndFolders.folders, files: newFiles };
-}
+// import { startDownloadAll } from "@store/data/fileSystemAccess";
 
 const { height, width } = Dimensions.get("screen");
 type Props = {
@@ -65,10 +46,11 @@ type Props = {
   onPathChange: (newPath: string, folderName: string) => void;
   yOffset?: number;
 };
+
 const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
   const [filesFolderObj, setFilesFolderObj] = React.useState<DropboxDir>();
   const [flatlistData, setFlatlistData] = React.useState<
-    FileEntry[] | FolderEntry[]
+    (FileEntry | FolderEntry)[]
   >([]);
   const [downloadAllId, setDownloadAllId] = React.useState<string>();
   const [isLoading, setIsLoading] = React.useState(false);
@@ -114,7 +96,7 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
             folder={item}
             onNavigateForward={onNavigateForward}
             showFolderMetadata={showMetadata}
-            setShowMetadata={setShowMetadata}
+            // setShowMetadata={setShowMetadata}
             folderMetadata={allFoldersMetadata?.[metadataKey]}
           />
         );
@@ -127,25 +109,16 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
     [showMetadata, downloadAllId, allFoldersMetadata]
   );
 
+  //~ ====================
+  //~ -- Whenever pathIn changes, load the folders and files to display
+  //~ ====================
   React.useEffect(() => {
     const getFiles = async () => {
       setIsLoading(true);
       setDownloadAllId(undefined);
       try {
-        const files = await listDropboxFiles(pathIn);
-        // console.log("FILES", files);
-        const filteredFoldersFiles = filterAudioFiles(files);
-        const taggedFiles = trackActions.isTrackDownloaded(
-          filteredFoldersFiles.files
-        );
-        const taggedFolders = dropboxActions.isFolderFavorited(
-          filteredFoldersFiles.folders
-        );
-
-        const finalFolderFileList: DropboxDir = {
-          folders: taggedFolders, //filteredFoldersFiles.folders,
-          files: taggedFiles,
-        };
+        // Read next list of folders and files
+        const finalFolderFileList = await folderFileReader(pathIn);
         setFilesFolderObj(finalFolderFileList);
         setFlatlistData([
           ...finalFolderFileList.folders,
@@ -179,13 +152,13 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
     }
     // Call download function and set to show metadata
     setShowMetadata("loading");
-    // console.log("PATH IN", pathIn);
     // pathIn will be the full path to the current folder
-    // So filesFolderObj.folders will be the folders IN the pathIn path.
-    // BUT the folders object being sent has the .path_lower property on it
-    // and it has the full path including the folder name
+    // So filesFolderObj.folders will be ALL the folders IN the pathIn path.
+    // One of the keys of the folders object is the ".path_lower" property
+    // and it has the full path including the folder name so we can look from the
+    // ...metdata.json file in each folder
     await downloadFolderMetadata(filesFolderObj.folders);
-    // console.log("turn on show meta flag");
+    // AFter getting metadata, tell renderItem to show metadata info.
     setShowMetadata("on");
   };
   //! ~ ====================
@@ -264,6 +237,7 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
           currentPath={pathIn}
           fileCount={filesFolderObj?.files?.length || 0}
           folderCount={filesFolderObj?.folders?.length || 0}
+          showMetadata={showMetadata}
           handleDownloadAll={onDownloadAll}
           handleDownloadMetadata={onDownloadMetadata}
         />
@@ -294,7 +268,7 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
         onScroll={handleScroll}
         //! Need to update the length based on if it is open or not
         getItemLayout={(data, index) => {
-          let offset = showMetadata === "off" ? 45 : 200;
+          let offset = showMetadata === "off" ? 45 : 210;
           if (filesFolderObj?.files?.length > 0) {
             offset = 45;
           }

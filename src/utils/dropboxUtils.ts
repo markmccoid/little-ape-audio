@@ -131,9 +131,11 @@ export const checkDropboxToken = async () => {
 
     // This is storing to secureStore on device
     // dropboxActions.updateToken(dropboxToken, Date.now() + expiresIn);
-    await storeDropboxToken(dropboxToken);
-    //~~ RETURN VALID Token REFRESHED
-    return { token: dropboxToken, tokenExpireDate: Date.now() + expiresIn };
+    if (dropboxToken) {
+      await storeDropboxToken(dropboxToken);
+      //~~ RETURN VALID Token REFRESHED
+      return { token: dropboxToken, tokenExpireDate: Date.now() + expiresIn };
+    }
   }
   //~~ RETURN Either New unauthed or some other error
   return { token: undefined };

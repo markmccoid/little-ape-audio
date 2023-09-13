@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   FolderEntry,
@@ -25,18 +25,12 @@ import { colors } from "../../constants/Colors";
 
 import ExplorerFolderRow from "./ExplorerFolderRow";
 import { MotiView } from "moti";
-import { defaultImages } from "../../store/storeUtils";
-import * as FileSystem from "expo-file-system";
-import { downloadToFileSystem } from "../../store/data/fileSystemAccess";
 
 type Props = {
   folder: FolderEntry;
   index: number;
   onNavigateForward: (path: string, folderName: string) => void;
   showFolderMetadata: "on" | "off" | "loading";
-  setShowMetadata: React.Dispatch<
-    React.SetStateAction<"on" | "off" | "loading">
-  >;
   folderMetadata: FolderMetadataDetails;
 };
 
@@ -45,7 +39,7 @@ const ExplorerFolder = ({
   index,
   onNavigateForward,
   showFolderMetadata = "on",
-  setShowMetadata,
+  // setShowMetadata,
   folderMetadata,
 }: Props) => {
   const [isFavorite, setIsFavorite] = useState(!!folder.favorited);
@@ -88,7 +82,7 @@ const ExplorerFolder = ({
 
     setMetadataInfo(convertedMetadata);
     setFolderMetaState("on");
-    setShowMetadata("on");
+    // setShowMetadata("on");
   };
 
   // isFav and isRead -> red
@@ -115,7 +109,7 @@ const ExplorerFolder = ({
         backgroundColor: index % 2 === 0 ? colors.amber100 : colors.amber50,
         flex: 1,
         paddingBottom: 5,
-        height: showFolderMetadata === "off" ? 45 : 200,
+        height: showFolderMetadata === "off" ? 45 : 210,
       }}
     >
       <TouchableOpacity

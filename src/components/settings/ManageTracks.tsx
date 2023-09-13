@@ -77,7 +77,7 @@ const ManageTracks = () => {
             ) => (
               <View
                 key={idx}
-                className={`flex-row justify-between  px-1 py-2 ${
+                className={`flex-row flex-1 justify-between  px-1 py-2  ${
                   file.orphaned ? "bg-red-500" : "bg-white"
                 }`}
                 style={{
@@ -92,20 +92,23 @@ const ManageTracks = () => {
                       params: { trackId: file.filename },
                     })
                   }
+                  className="flex-1"
                 >
                   <Text
-                    className={`flex-1 ${file.orphaned ? "text-white" : ""}`}
+                    className={`flex-1${file.orphaned ? "text-white" : ""}`}
+                    numberOfLines={2}
+                    lineBreakMode="tail"
                   >
                     {file.filename}
                   </Text>
                 </TouchableOpacity>
-                <Text className={`flex-1 font-semibold`}>
+                {/* <Text className={`flex-1 font-semibold`}>
                   {file.foundTrack &&
                     file.foundTrack?.metadata?.chapters &&
                     file.foundTrack?.metadata?.chapters.map(
                       (el) => el?.description
                     )}
-                </Text>
+                </Text> */}
                 <TouchableOpacity
                   onPress={async () => await deleteAnOrphan(file.filename)}
                   disabled={!file.orphaned}

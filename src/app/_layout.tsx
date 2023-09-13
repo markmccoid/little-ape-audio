@@ -25,7 +25,7 @@ import TrackPlayer, {
   Capability,
   IOSCategoryMode,
 } from "react-native-track-player";
-import { onInitialize } from "../store/store";
+import { onInitialize } from "../store/store-init";
 import { useSettingStore } from "../store/store-settings";
 import { deactivateKeepAwake } from "expo-keep-awake";
 

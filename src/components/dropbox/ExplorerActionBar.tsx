@@ -7,11 +7,14 @@ import {
 } from "react-native";
 import React from "react";
 import { CloudDownloadIcon, DatabaseDownloadIcon } from "../common/svg/Icons";
+import { MotiView } from "moti";
+import { colors } from "@constants/Colors";
 
 type Props = {
   currentPath: string;
   fileCount: number;
   folderCount: number;
+  showMetadata: "on" | "off" | "loading";
   handleDownloadAll: () => void;
   handleDownloadMetadata: () => void;
 };
@@ -20,6 +23,7 @@ const ExplorerActionBar = ({
   currentPath,
   fileCount,
   folderCount,
+  showMetadata,
   handleDownloadAll,
   handleDownloadMetadata,
 }: Props) => {
@@ -28,7 +32,18 @@ const ExplorerActionBar = ({
       {/* DOWNLOAD METADATA Button */}
       {folderCount > 0 ? (
         <TouchableOpacity onPress={handleDownloadMetadata} className="ml-2">
-          <DatabaseDownloadIcon />
+          <MotiView
+            from={{ transform: [{ rotate: "-90deg" }] }}
+            animate={{
+              transform: [
+                { rotate: showMetadata !== "off" ? "0deg" : "-90deg" },
+              ],
+            }}
+          >
+            <DatabaseDownloadIcon
+              color={showMetadata !== "off" ? colors.amber600 : colors.amber900}
+            />
+          </MotiView>
         </TouchableOpacity>
       ) : (
         // This is a placeholder so the justify between keeps icons in correct place

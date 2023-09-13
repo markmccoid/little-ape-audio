@@ -21,6 +21,7 @@ import {
 } from "./data/fileSystemAccess";
 import { Alert } from "react-native";
 import sortBy from "lodash/sortBy";
+import { useTracksStore } from "./store";
 
 //-- ==================================
 //-- DROPBOX STORE
@@ -260,14 +261,69 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
   },
 }));
 export const useFavoriteBooks = () => {
-  // const data = useDropboxStore.getState().folderMetadataArray;
-
   return useDropboxStore.getState().actions.getFavoritedBooks();
 };
+
 export const useFolderMeta = (folderId) => {
   const currMeta = useDropboxStore.getState().folderMetadata;
   return currMeta?.[folderId];
 };
+
+//------------------------------------------------------
+//-- FOLDER FILE READER FUNCTIONS
+//------------------------------------------------------
+function filterAudioFiles(filesAndFolders: DropboxDir) {
+  const files = filesAndFolders.files;
+  const AUDIO_FORMATS = [
+    "mp3",
+    "mb4",
+    "m4a",
+    "m4b",
+    "wav",
+    "aiff",
+    "aac",
+    "ogg",
+    "wma",
+    "flac",
+  ];
+  const newFiles = files.filter((file) =>
+    AUDIO_FORMATS.includes(file.name.slice(file.name.lastIndexOf(".") + 1))
+  );
+  return { folders: filesAndFolders.folders, files: newFiles };
+}
+
+//~~=================================
+//~~ Read folders and file from Dropbox or other service
+//~~ focused on dropbox only now.
+//~~=================================
+export const folderFileReader = async (pathIn: string) => {
+  const trackActions = useTracksStore.getState().actions;
+  const dropboxActions = useDropboxStore.getState().actions;
+  try {
+    const files = await listDropboxFiles(pathIn);
+
+    const filteredFoldersFiles = filterAudioFiles(files);
+    // tag tracks as being already downloaded
+    const taggedFiles = trackActions.isTrackDownloaded(
+      filteredFoldersFiles.files
+    );
+    // Tag folders as being favorited
+    const taggedFolders = dropboxActions.isFolderFavorited(
+      filteredFoldersFiles.folders
+    );
+    const finalFolderFileList: DropboxDir = {
+      folders: taggedFolders, //filteredFoldersFiles.folders,
+      files: taggedFiles,
+    };
+    //- Success reading directory, return data
+    return finalFolderFileList;
+  } catch (err) {
+    console.log(err);
+    throw new Error("folderFileReader Error" + err);
+  }
+};
+//------------------------------------------------------
+//------------------------------------------------------
 //~ ===================================
 //~ Download Function Metadata FUNCIONS
 //~ ===================================
@@ -359,6 +415,10 @@ export const getSingleFolderMetadata = async (folder) => {
       // );
     }
   } else {
+    //!!! Here is where we can decide if NO metadata file, do we do anything??
+    //!! Maybe if there is an image??
+    //!! If we send any converted metadata, it will take up space in our list
+    //!! We probably only want to store stuff that has real book data in it.
     // This means we did NOT find any ...metadata.json file build minimal info
     if (localImage) {
       finalCleanImageName = await getLocalImage(localImage, folder.name);

@@ -3,6 +3,7 @@ import React from "react";
 import * as FileSystem from "expo-file-system";
 import { colors } from "../../constants/Colors";
 import { CleanBookMetadata } from "../../utils/audiobookMetadata";
+import { getImageSize } from "@utils/audioUtils";
 
 const IMG_RATIO = 1.5;
 
@@ -12,22 +13,40 @@ type Props = {
   style?: ImageStyle;
 };
 const ExplorerImage = ({ metadata, width, style }: Props) => {
-  const imgDims = metadata.imageURL?.uri
-    ? { width, height: width * IMG_RATIO }
-    : { width, height: width };
-  const finalImage = metadata?.imageURL
-    ? metadata.imageURL
-    : metadata?.localImageName
-    ? `${FileSystem.documentDirectory}${metadata.localImageName}`
-    : metadata.defaultImage;
+  const [imgDims, setImgDims] = React.useState({
+    width: 100,
+    height: 100,
+    finalImage: undefined,
+  });
+  // const imgDims = metadata.imageURL?.uri
+  //   ? { width, height: width * IMG_RATIO }
+  //   : { width, height: width };
 
-  if (!metadata) {
+  React.useEffect(() => {
+    const getImageDims = async () => {
+      const finalImage = metadata?.imageURL
+        ? metadata.imageURL
+        : metadata?.localImageName
+        ? `${FileSystem.documentDirectory}${metadata.localImageName}`
+        : metadata.defaultImage;
+
+      let imgDims = { width: 100, height: 100 };
+      if (finalImage) {
+        const { aspectRatio } = await getImageSize(finalImage);
+        imgDims = { width: 100, height: 100 / aspectRatio };
+      }
+      setImgDims({ ...imgDims, finalImage });
+    };
+    getImageDims();
+  }, []);
+
+  if (!metadata || !imgDims.finalImage) {
     return null;
   }
   return (
     <View>
       <Image
-        source={{ uri: finalImage }}
+        source={{ uri: imgDims.finalImage }}
         style={[
           {
             width: imgDims.width,

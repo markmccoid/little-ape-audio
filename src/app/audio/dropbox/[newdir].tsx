@@ -19,6 +19,7 @@ const NewDirectory = () => {
   }, [newdir]);
 
   // Need a listener that will clear the dropbox store folderNavigation array
+  // This is when the modal is dismissed
   navigation.addListener("beforeRemove", () => {
     actions.clearFolderNavigation();
   });
@@ -33,6 +34,7 @@ const NewDirectory = () => {
       },
     });
   };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Stack.Screen
@@ -46,7 +48,7 @@ const NewDirectory = () => {
       <ExplorerContainer
         pathIn={fullPath}
         onPathChange={onPathChange}
-        yOffset={yOffset}
+        yOffset={yOffset ? parseFloat(yOffset) : 0}
       />
     </SafeAreaView>
   );
