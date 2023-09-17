@@ -5,7 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDropboxStore } from "../../store/store-dropbox";
 import { colors } from "../../constants/Colors";
 import { PanGestureHandlerProps, FlatList } from "react-native-gesture-handler";
@@ -13,16 +13,24 @@ import { PanGestureHandlerProps, FlatList } from "react-native-gesture-handler";
 import MetadataRow from "./MetadataRow";
 import { useSharedValue } from "react-native-reanimated";
 import SettingsMetadataErrors from "./SettingsMetadataErrors";
+import { useRouter } from "expo-router";
 
 const SettingsFolderMetadata = () => {
+  const route = useRouter();
   const actions = useDropboxStore((state) => state.actions);
-  const folderMetadata = useDropboxStore((state) => state.folderMetadataArray);
+  const folderMetadata = useDropboxStore((state) => state.folderMetadata);
+  const [displayFMD, setDisplayFMD] = useState([]);
   const folderMetadataErrors = useDropboxStore(
     (state) => state.folderMetadataErrors
   );
   const flatListRef = React.createRef<FlatList>();
   const activeKey = useSharedValue(undefined);
   const [showErrors, setShowErrors] = useState(false);
+
+  useEffect(() => {
+    setDisplayFMD(Object.keys(folderMetadata).map((key) => key));
+  }, [folderMetadata]);
+
   return (
     <>
       {folderMetadataErrors?.length > 0 && (
@@ -55,14 +63,25 @@ const SettingsFolderMetadata = () => {
           </View>
           <FlatList
             ref={flatListRef}
-            data={folderMetadata}
+            data={displayFMD}
             renderItem={({ item }) => (
               <View className="border px-2 py-1">
-                <Text>{item.id}</Text>
-                <Text>{item.dropboxPathLower}</Text>
+                <TouchableOpacity
+                  onPress={() =>
+                    route.push({
+                      pathname: "/settings/foldermetadatamodal",
+                      params: {
+                        pathInKey: item,
+                      },
+                    })
+                  }
+                >
+                  <Text>{item}</Text>
+                </TouchableOpacity>
+                {/* <Text>{item.dropboxPathLower}</Text>
                 <Text>
                   {item.categoryOne} - {item.categoryTwo}
-                </Text>
+                </Text> */}
               </View>
             )}
           />

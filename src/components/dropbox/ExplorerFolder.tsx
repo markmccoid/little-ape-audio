@@ -25,13 +25,14 @@ import { colors } from "../../constants/Colors";
 
 import ExplorerFolderRow from "./ExplorerFolderRow";
 import { MotiView } from "moti";
+import { CleanBookMetadata } from "@utils/audiobookMetadata";
 
 type Props = {
   folder: FolderEntry;
   index: number;
   onNavigateForward: (path: string, folderName: string) => void;
   showFolderMetadata: "on" | "off" | "loading";
-  folderMetadata: FolderMetadataDetails;
+  folderMetadata: CleanBookMetadata;
 };
 
 const ExplorerFolder = ({

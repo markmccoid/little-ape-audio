@@ -30,9 +30,16 @@ export const addTrack =
       `${FileSystem.documentDirectory}${fileURI}`
     )) as AudioMetadata;
     // process track number info
-    const trackNumInfo = tags.trackRaw ? tags.trackRaw.split("/") : [];
-    const trackNum = parseInt(trackNumInfo[0]) || undefined;
-    const totalTracks = parseInt(trackNumInfo[1]) || undefined;
+    let trackNum = tags.trackRaw;
+    let totalTracks = undefined;
+    const trackRaw = `${tags.trackRaw}`;
+
+    if (trackRaw?.includes("/")) {
+      const trackNumInfo = tags.trackRaw.split("/");
+      trackNum = trackNumInfo[0] || undefined;
+      totalTracks = trackNumInfo[1] || undefined;
+    }
+
     const finalTagInfo = {
       ...tags,
       trackNum,

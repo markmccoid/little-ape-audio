@@ -12,7 +12,13 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from "react-native";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import uuid from "react-native-uuid";
 import { Link } from "expo-router";
 import {
@@ -33,6 +39,7 @@ import { FolderClosedIcon } from "../common/svg/Icons";
 import {
   createFolderMetadataKey,
   downloadFolderMetadata,
+  extractMetadataKeys,
   folderFileReader,
   useDropboxStore,
 } from "../../store/store-dropbox";
@@ -60,12 +67,17 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
     "off" | "on" | "loading"
   >("off");
   const allFoldersMetadata = useDropboxStore((state) => state.folderMetadata);
-
-  const trackActions = useTrackActions();
+  const { pathToFolderKey, pathToBookFolderKey } = useMemo(
+    () => extractMetadataKeys(pathIn),
+    [pathIn]
+  );
   const dropboxActions = useDropboxStore((state) => state.actions);
-
   const flatlistRef = useRef<FlatList>();
-
+  //
+  const isFolderMetaAvailable = useMemo(
+    () => !!allFoldersMetadata?.[pathToFolderKey],
+    [pathIn]
+  );
   // ------------------------------------------------------------------------
   // -- HANDLE SCROLL and Save to Dropbox Store's FolderNavigation array
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -87,8 +99,12 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
 
   const renderItem = useCallback(
     ({ item, index }) => {
+      if (!item.path_lower) return;
       if (item[".tag"] === "folder") {
-        const metadataKey = createFolderMetadataKey(item.path_lower);
+        const { pathToFolderKey, pathToBookFolderKey } = extractMetadataKeys(
+          item.path_lower
+        );
+        // console.log("pathtobook0", pathToFolderKey, pathToBookFolderKey);
         return (
           <ExplorerFolder
             key={item.id}
@@ -97,7 +113,9 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
             onNavigateForward={onNavigateForward}
             showFolderMetadata={showMetadata}
             // setShowMetadata={setShowMetadata}
-            folderMetadata={allFoldersMetadata?.[metadataKey]}
+            folderMetadata={
+              allFoldersMetadata?.[pathToFolderKey]?.[pathToBookFolderKey]
+            }
           />
         );
       } else if (item[".tag"] === "file") {
@@ -131,8 +149,22 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
       }
       setIsLoading(false);
     };
+
     getFiles();
   }, [pathIn]);
+
+  //-- If the showMetadata option is on, try to download book metadata
+  useEffect(() => {
+    const downloadMetaCheck = async () => {
+      // CHeck if downloadMetadata flag is "on"
+      if (showMetadata === "on") {
+        // console.log("file/folder OBJ", filesFolderObj.folders);
+        await onDownloadMetadata(true);
+      }
+    };
+
+    downloadMetaCheck();
+  }, [filesFolderObj]);
 
   //~ ====================
   //~ == Navigate forward in Dropbox ==
@@ -144,12 +176,14 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
   //~ ====================
   //~ == download Folder Metadata flag set==
   //~ ====================
-  const onDownloadMetadata = async () => {
+  const onDownloadMetadata = async (leaveOnFlag = false) => {
     // If we are showing metadata, then hide and return
-    if (showMetadata !== "off") {
+    // console.log("X", showMetadata !== "off" && !leaveOnFlag);
+    if (showMetadata !== "off" && !leaveOnFlag) {
       setShowMetadata("off");
       return;
     }
+    // console.log("Y", filesFolderObj.folders);
     // Call download function and set to show metadata
     setShowMetadata("loading");
     // pathIn will be the full path to the current folder
@@ -246,7 +280,9 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
       {filesFolderObj?.files?.length > 0 && (
         <>
           <FileMetadataView
-            metadata={allFoldersMetadata?.[createFolderMetadataKey(pathIn)]}
+            metadata={
+              allFoldersMetadata?.[pathToFolderKey]?.[pathToBookFolderKey]
+            }
             path_lower={pathIn}
           />
         </>

@@ -27,7 +27,7 @@ import {
 import { AnimatedPressable } from "../common/buttons/Pressables";
 
 type Props = {
-  metadata: FolderMetadataDetails;
+  metadata: CleanBookMetadata;
   path_lower: string;
 };
 const FileMetadataView = ({ metadata, path_lower }: Props) => {

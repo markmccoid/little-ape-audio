@@ -33,16 +33,26 @@ export type FavoriteFolders = {
   position: number;
 };
 
-export type FolderMetadataDetails = Partial<CleanBookMetadata> & {
-  isFavorite?: boolean;
-  isRead?: boolean;
-  position?: number;
-};
+//! New Folder Metadata Types
+// The PathInKey is full path to the booksFolder run through the "sanitizeString" function
+type PathInKey = string;
+export type FolderMetadata = Record<PathInKey, FolderMetadataDetails>;
+// The PathInKey is full path to the book folder name run through the "sanitizeString" function
+type FolderNameKey = string;
+export type FolderMetadataDetails = Record<FolderNameKey, CleanBookMetadata>;
 
-export type FolderMetadataArrayItem = FolderMetadataDetails & {
-  key: string;
-  position?: number;
-};
+//! Old Folder Metadata types
+// export type FolderMetadataDetails = Partial<CleanBookMetadata> & {
+//   isFavorite?: boolean;
+//   isRead?: boolean;
+//   position?: number;
+// };
+
+// export type FolderMetadataArrayItem = FolderMetadataDetails & {
+//   key: string;
+//   position?: number;
+// };
+//!
 export type MetadataErrorObj = {
   dropboxPath: string;
   folderName: string;
@@ -61,7 +71,7 @@ type DropboxState = {
   favoriteFolders: FavoriteFolders[];
   // When a user tell a directory to be "read" the metadata for every folder
   // is stored in this object.
-  folderMetadata: Record<string, FolderMetadataDetails>;
+  folderMetadata: FolderMetadata;
   folderMetadataErrors: MetadataErrorObj[];
   // This is a derived array created from the folderMetadata object
   // created for easier display of folderMetadata
@@ -91,6 +101,11 @@ type DropboxState = {
     ) => Promise<void>;
     addFoldersMetadata: (
       newFoldersObj: Record<string, FolderMetadataDetails>
+    ) => Promise<void>;
+    // merge new bookFolders detail object into the passed folderKey
+    mergeFoldersMetadata: (
+      folderKey: string,
+      newBookFoldersObj: FolderMetadataDetails
     ) => Promise<void>;
     updateFoldersMetadataPosition: (
       newInfo: FolderMetadataArrayItem[]
@@ -193,6 +208,27 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
         folderMetadata,
       }));
       get().actions.generateFolderMetadataArray();
+      await saveToAsyncStorage("foldermetadata", folderMetadata);
+    },
+    //! NEW FolderMetada-NEW
+    mergeFoldersMetadata: async (folderKey, newBookFoldersObj) => {
+      const folderMetadata = { ...get().folderMetadata };
+      // The newBookFoldersObj is empty or undefined, bail on function
+      // we don't want to save empty keys
+      if (
+        !newBookFoldersObj ||
+        Object.keys(newBookFoldersObj || {}).length === 0
+      ) {
+        return;
+      }
+      folderMetadata[folderKey] = {
+        ...folderMetadata[folderKey],
+        ...newBookFoldersObj,
+      };
+      set((state) => ({
+        folderMetadata,
+      }));
+      // get().actions.generateFolderMetadataArray();
       await saveToAsyncStorage("foldermetadata", folderMetadata);
     },
     updateFoldersMetadataPosition: async (newInfo) => {
@@ -332,10 +368,25 @@ export const downloadFolderMetadata = async (folders: FolderEntry[]) => {
   // If we already downloaded metadata do not do it again!
   let foldersToDownload = [];
   const foldersMetadata = useDropboxStore.getState().folderMetadata;
+
+  // 1. First, grab the first entry in the "folders" and extract the path to the folder name
+  const pathToFolder = folders[0].path_lower.slice(
+    0,
+    folders[0].path_lower.lastIndexOf("/")
+  );
+  // console.log("store-dropbox", pathToFolder);
+  // 2. create folderMetadataKey used in for loop to check
+  //   for data in folderMetadata store
+  const folderMetadataKey = sanitizeString(pathToFolder);
+
   for (const folder of folders) {
+    const folderNameKey = sanitizeString(
+      folder.path_lower.slice(folder.path_lower.lastIndexOf("/") + 1)
+    );
+
     //! Check if we have metadata in zustand store
     const folderMetadata =
-      foldersMetadata?.[createFolderMetadataKey(folder.path_lower)];
+      foldersMetadata?.[folderMetadataKey]?.[folderNameKey];
     if (!folderMetadata) {
       foldersToDownload.push(folder);
     }
@@ -356,13 +407,14 @@ export const downloadFolderMetadata = async (folders: FolderEntry[]) => {
       new Promise(
         (resolve) =>
           setTimeout(() => {
-            processPromises(promises[i]);
+            processPromises(promises[i], folderMetadataKey);
             resolve(undefined);
           }, i * 800 * CHUNK_SIZE) // Give each record in chunk 900 ms to process (keeps rate limit error from api at bay)
       )
     );
   }
   await Promise.all(delayedPromises);
+  // console.log(useDropboxStore.getState().folderMetadata);
 };
 //~ -------------------------
 //~ downloadFolderMetadata
@@ -382,7 +434,7 @@ export const getSingleFolderMetadata = async (folder) => {
 
   let finalCleanImageName = "";
 
-  let convertedMeta;
+  let convertedMeta: CleanBookMetadata;
   if (metadataFile) {
     try {
       // console.log("PATH", metadataFile.path_lower);
@@ -420,16 +472,16 @@ export const getSingleFolderMetadata = async (folder) => {
     //!! If we send any converted metadata, it will take up space in our list
     //!! We probably only want to store stuff that has real book data in it.
     // This means we did NOT find any ...metadata.json file build minimal info
-    if (localImage) {
-      finalCleanImageName = await getLocalImage(localImage, folder.name);
-    }
-    convertedMeta = {
-      id: folder.path_lower,
-      title: folder.name,
-      localImageName: finalCleanImageName,
-      defaultImage: Image.resolveAssetSource(defaultImages[`image${randomNum}`])
-        .uri,
-    } as Partial<CleanBookMetadata>;
+    // if (localImage) {
+    //   finalCleanImageName = await getLocalImage(localImage, folder.name);
+    // }
+    // convertedMeta = {
+    //   id: folder.path_lower,
+    //   title: folder.name,
+    //   localImageName: finalCleanImageName,
+    //   defaultImage: Image.resolveAssetSource(defaultImages[`image${randomNum}`])
+    //     .uri,
+    // } as Partial<CleanBookMetadata>;
   }
   return convertedMeta;
 };
@@ -473,8 +525,13 @@ function getArrayOfPromises(arr: FolderEntry[]) {
   return arr.map(async (folder) => {
     const returnMeta = await getSingleFolderMetadata(folder);
 
-    const metadataKey = createFolderMetadataKey(folder.path_lower);
-    return { [metadataKey]: returnMeta };
+    if (!returnMeta) return;
+
+    const folderNameKey = sanitizeString(
+      folder.path_lower.slice(folder.path_lower.lastIndexOf("/") + 1)
+    );
+    // const metadataKey = createFolderMetadataKey(folder.path_lower);
+    return { [folderNameKey]: returnMeta };
   });
 }
 
@@ -486,7 +543,8 @@ function getArrayOfPromises(arr: FolderEntry[]) {
 //~===========================================
 /**
  *
- * [{
+ * {
+ * "folder_key": {
  *  "book_key": {
  *      id: "",
  *      title: "",
@@ -494,27 +552,35 @@ function getArrayOfPromises(arr: FolderEntry[]) {
  *      Maybe-isFavorite
  *      Maybe-hasRead
  *    }
+ *   ...
  * },
  *  ...
- * ]
+ * }
  */
-async function processPromises(promises) {
+async function processPromises(promises, folderMetadataKey) {
   const folderMetadataArray = await Promise.all(promises);
   // console.log("FMD", folderMetadataArray[0]);
   const currMetadata = useDropboxStore.getState().folderMetadata;
   const folderMetaObj = folderMetadataArray.reduce((final, el) => {
-    const path_lower = Object.keys(el)[0];
-    const metadataKey = createFolderMetadataKey(path_lower);
-    const newData = {
-      ...currMetadata[metadataKey],
-      ...el[metadataKey],
-    };
-
-    return { ...final, [metadataKey]: newData };
-  }, {});
+    // If the getSingleFolderMetadata function doesn't find any metata.json file
+    // don't save anything for that folder
+    if (!el) return final;
+    //! el will = { [folderNameKey]: { ...returnMeta } },
+    // each el will have one object with one key.  Grab that key and it will be the folderNameKey
+    const folderNameKey = Object.keys(el)[0];
+    // load up the final object
+    return { ...final, [folderNameKey]: el[folderNameKey] };
+  }, {}) as FolderMetadataDetails;
   // console.log("in PROCESS PROMISES", folderMetadataArray.length);
   // Save to store
-  await useDropboxStore.getState().actions.addFoldersMetadata(folderMetaObj);
+  const folderMetadata = {
+    ...currMetadata,
+    [folderMetadataKey]: folderMetaObj,
+  };
+
+  await useDropboxStore
+    .getState()
+    .actions.mergeFoldersMetadata(folderMetadataKey, folderMetaObj);
 }
 
 //~ -------------------------
@@ -525,8 +591,33 @@ export function createFolderMetadataKey(pathIn: string) {
   let finalKey = [];
   for (var i = pathArr.length - 1; i >= pathArr.length - 2; i--) {
     if (pathArr[i]) {
-      finalKey.push(getCleanFileName(pathArr[i]));
+      finalKey.push(sanitizeString(pathArr[i]));
     }
   }
   return finalKey.reverse().join("_");
+}
+
+function sanitizeString(stringToKey: string) {
+  return stringToKey.replace(/[^/^\w.]+/g, "_").replace(/_$/, "");
+}
+
+//~ -------------------------
+//~ extractMetadataKeys
+//~ Takes a full path to a book folder '/mark/myAudiobooks/fiction/BookTitle
+//~ and return two keys that can be used to check the folderMetadata object
+//~ folderMetadata[pathToFolderKey][pathToBookFolderKey]
+//~ -------------------------
+export function extractMetadataKeys(pathIn: string) {
+  const fullPath = pathIn.toLocaleLowerCase();
+  const pathToFolderKey = sanitizeString(
+    fullPath.slice(0, fullPath.lastIndexOf("/"))
+  );
+  const pathToBookFolderKey = sanitizeString(
+    fullPath.slice(fullPath.lastIndexOf("/") + 1)
+  );
+
+  return {
+    pathToFolderKey,
+    pathToBookFolderKey,
+  };
 }

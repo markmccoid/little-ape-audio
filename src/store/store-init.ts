@@ -27,7 +27,7 @@ export const onInitialize = async () => {
     folderMetadata: folderMetadata,
     folderMetadataErrors,
   });
-  useDropboxStore.getState().actions.generateFolderMetadataArray();
+  // useDropboxStore.getState().actions.generateFolderMetadataArray();
   useSettingStore.setState({
     ...settings,
     jumpForwardSeconds: settings?.jumpForwardSeconds || 15,

@@ -31,7 +31,10 @@ const ExplorerActionBar = ({
     <View className="flex flex-row items-center justify-between mt-1 pb-1 pr-2 flex-grow-1 border-b border-black">
       {/* DOWNLOAD METADATA Button */}
       {folderCount > 0 ? (
-        <TouchableOpacity onPress={handleDownloadMetadata} className="ml-2">
+        <TouchableOpacity
+          onPress={() => handleDownloadMetadata()}
+          className="ml-2"
+        >
           <MotiView
             from={{ transform: [{ rotate: "-90deg" }] }}
             animate={{

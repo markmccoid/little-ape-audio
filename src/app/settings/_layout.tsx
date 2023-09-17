@@ -57,6 +57,15 @@ const SettingsLayout = () => {
         }}
       />
       <Stack.Screen
+        name="foldermetadatamodal"
+        options={{
+          title: "Folder Metadata Details",
+          headerStyle: { backgroundColor: colors.amber200 },
+          headerTintColor: colors.amber900,
+          presentation: "modal",
+        }}
+      />
+      <Stack.Screen
         name="playarea"
         options={{
           title: "Play Area",
