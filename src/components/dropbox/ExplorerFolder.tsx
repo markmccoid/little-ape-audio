@@ -17,6 +17,7 @@ import {
 import {
   FolderMetadataDetails,
   createFolderMetadataKey,
+  extractMetadataKeys,
   getSingleFolderMetadata,
   useDropboxStore,
   useFolderMeta,
@@ -45,7 +46,14 @@ const ExplorerFolder = ({
 }: Props) => {
   const [isFavorite, setIsFavorite] = useState(!!folder.favorited);
   const actions = useDropboxStore((state) => state.actions);
+  const folderAttributes = useDropboxStore((state) => state.folderAttributes);
+
+  const currFolderAttributes = useMemo(() => {
+    const id = createFolderMetadataKey(folder?.path_lower);
+    return folderAttributes?.find((el) => el.id === id);
+  }, [folderAttributes]);
   const [metadataInfo, setMetadataInfo] = useState(folderMetadata);
+  // const [folderAttributes, setFolderAttributes] = useState(folderAttributes);
   const [folderMetaState, setFolderMetaState] = useState<
     "on" | "off" | "loading"
   >("off");
@@ -57,7 +65,6 @@ const ExplorerFolder = ({
     // setFolderMetaState(showFolderMetadata);
     setMetadataInfo(folderMetadata);
   }, [showFolderMetadata, folderMetadata]);
-
   const setFavorite = async () => {
     if (isFavorite) {
       setIsFavorite(false);
@@ -72,34 +79,36 @@ const ExplorerFolder = ({
   //~ Download Function
   //~ ----------------------------
   const downloadFolderMetadata = async () => {
-    // console.log("starting manual download", folder.path_lower);
     // Start download and parse
     setFolderMetaState("loading");
     const convertedMetadata = await getSingleFolderMetadata(folder);
-    // Create key and store the data in the dropbox store
-    const metadataKey = createFolderMetadataKey(folder.path_lower);
-    actions.addFoldersMetadata({ [metadataKey]: convertedMetadata });
-    // actions.addFolderMetadata(convertedMetadata, folder.path_lower);
+    // Create the needed keys and store the data in the dropbox store
+    const { pathToBookFolderKey, pathToFolderKey } = extractMetadataKeys(
+      folder.path_lower
+    );
+    actions.mergeFoldersMetadata(pathToFolderKey, {
+      [pathToBookFolderKey]: convertedMetadata,
+    });
 
+    // set local metadata
     setMetadataInfo(convertedMetadata);
     setFolderMetaState("on");
-    // setShowMetadata("on");
   };
 
   // isFav and isRead -> red
   // isRead only -> green
   // else black
-  const folderColor = folderMetadata?.isFavorite
+  const folderColor = currFolderAttributes?.isFavorite
     ? "#991b1b"
-    : folderMetadata?.isRead
+    : currFolderAttributes?.isRead
     ? "green"
     : "#d97706";
   // isFav and isRead -> green
   // isFav only -> red
   // else black
-  const textColor = folderMetadata?.isRead
+  const textColor = currFolderAttributes?.isRead
     ? "green"
-    : folderMetadata?.isFavorite
+    : currFolderAttributes?.isFavorite
     ? "#991b1b"
     : "black";
   return (
@@ -144,9 +153,9 @@ const ExplorerFolder = ({
               : ""
           }`}
         >
-          {folderMetadata?.isFavorite ? (
+          {currFolderAttributes?.isFavorite ? (
             <MDHeartIcon color={textColor} />
-          ) : folderMetadata?.isRead ? (
+          ) : currFolderAttributes?.isRead ? (
             <ReadIcon color={folderColor} />
           ) : (
             <FolderClosedIcon

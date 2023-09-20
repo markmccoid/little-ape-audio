@@ -8,6 +8,7 @@ type StorageKeys =
   | "favfolders"
   | "settings"
   | "foldermetadata"
+  | "folderattributes"
   | "foldermetadataerrors";
 
 // --------------------------------------------

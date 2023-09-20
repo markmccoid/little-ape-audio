@@ -37,7 +37,6 @@ import { times } from "lodash";
 import { Skeleton } from "moti/skeleton";
 import { FolderClosedIcon } from "../common/svg/Icons";
 import {
-  createFolderMetadataKey,
   downloadFolderMetadata,
   extractMetadataKeys,
   folderFileReader,

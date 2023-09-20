@@ -7,7 +7,7 @@ import {
   Pressable,
   ScrollView,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { CleanBookMetadata } from "../../utils/audiobookMetadata";
 import { colors } from "../../constants/Colors";
 import { AnimateHeight } from "../common/animations/AnimateHeight";
@@ -22,6 +22,7 @@ import { AnimatePresence, MotiText, MotiView } from "moti";
 import ExplorerImage from "./ExplorerImage";
 import {
   FolderMetadataDetails,
+  createFolderMetadataKey,
   useDropboxStore,
 } from "../../store/store-dropbox";
 import { AnimatedPressable } from "../common/buttons/Pressables";
@@ -33,20 +34,27 @@ type Props = {
 const FileMetadataView = ({ metadata, path_lower }: Props) => {
   const [showDescription, setShowDescription] = useState(false);
   const dropboxActions = useDropboxStore((state) => state.actions);
+  const folderAttributes = useDropboxStore((state) => state.folderAttributes);
+  const currFolderAttributes = useMemo(() => {
+    const id = createFolderMetadataKey(path_lower);
+    return folderAttributes?.find((el) => el.id === id);
+  }, [folderAttributes]);
 
   if (!metadata) return null;
 
   const handleToggleFavorite = async () => {
-    await dropboxActions.addFolderMetadata(
-      { isFavorite: !!!metadata.isFavorite },
-      path_lower
+    const action = !!currFolderAttributes?.isFavorite ? "remove" : "add";
+
+    await dropboxActions.updateFolderAttribute(
+      path_lower,
+      "isFavorite",
+      action
     );
   };
+
   const handleToggleRead = async () => {
-    await dropboxActions.addFolderMetadata(
-      { isRead: !!!metadata.isRead },
-      path_lower
-    );
+    const action = !!currFolderAttributes?.isRead ? "remove" : "add";
+    await dropboxActions.updateFolderAttribute(path_lower, "isRead", action);
   };
 
   return (
@@ -98,14 +106,14 @@ const FileMetadataView = ({ metadata, path_lower }: Props) => {
           </View>
           <View className="flex-row justify-center mt-4">
             <TouchableOpacity onPress={handleToggleFavorite}>
-              {metadata.isFavorite ? (
+              {currFolderAttributes?.isFavorite ? (
                 <MDHeartIcon color="red" size={30} />
               ) : (
                 <EmptyMDHeartIcon size={30} />
               )}
             </TouchableOpacity>
             <TouchableOpacity onPress={handleToggleRead} className="ml-4">
-              {metadata.isRead ? (
+              {currFolderAttributes?.isRead ? (
                 <View>
                   <BookIcon color="green" size={30} />
                   <ReadIcon

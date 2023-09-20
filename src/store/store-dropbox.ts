@@ -19,9 +19,10 @@ import {
   downloadToFileSystem,
   getCleanFileName,
 } from "./data/fileSystemAccess";
-import { Alert } from "react-native";
 import sortBy from "lodash/sortBy";
 import { useTracksStore } from "./store";
+import * as FileSystem from "expo-file-system";
+import { update } from "lodash";
 
 //-- ==================================
 //-- DROPBOX STORE
@@ -40,6 +41,23 @@ export type FolderMetadata = Record<PathInKey, FolderMetadataDetails>;
 // The PathInKey is full path to the book folder name run through the "sanitizeString" function
 type FolderNameKey = string;
 export type FolderMetadataDetails = Record<FolderNameKey, CleanBookMetadata>;
+
+//! NEW FolderAttributes (Favorite and Read)
+export type FolderAttributeItem = {
+  id: string;
+  pathToFolder: string;
+  isFavorite?: boolean;
+  isRead?: boolean;
+  favPosition?: number;
+  readPosition?: number;
+  imageURL?: string;
+  author?: string;
+  title?: string;
+  categoryOne?: string;
+  categoryTwo?: string;
+  genre?: string;
+  flagForDelete?: boolean;
+};
 
 //! Old Folder Metadata types
 // export type FolderMetadataDetails = Partial<CleanBookMetadata> & {
@@ -73,6 +91,8 @@ type DropboxState = {
   // is stored in this object.
   folderMetadata: FolderMetadata;
   folderMetadataErrors: MetadataErrorObj[];
+  // Currently store the isFavorite and isRead flags
+  folderAttributes: FolderAttributeItem[];
   // This is a derived array created from the folderMetadata object
   // created for easier display of folderMetadata
   folderMetadataArray: FolderMetadataArrayItem[];
@@ -89,6 +109,11 @@ type DropboxState = {
     // Returns the dropbox path to go to when the back button is pressed.
     popFolderNavigation: () => FolderNavigation;
     clearFolderNavigation: () => void;
+    updateFolderAttribute: (
+      id: string,
+      type: "isFavorite" | "isRead",
+      action: "add" | "remove"
+    ) => Promise<void>;
     addFavorite: (favPath: string) => Promise<void>;
     removeFavorite: (favPath: string) => Promise<void>;
     isFolderFavorited: (folders: FolderEntry[]) => FolderEntry[];
@@ -107,8 +132,9 @@ type DropboxState = {
       folderKey: string,
       newBookFoldersObj: FolderMetadataDetails
     ) => Promise<void>;
-    updateFoldersMetadataPosition: (
-      newInfo: FolderMetadataArrayItem[]
+    updateFoldersAttributePosition: (
+      type: "favPosition" | "readPosition",
+      newInfo: FolderAttributeItem[]
     ) => Promise<void>;
     getFolderMetadata: (path_lower: string) => FolderMetadataDetails;
     clearFolderMetadata: () => Promise<void>;
@@ -125,6 +151,7 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
   folderMetadata: {},
   folderMetadataArray: [],
   folderMetadataErrors: [],
+  folderAttributes: [],
   favoritedBooks: [],
   folderNavigation: [],
   actions: {
@@ -148,6 +175,50 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
     },
     clearFolderNavigation: () => {
       set({ folderNavigation: [] });
+    },
+    updateFolderAttribute: async (pathIn, type, action) => {
+      const id = createFolderMetadataKey(pathIn);
+      const attributes = [...get().folderAttributes];
+      let currAttribute = attributes?.find((el) => el.id === id);
+      if (!currAttribute) {
+        // If currAttrtibute doesn't exist, means we are creating it
+        // so must grab the image from folderMetadata.
+        const { pathToFolderKey, pathToBookFolderKey } =
+          extractMetadataKeys(pathIn);
+        const bookMetadata =
+          get().folderMetadata?.[pathToFolderKey]?.[pathToBookFolderKey];
+        const imageURL = bookMetadata?.imageURL
+          ? bookMetadata.imageURL
+          : bookMetadata?.localImageName
+          ? `${FileSystem.documentDirectory}${bookMetadata.localImageName}`
+          : bookMetadata.defaultImage;
+        // Push a new attribute into the array.  It will be process in tne for loop
+        attributes.push({
+          id,
+          pathToFolder: pathIn,
+          imageURL: imageURL,
+          title: bookMetadata.title,
+          author: bookMetadata.author,
+          categoryOne: bookMetadata.categoryOne,
+          categoryTwo: bookMetadata.categoryTwo,
+        });
+      }
+
+      for (let i = 0; i < attributes.length; i++) {
+        if (attributes[i].id === id) {
+          attributes[i] = { ...attributes[i], [type]: !!(action === "add") };
+        }
+        if (!attributes[i]?.isFavorite && !attributes[i]?.isRead) {
+          attributes[i].flagForDelete = true;
+        }
+      }
+      //REMOVE any items flagged for delete
+      const finalAttributes = attributes.filter((el) => !el?.flagForDelete);
+
+      //! May have to calculate favPosition and readPosition if they don't exists
+      set({ folderAttributes: attributes });
+      //!!!!!! IMPLEMENT Save to file system ()
+      await saveToAsyncStorage("folderattributes", finalAttributes);
     },
     addFavorite: async (favPath) => {
       const favs = [...(get().favoriteFolders || [])];
@@ -231,17 +302,23 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       // get().actions.generateFolderMetadataArray();
       await saveToAsyncStorage("foldermetadata", folderMetadata);
     },
-    updateFoldersMetadataPosition: async (newInfo) => {
-      // const { key, position } = newInfo;
-      const folderMetadata = { ...get().folderMetadata };
-      for (const book of newInfo) {
-        const { key, position } = book;
-        // folderMetadata[key] = { ...folderMetadata[key], position };
-        folderMetadata[key].position = position;
+    updateFoldersAttributePosition: async (type, newInfo) => {
+      const copyFolderAttributes = [...get().folderAttributes];
+      // Loop through the updated attributes and update the position
+      for (const newAttrib of newInfo) {
+        const index = copyFolderAttributes.findIndex(
+          (el) => el.id === newAttrib.id
+        );
+        if (index) {
+          copyFolderAttributes[index] = {
+            ...copyFolderAttributes[index],
+            [type]: newAttrib[type],
+          };
+        }
       }
-      set({ folderMetadata });
-      get().actions.generateFolderMetadataArray();
-      await saveToAsyncStorage("foldermetadata", folderMetadata);
+
+      set({ folderAttributes: copyFolderAttributes });
+      await saveToAsyncStorage("folderattributes", copyFolderAttributes);
     },
     getFolderMetadata: (path_lower: string) => {
       const key = createFolderMetadataKey(path_lower);
