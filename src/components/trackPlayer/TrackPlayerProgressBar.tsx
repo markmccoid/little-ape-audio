@@ -1,11 +1,7 @@
 import { View, Text, Dimensions } from "react-native";
 import React, { useEffect, useMemo, useState } from "react";
 import TrackPlayer, { useProgress } from "react-native-track-player";
-import {
-  getCurrentPlaylist,
-  useMyProgress,
-  usePlaybackStore,
-} from "../../store/store";
+import { getCurrentPlaylist, usePlaybackStore } from "../../store/store";
 import { formatSeconds } from "../../utils/formatUtils";
 import { colors } from "../../constants/Colors";
 import { AnimatePresence, MotiView } from "moti";
@@ -21,11 +17,10 @@ const TrackPlayerProgressBar = () => {
   // const { position } = useMyProgress();
   const queuePos = usePlaybackStore((state) => state.currentQueuePosition);
   const queueDuration = getCurrentPlaylist()?.totalDurationSeconds;
-  const myDuration = usePlaybackStore((state) => state.currentTrack.duration);
   const [seeking, setSeeking] = useState<number>();
   const [isSeeking, setIsSeeking] = useState(false);
   const [currPos, setCurrPos] = useState(position);
-
+  const currTrack = usePlaybackStore((state) => state.currentTrack);
   useEffect(() => {
     if (isSeeking) {
       setCurrPos(seeking);
@@ -33,6 +28,9 @@ const TrackPlayerProgressBar = () => {
       setCurrPos(position);
     }
   }, [position, seeking]);
+
+  // console.log("chapter ", currTrack.chapters.find((el) => currPos < el.endSeconds)?.title, currPos);
+
   async function handleChange(valueArr: number[]) {
     let value = valueArr[0];
     if (value < 0) value = 0;
@@ -117,16 +115,12 @@ const TrackPlayerProgressBar = () => {
         // onSlidingComplete={(val) => soundActions.updatePosition(val)}
       /> */}
       <View className="flex-row w-full px-1 justify-between mt-[-5]">
-        <Text className="font-semibold text-xs">
-          {formatSeconds(Math.floor(position))}
-        </Text>
+        <Text className="font-semibold text-xs">{formatSeconds(Math.floor(position))}</Text>
         <Text className="font-semibold text-xs">
           {formatSeconds(Math.floor(position + queuePos))} of{" "}
           {formatSeconds(Math.floor(queueDuration))}
         </Text>
-        <Text className="font-semibold">
-          {formatSeconds(Math.floor(duration))}
-        </Text>
+        <Text className="font-semibold">{formatSeconds(Math.floor(duration))}</Text>
       </View>
     </View>
   );

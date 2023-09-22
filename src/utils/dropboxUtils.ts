@@ -69,15 +69,11 @@ export const revokeDropboxAccess = async (token: string) => {
   const password = APP_SECRECT; // dropbox app secret
   const authHeader = `Bearer ${token}`;
   try {
-    const response = await axios.post(
-      "https://api.dropboxapi.com/2/auth/token/revoke",
-      undefined,
-      {
-        headers: {
-          Authorization: authHeader,
-        },
-      }
-    );
+    const response = await axios.post("https://api.dropboxapi.com/2/auth/token/revoke", undefined, {
+      headers: {
+        Authorization: authHeader,
+      },
+    });
     // Only returning the access token
     return {
       token: undefined,
@@ -125,9 +121,7 @@ export const checkDropboxToken = async () => {
 
   const dbRefreshToken = await getDropboxRefreshToken();
   if (dbRefreshToken) {
-    const { token: dropboxToken, expiresIn } = await refreshToken(
-      dbRefreshToken
-    );
+    const { token: dropboxToken, expiresIn } = await refreshToken(dbRefreshToken);
 
     // This is storing to secureStore on device
     // dropboxActions.updateToken(dropboxToken, Date.now() + expiresIn);
@@ -161,9 +155,7 @@ export const useDropboxToken = () => {
 //* getDropboxFileLink ----------------------
 //-----------------------------------------
 
-export const getDropboxFileLink = async (
-  pathWithFile: string
-): Promise<string> => {
+export const getDropboxFileLink = async (pathWithFile: string): Promise<string> => {
   const { token } = await checkDropboxToken();
   // path directive must be stringified when sending to "Dropbox-API-Arg"
   // end result --> '{"path": "/dropboxupload.txt"}'
@@ -195,9 +187,7 @@ export const getDropboxFileLink = async (
 //-----------------------------------------
 //* downloadDropboxFile ----------------------
 //-----------------------------------------
-export const downloadDropboxFile = async <T>(
-  pathWithFile: string
-): Promise<T> => {
+export const downloadDropboxFile = async <T>(pathWithFile: string): Promise<T> => {
   const { token } = await checkDropboxToken();
   // path directive must be stringified when sending to "Dropbox-API-Arg"
   // end result --> '{"path": "/dropboxupload.txt"}'
@@ -212,7 +202,10 @@ export const downloadDropboxFile = async <T>(
     })
     .then((resp) => resp.data)
     .catch((err) => {
-      console.log("Error Downloading Dropbox File", err.message);
+      // if (err.response?.status === 404) {
+      //   return undefined;
+      // }
+      // console.log("Error Downloading Dropbox File", err.message);
       throw err;
     });
 };
@@ -220,28 +213,20 @@ export const downloadDropboxFile = async <T>(
 //* uploadDropboxFile ----------------------
 //-----------------------------------------
 // NOTE: if you get status/error 409 it usually means
-export const uploadDropboxFile = async (
-  folder: string = "/",
-  filename: string,
-  data
-) => {
+export const uploadDropboxFile = async (folder: string = "/", filename: string, data) => {
   const { token } = await checkDropboxToken();
   // path directive must be stringified when sending to "Dropbox-API-Arg"
   // end result --> '{"path": "/dropboxupload.txt"}'
   const path = { path: `${folder}${filename}`, mode: "overwrite" };
 
   return axios
-    .post(
-      `https://content.dropboxapi.com/2/files/upload`,
-      JSON.stringify(data),
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Dropbox-API-Arg": JSON.stringify(path),
-          "Content-Type": "application/octet-stream",
-        },
-      }
-    )
+    .post(`https://content.dropboxapi.com/2/files/upload`, JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Dropbox-API-Arg": JSON.stringify(path),
+        "Content-Type": "application/octet-stream",
+      },
+    })
     .then((resp) => ({
       status: resp.status,
       error: undefined,
@@ -289,9 +274,7 @@ export type DropboxDir = {
 //-----------------------------------------
 //* listDropboxFiles ----------------------
 //-----------------------------------------
-export const listDropboxFiles = async (
-  path: string = ""
-): Promise<DropboxDir> => {
+export const listDropboxFiles = async (path: string = ""): Promise<DropboxDir> => {
   const { token } = await checkDropboxToken(); //getDropboxToken();
 
   // If no token throw an Error. Need to catch it somewhere
@@ -326,11 +309,8 @@ export const listDropboxFiles = async (
       throw new Error(err);
     }
   }
-  const {
-    cursor,
-    entries,
-    has_more,
-  }: { cursor: string; entries: Entries[]; has_more: boolean } = resp?.data;
+  const { cursor, entries, has_more }: { cursor: string; entries: Entries[]; has_more: boolean } =
+    resp?.data;
   let folders = [];
   let files = [];
   for (const item of entries) {
@@ -355,21 +335,15 @@ type TokenReturn = {
   valid: boolean;
   error?: ErrorValues;
 };
-export const isDropboxTokenValid = async (
-  token: string
-): Promise<TokenReturn> => {
+export const isDropboxTokenValid = async (token: string): Promise<TokenReturn> => {
   const data = { query: "valid" };
   try {
-    const resp = await axios.post(
-      "https://api.dropboxapi.com/2/check/user",
-      JSON.stringify(data),
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const resp = await axios.post("https://api.dropboxapi.com/2/check/user", JSON.stringify(data), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
     return { valid: true };
   } catch (e) {
     const err = e as AxiosError;

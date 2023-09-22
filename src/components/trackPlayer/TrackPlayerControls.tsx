@@ -9,12 +9,7 @@ import {
 } from "react-native";
 import React, { useEffect, useMemo, useState } from "react";
 import { usePlaybackStore, useTracksStore } from "../../store/store";
-import {
-  BookmarkIcon,
-  PauseIcon,
-  PlayIcon,
-  RewindIcon,
-} from "../common/svg/Icons";
+import { BookmarkIcon, PauseIcon, PlayIcon, RewindIcon } from "../common/svg/Icons";
 import { State } from "react-native-track-player";
 import { useSettingStore } from "../../store/store-settings";
 import { colors } from "../../constants/Colors";
@@ -30,12 +25,8 @@ const CONTROLSIZE = 35;
 const CONTROLCOLOR = colors.amber800;
 
 const TrackPlayerControls = ({ style }: Props) => {
-  const jumpSecondsForward = useSettingStore(
-    (state) => state.jumpForwardSeconds
-  );
-  const jumpSecondsBackward = useSettingStore(
-    (state) => state.jumpBackwardSeconds
-  );
+  const jumpSecondsForward = useSettingStore((state) => state.jumpForwardSeconds);
+  const jumpSecondsBackward = useSettingStore((state) => state.jumpBackwardSeconds);
   const playbackActions = usePlaybackStore((state) => state.actions);
 
   // const [playerState, setPlayerState] = useState(null);
@@ -50,7 +41,7 @@ const TrackPlayerControls = ({ style }: Props) => {
   // Then if bookmark added, it will update in handleAddBookmark
   useEffect(() => {
     const bookmarks = playbackActions.getBookmarks();
-    setBookmarkLength(bookmarks?.length);
+    setBookmarkLength(bookmarks?.length === 0 ? undefined : bookmarks?.length);
   }, [pl]);
 
   //~ --- ----
@@ -106,11 +97,7 @@ const TrackPlayerControls = ({ style }: Props) => {
               size={CONTROLSIZE}
               color={CONTROLCOLOR}
               style={{
-                transform: [
-                  { rotateZ: "-45deg" },
-                  { rotateY: "180deg" },
-                  { scale: 1.1 },
-                ],
+                transform: [{ rotateZ: "-45deg" }, { rotateY: "180deg" }, { scale: 1.1 }],
               }}
             />
             {/* <Text style={{ position: "absolute", bottom: -10, left: 12 }}> */}

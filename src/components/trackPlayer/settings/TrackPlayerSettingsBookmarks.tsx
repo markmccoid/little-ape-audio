@@ -17,10 +17,7 @@ const TrackPlayerSettingsBookmarks = () => {
   const playbackActions = usePlaybackStore((state) => state.actions);
   const router = useRouter();
   const [updateBookmarks, setUpdateBookmarks] = useState(false);
-  const bookmarks = useMemo(
-    () => playbackActions.getBookmarks(),
-    [updateBookmarks]
-  );
+  const bookmarks = useMemo(() => playbackActions.getBookmarks(), [updateBookmarks]);
 
   const handleApplyBookmark = async (bookmarkId) => {
     playbackActions.applyBookmark(bookmarkId);
@@ -30,7 +27,7 @@ const TrackPlayerSettingsBookmarks = () => {
     playbackActions.deleteBookmark(bookmarkId);
     setUpdateBookmarks((prev) => !prev);
   };
-
+  console.log("BOOK", bookmarks);
   if (!bookmarks || bookmarks?.length === 0) {
     return (
       <View className="w-full border border-amber-900 rounded-md bg-white p-3">

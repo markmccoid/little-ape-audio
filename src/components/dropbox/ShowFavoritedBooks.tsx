@@ -15,18 +15,15 @@ import DraggableFlatList, {
   OpacityDecorator,
   ScaleDecorator,
 } from "react-native-draggable-flatlist";
+import * as FileSystem from "expo-file-system";
 
 const ShowFavoritedBooks = () => {
   const actions = useDropboxStore((state) => state.actions);
   const folderAttributes = useDropboxStore((state) => state.folderAttributes);
 
-  const favBooks = useMemo(
-    () =>
-      folderAttributes
-        .filter((el) => el.isFavorite)
-        .sort((a, b) => a.favPosition - b.favPosition),
-    [folderAttributes]
-  );
+  const favBooks = folderAttributes
+    .filter((el) => el.isFavorite)
+    .sort((a, b) => a.favPosition - b.favPosition);
   const router = useRouter();
 
   const renderItem = ({
@@ -38,7 +35,11 @@ const ShowFavoritedBooks = () => {
     drag: any;
     isActive: boolean;
   }) => {
-    const imageURI = item?.imageURL;
+    const imageURI = item?.imageURL
+      ? item.imageURL
+      : item?.localImageName
+      ? `${FileSystem.documentDirectory}${item.localImageName}`
+      : item.defaultImage;
 
     return (
       // <ScaleDecorator activeScale={0.98}>

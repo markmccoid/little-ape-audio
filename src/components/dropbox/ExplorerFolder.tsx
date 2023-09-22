@@ -1,11 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  FolderEntry,
-  downloadDropboxFile,
-  getDropboxFileLink,
-  listDropboxFiles,
-} from "../../utils/dropboxUtils";
+import { FolderEntry } from "../../utils/dropboxUtils";
 import {
   EmptyMDHeartIcon,
   FolderClosedIcon,
@@ -54,9 +49,7 @@ const ExplorerFolder = ({
   }, [folderAttributes]);
   const [metadataInfo, setMetadataInfo] = useState(folderMetadata);
   // const [folderAttributes, setFolderAttributes] = useState(folderAttributes);
-  const [folderMetaState, setFolderMetaState] = useState<
-    "on" | "off" | "loading"
-  >("off");
+  const [folderMetaState, setFolderMetaState] = useState<"on" | "off" | "loading">("off");
 
   // Using local state for passed in show flag and metadata
   // because we allow reload of metadata from a single row with
@@ -83,9 +76,7 @@ const ExplorerFolder = ({
     setFolderMetaState("loading");
     const convertedMetadata = await getSingleFolderMetadata(folder);
     // Create the needed keys and store the data in the dropbox store
-    const { pathToBookFolderKey, pathToFolderKey } = extractMetadataKeys(
-      folder.path_lower
-    );
+    const { pathToBookFolderKey, pathToFolderKey } = extractMetadataKeys(folder.path_lower);
     actions.mergeFoldersMetadata(pathToFolderKey, {
       [pathToBookFolderKey]: convertedMetadata,
     });
@@ -133,8 +124,7 @@ const ExplorerFolder = ({
           animate={{ opacity: 1 }}
           transition={{
             loop:
-              (showFolderMetadata === "loading" && !metadataInfo) ||
-              folderMetaState === "loading"
+              (showFolderMetadata === "loading" && !metadataInfo) || folderMetaState === "loading"
                 ? true
                 : false,
             type: "timing",
@@ -147,8 +137,7 @@ const ExplorerFolder = ({
             paddingHorizontal: 8,
           }}
           className={`${
-            (showFolderMetadata === "loading" && !metadataInfo) ||
-            folderMetaState === "loading"
+            (showFolderMetadata === "loading" && !metadataInfo) || folderMetaState === "loading"
               ? "bg-amber-600"
               : ""
           }`}

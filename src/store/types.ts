@@ -2,6 +2,7 @@ import { Chapters } from "./../utils/audioUtils";
 import { Track } from "react-native-track-player";
 import { FileEntry } from "../utils/dropboxUtils";
 import { Chapters } from "@utils/audioUtils";
+import { Chapter } from "./store-functions";
 
 //~ ================================
 //~ AudioTrack Type
@@ -20,6 +21,7 @@ export type AudioMetadata = {
   title?: string;
   album?: string;
   artist?: string;
+  narratedBy?: string;
   genre?: string;
   trackRaw?: string;
   trackNum?: number;
@@ -47,6 +49,7 @@ export interface ApeTrack extends Track {
   filename: string;
   // The track number pulled from the metadata info
   trackNum: number;
+  chapters: Chapter[];
 }
 export type TrackAttributes = {
   currentPosition: number;
@@ -108,7 +111,9 @@ export type AudioState = {
     // record in AudioState.audioFiles store array
     addNewTrack: (
       fileURI: string,
+      // filename including extension
       filename: string,
+      // file.path_lower
       sourceLocation: string,
       playlistId?: string,
       directory?: string
@@ -120,37 +125,18 @@ export type AudioState = {
     // to the "tracks" array.  Returns the same array with a "alreadyDownload" key set to true or false
     isTrackDownloaded: (tracksToCheck: FileEntry[]) => FileEntry[];
     // creates playlist with the passed name and returns the playlistId
-    addNewPlaylist: (
-      title: string,
-      author?: string,
-      playlistId?: string
-    ) => Promise<string>;
+    addNewPlaylist: (title: string, author?: string, playlistId?: string) => Promise<string>;
     // Add track(s) to playlist ID
-    addTracksToPlaylist: (
-      playlistId: string,
-      trackIds: string[]
-    ) => Promise<void>;
-    removePlaylist: (
-      playlistId: string,
-      removeAllTracks?: boolean
-    ) => Promise<void>;
+    addTracksToPlaylist: (playlistId: string, trackIds: string[]) => Promise<void>;
+    removePlaylist: (playlistId: string, removeAllTracks?: boolean) => Promise<void>;
     getPlaylist: (playlistId: string) => Playlist | undefined;
     getTrack: (trackId: string) => AudioTrack | undefined;
     // Given a playlist ID, will return an array of tracks (with metadata,etc)
     getPlaylistTracks: (playlistId: string) => AudioTrack[];
     updatePlaylistRate: (playlistId: string, newRate: number) => void;
-    updatePlaylistFields: (
-      playlistId: string,
-      updateObj: PlaylistUpdateObj
-    ) => Promise<void>;
-    updatePlaylistTracks: (
-      playlistId: string,
-      newTracksArray: string[]
-    ) => Promise<void>;
-    deleteTrackFromPlaylist: (
-      playlistId: string,
-      trackToDeleteId: string
-    ) => Promise<void>;
+    updatePlaylistFields: (playlistId: string, updateObj: PlaylistUpdateObj) => Promise<void>;
+    updatePlaylistTracks: (playlistId: string, newTracksArray: string[]) => Promise<void>;
+    deleteTrackFromPlaylist: (playlistId: string, trackToDeleteId: string) => Promise<void>;
     addBookmarkToPlaylist: (
       bookmarkName: string,
       playlistId: string,
@@ -158,10 +144,7 @@ export type AudioState = {
       positionSeconds: number
     ) => Promise<void>;
     getBookmarksForPlaylist: (playlistId) => Bookmark[];
-    deleteBookmarkFromPlaylist: (
-      playlistId: string,
-      bookmarkId: string
-    ) => Promise<void>;
+    deleteBookmarkFromPlaylist: (playlistId: string, bookmarkId: string) => Promise<void>;
     clearAll: () => Promise<void>;
   };
 };
