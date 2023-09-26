@@ -47,10 +47,9 @@ const TrackList = () => {
 
   // Scroll to the current track and/or chapter
   useEffect(() => {
-    if (scrollViewRef.current) {
-      if (currChapterIndex) {
-        scrollToRow(currentTrackIndex, currChapterIndex + 1);
-      }
+    if (scrollViewRef.current && currChapterIndex !== undefined) {
+      scrollToRow(currentTrackIndex, currChapterIndex + 1);
+
       // else {
       //   console.log("scroll", currentTrackIndex, currChapterIndex);
       //   scrollToRow(currentTrackIndex, 1);
@@ -68,6 +67,8 @@ const TrackList = () => {
           break;
         }
       }
+    } else {
+      setCurrChapterIndex(0);
     }
   }, [chapters, position]);
   useEffect(() => {
@@ -87,7 +88,7 @@ const TrackList = () => {
           queuePos: index,
           id: track.id,
           duration: track.duration,
-          data: chapters || [],
+          data: chapters || [{ title: "~NO CHAPTERS~" }],
         } as SectionListData;
         return sectionList;
       });
@@ -143,6 +144,9 @@ const TrackList = () => {
   //~ RENDER ITEM
   const renderItem = ({ item, index, section }) => {
     // console.log("SUBSECT", item);
+    if (item.title === "~NO CHAPTERS~") {
+      return <View></View>;
+    }
     const isCurrChapter = index === currChapterIndex;
     const isCurrentTrack = currentTrackIndex === section?.queuePos;
     return (
