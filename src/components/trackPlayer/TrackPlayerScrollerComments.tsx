@@ -1,10 +1,13 @@
-import { View, Text, ScrollView, Dimensions } from "react-native";
+import { View, Text, ScrollView, Dimensions, Pressable } from "react-native";
 import React from "react";
 import {
   useCurrentPlaylist,
   usePlaybackStore,
   useTrackActions,
+  useTracksStore,
 } from "@store/store";
+import { formatSeconds } from "@utils/formatUtils";
+import { EnterKeyIcon } from "@components/common/svg/Icons";
 
 const { width, height } = Dimensions.get("window");
 const COMPONENT_WIDTH = width - 80;
@@ -12,6 +15,11 @@ const COMPONENT_WIDTH = width - 80;
 const TrackPlayerScrollerComments = () => {
   const actions = useTrackActions();
   const playbackTrack = usePlaybackStore((state) => state.currentTrack);
+  const playlistId = usePlaybackStore((state) => state.currentPlaylistId);
+  const playlists = useTracksStore((state) => state.playlists);
+  const playbackActions = usePlaybackStore((state) => state.actions);
+
+  const positionHistory = playlists[playlistId]?.positionHistory;
   const [trackComment, setTrackComment] = React.useState("");
 
   // Track comment
@@ -32,7 +40,22 @@ const TrackPlayerScrollerComments = () => {
       className=" border border-amber-700 bg-amber-100"
     >
       <View className="p-2 ">
-        <Text className="font-medium">{trackComment}</Text>
+        <Text className="font-semibold text-base mb-2">Progress History</Text>
+        {positionHistory?.map((pos, index) => {
+          return (
+            <Pressable
+              onPress={async () => {
+                await playbackActions.seekTo(pos);
+              }}
+              key={`${pos}-${index}`}
+            >
+              <View className="flex-row justify-between items-center border border-amber-800 bg-amber-300 p-2 mb-2 pr-4">
+                <Text>{formatSeconds(pos)}</Text>
+                <EnterKeyIcon />
+              </View>
+            </Pressable>
+          );
+        })}
       </View>
     </ScrollView>
   );

@@ -27,16 +27,11 @@ type Props = {
 const PlaylistRow = ({ playlist, onPlaylistSelect }: Props) => {
   const trackActions = useTrackActions();
   const playbackActions = usePlaybackStore((state) => state.actions);
-  const currentPlaylistId = usePlaybackStore(
-    (state) => state.currentPlaylistId
-  );
+  const currentPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
 
   const route = useRouter();
 
-  const isActive = useMemo(
-    () => currentPlaylistId === playlist.id,
-    [currentPlaylistId]
-  );
+  const isActive = useMemo(() => currentPlaylistId === playlist.id, [currentPlaylistId]);
   const [copiedText, setCopiedText] = useState("");
 
   const handleWebviewClose = async () => {
@@ -52,10 +47,10 @@ const PlaylistRow = ({ playlist, onPlaylistSelect }: Props) => {
         {
           text: "Yes",
           onPress: async () => {
-            await trackActions.removePlaylist(playlist.id);
             if (currentPlaylistId === playlist.id) {
               await playbackActions.resetPlaybackStore();
             }
+            await trackActions.removePlaylist(playlist.id);
           },
         },
         { text: "No", style: "cancel" },
@@ -67,8 +62,7 @@ const PlaylistRow = ({ playlist, onPlaylistSelect }: Props) => {
     Alert.prompt("Edit Playlist Name", "Enter a new Playlist Name", [
       {
         text: "OK",
-        onPress: (text) =>
-          trackActions.updatePlaylistFields(playlist.id, { name: text }),
+        onPress: (text) => trackActions.updatePlaylistFields(playlist.id, { name: text }),
       },
       { text: "Cancel", onPress: () => {} },
     ]);
@@ -83,9 +77,7 @@ const PlaylistRow = ({ playlist, onPlaylistSelect }: Props) => {
   //   console.log("webview", openWebview);
   // };
   const imageSource =
-    playlist?.imageType === "uri"
-      ? { uri: playlist.imageURI }
-      : playlist.imageURI;
+    playlist?.imageType === "uri" ? { uri: playlist.imageURI } : playlist.imageURI;
 
   return (
     <View
@@ -93,25 +85,14 @@ const PlaylistRow = ({ playlist, onPlaylistSelect }: Props) => {
         isActive ? "bg-amber-300" : ""
       }`}
     >
-      <Pressable
-        className="flex-1 flex-row"
-        onPress={() => onPlaylistSelect(playlist.id)}
-      >
+      <Pressable className="flex-1 flex-row" onPress={() => onPlaylistSelect(playlist.id)}>
         {/* IMAGE */}
 
-        <PlaylistImage
-          style={styles.trackImage}
-          playlistId={playlist.id}
-          noTransition
-        />
+        <PlaylistImage style={styles.trackImage} playlistId={playlist.id} noTransition />
         {/* TITLE AUTHOR LENGTH */}
         <View className="flex-col flex-1 ml-2 justify-between pb-1 ">
           <View className="flex-col flex-shrink">
-            <Text
-              className="text-lg font-ssp_semibold"
-              numberOfLines={2}
-              ellipsizeMode="tail"
-            >
+            <Text className="text-lg font-ssp_semibold" numberOfLines={2} ellipsizeMode="tail">
               {playlist?.name}
             </Text>
             <Text className="text-sm font-ssp_regular" ellipsizeMode="tail">
@@ -126,10 +107,7 @@ const PlaylistRow = ({ playlist, onPlaylistSelect }: Props) => {
       </Pressable>
 
       {/* DELETE BUTTON */}
-      <View
-        className="flex-col items-center justify-end "
-        style={{ width: 50 }}
-      >
+      <View className="flex-col items-center justify-end " style={{ width: 50 }}>
         <TouchableOpacity
           className="flex-1 justify-center"
           // onPress={handleEditPlaylist}
@@ -149,10 +127,7 @@ const PlaylistRow = ({ playlist, onPlaylistSelect }: Props) => {
         >
           <ImageIcon />
         </TouchableOpacity> */}
-        <TouchableOpacity
-          className="flex-1 justify-center"
-          onPress={handleRemovePlaylist}
-        >
+        <TouchableOpacity className="flex-1 justify-center" onPress={handleRemovePlaylist}>
           <DeleteIcon />
         </TouchableOpacity>
       </View>

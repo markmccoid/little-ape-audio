@@ -28,7 +28,7 @@ const AudioLayout = () => {
           headerRight: () => {
             return (
               <Link href="/audio/dropbox" asChild>
-                <Pressable>
+                <Pressable className="p-[10] mr-[-10]">
                   <AddBook size={25} />
                 </Pressable>
               </Link>
@@ -37,7 +37,7 @@ const AudioLayout = () => {
           headerLeft: () => {
             return (
               <Link href="/settings" asChild replace>
-                <Pressable>
+                <Pressable className="p-[10] ml-[-10]">
                   <Monkey size={25} />
                 </Pressable>
               </Link>
@@ -52,8 +52,10 @@ const AudioLayout = () => {
           // headerStyle: { backgroundColor: colors.amber200 },
           headerTintColor: colors.amber900,
           headerRight: () => (
-            <Link href="/audio/playersettings">
-              <SettingsIcon size={25} />
+            <Link href="/audio/playersettings" asChild>
+              <Pressable className="p-[10] mr-[-10]">
+                <SettingsIcon size={25} />
+              </Pressable>
             </Link>
           ),
         }}

@@ -27,7 +27,7 @@ const TrackPlayerSettingsBookmarks = () => {
     playbackActions.deleteBookmark(bookmarkId);
     setUpdateBookmarks((prev) => !prev);
   };
-  console.log("BOOK", bookmarks);
+
   if (!bookmarks || bookmarks?.length === 0) {
     return (
       <View className="w-full border border-amber-900 rounded-md bg-white p-3">

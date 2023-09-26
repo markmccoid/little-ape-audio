@@ -4,7 +4,7 @@ import {
   // FlatList,
   Dimensions,
   TouchableOpacity,
-  Touchable,
+  SectionList,
   Pressable,
 } from "react-native";
 import React, { useCallback, useRef, useState } from "react";
@@ -20,76 +20,127 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import SwipeableItem, {
-  useSwipeableItemParams,
-} from "react-native-swipeable-item";
-import DraggableFlatList from "react-native-draggable-flatlist";
+import SwipeableItem, { useSwipeableItemParams } from "react-native-swipeable-item";
 import { colors } from "@constants/Colors";
-import {
-  Gesture,
-  GestureDetector,
-  FlatList,
-} from "react-native-gesture-handler";
-import DragListItem from "@components/xplayarea/DragListItem";
+import { usePlaybackStore, usePlaylists } from "@store/store";
+import { useProgress } from "react-native-track-player";
 
-type Item = {
-  key: string;
-  text: string;
-  backgroundColor: string;
+type SectionChapter = {
+  title: string;
+  start: number;
+  end: number;
 };
-const NUM_ITEMS = 10;
+type SectionListData = {
+  title: string;
+  filename: string;
+  queuePos: number;
+  duration: number;
+  data: SectionChapter[];
+};
 
-const initialData: Item[] = [...Array(NUM_ITEMS)].fill(0).map((d, index) => {
-  const backgroundColor = getColor(index);
-  return {
-    text: `${index}`,
-    key: `key-${backgroundColor}`,
-    backgroundColor,
-  };
-});
-
+//!! How to determine current chapter without looking at each chapter
+//!!
+//!!
+//!!
+//!!
+//!!
 const playarea = () => {
-  const flatRef = useRef(null);
-  let prevOpenedRow = undefined;
-  let row = [];
+  const queue = usePlaybackStore((state) => state.trackPlayerQueue);
+  const currentTrack = usePlaybackStore((state) => state.currentTrack);
+  const playbackActions = usePlaybackStore((state) => state.actions);
+  const { position } = useProgress();
+  const [sectionList, setSectionList] = useState<SectionListData[]>([]);
+  const [chapters, setChapters] = useState<SectionChapter[]>();
 
-  const closeRow = (index) => {
-    if (prevOpenedRow && prevOpenedRow !== row[index]) {
-      prevOpenedRow.close();
+  const [currChapterIndex, setCurrChapterIndex] = useState();
+  // console.log("CURRCHAPT", currChapterIndex);
+  React.useEffect(() => {
+    // console.log("1", chapters);
+    if (chapters?.length > 0) {
+      for (let i = 0; i < chapters.length; i++) {
+        if (position <= chapters[i].end) {
+          setCurrChapterIndex(i);
+          break;
+        }
+      }
     }
-    prevOpenedRow = row[index];
-  };
-
-  const renderItem = useCallback((props) => {
-    console.log("index", props.getIndex());
-    return (
-      <DragListItem
-        item={props.item}
-        drag={props.drag}
-        isActive={props.isActive}
-        index={props.getIndex()}
-        closeRow={closeRow}
-        row={row}
-      />
-    );
+  }, [chapters, position]);
+  React.useEffect(() => {
+    if (queue) {
+      const finalSectionList = queue.map((track, index) => {
+        const section = track.title;
+        const chapters = track?.chapters?.map((chapt) => {
+          return {
+            title: chapt.title,
+            start: chapt.startSeconds,
+            end: chapt.endSeconds,
+          };
+        }) as SectionChapter[];
+        const sectionList = {
+          title: track.title,
+          filename: track.filename,
+          queuePos: index,
+          id: track.id,
+          duration: track.duration,
+          data: chapters || [],
+        } as SectionListData;
+        return sectionList;
+      });
+      setSectionList(finalSectionList);
+      setChapters(finalSectionList.flatMap((el) => el.data));
+    }
   }, []);
 
+  const renderSectionHeader = ({ section }) => {
+    // console.log("SECTION", section);
+    const isCurrentTrack = section.id === currentTrack.id;
+    return (
+      <TouchableOpacity
+        key={section.id}
+        onPress={() => {
+          if (!isCurrentTrack) {
+            playbackActions.goToTrack(section?.queuePos);
+          }
+        }}
+        className=""
+      >
+        <View
+          className={`p-2 ${
+            section.position === 0 ? "border" : "border-b"
+          } border-amber-500 h-[55] ${isCurrentTrack ? "bg-amber-200" : "bg-white"}`}
+        >
+          <Text className="text-lg">{section?.title}</Text>
+
+          <Text className="text-lg">{section.duration}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  const renderItem = ({ item, index }) => {
+    // console.log("SUBSECT", item);
+    const isCurrChapter = index === currChapterIndex;
+    return (
+      <View
+        className={`p-2 ${index === 0 ? "border" : "border-b"} border-amber-500 h-[55] ${
+          isCurrChapter ? "bg-amber-200" : "bg-white"
+        }`}
+      >
+        {/* <Text className="text-base">{props.item.title}</Text> */}
+        <Text className="text-base">{item.title}</Text>
+      </View>
+    );
+  };
+
   return (
-    <View style={{ flex: 1 }}>
-      <DraggableFlatList
-        ref={flatRef}
-        keyExtractor={(item) => item.key}
-        data={initialData}
+    <View>
+      <SectionList
+        sections={sectionList}
+        renderSectionHeader={renderSectionHeader}
         renderItem={renderItem}
       />
     </View>
   );
 };
-
-function getColor(i: number) {
-  const multiplier = 255 / (NUM_ITEMS - 1);
-  const colorVal = i * multiplier;
-  return `rgb(${colorVal}, ${Math.abs(128 - colorVal)}, ${255 - colorVal})`;
-}
 
 export default playarea;
