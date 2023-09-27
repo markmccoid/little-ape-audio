@@ -7,6 +7,7 @@ import {
   Pressable,
   ImageSourcePropType,
   Alert,
+  Animated as RNAnimated,
 } from "react-native";
 import React, { useEffect, useMemo, useState } from "react";
 import { usePlaybackStore, useTrackActions } from "../../store/store";
@@ -16,6 +17,8 @@ import { formatSeconds } from "../../utils/formatUtils";
 import PlaylistImage from "../common/PlaylistImage";
 import { DeleteIcon, EditIcon, ImageIcon } from "../common/svg/Icons";
 import { getImageFromWeb } from "@utils/otherUtils";
+import { Swipeable } from "react-native-gesture-handler";
+import { colors } from "@constants/Colors";
 // import * as WebBrowser from "expo-web-browser";
 // import * as Clipboard from "expo-clipboard";
 // import { getImageSize } from "@utils/audioUtils";
@@ -23,21 +26,16 @@ import { getImageFromWeb } from "@utils/otherUtils";
 type Props = {
   playlist: Playlist;
   onPlaylistSelect: (playlistId: string) => void;
+  index: number;
+  renderRowRefs: Swipeable[];
+  closeRow: (index: number) => void;
 };
-const PlaylistRow = ({ playlist, onPlaylistSelect }: Props) => {
+const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRow }: Props) => {
   const trackActions = useTrackActions();
   const playbackActions = usePlaybackStore((state) => state.actions);
   const currentPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
 
-  const route = useRouter();
-
   const isActive = useMemo(() => currentPlaylistId === playlist.id, [currentPlaylistId]);
-  const [copiedText, setCopiedText] = useState("");
-
-  const handleWebviewClose = async () => {
-    const clipboardContent = await Clipboard.getStringAsync();
-    setCopiedText(clipboardContent);
-  };
 
   const handleRemovePlaylist = async () => {
     Alert.alert(
@@ -58,80 +56,49 @@ const PlaylistRow = ({ playlist, onPlaylistSelect }: Props) => {
     );
   };
 
-  const handleEditPlaylist = async () => {
-    Alert.prompt("Edit Playlist Name", "Enter a new Playlist Name", [
-      {
-        text: "OK",
-        onPress: (text) => trackActions.updatePlaylistFields(playlist.id, { name: text }),
-      },
-      { text: "Cancel", onPress: () => {} },
-    ]);
-  };
-
-  // const handleImagePick = () => {
-  //   const url = "https://google.com"; // Replace with your desired URL
-
-  //   const openWebview = async () => {
-  //     await WebBrowser.openBrowserAsync(url);
-  //   };
-  //   console.log("webview", openWebview);
-  // };
-  const imageSource =
-    playlist?.imageType === "uri" ? { uri: playlist.imageURI } : playlist.imageURI;
-
   return (
-    <View
-      className={`flex-row flex-1 py-2 px-2 border-b border-b-amber-700 ${
-        isActive ? "bg-amber-300" : ""
-      }`}
+    <Swipeable
+      ref={(ref) => (renderRowRefs[index] = ref)}
+      onSwipeableOpen={() => closeRow(index)}
+      renderRightActions={(progress, dragX) => {
+        return (
+          <RenderRight
+            handleRemovePlaylist={handleRemovePlaylist}
+            playlistId={playlist.id}
+            progress={progress}
+            dragX={dragX}
+          />
+        );
+      }}
+      rightThreshold={45}
+      leftThreshold={10}
     >
-      <Pressable className="flex-1 flex-row" onPress={() => onPlaylistSelect(playlist.id)}>
-        {/* IMAGE */}
-
-        <PlaylistImage style={styles.trackImage} playlistId={playlist.id} noTransition />
-        {/* TITLE AUTHOR LENGTH */}
-        <View className="flex-col flex-1 ml-2 justify-between pb-1 ">
-          <View className="flex-col flex-shrink">
-            <Text className="text-lg font-ssp_semibold" numberOfLines={2} ellipsizeMode="tail">
-              {playlist?.name}
-            </Text>
-            <Text className="text-sm font-ssp_regular" ellipsizeMode="tail">
-              {playlist.author}
+      <View
+        className={`flex-row flex-1 pt-2 pb-3 px-2 border-r border-r-amber-800 ${
+          isActive ? "bg-amber-300" : "bg-amber-50"
+        }`}
+      >
+        <Pressable className="flex-1 flex-row" onPress={() => onPlaylistSelect(playlist.id)}>
+          {/* IMAGE */}
+          <PlaylistImage style={styles.trackImage} playlistId={playlist.id} noTransition />
+          {/* TITLE AUTHOR LENGTH */}
+          <View className="flex-col flex-1 ml-2 justify-between pb-1 ">
+            <View className="flex-col flex-shrink">
+              <Text className="text-lg font-ssp_semibold" numberOfLines={2} ellipsizeMode="tail">
+                {playlist?.name}
+              </Text>
+              <Text className="text-sm font-ssp_regular" ellipsizeMode="tail">
+                {playlist.author}
+              </Text>
+            </View>
+            <Text className="text-sm font-ssp_regular">
+              {formatSeconds(playlist.totalListenedToSeconds, "minimal")} -
+              {formatSeconds(playlist.totalDurationSeconds, "minimal")}
             </Text>
           </View>
-          <Text className="text-sm font-ssp_regular">
-            {formatSeconds(playlist.totalListenedToSeconds, "minimal")} -
-            {formatSeconds(playlist.totalDurationSeconds, "minimal")}
-          </Text>
-        </View>
-      </Pressable>
-
-      {/* DELETE BUTTON */}
-      <View className="flex-col items-center justify-end " style={{ width: 50 }}>
-        <TouchableOpacity
-          className="flex-1 justify-center"
-          // onPress={handleEditPlaylist}
-          onPress={() => {
-            // router.setParams({ playlistId: playlist.id });
-            router.push({
-              pathname: "/audio/playlistedit",
-              params: { playlistId: playlist.id },
-            });
-          }}
-        >
-          <EditIcon />
-        </TouchableOpacity>
-        {/* <TouchableOpacity
-          className="flex-1 justify-center"
-          onPress={async () => getImageFromWeb(playlist.id, playlist.name)}
-        >
-          <ImageIcon />
-        </TouchableOpacity> */}
-        <TouchableOpacity className="flex-1 justify-center" onPress={handleRemovePlaylist}>
-          <DeleteIcon />
-        </TouchableOpacity>
+        </Pressable>
       </View>
-    </View>
+    </Swipeable>
   );
 };
 
@@ -144,3 +111,68 @@ const styles = StyleSheet.create({
   },
 });
 export default PlaylistRow;
+
+//~ ========================================================================
+//~ Render the Right swipe buttons
+//~ ========================================================================
+function RenderRight({
+  handleRemovePlaylist,
+  playlistId,
+  progress,
+  dragX,
+}: {
+  handleRemovePlaylist;
+  playlistId: string;
+  progress: RNAnimated.AnimatedInterpolation<string | number>;
+  dragX: RNAnimated.AnimatedInterpolation<string | number>;
+}) {
+  const drag = dragX.interpolate({
+    inputRange: [-400, -82, 0],
+    outputRange: [82 - 400, 0, 82],
+    extrapolate: "clamp",
+  });
+  const iconScale = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1.1],
+    extrapolate: "clamp",
+  });
+
+  return (
+    <RNAnimated.View
+      className="flex-row items-center justify-center w-[82] bg-amber-200 "
+      style={{ opacity: progress, transform: [{ translateX: drag }] }}
+    >
+      {/* EDIT BUTTON */}
+      <View className="flex-col items-center justify-end " style={{ width: 50 }}>
+        <TouchableOpacity
+          className="flex-1 justify-center"
+          // onPress={handleEditPlaylist}
+          onPress={() => {
+            // router.setParams({ playlistId: playlist.id });
+            router.push({
+              pathname: "/audio/playlistedit",
+              params: { playlistId: playlistId },
+            });
+          }}
+        >
+          <RNAnimated.View
+            className="w-[40] items-center"
+            style={{ transform: [{ scale: iconScale }] }}
+          >
+            <EditIcon />
+          </RNAnimated.View>
+        </TouchableOpacity>
+        {/* DELETE BUTTON */}
+        <TouchableOpacity className="flex-1 justify-center" onPress={handleRemovePlaylist}>
+          {/* <DeleteIcon /> */}
+          <RNAnimated.View
+            className="w-[40] items-center"
+            style={{ transform: [{ scale: iconScale }] }}
+          >
+            <DeleteIcon color={colors.deleteRed} />
+          </RNAnimated.View>
+        </TouchableOpacity>
+      </View>
+    </RNAnimated.View>
+  );
+}

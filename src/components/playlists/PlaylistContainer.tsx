@@ -8,20 +8,17 @@ import {
   FlatList,
   Dimensions,
   NativeScrollEvent,
+  StyleSheet,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
-import {
-  usePlaybackStore,
-  usePlaylists,
-  useTrackActions,
-  useTracksStore,
-} from "../../store/store";
-import { Link, useNavigation, useRouter } from "expo-router";
+import { usePlaybackStore, usePlaylists, useTrackActions, useTracksStore } from "../../store/store";
+import { Link, useFocusEffect, useNavigation, useRouter } from "expo-router";
 import PlaylistRow from "./PlaylistRow";
-import { ScrollView } from "react-native-gesture-handler";
+import { ScrollView, Swipeable } from "react-native-gesture-handler";
 import { AnimatePresence, MotiView } from "moti";
 import PlaylistActionBar from "./PlaylistActionBar";
-
+import { colors } from "@constants/Colors";
+import { router } from "expo-router";
 const { width, height: screenHeight } = Dimensions.get("window");
 
 const PlaylistContainer = () => {
@@ -30,14 +27,10 @@ const PlaylistContainer = () => {
   const [onShow, setOnShow] = useState(false);
   const [layoutHeight, setLayoutHeight] = useState(0);
   const playlists = usePlaylists(); //useTracksStore((state) => state.playlists);
-  const currentPlaylistId = usePlaybackStore(
-    (state) => state.currentPlaylistId
-  );
+  const currentPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
   const prevPlaylistId = useRef(undefined);
   const scrollRef = useRef<FlatList>(null);
-  const setCurrPlaylist = usePlaybackStore(
-    (state) => state.actions.setCurrentPlaylist
-  );
+  const setCurrPlaylist = usePlaybackStore((state) => state.actions.setCurrentPlaylist);
 
   // Scroll to the active track
   const scrollToRow = () => {
@@ -46,6 +39,11 @@ const PlaylistContainer = () => {
       animated: true,
     });
   };
+
+  // When route becomes focused close all playlist rows
+  useFocusEffect(() => {
+    closeAllRows();
+  });
 
   useEffect(() => {
     prevPlaylistId.current = currentPlaylistId;
@@ -78,6 +76,24 @@ const PlaylistContainer = () => {
     route.push({ pathname: "/audio/player", params: {} });
     setUpdate(false);
   };
+
+  // Swipeable auto close code
+  let prevOpenedRow = undefined;
+  let renderRowRefs: Swipeable[] = [];
+
+  const closeRow = (index) => {
+    if (prevOpenedRow && prevOpenedRow !== renderRowRefs[index]) {
+      prevOpenedRow.close();
+    }
+    prevOpenedRow = renderRowRefs[index];
+  };
+  const closeAllRows = () => {
+    renderRowRefs.forEach((rowRef) => {
+      rowRef.close();
+    });
+  };
+  // END Swipeable auto close code
+
   const renderItem = ({ item, index }) => {
     return (
       <MotiView
@@ -89,12 +105,21 @@ const PlaylistContainer = () => {
           duration: 800,
           delay: 100 * index,
         }}
-        style={{ flex: 1 }}
+        style={{
+          flex: 1,
+          borderWidth: StyleSheet.hairlineWidth,
+          borderColor: colors.amber900,
+          borderRightWidth: 0,
+          backgroundColor: colors.amber200,
+        }}
       >
         <PlaylistRow
           key={item.id}
           playlist={item}
           onPlaylistSelect={handleRowSelect}
+          index={index}
+          renderRowRefs={renderRowRefs}
+          closeRow={closeRow}
         />
       </MotiView>
     );
@@ -120,10 +145,7 @@ const PlaylistContainer = () => {
               opacity: { type: "timing", duration: 200 },
             }}
           >
-            <PlaylistActionBar
-              closeActionBar={() => setOnShow(false)}
-              barHeight={40}
-            />
+            <PlaylistActionBar closeActionBar={() => setOnShow(false)} barHeight={40} />
           </MotiView>
         )}
       </AnimatePresence>

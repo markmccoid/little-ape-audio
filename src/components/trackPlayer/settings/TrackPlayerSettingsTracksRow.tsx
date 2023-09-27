@@ -1,22 +1,12 @@
-import {
-  Animated as RNAnimated,
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  Alert,
-} from "react-native";
+import { Animated as RNAnimated, View, Text, Pressable, StyleSheet, Alert } from "react-native";
 import React from "react";
 import { Swipeable } from "react-native-gesture-handler";
 import { BuildList } from "./TrackPlayerSettingsTracks";
-import {
-  DeleteIcon,
-  DragHandleIcon,
-  EditIcon,
-} from "@components/common/svg/Icons";
+import { DeleteIcon, DragHandleIcon, EditIcon } from "@components/common/svg/Icons";
 import { usePlaybackStore, useTrackActions } from "@store/store";
 
 import { colors } from "@constants/Colors";
+import { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 
 type Unpacked<T> = T extends (infer U)[] ? U : T;
 
@@ -67,11 +57,7 @@ function TrackPlayerSettingsTracksRow({
         </Pressable>
         <View className="flex-row flex-1 items-center ">
           <View className="flex-col flex-1 ml-2">
-            <Text
-              className="font-bold mr-3 text-base"
-              ellipsizeMode="tail"
-              numberOfLines={1}
-            >
+            <Text className="font-bold mr-3 text-base" ellipsizeMode="tail" numberOfLines={1}>
               {item.name}
             </Text>
             <Text

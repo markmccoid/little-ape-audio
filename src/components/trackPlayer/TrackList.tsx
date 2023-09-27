@@ -74,7 +74,6 @@ const TrackList = () => {
   useEffect(() => {
     if (queue) {
       const finalSectionList = queue.map((track, index) => {
-        const section = track.title;
         const chapters = track?.chapters?.map((chapt) => {
           return {
             title: chapt.title,
