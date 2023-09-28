@@ -132,8 +132,8 @@ function RenderRight({
     extrapolate: "clamp",
   });
   const iconScale = progress.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 1.1],
+    inputRange: [0, 1, 2],
+    outputRange: [0, 1.1, 1.8],
     extrapolate: "clamp",
   });
 
@@ -143,9 +143,14 @@ function RenderRight({
       style={{ opacity: progress, transform: [{ translateX: drag }] }}
     >
       {/* EDIT BUTTON */}
-      <View className="flex-col items-center justify-end " style={{ width: 50 }}>
+      <View className="flex-col items-center justify-end">
         <TouchableOpacity
-          className="flex-1 justify-center"
+          className="flex-row flex-1 items-center justify-center"
+          style={{
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.amber800,
+            borderTopWidth: 0,
+          }}
           // onPress={handleEditPlaylist}
           onPress={() => {
             // router.setParams({ playlistId: playlist.id });
@@ -156,17 +161,26 @@ function RenderRight({
           }}
         >
           <RNAnimated.View
-            className="w-[40] items-center"
+            className="w-full items-center"
             style={{ transform: [{ scale: iconScale }] }}
           >
             <EditIcon />
           </RNAnimated.View>
         </TouchableOpacity>
         {/* DELETE BUTTON */}
-        <TouchableOpacity className="flex-1 justify-center" onPress={handleRemovePlaylist}>
+        <TouchableOpacity
+          className="flex-row flex-1 items-center justify-center"
+          onPress={handleRemovePlaylist}
+          style={{
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.amber800,
+            // borderTopWidth: 0,
+            borderBottomWidth: 0,
+          }}
+        >
           {/* <DeleteIcon /> */}
           <RNAnimated.View
-            className="w-[40] items-center"
+            className="w-full items-center"
             style={{ transform: [{ scale: iconScale }] }}
           >
             <DeleteIcon color={colors.deleteRed} />

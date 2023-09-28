@@ -78,7 +78,7 @@ const PlaylistContainer = () => {
   };
 
   // Swipeable auto close code
-  let prevOpenedRow = undefined;
+  let prevOpenedRow: Swipeable = undefined;
   let renderRowRefs: Swipeable[] = [];
 
   const closeRow = (index) => {

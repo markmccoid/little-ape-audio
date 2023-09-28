@@ -2,11 +2,12 @@ import { View, Text, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { useDropboxStore } from "@store/store-dropbox";
+import { CleanBookMetadata } from "@utils/audiobookMetadata";
 
 const foldermetadatamodal = () => {
   const { pathInKey } = useLocalSearchParams();
   const folderMetadata = useDropboxStore((state) => state.folderMetadata);
-  const [detailArray, setDetailArray] = useState([]);
+  const [detailArray, setDetailArray] = useState<(CleanBookMetadata & { key: string })[]>([]);
 
   useEffect(() => {
     const detailObj = folderMetadata?.[pathInKey];
@@ -21,15 +22,19 @@ const foldermetadatamodal = () => {
     );
   }, []);
   return (
-    <View>
+    <View className="mx-1">
       <Text className="font-semibold text-baser">{pathInKey}</Text>
-      <ScrollView>
+      <ScrollView style={{ marginBottom: 50 }}>
         {detailArray.length > 0 &&
           detailArray.map((el) => {
             return (
-              <View key={el.key}>
-                <Text>{el.key}</Text>
-                <Text>{el.imageURL}</Text>
+              <View key={el.key} className="p-2 border rounded-md bg-indigo-100 mb-1">
+                <View className="pb-1 border-b">
+                  <Text>{`KEY -> ${el.key}`}</Text>
+                </View>
+                <Text className="pt-1">{`IMAGEURL -> ${el.imageURL}`}</Text>
+                <Text className="pt-1">{`Cat ONE -> ${el.categoryOne}`}</Text>
+                <Text className="pt-1">{`Cat TWO -> ${el.categoryTwo}`}</Text>
                 {/* <Text>{JSON.stringify(el)}</Text> */}
               </View>
             );
