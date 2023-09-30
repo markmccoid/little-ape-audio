@@ -1,10 +1,4 @@
-import {
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, Pressable, StyleSheet, TouchableOpacity } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { useDropboxStore } from "../../store/store-dropbox";
 import { colors } from "../../constants/Colors";
@@ -14,21 +8,25 @@ import MetadataRow from "./MetadataRow";
 import { useSharedValue } from "react-native-reanimated";
 import SettingsMetadataErrors from "./SettingsMetadataErrors";
 import { useRouter } from "expo-router";
+import { DeleteIcon } from "@components/common/svg/Icons";
 
 const SettingsFolderMetadata = () => {
   const route = useRouter();
   const actions = useDropboxStore((state) => state.actions);
   const folderMetadata = useDropboxStore((state) => state.folderMetadata);
   const [displayFMD, setDisplayFMD] = useState([]);
-  const folderMetadataErrors = useDropboxStore(
-    (state) => state.folderMetadataErrors
-  );
+  const folderMetadataErrors = useDropboxStore((state) => state.folderMetadataErrors);
   const flatListRef = React.createRef<FlatList>();
   const activeKey = useSharedValue(undefined);
   const [showErrors, setShowErrors] = useState(false);
 
   useEffect(() => {
-    setDisplayFMD(Object.keys(folderMetadata).map((key) => key));
+    setDisplayFMD(
+      Object.keys(folderMetadata).map((key) => ({
+        key,
+        numberOfBooks: Object.keys(folderMetadata[key]).length,
+      }))
+    );
   }, [folderMetadata]);
 
   return (
@@ -64,19 +62,46 @@ const SettingsFolderMetadata = () => {
           <FlatList
             ref={flatListRef}
             data={displayFMD}
+            extraData={folderMetadata}
+            style={{ marginHorizontal: 10 }}
             renderItem={({ item }) => (
-              <View className="border px-2 py-1">
+              <View className="border flex-row justify-between mb-1 h-[75] flex-1  bg-indigo-100">
                 <TouchableOpacity
                   onPress={() =>
                     route.push({
                       pathname: "/settings/foldermetadatamodal",
                       params: {
-                        pathInKey: item,
+                        pathInKey: item.key,
                       },
                     })
                   }
+                  className="flex-grow"
                 >
-                  <Text>{item}</Text>
+                  <View className="px-2 py-1 flex-col flex-1">
+                    <View className="flex-row flex-1">
+                      <Text className="font-semibold">Books: </Text>
+                      <Text numberOfLines={2} ellipsizeMode="tail" className="flex-1">
+                        {item.numberOfBooks}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-start flex-1">
+                      <Text className="font-semibold text-base">Path: </Text>
+                      <Text numberOfLines={2} ellipsizeMode="tail" className="text-base flex-1">
+                        {item.key}
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={async () => {
+                    await actions.removeFolderMetadataKey(item.key);
+                  }}
+                  className="border-l border-amber-800"
+                  style={{ backgroundColor: colors.deleteRed }}
+                >
+                  <View className="px-2 py-1  flex justify-center items-center flex-grow">
+                    <DeleteIcon color="white" />
+                  </View>
                 </TouchableOpacity>
                 {/* <Text>{item.dropboxPathLower}</Text>
                 <Text>

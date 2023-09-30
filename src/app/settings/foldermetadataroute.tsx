@@ -6,16 +6,6 @@ const FolderMetadataRoute = () => {
   const route = useRouter();
   return (
     <View>
-      <TouchableOpacity
-        onPress={() =>
-          route.push({
-            pathname: "/settings/foldermetadatamodal",
-            params: { pathInKey: "x" },
-          })
-        }
-      >
-        <Text>Modal</Text>
-      </TouchableOpacity>
       <SettingsFolderMetadata />
     </View>
   );

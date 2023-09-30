@@ -8,16 +8,9 @@ import {
   getDropboxFileLink,
   listDropboxFiles,
 } from "../utils/dropboxUtils";
-import {
-  CleanBookMetadata,
-  BookJSONMetadata,
-  cleanOneBook,
-} from "./../utils/audiobookMetadata";
+import { CleanBookMetadata, BookJSONMetadata, cleanOneBook } from "./../utils/audiobookMetadata";
 import { defaultImages, getRandomNumber } from "./storeUtils";
-import {
-  downloadToFileSystem,
-  getCleanFileName,
-} from "./data/fileSystemAccess";
+import { downloadToFileSystem, getCleanFileName } from "./data/fileSystemAccess";
 import { useTracksStore } from "./store";
 import { format } from "date-fns";
 //-- ==================================
@@ -111,6 +104,8 @@ type DropboxState = {
     ) => Promise<void>;
     getFolderMetadata: (path_lower: string) => FolderMetadataDetails;
     clearFolderMetadata: () => Promise<void>;
+    // Remove one of the folders (key) from our metadata list
+    removeFolderMetadataKey: (metadataKey: string) => Promise<void>;
     addMetadataError: (error: MetadataErrorObj) => Promise<void>;
     clearMetadataError: () => Promise<void>;
   };
@@ -151,10 +146,8 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       if (!currAttribute) {
         // If currAttrtibute doesn't exist, means we are creating it
         // so must grab the image from folderMetadata.
-        const { pathToFolderKey, pathToBookFolderKey } =
-          extractMetadataKeys(pathIn);
-        const bookMetadata =
-          get().folderMetadata?.[pathToFolderKey]?.[pathToBookFolderKey];
+        const { pathToFolderKey, pathToBookFolderKey } = extractMetadataKeys(pathIn);
+        const bookMetadata = get().folderMetadata?.[pathToFolderKey]?.[pathToBookFolderKey];
 
         // Push a new attribute into the array.  It will be process in tne for loop
         attributes.push({
@@ -230,10 +223,7 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       const folderMetadata = { ...get().folderMetadata };
       // The newBookFoldersObj is empty or undefined, bail on function
       // we don't want to save empty keys
-      if (
-        !newBookFoldersObj ||
-        Object.keys(newBookFoldersObj || {}).length === 0
-      ) {
+      if (!newBookFoldersObj || Object.keys(newBookFoldersObj || {}).length === 0) {
         return;
       }
       folderMetadata[folderKey] = {
@@ -251,9 +241,7 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       const copyFolderAttributes = [...get().folderAttributes];
       // Loop through the updated attributes and update the position
       for (const newAttrib of newInfo) {
-        const index = copyFolderAttributes.findIndex(
-          (el) => el.id === newAttrib.id
-        );
+        const index = copyFolderAttributes.findIndex((el) => el.id === newAttrib.id);
         if (index) {
           copyFolderAttributes[index] = {
             ...copyFolderAttributes[index],
@@ -273,11 +261,14 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       set({ folderMetadata: {} });
       await saveToAsyncStorage("foldermetadata", {});
     },
+    removeFolderMetadataKey: async (metadataKey) => {
+      const metadata = { ...get().folderMetadata };
+      delete metadata[metadataKey];
+      set({ folderMetadata: metadata });
+      await saveToAsyncStorage("foldermetadata", metadata);
+    },
     addMetadataError: async (error) => {
-      const folderMetadataErrors = [
-        error,
-        ...(get().folderMetadataErrors || []),
-      ];
+      const folderMetadataErrors = [error, ...(get().folderMetadataErrors || [])];
       set({ folderMetadataErrors });
       await saveToAsyncStorage("foldermetadataerrors", folderMetadataErrors);
     },
@@ -298,18 +289,7 @@ export const useFolderMeta = (folderId) => {
 //------------------------------------------------------
 function filterAudioFiles(filesAndFolders: DropboxDir) {
   const files = filesAndFolders.files;
-  const AUDIO_FORMATS = [
-    "mp3",
-    "mb4",
-    "m4a",
-    "m4b",
-    "wav",
-    "aiff",
-    "aac",
-    "ogg",
-    "wma",
-    "flac",
-  ];
+  const AUDIO_FORMATS = ["mp3", "mb4", "m4a", "m4b", "wav", "aiff", "aac", "ogg", "wma", "flac"];
   const newFiles = files.filter((file) =>
     AUDIO_FORMATS.includes(file.name.slice(file.name.lastIndexOf(".") + 1))
   );
@@ -328,13 +308,9 @@ export const folderFileReader = async (pathIn: string) => {
 
     const filteredFoldersFiles = filterAudioFiles(files);
     // tag tracks as being already downloaded
-    const taggedFiles = trackActions.isTrackDownloaded(
-      filteredFoldersFiles.files
-    );
+    const taggedFiles = trackActions.isTrackDownloaded(filteredFoldersFiles.files);
     // Tag folders as being favorited
-    const taggedFolders = dropboxActions.isFolderFavorited(
-      filteredFoldersFiles.folders
-    );
+    const taggedFolders = dropboxActions.isFolderFavorited(filteredFoldersFiles.folders);
     const finalFolderFileList: DropboxDir = {
       folders: taggedFolders, //filteredFoldersFiles.folders,
       files: taggedFiles,
@@ -358,10 +334,7 @@ export const downloadFolderMetadata = async (folders: FolderEntry[]) => {
   const foldersMetadata = useDropboxStore.getState().folderMetadata;
 
   // 1. First, grab the first entry in the "folders" and extract the path to the folder name
-  const pathToFolder = folders[0].path_lower.slice(
-    0,
-    folders[0].path_lower.lastIndexOf("/")
-  );
+  const pathToFolder = folders[0].path_lower.slice(0, folders[0].path_lower.lastIndexOf("/"));
   // console.log("store-dropbox", pathToFolder);
   // 2. create folderMetadataKey used in for loop to check
   //   for data in folderMetadata store
@@ -373,8 +346,7 @@ export const downloadFolderMetadata = async (folders: FolderEntry[]) => {
     );
 
     //! Check if we have metadata in zustand store
-    const folderMetadata =
-      foldersMetadata?.[folderMetadataKey]?.[folderNameKey];
+    const folderMetadata = foldersMetadata?.[folderMetadataKey]?.[folderNameKey];
     if (!folderMetadata) {
       foldersToDownload.push(folder);
     }
@@ -437,11 +409,7 @@ export const getSingleFolderMetadata = async (folder) => {
       if (!metadata?.googleAPIData?.imageURL && localImage) {
         finalCleanImageName = await getLocalImage(localImage, folder.name);
       }
-      convertedMeta = cleanOneBook(
-        metadata,
-        folder.path_lower,
-        finalCleanImageName
-      );
+      convertedMeta = cleanOneBook(metadata, folder.path_lower, finalCleanImageName);
     } catch (error) {
       const errorObj = {
         dropboxPath: folder.path_lower,
@@ -496,10 +464,7 @@ async function getLocalImage(localImage, folderName) {
   // Get the dropbox link to image file
   const localImageURI = await getDropboxFileLink(`${localImage.path_lower}`);
   // Download and store the image locally
-  const { uri, cleanFileName } = await downloadToFileSystem(
-    localImageURI,
-    localImageName
-  );
+  const { uri, cleanFileName } = await downloadToFileSystem(localImageURI, localImageName);
   return cleanFileName;
 }
 //~ ------------------------------
@@ -575,9 +540,7 @@ async function processPromises(promises, folderMetadataKey) {
     [folderMetadataKey]: folderMetaObj,
   };
 
-  await useDropboxStore
-    .getState()
-    .actions.mergeFoldersMetadata(folderMetadataKey, folderMetaObj);
+  await useDropboxStore.getState().actions.mergeFoldersMetadata(folderMetadataKey, folderMetaObj);
 }
 
 //~ -------------------------
@@ -606,12 +569,8 @@ function sanitizeString(stringToKey: string) {
 //~ -------------------------
 export function extractMetadataKeys(pathIn: string) {
   const fullPath = pathIn.toLocaleLowerCase();
-  const pathToFolderKey = sanitizeString(
-    fullPath.slice(0, fullPath.lastIndexOf("/"))
-  );
-  const pathToBookFolderKey = sanitizeString(
-    fullPath.slice(fullPath.lastIndexOf("/") + 1)
-  );
+  const pathToFolderKey = sanitizeString(fullPath.slice(0, fullPath.lastIndexOf("/")));
+  const pathToBookFolderKey = sanitizeString(fullPath.slice(fullPath.lastIndexOf("/") + 1));
 
   return {
     pathToFolderKey,

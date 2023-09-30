@@ -54,6 +54,7 @@ const SettingsLayout = () => {
           title: "Folder Metadata Storage",
           headerStyle: { backgroundColor: colors.amber200 },
           headerTintColor: colors.amber900,
+          headerBackTitle: "Back",
         }}
       />
       <Stack.Screen
@@ -62,7 +63,20 @@ const SettingsLayout = () => {
           title: "Folder Metadata Details",
           headerStyle: { backgroundColor: colors.amber200 },
           headerTintColor: colors.amber900,
-          presentation: "modal",
+          presentation: "card",
+          headerBackTitle: "Back",
+        }}
+      />
+      <Stack.Screen
+        name="[bookdir]"
+        options={{
+          title: "",
+          headerStyle: { backgroundColor: colors.amber200 },
+          headerTintColor: colors.amber900,
+          presentation: "card",
+          headerBackTitle: "Back",
+          // headerBackTitleVisible: false,
+          // headerBackVisible: false,
         }}
       />
       <Stack.Screen
