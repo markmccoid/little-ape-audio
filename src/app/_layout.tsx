@@ -1,9 +1,4 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import {
   Slot,
@@ -15,20 +10,13 @@ import {
 } from "expo-router";
 import { useEffect, useState } from "react";
 import { View, useColorScheme } from "react-native";
-import {
-  Lato_100Thin,
-  Lato_400Regular,
-  Lato_700Bold,
-} from "@expo-google-fonts/lato";
+import { Lato_100Thin, Lato_400Regular, Lato_700Bold } from "@expo-google-fonts/lato";
 
-import TrackPlayer, {
-  Capability,
-  IOSCategoryMode,
-} from "react-native-track-player";
+import TrackPlayer, { Capability, IOSCategoryMode } from "react-native-track-player";
 import { onInitialize } from "../store/store-init";
 import { useSettingStore } from "../store/store-settings";
 import { deactivateKeepAwake } from "expo-keep-awake";
-
+import { Orientation, lockPlatformAsync } from "expo-screen-orientation";
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
@@ -55,8 +43,7 @@ export default function RootLayout() {
     const setupTP = async () => {
       await onInitialize();
       const jumpForwardSeconds = useSettingStore.getState().jumpForwardSeconds;
-      const jumpBackwardSeconds =
-        useSettingStore.getState().jumpBackwardSeconds;
+      const jumpBackwardSeconds = useSettingStore.getState().jumpBackwardSeconds;
       await TrackPlayer.setupPlayer({
         iosCategoryMode: IOSCategoryMode.SpokenAudio,
       });
@@ -80,6 +67,7 @@ export default function RootLayout() {
       // This allows the phone to go into sleep mode.  RNTP seems
       // to keep the phone awake when open.
       await deactivateKeepAwake();
+      await lockPlatformAsync({ screenOrientationArrayIOS: [Orientation.PORTRAIT_UP] });
       setIsLoaded(true);
     };
     // Run your initialization code here
