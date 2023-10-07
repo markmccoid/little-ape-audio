@@ -24,6 +24,7 @@ import SwipeableItem, { useSwipeableItemParams } from "react-native-swipeable-it
 import { colors } from "@constants/Colors";
 import { usePlaybackStore, usePlaylists } from "@store/store";
 import { useProgress } from "react-native-track-player";
+import { useDropboxStore } from "@store/store-dropbox";
 
 type SectionChapter = {
   title: string;
@@ -51,6 +52,8 @@ const playarea = () => {
   const { position } = useProgress();
   const [sectionList, setSectionList] = useState<SectionListData[]>([]);
   const [chapters, setChapters] = useState<SectionChapter[]>();
+
+  const folderNav = useDropboxStore((state) => state.folderNavigation);
 
   const [currChapterIndex, setCurrChapterIndex] = useState();
   // console.log("CURRCHAPT", currChapterIndex);
@@ -134,11 +137,7 @@ const playarea = () => {
 
   return (
     <View>
-      <SectionList
-        sections={sectionList}
-        renderSectionHeader={renderSectionHeader}
-        renderItem={renderItem}
-      />
+      <Text>{JSON.stringify(folderNav)}</Text>
     </View>
   );
 };

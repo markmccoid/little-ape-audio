@@ -384,6 +384,7 @@ export const getSingleFolderMetadata = async (folder) => {
   //! Since we didn't have it in the store, download it
   // Start download and parse
   const dropboxFolder = await listDropboxFiles(folder.path_lower);
+
   const metadataFile = dropboxFolder.files.find(
     (entry) => entry.name.includes("metadata") && entry.name.endsWith(".json")
   );
@@ -571,9 +572,10 @@ export function extractMetadataKeys(pathIn: string) {
   const fullPath = pathIn.toLocaleLowerCase();
   const pathToFolderKey = sanitizeString(fullPath.slice(0, fullPath.lastIndexOf("/")));
   const pathToBookFolderKey = sanitizeString(fullPath.slice(fullPath.lastIndexOf("/") + 1));
-
+  const bookFolderName = fullPath.slice(fullPath.lastIndexOf("/") + 1);
   return {
     pathToFolderKey,
     pathToBookFolderKey,
+    bookFolderName,
   };
 }

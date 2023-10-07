@@ -13,10 +13,10 @@ export default {
   platforms: ["ios"],
   version: "0.3.6",
   orientation: "portrait",
-  icon: "./assets/littleapeaudiocolor.png",
+  icon: "./assets/icon.png",
   userInterfaceStyle: "automatic",
   splash: {
-    image: "./assets/littleapeaudiocolor.png",
+    image: "./assets/splash.png",
     resizeMode: "contain",
     backgroundColor: "#ffffff",
   },

@@ -4,7 +4,7 @@ import { Stack } from "expo-router";
 import { getCurrentPlaylist, usePlaybackStore } from "../../store/store";
 import TrackPlayerContainer from "@components/trackPlayer/TrackPlayerContainer";
 
-const littleApeImage05 = require("../../../assets/images/LittleApAudio05.png");
+const littleApeImage05 = require("../../../assets/images/LittleApAudio05.jpg");
 
 const { width, height } = Dimensions.get("window");
 
@@ -14,9 +14,7 @@ const PlaylistScreen = () => {
   //   (state) => state.actions.getCurrentPlaylist
   // )();
   const imageSource =
-    playlist?.imageType === "uri"
-      ? { uri: playlist.imageURI }
-      : playlist.imageURI;
+    playlist?.imageType === "uri" ? { uri: playlist.imageURI } : playlist.imageURI;
   return (
     <View className="flex-1 bg-amber-50 pt-2">
       <Stack.Screen

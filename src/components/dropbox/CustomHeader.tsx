@@ -1,17 +1,6 @@
 import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  useWindowDimensions,
-  SafeAreaView,
-} from "react-native";
-import {
-  useNavigation,
-  usePathname,
-  useRouter,
-  useSegments,
-} from "expo-router";
+import { View, Text, TouchableOpacity, useWindowDimensions, SafeAreaView } from "react-native";
+import { useNavigation, usePathname, useRouter, useSegments } from "expo-router";
 import { ChevronBackIcon } from "../common/svg/Icons";
 import { useDropboxStore } from "@store/store-dropbox";
 

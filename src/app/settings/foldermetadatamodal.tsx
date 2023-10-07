@@ -3,16 +3,21 @@ import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useDropboxStore } from "@store/store-dropbox";
 import { CleanBookMetadata } from "@utils/audiobookMetadata";
-import { sortBy } from "lodash";
+import { sortBy, debounce } from "lodash";
 
 const foldermetadatamodal = () => {
   const { pathInKey } = useLocalSearchParams();
   const router = useRouter();
   const folderMetadata = useDropboxStore((state) => state.folderMetadata);
-  const [detailArray, setDetailArray] = useState<(CleanBookMetadata & { key: string })[]>([]);
+  const [detailArray, setDetailArray] =
+    useState<(CleanBookMetadata & { key: string })[]>(undefined);
   const [results, setResults] = useState<(CleanBookMetadata & { key: string })[]>([]);
   const [title, setTitle] = useState("");
 
+  const dbSearch = React.useCallback(
+    debounce((title, detailArray) => searchTitle(title, detailArray), 300),
+    []
+  );
   useEffect(() => {
     const detailObj = folderMetadata?.[pathInKey];
     if (!detailObj) return;
@@ -27,16 +32,23 @@ const foldermetadatamodal = () => {
   }, []);
 
   useEffect(() => {
-    searchTitle(title);
+    if (detailArray) {
+      dbSearch(title, detailArray);
+    }
   }, [title, detailArray]);
 
-  const searchTitle = (searchTerm: string) => {
+  const searchTitle = (searchTerm: string, detailArray) => {
+    if (!detailArray) return;
     if (searchTerm === "") {
       setResults(detailArray);
       return;
     }
-    setResults(detailArray.filter((el) => el.title.includes(searchTerm)));
+
+    const authorBooks = detailArray.filter((el) => el.author.includes(searchTerm));
+    const titleBooks = detailArray.filter((el) => el.title.includes(searchTerm));
+    setResults([...titleBooks, ...authorBooks]);
   };
+
   return (
     <View className="mx-1">
       <Text className="self-center font-semibold text-base p-2">{pathInKey}</Text>
@@ -48,11 +60,11 @@ const foldermetadatamodal = () => {
           className="bg-white p-2 border"
         />
       </View>
-      <ScrollView style={{ marginBottom: 50 }}>
-        {results.length > 0 &&
-          results.map((el) => {
+      <ScrollView style={{ marginBottom: 150 }}>
+        {results?.length > 0 &&
+          results?.map((el) => {
             return (
-              <View key={el.key} className="border rounded-md bg-indigo-100 mb-1">
+              <View key={el.key} className="border rounded-md bg-indigo-100 mb-1 pb-1">
                 <TouchableOpacity
                   onPress={() => {
                     router.push({
@@ -66,16 +78,15 @@ const foldermetadatamodal = () => {
                     <Text className="font-semibold">{`${el.author}`}</Text>
                   </View>
                 </TouchableOpacity>
-                <Text className="p-2 pt-1">{`${el.categoryOne} --> ${el.categoryTwo}`}</Text>
-                <Text className="p-2 pt-1">{`${el.dropboxPathLower}`}</Text>
-                <Text className="p-2 pt-1">{`${el.categories}`}</Text>
+                <Text className="px-2 pt-1">{`${el.categoryOne} --> ${el.categoryTwo}`}</Text>
+                <Text className="px-2 pt-1">{`${el.dropboxPathLower}`}</Text>
+                <Text className="px-2 pt-1">{`${el.categories}`}</Text>
 
                 <Text
-                  className="flex-1 p-2 pt-1"
+                  className=" px-2 pt-1"
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >{`IMAGEURL -> ${el.imageURL}`}</Text>
-                {/* <Text>{JSON.stringify(el)}</Text> */}
               </View>
             );
           })}

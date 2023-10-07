@@ -1,19 +1,18 @@
 import { AudioTrack } from "./types";
 
 export const defaultImages = {
-  image01: require("../../assets/images/LittleApAudio01.png"),
-  image02: require("../../assets/images/LittleApAudio02.png"),
-  image03: require("../../assets/images/LittleApAudio03.png"),
-  image04: require("../../assets/images/LittleApAudio04.png"),
-  image05: require("../../assets/images/LittleApAudio05.png"),
-  image06: require("../../assets/images/LittleApAudio06.png"),
-  image07: require("../../assets/images/LittleApAudio07.png"),
-  image08: require("../../assets/images/LittleApAudio08.png"),
-  image09: require("../../assets/images/LittleApAudio09.png"),
-  image10: require("../../assets/images/LittleApAudio10.png"),
-  image11: require("../../assets/images/LittleApAudio11.png"),
-  image12: require("../../assets/images/LittleApAudio12.png"),
-  image13: require("../../assets/images/LittleApAudio13.png"),
+  image01: require("../../assets/images/LittleApAudio01.jpg"),
+  image02: require("../../assets/images/LittleApAudio02.jpg"),
+  image03: require("../../assets/images/LittleApAudio03.jpg"),
+  image04: require("../../assets/images/LittleApAudio04.jpg"),
+  image05: require("../../assets/images/LittleApAudio05.jpg"),
+  image06: require("../../assets/images/LittleApAudio06.jpg"),
+  image07: require("../../assets/images/LittleApAudio07.jpg"),
+  image08: require("../../assets/images/LittleApAudio08.jpg"),
+  image09: require("../../assets/images/LittleApAudio09.jpg"),
+  image10: require("../../assets/images/LittleApAudio10.jpg"),
+  image11: require("../../assets/images/LittleApAudio11.jpg"),
+  image12: require("../../assets/images/LittleApAudio12.jpg"),
 };
 
 export function getRandomNumber() {
@@ -30,10 +29,7 @@ export function getRandomNumber() {
 //~ aspectRatio, I decided to return all images with their aspect ratio
 //~ in an object
 //~ -----------------------------------
-export const analyzePlaylistTracks = (
-  storedTracks: AudioTrack[],
-  tracks: string[]
-) => {
+export const analyzePlaylistTracks = (storedTracks: AudioTrack[], tracks: string[]) => {
   let totalDuration = 0;
   // let imageSet = new Set();
   let genreSet = new Set();
@@ -76,10 +72,7 @@ export const analyzePlaylistTracks = (
  * @param currentTrackId - Current track id in playlist
  * @returns 
  */
-export const parseTrackPositions = (
-  tracks: AudioTrack[],
-  currentTrackId: string
-) => {
+export const parseTrackPositions = (tracks: AudioTrack[], currentTrackId: string) => {
   let currTrack;
   let prevTracks = [];
   let nextTracks = [];

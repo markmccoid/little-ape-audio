@@ -78,15 +78,15 @@ const SettingsFolderMetadata = () => {
                   className="flex-grow"
                 >
                   <View className="px-2 py-1 flex-col flex-1">
-                    <View className="flex-row flex-1">
+                    <View className="flex-row">
                       <Text className="font-semibold">Books: </Text>
-                      <Text numberOfLines={2} ellipsizeMode="tail" className="flex-1">
+                      <Text numberOfLines={1} ellipsizeMode="tail" className="flex-1">
                         {item.numberOfBooks}
                       </Text>
                     </View>
-                    <View className="flex-row items-start flex-1">
+                    <View className="flex-row items-start">
                       <Text className="font-semibold text-base">Path: </Text>
-                      <Text numberOfLines={2} ellipsizeMode="tail" className="text-base flex-1">
+                      <Text numberOfLines={2} className="text-base flex-1">
                         {item.key}
                       </Text>
                     </View>

@@ -42,24 +42,15 @@ const managetracksmodal = () => {
         {currTrack.metadata?.chapters &&
           currTrack.metadata?.chapters.map((el, index) => {
             return (
-              <View
-                key={el.startTime}
-                className="flex-col mb-1 border-b border-l border-red-700 "
-              >
+              <View key={el.startTime} className="flex-col mb-1 border-b border-l border-red-700 ">
                 <View className="flex-row flex-wrap mx-2">
                   <Text className="pr-2">{index + 1}</Text>
-                  <Text
-                    className="pr-2 flex-1"
-                    numberOfLines={1}
-                    lineBreakMode="tail"
-                  >
+                  <Text className="pr-2 flex-1" numberOfLines={1} lineBreakMode="tail">
                     {el.description}
                   </Text>
                 </View>
                 <View className="flex-row flex-wrap mx-2">
-                  <Text className="pl-2 font-medium">
-                    Start / End In Seconds
-                  </Text>
+                  <Text className="pl-2 font-medium">Start / End In Seconds</Text>
                   <Text className="pl-5 pr-2">{el.startTime}</Text>
                   <Text className="pr-2">{el.endTime}</Text>
                 </View>

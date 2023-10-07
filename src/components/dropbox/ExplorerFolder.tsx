@@ -75,6 +75,7 @@ const ExplorerFolder = ({
     // Start download and parse
     setFolderMetaState("loading");
     const convertedMetadata = await getSingleFolderMetadata(folder);
+
     // Create the needed keys and store the data in the dropbox store
     const { pathToBookFolderKey, pathToFolderKey } = extractMetadataKeys(folder.path_lower);
     actions.mergeFoldersMetadata(pathToFolderKey, {

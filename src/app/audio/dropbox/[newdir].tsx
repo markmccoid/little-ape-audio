@@ -1,5 +1,5 @@
 import { View, Text, SafeAreaView } from "react-native";
-import React, { useEffect, useLayoutEffect } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { Link, Stack, useRouter, useLocalSearchParams } from "expo-router";
 import ExplorerContainer from "../../../components/dropbox/ExplorerContainer";
 import { useNavigation } from "expo-router";
@@ -12,12 +12,18 @@ const NewDirectory = () => {
   const actions = useDropboxStore((state) => state.actions);
   const router = useRouter();
   const navigation = useNavigation();
-  const { newdir, fullPath, backTitle, yOffset } =
-    useLocalSearchParams<SearchParms>();
-  useEffect(() => {
-    actions.pushFolderNavigation({ fullPath, backTitle });
-  }, [newdir]);
+  const { newdir, fullPath, backTitle, yOffset } = useLocalSearchParams<SearchParms>();
+  const [prevDir, setPrevDir] = useState("");
 
+  useEffect(() => {
+    // console.log("PREV DIR", prevDir, newdir);
+    if (prevDir !== newdir) {
+      actions.pushFolderNavigation({ fullPath: fullPath || "/", backTitle });
+    }
+    setPrevDir(newdir);
+  }, [newdir]);
+  // console.log("NEWDIR-newdir", newdir);
+  // console.log("NEWDIR-fulPath BackTitle", fullPath, backTitle);
   // Need a listener that will clear the dropbox store folderNavigation array
   // This is when the modal is dismissed
   navigation.addListener("beforeRemove", () => {
@@ -41,12 +47,12 @@ const NewDirectory = () => {
         options={{
           headerBackTitleVisible: false,
           headerBackVisible: false,
-          header: () => <CustomHeader title={fullPath} backText={backTitle} />,
+          header: () => <CustomHeader title={fullPath || "/"} backText={backTitle} />,
         }}
       />
 
       <ExplorerContainer
-        pathIn={fullPath}
+        pathIn={fullPath || "/"}
         onPathChange={onPathChange}
         yOffset={yOffset ? parseFloat(yOffset) : 0}
       />

@@ -101,6 +101,8 @@ PODS:
     - React-Core
   - ExpoSecureStore (12.3.1):
     - ExpoModulesCore
+  - ExpoSharing (11.5.0):
+    - ExpoModulesCore
   - ExpoWebBrowser (12.3.2):
     - ExpoModulesCore
   - EXSplashScreen (0.20.4):
@@ -614,6 +616,7 @@ DEPENDENCIES:
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - ExpoScreenOrientation (from `../node_modules/expo-screen-orientation/ios`)
   - ExpoSecureStore (from `../node_modules/expo-secure-store/ios`)
+  - ExpoSharing (from `../node_modules/expo-sharing/ios`)
   - ExpoWebBrowser (from `../node_modules/expo-web-browser/ios`)
   - EXSplashScreen (from `../node_modules/expo-splash-screen/ios`)
   - EXUpdatesInterface (from `../node_modules/expo-updates-interface/ios`)
@@ -722,6 +725,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-screen-orientation/ios"
   ExpoSecureStore:
     :path: "../node_modules/expo-secure-store/ios"
+  ExpoSharing:
+    :path: "../node_modules/expo-sharing/ios"
   ExpoWebBrowser:
     :path: "../node_modules/expo-web-browser/ios"
   EXSplashScreen:
@@ -849,6 +854,7 @@ SPEC CHECKSUMS:
   ExpoModulesCore: f8f3cac222bb0f574c77664d7e05817eaa97434b
   ExpoScreenOrientation: 5d109570b17835fe0cfb822268a8ff087c2112ad
   ExpoSecureStore: 57db3b6da8b59046e2057e95bf7738a8027b47c3
+  ExpoSharing: 825b2b3fc919a2656f75def0069f584bbd6e359a
   ExpoWebBrowser: 2c788f9c07718a780fe6d8bf2f6195c47609faaa
   EXSplashScreen: 89586b0961acd173b04713b7457949b063a659da
   EXUpdatesInterface: 82ed48d417cdcd376c12ca1c2ce390d35500bed6

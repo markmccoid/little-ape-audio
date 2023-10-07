@@ -11,22 +11,12 @@ import {
   RefreshControl,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  Alert,
 } from "react-native";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import uuid from "react-native-uuid";
-import { Link } from "expo-router";
-import {
-  listDropboxFiles,
-  DropboxDir,
-  FileEntry,
-  FolderEntry,
-} from "../../utils/dropboxUtils";
+import { Link, router } from "expo-router";
+import { listDropboxFiles, DropboxDir, FileEntry, FolderEntry } from "../../utils/dropboxUtils";
 import ExplorerActionBar from "./ExplorerActionBar";
 // import { useTrackActions } from "../../store/store";
 import ExplorerFile from "./ExplorerFile";
@@ -55,28 +45,26 @@ type Props = {
 
 const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
   const [filesFolderObj, setFilesFolderObj] = React.useState<DropboxDir>();
-  const [flatlistData, setFlatlistData] = React.useState<
-    (FileEntry | FolderEntry)[]
-  >([]);
+  const [flatlistData, setFlatlistData] = React.useState<(FileEntry | FolderEntry)[]>([]);
   const [downloadAllId, setDownloadAllId] = React.useState<string>();
   const [isLoading, setIsLoading] = React.useState(false);
   const [isError, setIsError] = React.useState(undefined);
 
-  const [showMetadata, setShowMetadata] = React.useState<
-    "off" | "on" | "loading"
-  >("off");
+  const [showMetadata, setShowMetadata] = React.useState<"off" | "on" | "loading">("off");
   const allFoldersMetadata = useDropboxStore((state) => state.folderMetadata);
-  const { pathToFolderKey, pathToBookFolderKey } = useMemo(
-    () => extractMetadataKeys(pathIn),
-    [pathIn]
-  );
+  const { pathToFolderKey, pathToBookFolderKey } = extractMetadataKeys(pathIn);
+
+  // const { pathToFolderKey, pathToBookFolderKey } = useMemo(
+  //   () => extractMetadataKeys(pathIn),
+  //   [pathIn]
+  // );
   const dropboxActions = useDropboxStore((state) => state.actions);
   const flatlistRef = useRef<FlatList>();
   //
-  const isFolderMetaAvailable = useMemo(
-    () => !!allFoldersMetadata?.[pathToFolderKey],
-    [pathIn]
-  );
+  // const isFolderMetaAvailable = useMemo(
+  //   () => !!allFoldersMetadata?.[pathToFolderKey],
+  //   [pathIn]
+  // );
   // ------------------------------------------------------------------------
   // -- HANDLE SCROLL and Save to Dropbox Store's FolderNavigation array
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -100,9 +88,7 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
     ({ item, index }) => {
       if (!item.path_lower) return;
       if (item[".tag"] === "folder") {
-        const { pathToFolderKey, pathToBookFolderKey } = extractMetadataKeys(
-          item.path_lower
-        );
+        const { pathToFolderKey, pathToBookFolderKey } = extractMetadataKeys(item.path_lower);
         // console.log("pathtobook0", pathToFolderKey, pathToBookFolderKey);
         return (
           <ExplorerFolder
@@ -112,15 +98,11 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
             onNavigateForward={onNavigateForward}
             showFolderMetadata={showMetadata}
             // setShowMetadata={setShowMetadata}
-            folderMetadata={
-              allFoldersMetadata?.[pathToFolderKey]?.[pathToBookFolderKey]
-            }
+            folderMetadata={allFoldersMetadata?.[pathToFolderKey]?.[pathToBookFolderKey]}
           />
         );
       } else if (item[".tag"] === "file") {
-        return (
-          <ExplorerFile key={item.id} file={item} playlistId={downloadAllId} />
-        );
+        return <ExplorerFile key={item.id} file={item} playlistId={downloadAllId} />;
       }
     },
     [showMetadata, downloadAllId, allFoldersMetadata]
@@ -137,14 +119,16 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
         // Read next list of folders and files
         const finalFolderFileList = await folderFileReader(pathIn);
         setFilesFolderObj(finalFolderFileList);
-        setFlatlistData([
-          ...finalFolderFileList.folders,
-          ...finalFolderFileList.files,
-        ]);
+        setFlatlistData([...finalFolderFileList.folders, ...finalFolderFileList.files]);
         // setIsError(undefined)
       } catch (err) {
+        // If we don't get data back from dropbox we will alert user and redirect to main audio sources route.
         console.log(err);
-        setIsError("Dropbox");
+        Alert.alert(
+          `Error finding path ${pathIn}.  Error in Link or you are not authorized for that dropbox account.`
+        );
+        router.replace("/audio/dropbox");
+        // setIsError("Dropbox");
       }
       setIsLoading(false);
     };
@@ -279,9 +263,7 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
       {filesFolderObj?.files?.length > 0 && (
         <>
           <FileMetadataView
-            metadata={
-              allFoldersMetadata?.[pathToFolderKey]?.[pathToBookFolderKey]
-            }
+            metadata={allFoldersMetadata?.[pathToFolderKey]?.[pathToBookFolderKey]}
             path_lower={pathIn}
           />
         </>
