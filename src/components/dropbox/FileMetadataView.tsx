@@ -155,13 +155,12 @@ const FileMetadataView = ({ metadata, path_lower }: Props) => {
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={async () => {
-                    const shareLink = Linking.createURL("audio/dropbox/theLink", {
+                    const shareLink = Linking.createURL("audio/externalLink", {
                       queryParams: { fullPath: path_lower, backTitle: "Audio Sources" },
                     });
                     try {
                       const res = await Share.share({
-                        title: "Share Book",
-                        message: `Share ${metadata.title}`,
+                        // message: `Share ${shareLink}`,
                         url: shareLink,
                       });
                     } catch (e) {

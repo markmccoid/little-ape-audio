@@ -282,7 +282,8 @@ export const listDropboxFiles = async (path: string = ""): Promise<DropboxDir> =
     throw new Error("Invalid Token");
   }
   // console.log("TOKEN", token);
-  const data = { path: path };
+  const finalPath = path === "/" ? "" : path;
+  const data = { path: finalPath };
   let resp;
   // console.log("PATH/", data, token);
   try {

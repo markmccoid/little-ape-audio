@@ -9,6 +9,7 @@ const RootIndex = () => {
   useEffect(() => {
     setTimeout(() => router.replace("/audio"), 1);
   }, []);
+
   return (
     <SafeAreaView>
       <Link href="/audio">

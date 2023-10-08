@@ -17,6 +17,7 @@ import { onInitialize } from "../store/store-init";
 import { useSettingStore } from "../store/store-settings";
 import { deactivateKeepAwake } from "expo-keep-awake";
 import { Orientation, lockPlatformAsync } from "expo-screen-orientation";
+
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
@@ -31,6 +32,7 @@ export default function RootLayout() {
   });
   const [isLoaded, setIsLoaded] = useState(false);
   const rootNavState = useRootNavigationState();
+
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {

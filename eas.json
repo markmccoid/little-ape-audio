@@ -1,15 +1,16 @@
 {
   "cli": {
-    "version": ">= 3.9.3"
+    "version": ">= 3.9.3",
+    "promptToConfigurePushNotifications": false
   },
   "build": {
-      "dev-simulator": {
-        "developmentClient": true,
-        "distribution": "internal",
-        "ios": {
-          "simulator": true
-        }
-      },      
+    "dev-simulator": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      }
+    },
     "development": {
       "developmentClient": true,
       "distribution": "internal",

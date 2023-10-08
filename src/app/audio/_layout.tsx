@@ -83,6 +83,13 @@ const AudioLayout = () => {
           headerShown: true,
         }}
       />
+      <Stack.Screen
+        name="externalLink"
+        options={{
+          title: "overwrite",
+          presentation: "card",
+        }}
+      />
     </Stack>
   );
 };

@@ -52,7 +52,7 @@ const NewDirectory = () => {
       />
 
       <ExplorerContainer
-        pathIn={fullPath || "/"}
+        pathIn={fullPath || ""}
         onPathChange={onPathChange}
         yOffset={yOffset ? parseFloat(yOffset) : 0}
       />
