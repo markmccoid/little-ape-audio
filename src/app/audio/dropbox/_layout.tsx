@@ -18,6 +18,15 @@ const DropboxLayout = () => {
         }}
       />
       <Stack.Screen
+        name="searchBooks"
+        options={{
+          title: "Search Books",
+          presentation: "card",
+          headerStyle: { backgroundColor: colors.amber200 },
+          headerTintColor: colors.amber900,
+        }}
+      />
+      <Stack.Screen
         name="[newdir]"
         options={{
           title: "overwrite",

@@ -1,10 +1,7 @@
 import { View, Text, StyleSheet, Dimensions } from "react-native";
 import React, { useState } from "react";
 import { Link } from "expo-router";
-import {
-  DropboxIcon,
-  StarFilledIcon,
-} from "../../../components/common/svg/Icons";
+import { DropboxIcon, SearchIcon, StarFilledIcon } from "../../../components/common/svg/Icons";
 import { useDropboxStore } from "../../../store/store-dropbox";
 import { colors } from "../../../constants/Colors";
 // import MainFavFolders from "../../../components/dropbox/MainFavFoldersOLD";
@@ -13,10 +10,7 @@ import Animated from "react-native-reanimated";
 import ShowFavoritedBooks from "@components/dropbox/ShowFavoritedBooks";
 import { AnimatedPressable } from "@components/common/buttons/Pressables";
 import { AnimatePresence, MotiView } from "moti";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 // import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 const { width, height } = Dimensions.get("window");
 const DropboxScreens = () => {
@@ -46,8 +40,28 @@ const DropboxScreens = () => {
             }}
           >
             <View className="flex-row px-2 py-3 items-center">
-              <DropboxIcon />
+              <DropboxIcon color={colors.dropboxBlue} />
               <Text className="ml-3 text">Dropbox</Text>
+            </View>
+          </Link>
+        </View>
+        {/* BOOK META SEARCH */}
+        <View
+          className="rounded-xl bg-white mt-2"
+          style={{
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.amber900,
+          }}
+        >
+          <Link
+            href={{
+              pathname: "audio/dropbox/searchBooks",
+              params: { fullPath: "", backTitle: "Back" },
+            }}
+          >
+            <View className="flex-row px-2 py-3 items-center">
+              <SearchIcon color={colors.dropboxBlue} />
+              <Text className="ml-3 text">Search Books</Text>
             </View>
           </Link>
         </View>
@@ -55,10 +69,7 @@ const DropboxScreens = () => {
       <View className="h-2" />
 
       {/* FAVORITE Folders and Books */}
-      <View
-        className="flex-col mx-[11] flex-1"
-        style={{ marginBottom: insets.bottom }}
-      >
+      <View className="flex-col mx-[11] flex-1" style={{ marginBottom: insets.bottom }}>
         <View className="flex-row justify-between mb-2">
           <MotiView
             className="absolute w-[125] h-[2] bottom-0 left-0 bg-amber-800"
@@ -68,9 +79,7 @@ const DropboxScreens = () => {
           <AnimatedPressable onPress={() => setCurrTab("folders")}>
             <Text
               className={`text-base ${
-                currTab === "folders"
-                  ? "font-semibold text-amber-800"
-                  : "font-normal"
+                currTab === "folders" ? "font-semibold text-amber-800" : "font-normal"
               }`}
             >
               Favorite Folders
@@ -80,9 +89,7 @@ const DropboxScreens = () => {
           <AnimatedPressable onPress={() => setCurrTab("books")}>
             <Text
               className={`text-base ${
-                currTab === "books"
-                  ? "font-semibold text-amber-800"
-                  : "font-normal"
+                currTab === "books" ? "font-semibold text-amber-800" : "font-normal"
               }`}
             >
               Favorited Books
@@ -114,23 +121,6 @@ const DropboxScreens = () => {
           )}
         </AnimatePresence>
       </View>
-      {/* FAVORITE FOLDERS  */}
-      {/* ---------- */}
-      {/* <View className="mx-4 my-2">
-        <Text className="text-amber-800 font-semibold mb-1 ml-2">
-          Favorite Folders
-        </Text>
-        <View className="bg-white">
-          <MainFavFolders />
-        </View>
-      </View> */}
-      {/*  */}
-      {/* <View className="flex-1 mx-4 my-2 mb-10">
-        <Text className="text-amber-800 font-semibold mb-1 ml-2">
-          Favorited Books
-        </Text>
-        <ShowFavoritedBooks />
-      </View> */}
     </View>
   );
 };

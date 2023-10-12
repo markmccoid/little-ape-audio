@@ -1,26 +1,12 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Pressable,
-  StyleSheet,
-} from "react-native";
+import { View, Text, TouchableOpacity, Pressable, StyleSheet } from "react-native";
 import React, { useRef, useState } from "react";
 import { FavoriteFolders, useDropboxStore } from "@store/store-dropbox";
-import DraggableFlatList, {
-  OpacityDecorator,
-} from "react-native-draggable-flatlist";
-import {
-  DeleteIcon,
-  DragHandleIcon,
-  StarFilledIcon,
-} from "@components/common/svg/Icons";
+import DraggableFlatList, { OpacityDecorator } from "react-native-draggable-flatlist";
+import { DeleteIcon, DragHandleIcon, StarFilledIcon } from "@components/common/svg/Icons";
 import { Link } from "expo-router";
 import MainFavFoldersRow from "./MainFavFoldersRow";
 import { useSharedValue } from "react-native-reanimated";
-import SwipeableItem, {
-  useSwipeableItemParams,
-} from "react-native-swipeable-item";
+import SwipeableItem, { useSwipeableItemParams } from "react-native-swipeable-item";
 import { colors } from "@constants/Colors";
 
 type Props = {
@@ -56,8 +42,7 @@ const MainFavFolders = () => {
           style={{
             borderTopWidth: StyleSheet.hairlineWidth,
             borderTopColor: colors.amber900,
-            borderBottomWidth:
-              isActive || isLast ? StyleSheet.hairlineWidth : 0,
+            borderBottomWidth: isActive || isLast ? StyleSheet.hairlineWidth : 0,
             borderBottomColor: colors.amber900,
           }}
         >
@@ -67,7 +52,7 @@ const MainFavFolders = () => {
             key={item.id}
             className="px-2 border-r border-amber-900 h-full justify-center"
           >
-            <StarFilledIcon />
+            <StarFilledIcon color="green" />
           </Pressable>
           <Link
             push
@@ -82,11 +67,7 @@ const MainFavFolders = () => {
             className="flex-1"
           >
             <View className="flex-row flex-1 items-center ">
-              <Text
-                className="ml-3 text"
-                ellipsizeMode="tail"
-                numberOfLines={2}
-              >
+              <Text className="ml-3 text" ellipsizeMode="tail" numberOfLines={2}>
                 {item.folderPath}
               </Text>
             </View>

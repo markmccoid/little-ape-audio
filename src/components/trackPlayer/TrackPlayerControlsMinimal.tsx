@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ViewStyle,
-  Dimensions,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ViewStyle, Dimensions } from "react-native";
 import React, { useState } from "react";
 import { getCurrentPlaylist, usePlaybackStore } from "../../store/store";
 import {
@@ -33,12 +26,8 @@ const CONTROLSIZE = 25;
 const CONTROLCOLOR = colors.amber800;
 
 const TrackPlayerControlsMinimal = ({ style }: Props) => {
-  const jumpSecondsForward = useSettingStore(
-    (state) => state.jumpForwardSeconds
-  );
-  const jumpSecondsBackward = useSettingStore(
-    (state) => state.jumpBackwardSeconds
-  );
+  const jumpSecondsForward = useSettingStore((state) => state.jumpForwardSeconds);
+  const jumpSecondsBackward = useSettingStore((state) => state.jumpBackwardSeconds);
   const playbackActions = usePlaybackStore((state) => state.actions);
   // const [playerState, setPlayerState] = useState(null);
   const playerState = usePlaybackStore((state) => state.playerState);
@@ -59,23 +48,14 @@ const TrackPlayerControlsMinimal = ({ style }: Props) => {
 
   return (
     <View className="flex flex-col justify-center items-center">
-      <View
-        className="flex-row gap-10 items-center justify-center"
-        style={style}
-      >
+      <View className="flex-row gap-10 items-center justify-center" style={style}>
         {/* SEEK BACKWARD */}
-        <TouchableOpacity
-          onPress={() => actions.jumpForward(jumpSecondsBackward)}
-        >
+        <TouchableOpacity onPress={() => actions.jumpForward(jumpSecondsBackward)}>
           <SpinnerForwardIcon
             size={CONTROLSIZE}
             color={CONTROLCOLOR}
             style={{
-              transform: [
-                { rotateZ: "-45deg" },
-                { rotateY: "180deg" },
-                { scale: 1.1 },
-              ],
+              transform: [{ rotateZ: "-45deg" }, { rotateY: "180deg" }, { scale: 1.1 }],
             }}
           />
           <Text
@@ -104,9 +84,7 @@ const TrackPlayerControlsMinimal = ({ style }: Props) => {
           </View>
         </TouchableOpacity>
         {/* SEEK FORWARD */}
-        <TouchableOpacity
-          onPress={() => actions.jumpForward(jumpSecondsForward)}
-        >
+        <TouchableOpacity onPress={() => actions.jumpForward(jumpSecondsForward)}>
           <SpinnerForwardIcon
             size={CONTROLSIZE}
             color={CONTROLCOLOR}
@@ -131,7 +109,7 @@ const TrackPlayerControlsMinimal = ({ style }: Props) => {
         numberOfLines={1}
         ellipsizeMode="tail"
       >
-        {playlist.name}
+        {playlist?.name}
       </Text>
     </View>
   );

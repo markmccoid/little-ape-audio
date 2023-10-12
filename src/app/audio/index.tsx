@@ -15,9 +15,7 @@ export default function AudioScreen() {
   const isPlaylistLoaded = usePlaybackStore((state) => state.playlistLoaded);
 
   return (
-    <SafeAreaView
-      className={`flex-1 ${isPlaylistLoaded ? "bg-amber-200" : "bg-amber-50"} `}
-    >
+    <SafeAreaView className={`flex-1 ${isPlaylistLoaded ? "bg-amber-200" : "bg-amber-50"} `}>
       <View className="flex-col flex-1 justify-start flex-grow bg-amber-50">
         <PlaylistContainer />
         {isPlaylistLoaded && (

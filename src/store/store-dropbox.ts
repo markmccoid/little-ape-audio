@@ -380,11 +380,17 @@ export const downloadFolderMetadata = async (folders: FolderEntry[]) => {
 //~ -------------------------
 //~ downloadFolderMetadata
 //~ -------------------------
+const audioFormats = [".mp3", ".m4b", ".flac", ".wav", ".m4a", ".wma", ".aac"];
 export const getSingleFolderMetadata = async (folder) => {
   //! Since we didn't have it in the store, download it
-  // Start download and parse
+  // This will return a list of files that are in the folder.path_lower passed
   const dropboxFolder = await listDropboxFiles(folder.path_lower);
+  // Check for audio files in directory and if so set flag to true
+  const localAudioExists = audioFormats.some((format) =>
+    dropboxFolder.files.some((file) => file.name.toLowerCase().includes(format))
+  );
 
+  // Look for a metadata file
   const metadataFile = dropboxFolder.files.find(
     (entry) => entry.name.includes("metadata") && entry.name.endsWith(".json")
   );
@@ -411,6 +417,11 @@ export const getSingleFolderMetadata = async (folder) => {
         finalCleanImageName = await getLocalImage(localImage, folder.name);
       }
       convertedMeta = cleanOneBook(metadata, folder.path_lower, finalCleanImageName);
+      // if there are no audio files in the directory do not return and metadata
+      // This can happen if a metadata.json file is found but no audio file exist in dir
+      if (!convertedMeta.audioFileCount && !localAudioExists) {
+        convertedMeta = undefined;
+      }
     } catch (error) {
       const errorObj = {
         dropboxPath: folder.path_lower,
@@ -424,22 +435,6 @@ export const getSingleFolderMetadata = async (folder) => {
       //   `Error downloading "${metadataFile.name}" with ${error.message}`
       // );
     }
-  } else {
-    //!!! Here is where we can decide if NO metadata file, do we do anything??
-    //!! Maybe if there is an image??
-    //!! If we send any converted metadata, it will take up space in our list
-    //!! We probably only want to store stuff that has real book data in it.
-    // This means we did NOT find any ...metadata.json file build minimal info
-    // if (localImage) {
-    //   finalCleanImageName = await getLocalImage(localImage, folder.name);
-    // }
-    // convertedMeta = {
-    //   id: folder.path_lower,
-    //   title: folder.name,
-    //   localImageName: finalCleanImageName,
-    //   defaultImage: Image.resolveAssetSource(defaultImages[`image${randomNum}`])
-    //     .uri,
-    // } as Partial<CleanBookMetadata>;
   }
   return convertedMeta;
 };
