@@ -64,10 +64,13 @@ const FileMetadataView = ({ metadata, path_lower }: Props) => {
       extractMetadataKeys(path_lower);
     const convertedMetadata = await getSingleFolderMetadata({ path_lower, name: bookFolderName });
 
-    // Create the needed keys and store the data in the dropbox store
-    dropboxActions.mergeFoldersMetadata(pathToFolderKey, {
-      [pathToBookFolderKey]: convertedMetadata,
-    });
+    // Create the needed keys and store the data in the dropbox store ONLY if
+    // convertedMetadata has data
+    if (convertedMetadata) {
+      dropboxActions.mergeFoldersMetadata(pathToFolderKey, {
+        [pathToBookFolderKey]: convertedMetadata,
+      });
+    }
   };
 
   useEffect(() => {

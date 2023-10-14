@@ -4,16 +4,22 @@ import { Link, Stack } from "expo-router";
 import { colors } from "../../constants/Colors";
 import { BackIcon, HomeIcon } from "../../components/common/svg/Icons";
 import Constants from "expo-constants";
+import { useDropboxStore } from "@store/store-dropbox";
 
 const SettingsLayout = () => {
   const version = Constants?.expoConfig?.version;
+  const folderMetadataProcessingFlag = useDropboxStore(
+    (state) => state.folderMetadataProcessingFlag
+  );
   return (
     <Stack>
       <Stack.Screen
         name="index"
         options={{
           title: "Settings",
-          headerStyle: { backgroundColor: colors.amber200 },
+          headerStyle: {
+            backgroundColor: folderMetadataProcessingFlag ? colors.deleteRed : colors.amber200,
+          },
           headerTintColor: colors.amber900,
           headerLeft: () => (
             <Link href="/audio" className="p-[10] ml-[-10]">

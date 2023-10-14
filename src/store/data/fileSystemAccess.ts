@@ -24,10 +24,7 @@ export const readFileSystemDir = async (dirName = "") => {
 //--============================================================
 //-- deleteFromFileSystem -
 //--============================================================
-export const deleteFromFileSystem = async (
-  path?: string,
-  includesDocDirectory = true
-) => {
+export const deleteFromFileSystem = async (path?: string, includesDocDirectory = true) => {
   if (!path) return;
   let finalPath = path;
   if (!includesDocDirectory) {
@@ -51,13 +48,20 @@ export const downloadToFileSystem = async (
   dirName = ""
 ) => {
   // "Clean" filename by only allowing upper/lower chars, digits, and underscores
-  const cleanFileName = getCleanFileName(filename);
+  const cleanFileName = getCleanFileName(filename.trimEnd());
   let documentDirectoryUri = FileSystem.documentDirectory + cleanFileName;
-  const { uri } = await FileSystem.downloadAsync(
-    downloadLink,
-    documentDirectoryUri
-  );
-  return { uri, cleanFileName };
+
+  try {
+    const { exists } = await FileSystem.getInfoAsync(documentDirectoryUri);
+    if (exists) {
+      // file already exists, just return the name
+      return { uri: documentDirectoryUri, cleanFileName };
+    }
+    const { uri } = await FileSystem.downloadAsync(downloadLink, documentDirectoryUri);
+    return { uri, cleanFileName };
+  } catch (e) {
+    throw new Error(`error in downloadToFileSystem (image probably)-> ${e}`);
+  }
 };
 export type DownloadProgress = {
   downloadProgress: number;
@@ -85,12 +89,9 @@ export const downloadWithProgress = (
   let pauseData: FileSystem.DownloadPauseState;
   //~ INITIAL Setup of downloadResumable var
 
-  const progressCallback = (
-    downloadProgress: FileSystem.DownloadProgressData
-  ) => {
+  const progressCallback = (downloadProgress: FileSystem.DownloadProgressData) => {
     const progress =
-      downloadProgress.totalBytesWritten /
-      downloadProgress.totalBytesExpectedToWrite;
+      downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite;
     setProgress({
       downloadProgress: progress,
       bytesWritten: downloadProgress.totalBytesWritten,

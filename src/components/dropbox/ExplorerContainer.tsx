@@ -30,6 +30,7 @@ import {
   downloadFolderMetadata,
   extractMetadataKeys,
   folderFileReader,
+  recurseFolderMetadata,
   useDropboxStore,
 } from "../../store/store-dropbox";
 import FileMetadataView from "./FileMetadataView";
@@ -174,7 +175,8 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
     // One of the keys of the folders object is the ".path_lower" property
     // and it has the full path including the folder name so we can look from the
     // ...metdata.json file in each folder
-    await downloadFolderMetadata(filesFolderObj.folders);
+    // await downloadFolderMetadata(filesFolderObj.folders);
+    await recurseFolderMetadata(filesFolderObj.folders);
     // AFter getting metadata, tell renderItem to show metadata info.
     setShowMetadata("on");
   };

@@ -69,6 +69,7 @@ type DropboxState = {
   // When a user tell a directory to be "read" the metadata for every folder
   // is stored in this object.
   folderMetadata: FolderMetadata;
+  folderMetadataProcessingFlag: boolean;
   folderMetadataErrors: MetadataErrorObj[];
   // Currently store the isFavorite and isRead flags
   folderAttributes: FolderAttributeItem[];
@@ -113,6 +114,7 @@ type DropboxState = {
 export const useDropboxStore = create<DropboxState>((set, get) => ({
   favoriteFolders: [],
   folderMetadata: {},
+  folderMetadataProcessingFlag: false,
   folderMetadataErrors: [],
   folderAttributes: [],
   favoritedBooks: [],
@@ -325,10 +327,126 @@ export const folderFileReader = async (pathIn: string) => {
 //------------------------------------------------------
 //------------------------------------------------------
 //~ ===================================
+//~ RECURSE
+//~ ===================================
+type FolderMetadataKey = string;
+type FoldersToProcess = Record<FolderMetadataKey, string[]>;
+// function getSubFolders(startingFolder) {
+//   const subFolders = [];
+
+//   // Read the contents of the starting folder.
+//   const files = fs.readdirSync(startingFolder);
+
+//   // Iterate over the contents of the starting folder.
+//   for (const file of files) {
+//     // If the item is a directory, add it to the list of sub folders.
+//     if (fs.lstatSync(path.join(startingFolder, file)).isDirectory()) {
+//       subFolders.push(file);
+
+//       // Recursively call the getSubFolders function to get the sub folders of the current sub folder.
+//       subFolders.push(...getSubFolders(path.join(startingFolder, file)));
+//     }
+//   }
+
+//   // Return the list of sub folders.
+//   return subFolders;
+// }
+type ProcessFolder = { metadataKey: string; processFolder: string };
+export const recurseFolders = async (
+  startingFolder: string,
+  metadataFolderKey: string
+): Promise<ProcessFolder[]> => {
+  // Bring in meta paths already processed
+  // Also store paths that DONT have metadata, we can keep from process those again
+  const subFolders = [] as ProcessFolder[];
+  // Delay the processing of the `listDropboxFiles()` function by 300 ms.
+  // await new Promise((resolve) => setTimeout(resolve, 100));
+  const dropboxFolders = (await listDropboxFiles(startingFolder)).folders;
+
+  // Add starting folder to our list.  This is because this function is called within
+  // a loop in `downloadFolderMetadata` thus the folders could be book folders with no sub folders
+  // but we still want to process those book folders
+  // ex: starting at /myAudioBooks/Fiction/Thriller startingFolder would be a book folder with NO sub folders.
+  // subFolders.push(startingFolder);
+  subFolders.push({ metadataKey: metadataFolderKey, processFolder: startingFolder });
+  // console.log("START", startingFolder);
+  for (const folderPath of dropboxFolders) {
+    //
+    // console.log("SUB FOLDER", startingFolder, folderPath.path_lower);
+    // Take each folder that exists in startingFolder and recurse to see if more subfolders
+    const pathToFolder = folderPath.path_lower.slice(0, folderPath.path_lower.lastIndexOf("/"));
+    subFolders.push(...(await recurseFolders(folderPath.path_lower, sanitizeString(pathToFolder))));
+  }
+
+  return subFolders;
+};
+//~~ ==
+//~ NEW Interate
+//~~ ==
+export const recurseFolderMetadata = async (folders) => {
+  useDropboxStore.setState({ folderMetadataProcessingFlag: true });
+  // If we already downloaded metadata do not do it again!
+  let foldersToDownload = [];
+  // const foldersMetadata = useDropboxStore.getState().folderMetadata;
+
+  const folderPathArray = folders.map((el) => el.path_lower);
+  let processFolders = [] as ProcessFolder[];
+  for (const folder of folderPathArray) {
+    const pathToFolder = folder.slice(0, folder.lastIndexOf("/"));
+    const folderResult = await recurseFolders(folder, sanitizeString(pathToFolder));
+    processFolders = [...processFolders, ...folderResult];
+  }
+
+  // console.log("RESULT", processFolders);
+  // return;
+  //!== START NEW CODE ===
+  for (const folder of processFolders) {
+    const folderMetadataKey = folder.metadataKey;
+    const folderName = folder.processFolder.slice(folder.processFolder.lastIndexOf("/") + 1);
+    const folderNameKey = sanitizeString(
+      folder.processFolder.slice(folder.processFolder.lastIndexOf("/") + 1)
+    );
+
+    //! Check if we have metadata in zustand store
+    // const folderMetadata = foldersMetadata?.[folderMetadataKey]?.[folderNameKey];
+    // if (!folderMetadata) {
+    foldersToDownload.push({
+      path_lower: folder.processFolder,
+      name: folderName,
+      folderMetadataKey,
+    });
+    // }
+  }
+  // console.log("foldersToDownload", foldersToDownload);
+  // Take the folders to download and create an object where each key is the folderMetdataKey with
+  // an array of folders to proces
+  const groupedProcessFolders: Record<string, Partial<FolderEntry>[]> = foldersToDownload.reduce(
+    (final, el, index) => {
+      return {
+        ...final,
+        [el.folderMetadataKey]: [
+          ...(final[el.folderMetadataKey] || []),
+          { path_lower: el.path_lower, name: el.name },
+        ],
+      };
+    },
+    {}
+  );
+  // console.log("grouped", groupedProcessFolders);
+
+  // Send each Group of folderMetadataKeys separately to get downloaded
+  for (const key in groupedProcessFolders) {
+    // console.log("Processing", key);
+    await downloadFolderMetadata(groupedProcessFolders[key]);
+  }
+  useDropboxStore.setState({ folderMetadataProcessingFlag: false });
+};
+
+//~ ===================================
 //~ Download Function Metadata FUNCIONS
 //~ ===================================
 //~ downloadFolderMetadata
-export const downloadFolderMetadata = async (folders: FolderEntry[]) => {
+export const downloadFolderMetadata = async (folders: Partial<FolderEntry>[]) => {
   // If we already downloaded metadata do not do it again!
   let foldersToDownload = [];
   const foldersMetadata = useDropboxStore.getState().folderMetadata;
@@ -377,11 +495,12 @@ export const downloadFolderMetadata = async (folders: FolderEntry[]) => {
   // console.log(useDropboxStore.getState().folderMetadata);
 };
 
+const audioFormats = [".mp3", ".m4b", ".flac", ".wav", ".m4a", ".wma", ".aac"];
 //~ -------------------------
 //~ downloadFolderMetadata
 //~ -------------------------
-const audioFormats = [".mp3", ".m4b", ".flac", ".wav", ".m4a", ".wma", ".aac"];
 export const getSingleFolderMetadata = async (folder) => {
+  // console.log("IN getSingle", folder);
   //! Since we didn't have it in the store, download it
   // This will return a list of files that are in the folder.path_lower passed
   const dropboxFolder = await listDropboxFiles(folder.path_lower);
@@ -401,7 +520,7 @@ export const getSingleFolderMetadata = async (folder) => {
 
   let finalCleanImageName = "";
 
-  let convertedMeta: CleanBookMetadata;
+  let convertedMeta: CleanBookMetadata = undefined;
   // Metadata file
   if (metadataFile) {
     try {
@@ -436,6 +555,7 @@ export const getSingleFolderMetadata = async (folder) => {
       // );
     }
   }
+  // console.log("Converted Meta", convertedMeta, folder.path_lower);
   return convertedMeta;
 };
 
@@ -456,11 +576,14 @@ async function getLocalImage(localImage, folderName) {
   // Create full file name
   //NOTE: we are using the base folder name for the image name NOT the actual filename
   //    this is why we are tacking on the extension
+  // NOTE: in the downloadToFileSystem we are "cleaning" the filename
   const localImageName = `localimages_${folderName}${localImageExt}`;
   // Get the dropbox link to image file
   const localImageURI = await getDropboxFileLink(`${localImage.path_lower}`);
   // Download and store the image locally
+
   const { uri, cleanFileName } = await downloadToFileSystem(localImageURI, localImageName);
+
   return cleanFileName;
 }
 //~ ------------------------------
@@ -487,6 +610,7 @@ function getArrayOfPromises(arr: FolderEntry[]) {
 
     const folderNameKey = sanitizeString(
       folder.path_lower.slice(folder.path_lower.lastIndexOf("/") + 1)
+      // folder.slice(folder.lastIndexOf("/") + 1)
     );
     // const metadataKey = createFolderMetadataKey(folder.path_lower);
     return { [folderNameKey]: returnMeta };
