@@ -27,7 +27,9 @@ type Props = {
   folder: FolderEntry;
   index: number;
   onNavigateForward: (path: string, folderName: string) => void;
-  showFolderMetadata: "on" | "off" | "loading";
+  displayFolderMetadata: boolean;
+  onDownloadMetadata: (startingFolder: FolderEntry[]) => Promise<void>;
+  hasMetadata: boolean;
   folderMetadata: CleanBookMetadata;
 };
 
@@ -35,7 +37,9 @@ const ExplorerFolder = ({
   folder,
   index,
   onNavigateForward,
-  showFolderMetadata = "on",
+  displayFolderMetadata,
+  onDownloadMetadata,
+  hasMetadata,
   // setShowMetadata,
   folderMetadata,
 }: Props) => {
@@ -57,7 +61,7 @@ const ExplorerFolder = ({
   useEffect(() => {
     // setFolderMetaState(showFolderMetadata);
     setMetadataInfo(folderMetadata);
-  }, [showFolderMetadata, folderMetadata]);
+  }, [displayFolderMetadata, folderMetadata]);
   const setFavorite = async () => {
     if (isFavorite) {
       setIsFavorite(false);
@@ -111,37 +115,40 @@ const ExplorerFolder = ({
         backgroundColor: index % 2 === 0 ? colors.amber100 : colors.amber50,
         flex: 1,
         paddingBottom: 5,
-        height: showFolderMetadata === "off" ? 45 : 210,
+        height: !displayFolderMetadata ? 45 : displayFolderMetadata && hasMetadata ? 200 : 45,
+        // height: showFolderMetadata === "off" || !hasMetadata ? 45  : 210,
       }}
     >
       <TouchableOpacity
         onPress={() => onNavigateForward(folder.path_lower, folder.name)}
-        onLongPress={downloadFolderMetadata}
+        onLongPress={async () => await onDownloadMetadata([folder])}
         key={folder.id}
       >
         <MotiView
-          key={`${showFolderMetadata}-${metadataInfo?.id}`}
+          key={`${displayFolderMetadata}-${metadataInfo?.id}`}
           from={{ opacity: 0.3 }}
           animate={{ opacity: 1 }}
-          transition={{
-            loop:
-              (showFolderMetadata === "loading" && !metadataInfo) || folderMetaState === "loading"
-                ? true
-                : false,
-            type: "timing",
-            duration: 500,
-          }}
+          transition={
+            {
+              // loop:
+              //   (displayFolderMetadata === "loading" && !metadataInfo) || folderMetaState === "loading"
+              //     ? true
+              //     : false,
+              // type: "timing",
+              // duration: 500,
+            }
+          }
           style={{
             flexDirection: "row",
             flexGrow: 1,
             alignItems: "center",
             paddingHorizontal: 8,
           }}
-          className={`${
-            (showFolderMetadata === "loading" && !metadataInfo) || folderMetaState === "loading"
-              ? "bg-amber-600"
-              : ""
-          }`}
+          // className={`${
+          //   (showFolderMetadata === "loading" && !metadataInfo) || folderMetaState === "loading"
+          //     ? "bg-amber-600"
+          //     : ""
+          // }`}
         >
           {currFolderAttributes?.isFavorite ? (
             <MDHeartIcon color={textColor} />
@@ -171,7 +178,7 @@ const ExplorerFolder = ({
       </TouchableOpacity>
       <View className="mb-0 flex-1">
         <ExplorerFolderRow
-          showMetadata={showFolderMetadata !== "off"}
+          showMetadata={displayFolderMetadata}
           metadata={metadataInfo}
           index={index}
           key="data"

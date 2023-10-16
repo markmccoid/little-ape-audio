@@ -84,9 +84,9 @@ const foldermetadatamodal = () => {
 
                 <Text
                   className=" px-2 pt-1"
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >{`IMAGEURL -> ${el.imageURL}`}</Text>
+                  // numberOfLines={1}
+                  // ellipsizeMode="tail"
+                >{`IMAGEURL -> ${el.imageURL}\n${el.defaultImage}\n${el.localImageName}`}</Text>
               </View>
             );
           })}

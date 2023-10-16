@@ -8,8 +8,8 @@ import { useDropboxStore } from "@store/store-dropbox";
 
 const SettingsLayout = () => {
   const version = Constants?.expoConfig?.version;
-  const folderMetadataProcessingFlag = useDropboxStore(
-    (state) => state.folderMetadataProcessingFlag
+  const metadataProcessingFlag = useDropboxStore(
+    (state) => state.folderMetadataProcessingInfo.metadataProcessingFlag
   );
   return (
     <Stack>
@@ -18,7 +18,7 @@ const SettingsLayout = () => {
         options={{
           title: "Settings",
           headerStyle: {
-            backgroundColor: folderMetadataProcessingFlag ? colors.deleteRed : colors.amber200,
+            backgroundColor: metadataProcessingFlag ? colors.deleteRed : colors.amber200,
           },
           headerTintColor: colors.amber900,
           headerLeft: () => (

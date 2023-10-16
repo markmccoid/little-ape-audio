@@ -52,20 +52,27 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
   const [isError, setIsError] = React.useState(undefined);
 
   const [showMetadata, setShowMetadata] = React.useState<"off" | "on" | "loading">("off");
+  const [displayMetadata, toggeleDisplayMetadata] = React.useReducer((prev) => !prev, false);
   const allFoldersMetadata = useDropboxStore((state) => state.folderMetadata);
   const { pathToFolderKey, pathToBookFolderKey } = extractMetadataKeys(pathIn);
-
+  const hasMetadata = !!Object.keys(allFoldersMetadata).find(
+    (key) => key === `${pathToFolderKey}/${pathToBookFolderKey}`
+  );
+  // console.log(
+  //   "hasMetadata0",
+  //   `${pathToFolderKey}/${pathToBookFolderKey}`,
+  //   !!Object.keys(allFoldersMetadata).find(
+  //     (key) => key === `${pathToFolderKey}/${pathToBookFolderKey}`
+  //   ),
+  //   displayMetadata
+  // );
   // const { pathToFolderKey, pathToBookFolderKey } = useMemo(
   //   () => extractMetadataKeys(pathIn),
   //   [pathIn]
   // );
   const dropboxActions = useDropboxStore((state) => state.actions);
   const flatlistRef = useRef<FlatList>();
-  //
-  // const isFolderMetaAvailable = useMemo(
-  //   () => !!allFoldersMetadata?.[pathToFolderKey],
-  //   [pathIn]
-  // );
+
   // ------------------------------------------------------------------------
   // -- HANDLE SCROLL and Save to Dropbox Store's FolderNavigation array
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -90,23 +97,26 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
       if (!item.path_lower) return;
       if (item[".tag"] === "folder") {
         const { pathToFolderKey, pathToBookFolderKey } = extractMetadataKeys(item.path_lower);
-        // console.log("pathtobook0", pathToFolderKey, pathToBookFolderKey);
+
+        // console.log("pathtobookRENDER", pathToFolderKey, pathToBookFolderKey);
         return (
           <ExplorerFolder
             key={item.id}
             index={index}
             folder={item}
             onNavigateForward={onNavigateForward}
-            showFolderMetadata={showMetadata}
+            displayFolderMetadata={displayMetadata}
+            onDownloadMetadata={onDownloadMetadata}
             // setShowMetadata={setShowMetadata}
             folderMetadata={allFoldersMetadata?.[pathToFolderKey]?.[pathToBookFolderKey]}
+            hasMetadata={hasMetadata}
           />
         );
       } else if (item[".tag"] === "file") {
         return <ExplorerFile key={item.id} file={item} playlistId={downloadAllId} />;
       }
     },
-    [showMetadata, downloadAllId, allFoldersMetadata]
+    [displayMetadata, downloadAllId, allFoldersMetadata, hasMetadata]
   );
 
   //~ ====================
@@ -138,17 +148,17 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
   }, [pathIn]);
 
   //-- If the showMetadata option is on, try to download book metadata
-  useEffect(() => {
-    const downloadMetaCheck = async () => {
-      // CHeck if downloadMetadata flag is "on"
-      if (showMetadata === "on") {
-        // console.log("file/folder OBJ", filesFolderObj.folders);
-        await onDownloadMetadata(true);
-      }
-    };
+  // useEffect(() => {
+  //   const downloadMetaCheck = async () => {
+  //     // CHeck if downloadMetadata flag is "on"
+  //     if (showMetadata === "on") {
+  //       // console.log("file/folder OBJ", filesFolderObj.folders);
+  //       await onDownloadMetadata(true);
+  //     }
+  //   };
 
-    downloadMetaCheck();
-  }, [filesFolderObj]);
+  //   downloadMetaCheck();
+  // }, [filesFolderObj]);
 
   //~ ====================
   //~ == Navigate forward in Dropbox ==
@@ -160,25 +170,27 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
   //~ ====================
   //~ == download Folder Metadata flag set==
   //~ ====================
-  const onDownloadMetadata = async (leaveOnFlag = false) => {
+  const onDownloadMetadata = async (startingFolder: FolderEntry[] = undefined) => {
     // If we are showing metadata, then hide and return
-    // console.log("X", showMetadata !== "off" && !leaveOnFlag);
-    if (showMetadata !== "off" && !leaveOnFlag) {
-      setShowMetadata("off");
-      return;
-    }
-    // console.log("Y", filesFolderObj.folders);
-    // Call download function and set to show metadata
-    setShowMetadata("loading");
+    // console.log("IN onDowloadMetadata", startingFolder);
+    // if (showMetadata !== "off") {
+    //   setShowMetadata("off");
+    //   return;
+    // }
+    // // console.log("Y", filesFolderObj.folders);
+    // // Call download function and set to show metadata
+    // setShowMetadata("loading");
     // pathIn will be the full path to the current folder
     // So filesFolderObj.folders will be ALL the folders IN the pathIn path.
     // One of the keys of the folders object is the ".path_lower" property
     // and it has the full path including the folder name so we can look from the
     // ...metdata.json file in each folder
     // await downloadFolderMetadata(filesFolderObj.folders);
-    await recurseFolderMetadata(filesFolderObj.folders);
+    const foldersToRecurse = startingFolder ? startingFolder : filesFolderObj.folders;
+    console.log(foldersToRecurse.map((el) => el.path_display));
+    await recurseFolderMetadata(foldersToRecurse);
     // AFter getting metadata, tell renderItem to show metadata info.
-    setShowMetadata("on");
+    // setShowMetadata("on");
   };
   //! ~ ====================
   //! ~ onDownloadAll
@@ -257,8 +269,10 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
           fileCount={filesFolderObj?.files?.length || 0}
           folderCount={filesFolderObj?.folders?.length || 0}
           showMetadata={showMetadata}
+          displayMetadata={displayMetadata}
           handleDownloadAll={onDownloadAll}
           handleDownloadMetadata={onDownloadMetadata}
+          handleDisplayMetadata={toggeleDisplayMetadata}
         />
       </View>
 
@@ -277,7 +291,7 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
         //   <RefreshControl refreshing={false} onRefresh={onRefresh} />
         // }
         ref={flatlistRef}
-        extraData={[allFoldersMetadata, showMetadata]}
+        extraData={[allFoldersMetadata, displayMetadata, hasMetadata]}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         horizontal={false}
@@ -287,7 +301,8 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
         onScroll={handleScroll}
         //! Need to update the length based on if it is open or not
         getItemLayout={(data, index) => {
-          let offset = showMetadata === "off" ? 45 : 210;
+          let offset = !hasMetadata ? 45 : 210;
+          // let offset = showMetadata === "off" ? 45 : 210;
           if (filesFolderObj?.files?.length > 0) {
             offset = 45;
           }

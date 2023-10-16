@@ -23,6 +23,12 @@ export const ImageIcon = ({ size = 25, color, style }: Props) => {
 export const SearchIcon = ({ size = 25, color, style }: Props) => {
   return <MaterialIcons name="search" size={size} color={color} style={style} />;
 };
+export const EyeOutlineIcon = ({ size = 25, color, style }: Props) => {
+  return <MaterialCommunityIcons name="eye-outline" size={size} color={color} style={style} />;
+};
+export const EyeOffOutlineIcon = ({ size = 25, color, style }: Props) => {
+  return <MaterialCommunityIcons name="eye-off-outline" size={size} color={color} style={style} />;
+};
 
 export const DragHandleIcon = ({ size = 25, color, style }: Props) => {
   return <MaterialIcons name="drag-handle" size={size} color={color} style={style} />;

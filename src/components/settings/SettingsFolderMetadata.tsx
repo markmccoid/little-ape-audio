@@ -74,7 +74,7 @@ const SettingsFolderMetadata = () => {
               ref={flatListRef}
               data={displayFMD}
               // extraData={folderMetadata}
-              style={{ marginHorizontal: 10, flexShrink: 0 }}
+              style={{ marginHorizontal: 10, flexShrink: 0, marginBottom: 220 }}
               renderItem={({ item }) => {
                 return (
                   <View className="border flex-row justify-between mb-1 h-[75] flex-grow bg-indigo-100">

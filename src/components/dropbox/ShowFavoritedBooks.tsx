@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  Pressable,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, Pressable } from "react-native";
 import React, { useEffect, useMemo } from "react";
 import { FolderAttributeItem, useDropboxStore } from "@store/store-dropbox";
 import { ScrollView } from "react-native-gesture-handler";
@@ -64,14 +57,8 @@ const ShowFavoritedBooks = () => {
           key={item.id}
           // className="px-2 border-r border-amber-900 h-full justify-center"
         >
-          <View
-            className="flex-col bg-white justify-start"
-            style={styles.shadow}
-          >
-            <Image
-              style={{ width: 50, height: 72 }}
-              source={{ uri: imageURI }}
-            />
+          <View className="flex-col bg-white justify-start" style={styles.shadow}>
+            <Image style={{ width: 50, height: 72 }} source={{ uri: imageURI }} />
           </View>
         </Pressable>
 
@@ -112,8 +99,6 @@ const ShowFavoritedBooks = () => {
     }
 
     // save to store
-    //!  Need to update all items positions
-    //! how to send and how to update???
     actions.updateFoldersAttributePosition("favPosition", newData);
     // setExtra((prev) => !prev);
   };

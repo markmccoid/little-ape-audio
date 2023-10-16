@@ -1,22 +1,24 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, StyleSheet, Pressable, TouchableOpacity } from "react-native";
 import React from "react";
-import { CloudDownloadIcon, DatabaseDownloadIcon } from "../common/svg/Icons";
+import {
+  CloudDownloadIcon,
+  DatabaseDownloadIcon,
+  EyeOffOutlineIcon,
+  EyeOutlineIcon,
+} from "../common/svg/Icons";
 import { MotiView } from "moti";
 import { colors } from "@constants/Colors";
+import { useDropboxStore } from "@store/store-dropbox";
 
 type Props = {
   currentPath: string;
   fileCount: number;
   folderCount: number;
   showMetadata: "on" | "off" | "loading";
+  displayMetadata: boolean;
   handleDownloadAll: () => void;
   handleDownloadMetadata: () => void;
+  handleDisplayMetadata: () => void;
 };
 
 const ExplorerActionBar = ({
@@ -24,30 +26,50 @@ const ExplorerActionBar = ({
   fileCount,
   folderCount,
   showMetadata,
+  displayMetadata,
   handleDownloadAll,
   handleDownloadMetadata,
+  handleDisplayMetadata,
 }: Props) => {
+  const metadataProcessingFlag = useDropboxStore(
+    (state) => state.folderMetadataProcessingInfo.metadataProcessingFlag
+  );
+  const metadataTasks = useDropboxStore(
+    (state) => state.folderMetadataProcessingInfo.metadataTasks
+  );
+  console.log("PROCESSING FLAG", metadataTasks);
   return (
     <View className="flex flex-row items-center justify-between mt-1 pb-1 pr-2 flex-grow-1 border-b border-black">
       {/* DOWNLOAD METADATA Button */}
       {folderCount > 0 ? (
-        <TouchableOpacity
-          onPress={() => handleDownloadMetadata()}
-          className="ml-2"
-        >
-          <MotiView
-            from={{ transform: [{ rotate: "-90deg" }] }}
-            animate={{
-              transform: [
-                { rotate: showMetadata !== "off" ? "0deg" : "-90deg" },
-              ],
-            }}
+        <>
+          <TouchableOpacity onPress={handleDisplayMetadata} className="mx-2">
+            {displayMetadata ? <EyeOutlineIcon /> : <EyeOffOutlineIcon />}
+          </TouchableOpacity>
+          <View className="mr-5">
+            {metadataProcessingFlag && <Text>{metadataTasks.slice(metadataTasks.length - 1)}</Text>}
+          </View>
+          <TouchableOpacity
+            onPress={() => handleDownloadMetadata()}
+            className="mx-2"
+            disabled={metadataProcessingFlag}
           >
-            <DatabaseDownloadIcon
-              color={showMetadata !== "off" ? colors.amber600 : colors.amber900}
-            />
-          </MotiView>
-        </TouchableOpacity>
+            <MotiView
+              key={metadataProcessingFlag.toString()}
+              from={{ opacity: 0.3 }}
+              animate={{ opacity: 1 }}
+              transition={{
+                loop: metadataProcessingFlag ? true : false,
+                type: "timing",
+                duration: 500,
+              }}
+            >
+              <DatabaseDownloadIcon
+                color={metadataProcessingFlag ? colors.amber600 : colors.amber900}
+              />
+            </MotiView>
+          </TouchableOpacity>
+        </>
       ) : (
         // This is a placeholder so the justify between keeps icons in correct place
         <View />
