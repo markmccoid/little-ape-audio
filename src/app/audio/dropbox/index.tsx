@@ -13,6 +13,7 @@ import { AnimatePresence, MotiView } from "moti";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 // import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 const { width, height } = Dimensions.get("window");
+
 const DropboxScreens = () => {
   const favFolders = useDropboxStore((state) => state.favoriteFolders) || [];
   const [currTab, setCurrTab] = useState<"folders" | "books">("folders");

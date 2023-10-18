@@ -5,7 +5,7 @@ import { useRouter } from "expo-router";
 const FolderMetadataRoute = () => {
   const route = useRouter();
   return (
-    <View>
+    <View className="flex-1">
       <SettingsFolderMetadata />
     </View>
   );

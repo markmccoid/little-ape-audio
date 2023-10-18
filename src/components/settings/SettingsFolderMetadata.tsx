@@ -17,8 +17,13 @@ const SettingsFolderMetadata = () => {
   const [displayFMD, setDisplayFMD] = useState([]);
   const folderMetadataErrors = useDropboxStore((state) => state.folderMetadataErrors);
   const flatListRef = React.createRef<FlatList>();
-  const activeKey = useSharedValue(undefined);
   const [showErrors, setShowErrors] = useState(false);
+  const metadataProcessingFlag = useDropboxStore(
+    (state) => state.folderMetadataProcessingInfo.metadataProcessingFlag
+  );
+  const metadataCurrentTask = useDropboxStore(
+    (state) => state.folderMetadataProcessingInfo.currentTask
+  );
 
   useEffect(() => {
     setDisplayFMD(
@@ -30,7 +35,7 @@ const SettingsFolderMetadata = () => {
   }, [folderMetadata]);
 
   return (
-    <>
+    <View className="flex-1">
       {folderMetadataErrors?.length > 0 && (
         <View className="flex-row justify-center mr-2 mt-1">
           <TouchableOpacity
@@ -46,7 +51,14 @@ const SettingsFolderMetadata = () => {
       {showErrors ? (
         <SettingsMetadataErrors closeShowErrors={() => setShowErrors(false)} />
       ) : (
-        <>
+        <View className="flex flex-col flex-1">
+          {metadataProcessingFlag && (
+            <View className="p-2 m-2 border border-red-700 h-[75] bg-red-100 flex-row flex">
+              <Text className="flex-1" lineBreakMode="tail" numberOfLines={3}>
+                {metadataCurrentTask}
+              </Text>
+            </View>
+          )}
           <View className="flex-row m-2 justify-between">
             <Pressable
               onPress={() => actions.clearFolderMetadata()}
@@ -69,12 +81,12 @@ const SettingsFolderMetadata = () => {
               <Text>Download Metadata</Text>
             </Pressable>
           </View>
-          <View className="flex-grow">
+          <View className="flex-1">
             <FlatList
               ref={flatListRef}
               data={displayFMD}
               // extraData={folderMetadata}
-              style={{ marginHorizontal: 10, flexShrink: 0, marginBottom: 220 }}
+              style={{ marginHorizontal: 10, flexShrink: 0, marginBottom: 50, flex: 1 }}
               renderItem={({ item }) => {
                 return (
                   <View className="border flex-row justify-between mb-1 h-[75] flex-grow bg-indigo-100">
@@ -124,7 +136,7 @@ const SettingsFolderMetadata = () => {
               }}
             />
           </View>
-        </>
+        </View>
       )}
       {/* <ScrollView ref={scrollRef}>
         {Object.keys(folderMetadata).map((key) => {
@@ -139,7 +151,7 @@ const SettingsFolderMetadata = () => {
           );
         })}
       </ScrollView> */}
-    </>
+    </View>
   );
 };
 

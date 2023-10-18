@@ -72,6 +72,7 @@ type DropboxState = {
   folderMetadataProcessingInfo: {
     metadataProcessingFlag: boolean;
     metadataTasks: string[];
+    currentTask: string;
   };
   folderMetadataErrors: MetadataErrorObj[];
   // Currently store the isFavorite and isRead flags
@@ -117,7 +118,11 @@ type DropboxState = {
 export const useDropboxStore = create<DropboxState>((set, get) => ({
   favoriteFolders: [],
   folderMetadata: {},
-  folderMetadataProcessingInfo: { metadataProcessingFlag: false, metadataTasks: [] },
+  folderMetadataProcessingInfo: {
+    metadataProcessingFlag: false,
+    metadataTasks: [],
+    currentTask: undefined,
+  },
   folderMetadataErrors: [],
   folderAttributes: [],
   favoritedBooks: [],
@@ -292,6 +297,41 @@ export const useFolderMeta = (folderId) => {
   return currMeta?.[folderId];
 };
 
+//~~===============================
+//~~ Update FolderMetadata ProcessingInfo
+//~~===============================
+const updateFMDProcessingInfo = ({
+  message,
+  processingFlag = undefined,
+  clearFlag = undefined,
+}: {
+  message?: string;
+  processingFlag?: boolean;
+  clearFlag?: boolean;
+}) => {
+  const folderMetadataProcessingInfo = useDropboxStore.getState().folderMetadataProcessingInfo;
+  // create new info object
+  const newFMDProcessingInfo = {
+    metadataProcessingFlag:
+      processingFlag === undefined
+        ? folderMetadataProcessingInfo.metadataProcessingFlag
+        : processingFlag,
+    currentTask: message || folderMetadataProcessingInfo.currentTask,
+    metadataTasks: message
+      ? [...folderMetadataProcessingInfo.metadataTasks, message]
+      : folderMetadataProcessingInfo.metadataTasks,
+  };
+  // if clear flag, then clear
+  if (clearFlag) {
+    newFMDProcessingInfo.currentTask = "";
+    newFMDProcessingInfo.metadataTasks = [];
+  }
+
+  useDropboxStore.setState({
+    folderMetadataProcessingInfo: newFMDProcessingInfo,
+  });
+};
+
 //------------------------------------------------------
 //-- FOLDER FILE READER FUNCTIONS
 //------------------------------------------------------
@@ -337,26 +377,6 @@ export const folderFileReader = async (pathIn: string) => {
 //~ ===================================
 type FolderMetadataKey = string;
 type FoldersToProcess = Record<FolderMetadataKey, string[]>;
-// function getSubFolders(startingFolder) {
-//   const subFolders = [];
-
-//   // Read the contents of the starting folder.
-//   const files = fs.readdirSync(startingFolder);
-
-//   // Iterate over the contents of the starting folder.
-//   for (const file of files) {
-//     // If the item is a directory, add it to the list of sub folders.
-//     if (fs.lstatSync(path.join(startingFolder, file)).isDirectory()) {
-//       subFolders.push(file);
-
-//       // Recursively call the getSubFolders function to get the sub folders of the current sub folder.
-//       subFolders.push(...getSubFolders(path.join(startingFolder, file)));
-//     }
-//   }
-
-//   // Return the list of sub folders.
-//   return subFolders;
-// }
 type ProcessFolder = { metadataKey: string; processFolder: string };
 export const recurseFolders = async (
   startingFolder: string,
@@ -369,11 +389,12 @@ export const recurseFolders = async (
   // Check to see if already processed
   const folderKey = sanitizeString(startingFolder?.slice(startingFolder?.lastIndexOf("/") + 1));
   const alreadyProcessed = !!folderMetadata?.[metadataFolderKey]?.[folderKey];
-  console.log("ALREADY PROCESSED", alreadyProcessed, startingFolder);
+  // alreadyProcessed && console.log("ALREADY PROCESSED", alreadyProcessed, startingFolder);
   if (alreadyProcessed) return subFolders;
 
-  // Delay the processing of the `listDropboxFiles()` function by 300 ms.
+  // Delay the processing of the `listDropboxFiles()` function by 300 ms. IF we get a 429 error from Dropbox.
   // await new Promise((resolve) => setTimeout(resolve, 100));
+  updateFMDProcessingInfo({ message: `Checking for Books in ${startingFolder}` });
   const dropboxFilesFolders = await listDropboxFiles(startingFolder);
   const dropboxFolders = dropboxFilesFolders.folders;
   // check if there are audio files in the directory we are working on --> startingFOlder
@@ -382,7 +403,7 @@ export const recurseFolders = async (
   );
 
   // Add starting folder to our list.  This is because this function is called within
-  // a loop in `downloadFolderMetadata` thus the folders could be book folders with no sub folders
+  // a loop in `recurseFolderMetadata` thus the folders could be book folders with no sub folders
   // but we still want to process those book folders
   // ex: starting at /myAudioBooks/Fiction/Thriller startingFolder would be a book folder with NO sub folders.
   // subFolders.push(startingFolder);
@@ -391,13 +412,10 @@ export const recurseFolders = async (
   //!  TESTING - SKIP any folder that has mp3 files in it.  NOTE: this would stop further processing on the folder.
   //! SO, if the first folder passed had audio files in it, nothing would be processed.
   //! We Must do this AFTER we push the startingFolder onto our list.  We are just saying don't go any deeper!
-  console.log("RECURSE-", hasAudioFiles, startingFolder);
   if (hasAudioFiles) return subFolders;
 
   // Loop through the folder contents of startingFolder
   for (const folderPath of dropboxFolders) {
-    //
-    // console.log("SUB FOLDER", startingFolder, folderPath.path_lower);
     // Take each folder that exists in startingFolder and recurse to see if more subfolders
     const pathToFolder = folderPath.path_lower.slice(0, folderPath.path_lower.lastIndexOf("/"));
     subFolders.push(...(await recurseFolders(folderPath.path_lower, sanitizeString(pathToFolder))));
@@ -410,10 +428,7 @@ export const recurseFolders = async (
 //~
 //~~ ==================================================
 export const recurseFolderMetadata = async (folders) => {
-  const folderMetadataProcessingInfo = useDropboxStore.getState().folderMetadataProcessingInfo;
-  folderMetadataProcessingInfo.metadataProcessingFlag = true;
-  folderMetadataProcessingInfo.metadataTasks = ["Collecting Sub Folders to Process"];
-  useDropboxStore.setState({ folderMetadataProcessingInfo });
+  updateFMDProcessingInfo({ processingFlag: true, message: "Collecting Sub Folders to Process" });
 
   // If we already downloaded metadata do not do it again!
   let foldersToDownload = [];
@@ -427,14 +442,8 @@ export const recurseFolderMetadata = async (folders) => {
     processFolders = [...processFolders, ...folderResult];
   }
 
-  // console.log("RESULT", processFolders);
-  // return;
   //!== START NEW CODE ===
-  console.log(`starting to process ${processFolders.length} folders`);
-  folderMetadataProcessingInfo.metadataTasks.push(
-    `Found ${processFolders.length} folders to Process`
-  );
-  useDropboxStore.setState({ folderMetadataProcessingInfo });
+  updateFMDProcessingInfo({ message: `starting to process ${processFolders.length} folders` });
 
   for (const folder of processFolders) {
     const folderMetadataKey = folder.metadataKey;
@@ -472,15 +481,10 @@ export const recurseFolderMetadata = async (folders) => {
 
   // Send each Group of folderMetadataKeys separately to get downloaded
   for (const key in groupedProcessFolders) {
-    console.log("Processing", key);
-    folderMetadataProcessingInfo.metadataTasks.push(`Processing ${key}`);
-    useDropboxStore.setState({ folderMetadataProcessingInfo });
     await downloadFolderMetadata(groupedProcessFolders[key]);
   }
 
-  console.log("FINAL", folderMetadataProcessingInfo);
-  folderMetadataProcessingInfo.metadataProcessingFlag = false;
-  useDropboxStore.setState({ folderMetadataProcessingInfo });
+  updateFMDProcessingInfo({ processingFlag: false, clearFlag: true });
 };
 
 //~ ===================================
@@ -519,14 +523,19 @@ export const downloadFolderMetadata = async (folders: Partial<FolderEntry>[]) =>
   chunkedFolders = chunkArray(foldersToDownload, CHUNK_SIZE);
 
   const promises = chunkedFolders.map((chunk) => getArrayOfPromises(chunk));
-
+  const lengthOfChunks = chunkedFolders.map((chunk) => chunk.length);
   const delayedPromises = [];
   for (let i = 0; i < promises.length; i++) {
     delayedPromises.push(
       new Promise(
         (resolve) =>
           setTimeout(async () => {
-            await processPromises(promises[i], folderMetadataKey);
+            await processPromises(promises[i], folderMetadataKey, {
+              lengthOfChunk: lengthOfChunks[i],
+              arrayPosition: i,
+              numberOfFolders: foldersToDownload.length,
+              folderProcessing: folderMetadataKey,
+            });
             resolve(undefined);
           }, i * 800 * CHUNK_SIZE) // Give each record in chunk 900 ms to process (keeps rate limit error from api at bay)
       )
@@ -541,8 +550,8 @@ const audioFormats = [".mp3", ".m4b", ".flac", ".wav", ".m4a", ".wma", ".aac"];
 //~ downloadFolderMetadata
 //~ -------------------------
 export const getSingleFolderMetadata = async (folder) => {
-  // console.log("IN getSingle", folder);
-  //! Since we didn't have it in the store, download it
+  //console.log(`Load Metadata ${folder.path_lower}`);
+
   // This will return a list of files that are in the folder.path_lower passed
   const dropboxFolder = await listDropboxFiles(folder.path_lower);
 
@@ -685,10 +694,11 @@ function getArrayOfPromises(arr: FolderEntry[]) {
  *  ...
  * }
  */
-async function processPromises(promises, folderMetadataKey) {
+async function processPromises(promises, folderMetadataKey, logInfo) {
+  const { lengthOfChunk, arrayPosition, numberOfFolders, folderProcessing } = logInfo;
   const folderMetadataArray = await Promise.all(promises);
   // console.log("FMD", folderMetadataArray[0]);
-  const currMetadata = useDropboxStore.getState().folderMetadata;
+  // const currMetadata = useDropboxStore.getState().folderMetadata;
   const folderMetaObj = folderMetadataArray.reduce((final, el) => {
     // If the getSingleFolderMetadata function doesn't find any metata.json file
     // don't save anything for that folder
@@ -699,12 +709,12 @@ async function processPromises(promises, folderMetadataKey) {
     // load up the final object
     return { ...final, [folderNameKey]: el[folderNameKey] };
   }, {}) as FolderMetadataDetails;
-  // console.log("in PROCESS PROMISES", folderMetadataArray.length);
-  // Save to store
-  const folderMetadata = {
-    ...currMetadata,
-    [folderMetadataKey]: folderMetaObj,
-  };
+  // console.log("Before FMD Process", lengthOfChunk, i)
+  updateFMDProcessingInfo({
+    message: `Processing ${folderProcessing} --> ${
+      lengthOfChunk !== 10 ? arrayPosition * 10 + lengthOfChunk : (arrayPosition + 1) * 10
+    } records of ${numberOfFolders}`,
+  });
 
   await useDropboxStore.getState().actions.mergeFoldersMetadata(folderMetadataKey, folderMetaObj);
 }

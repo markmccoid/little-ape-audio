@@ -187,7 +187,7 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
     // ...metdata.json file in each folder
     // await downloadFolderMetadata(filesFolderObj.folders);
     const foldersToRecurse = startingFolder ? startingFolder : filesFolderObj.folders;
-    console.log(foldersToRecurse.map((el) => el.path_display));
+    // console.log(foldersToRecurse.map((el) => el.path_display));
     await recurseFolderMetadata(foldersToRecurse);
     // AFter getting metadata, tell renderItem to show metadata info.
     // setShowMetadata("on");

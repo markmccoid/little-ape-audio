@@ -34,7 +34,6 @@ const NewDirectory = () => {
     });
   };
 
-  console.log("BOOKDRI", fullPath, backTitle);
   return (
     <SafeAreaView style={{ flex: 1 }}>
       {/* <Stack.Screen

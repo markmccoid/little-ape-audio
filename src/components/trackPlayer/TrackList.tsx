@@ -94,7 +94,7 @@ const TrackList = () => {
       setSectionList(finalSectionList);
       setChapters(finalSectionList.flatMap((el) => el.data));
     }
-  }, []);
+  }, [queue]);
 
   //~~ ========================================================
   //~~ Section RENDERERS

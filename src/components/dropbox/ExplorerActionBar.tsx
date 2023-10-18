@@ -9,6 +9,7 @@ import {
 import { MotiView } from "moti";
 import { colors } from "@constants/Colors";
 import { useDropboxStore } from "@store/store-dropbox";
+import { useShallow } from "zustand/react/shallow";
 
 type Props = {
   currentPath: string;
@@ -34,20 +35,24 @@ const ExplorerActionBar = ({
   const metadataProcessingFlag = useDropboxStore(
     (state) => state.folderMetadataProcessingInfo.metadataProcessingFlag
   );
-  const metadataTasks = useDropboxStore(
-    (state) => state.folderMetadataProcessingInfo.metadataTasks
+  const metadataCurrentTask = useDropboxStore(
+    (state) => state.folderMetadataProcessingInfo.currentTask
   );
-  console.log("PROCESSING FLAG", metadataTasks);
+  // console.log("ActionBAr tasks", metadataCurrentTask, metadataProcessingFlag);
   return (
-    <View className="flex flex-row items-center justify-between mt-1 pb-1 pr-2 flex-grow-1 border-b border-black">
+    <View className="flex flex-row items-center justify-end mt-1 pb-1 pr-2 border-b border-black">
       {/* DOWNLOAD METADATA Button */}
       {folderCount > 0 ? (
-        <>
-          <TouchableOpacity onPress={handleDisplayMetadata} className="mx-2">
+        <View className="flex flex-row justify-between items-center flex-1">
+          <TouchableOpacity onPress={handleDisplayMetadata} className="mx-2 ">
             {displayMetadata ? <EyeOutlineIcon /> : <EyeOffOutlineIcon />}
           </TouchableOpacity>
-          <View className="mr-5">
-            {metadataProcessingFlag && <Text>{metadataTasks.slice(metadataTasks.length - 1)}</Text>}
+          <View className="mr-1 flex-1 items-center flex flex-row">
+            {metadataProcessingFlag && (
+              <Text lineBreakMode="tail" numberOfLines={2} className="flex-1">
+                {metadataCurrentTask}
+              </Text>
+            )}
           </View>
           <TouchableOpacity
             onPress={() => handleDownloadMetadata()}
@@ -56,6 +61,7 @@ const ExplorerActionBar = ({
           >
             <MotiView
               key={metadataProcessingFlag.toString()}
+              className=""
               from={{ opacity: 0.3 }}
               animate={{ opacity: 1 }}
               transition={{
@@ -69,7 +75,7 @@ const ExplorerActionBar = ({
               />
             </MotiView>
           </TouchableOpacity>
-        </>
+        </View>
       ) : (
         // This is a placeholder so the justify between keeps icons in correct place
         <View />
@@ -77,9 +83,9 @@ const ExplorerActionBar = ({
 
       {/* DOWNLOAD ALL Button */}
       {fileCount > 0 && (
-        <View className="ml-2 ">
+        <View className="flex-shrink flex justify-end">
           <TouchableOpacity
-            className="flex-row items-center space-x-1 px-2 py-1 "
+            className="flex-row flex-grow items-center space-x-1 pl-2 py-1 "
             onPress={handleDownloadAll}
           >
             <CloudDownloadIcon />
