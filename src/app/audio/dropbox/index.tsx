@@ -2,20 +2,16 @@ import { View, Text, StyleSheet, Dimensions } from "react-native";
 import React, { useState } from "react";
 import { Link } from "expo-router";
 import { DropboxIcon, SearchIcon, StarFilledIcon } from "../../../components/common/svg/Icons";
-import { useDropboxStore } from "../../../store/store-dropbox";
 import { colors } from "../../../constants/Colors";
 // import MainFavFolders from "../../../components/dropbox/MainFavFoldersOLD";
 import MainFavFolders from "@components/dropbox/MainFavFolders";
-import Animated from "react-native-reanimated";
 import ShowFavoritedBooks from "@components/dropbox/ShowFavoritedBooks";
 import { AnimatedPressable } from "@components/common/buttons/Pressables";
 import { AnimatePresence, MotiView } from "moti";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-// import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 const { width, height } = Dimensions.get("window");
 
 const DropboxScreens = () => {
-  const favFolders = useDropboxStore((state) => state.favoriteFolders) || [];
   const [currTab, setCurrTab] = useState<"folders" | "books">("folders");
   const insets = useSafeAreaInsets();
 

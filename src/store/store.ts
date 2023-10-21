@@ -404,6 +404,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
     },
     setCurrentPlaylist: async (playlistId) => {
       set({ playlistLoaded: false });
+
       useTracksStore.getState().actions.updatePlaylistFields(playlistId, {
         lastPlayedDateTime: Date.now(),
       });

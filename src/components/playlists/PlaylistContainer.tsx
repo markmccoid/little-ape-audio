@@ -74,7 +74,7 @@ const PlaylistContainer = () => {
     setUpdate(true);
     await setCurrPlaylist(playlistId);
     route.push({ pathname: "/audio/player", params: {} });
-    setUpdate(false);
+    setTimeout(() => setUpdate(false), 500);
   };
 
   // Swipeable auto close code
@@ -95,6 +95,7 @@ const PlaylistContainer = () => {
   // END Swipeable auto close code
 
   const renderItem = ({ item, index }) => {
+    if (update) return;
     return (
       <MotiView
         from={{ opacity: 0 }}
@@ -102,8 +103,8 @@ const PlaylistContainer = () => {
         animate={{ opacity: 1 }}
         transition={{
           type: "timing",
-          duration: 800,
-          delay: 100 * index,
+          duration: 500,
+          delay: 50 * index,
         }}
         style={{
           flex: 1,

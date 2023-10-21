@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import React, { useMemo, useState } from "react";
 import { usePlaybackStore, useTracksStore } from "@store/store";
 import { getImageSize } from "@utils/audioUtils";
@@ -26,8 +19,8 @@ const TPImagePicker = ({ currPlaylistId }) => {
     const plImage = trackActions.getPlaylist(currPlaylistId);
     return {
       id: "0",
-      pictureURI: plImage.imageURI,
-      pictureAspectRatio: plImage.imageAspectRatio,
+      pictureURI: plImage?.imageURI,
+      pictureAspectRatio: plImage?.imageAspectRatio,
     };
   }, [currPlaylistId, picUpdate, playlistUpdated]);
 
@@ -92,29 +85,23 @@ const TPImagePicker = ({ currPlaylistId }) => {
       // }}
     >
       <View className="m-1 border-2 border-red-600">
-        <Image
-          source={{ uri: playlistImage.pictureURI }}
-          style={{ width: 100, height: 100 }}
-        />
+        <Image source={{ uri: playlistImage.pictureURI }} style={{ width: 100, height: 100 }} />
       </View>
       {tracks.map((track) => {
-        if (track.pictureURI) {
+        if (track?.pictureURI) {
           return (
             <TouchableOpacity
               key={track.id}
               className="p-2"
               onPress={async () => {
                 await trackActions.updatePlaylistFields(currPlaylistId, {
-                  imageURI: track.pictureURI,
-                  imageAspectRatio: track.pictureAspectRatio,
+                  imageURI: track?.pictureURI,
+                  imageAspectRatio: track?.pictureAspectRatio,
                 });
                 setPicUpdate((prev) => !prev);
               }}
             >
-              <Image
-                source={{ uri: track.pictureURI }}
-                style={{ width: 100, height: 100 }}
-              />
+              <Image source={{ uri: track.pictureURI }} style={{ width: 100, height: 100 }} />
             </TouchableOpacity>
           );
         }

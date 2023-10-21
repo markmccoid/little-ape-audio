@@ -34,16 +34,17 @@ const PlaylistImage = ({ playlistId, style, noTransition = false }: Props) => {
   if (playlistId) {
     playlist = actions.getPlaylist(playlistId);
   }
+
   const aspectRatio = playlist?.imageAspectRatio || 1.28;
 
   return (
     <>
       {playlist && playlist.id && (
-        <Animated.View entering={ZoomInEasyUp} style={[styles.shadow, style]}>
-          <Animated.Image
-            style={[styles.trackImage, style]}
-            source={{ uri: playlist.imageURI }}
-          />
+        <Animated.View
+          entering={noTransition ? undefined : ZoomInEasyUp}
+          style={[styles.shadow, style]}
+        >
+          <Animated.Image style={[styles.trackImage, style]} source={{ uri: playlist.imageURI }} />
         </Animated.View>
       )}
     </>

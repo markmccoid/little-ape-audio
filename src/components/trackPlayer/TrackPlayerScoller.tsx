@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  FlatList,
-  Image,
-  Dimensions,
-} from "react-native";
+import { View, Text, ScrollView, FlatList, Image, Dimensions } from "react-native";
 import React, { useState } from "react";
 import { useCurrentPlaylist } from "@store/store";
 import Animated, {

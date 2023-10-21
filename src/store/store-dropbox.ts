@@ -1,3 +1,5 @@
+import { Image } from "react-native";
+import { defaultImages, getRandomNumber } from "./storeUtils";
 import uuid from "react-native-uuid";
 import { create } from "zustand";
 import { saveToAsyncStorage } from "./data/asyncStorage";
@@ -9,10 +11,9 @@ import {
   listDropboxFiles,
 } from "../utils/dropboxUtils";
 import { CleanBookMetadata, BookJSONMetadata, cleanOneBook } from "./../utils/audiobookMetadata";
-import { defaultImages, getRandomNumber } from "./storeUtils";
-import { downloadToFileSystem, getCleanFileName } from "./data/fileSystemAccess";
+import { downloadToFileSystem } from "./data/fileSystemAccess";
 import { useTracksStore } from "./store";
-import { format } from "date-fns";
+
 //-- ==================================
 //-- DROPBOX STORE
 //-- ==================================
@@ -158,25 +159,43 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
         // so must grab the image from folderMetadata.
         const { pathToFolderKey, pathToBookFolderKey } = extractMetadataKeys(pathIn);
         const bookMetadata = get().folderMetadata?.[pathToFolderKey]?.[pathToBookFolderKey];
-
-        // Push a new attribute into the array.  It will be process in tne for loop
-        attributes.push({
-          id,
-          pathToFolder: pathIn,
-          imageURL: bookMetadata?.imageURL,
-          defaultImage: bookMetadata?.defaultImage,
-          localImageName: bookMetadata?.localImageName,
-          title: bookMetadata.title,
-          author: bookMetadata.author,
-          categoryOne: bookMetadata.categoryOne,
-          categoryTwo: bookMetadata.categoryTwo,
-        });
+        if (!bookMetadata) {
+          console.log("PathIn", pathIn);
+          const folderName = pathIn.slice(pathIn.lastIndexOf("/") + 1);
+          console.log("Data", id, folderName);
+          attributes.push({
+            id,
+            pathToFolder: pathIn,
+            imageURL: undefined,
+            defaultImage: Image.resolveAssetSource(defaultImages[`image${getRandomNumber(10)}`])
+              .uri,
+            localImageName: undefined,
+            title: folderName,
+            author: "unknown",
+            categoryOne: "unknown",
+            categoryTwo: "unknown",
+          });
+        } else {
+          // Push a new attribute into the array.  It will be process in tne for loop
+          attributes.push({
+            id,
+            pathToFolder: pathIn,
+            imageURL: bookMetadata?.imageURL,
+            defaultImage: bookMetadata?.defaultImage,
+            localImageName: bookMetadata?.localImageName,
+            title: bookMetadata.title,
+            author: bookMetadata.author,
+            categoryOne: bookMetadata.categoryOne,
+            categoryTwo: bookMetadata.categoryTwo,
+          });
+        }
       }
 
       for (let i = 0; i < attributes.length; i++) {
         if (attributes[i].id === id) {
           attributes[i] = { ...attributes[i], [type]: !!(action === "add") };
         }
+        // Clean up attributes if not favorited or read, then remove from array
         if (!attributes[i]?.isFavorite && !attributes[i]?.isRead) {
           attributes[i].flagForDelete = true;
         }
@@ -635,13 +654,18 @@ async function getLocalImage(localImage, folderName) {
   //    this is why we are tacking on the extension
   // NOTE: in the downloadToFileSystem we are "cleaning" the filename
   const localImageName = `localimages_${folderName}${localImageExt}`;
-  // Get the dropbox link to image file
-  const localImageURI = await getDropboxFileLink(`${localImage.path_lower}`);
-  // Download and store the image locally
+  let finalCleanFileName = undefined;
+  try {
+    // Get the dropbox link to image file
+    const localImageURI = await getDropboxFileLink(`${localImage.path_lower}`);
+    // Download and store the image locally
+    const { uri, cleanFileName } = await downloadToFileSystem(localImageURI, localImageName);
+    finalCleanFileName = cleanFileName;
+  } catch (error) {
+    console.log("Error storing local Image");
+  }
 
-  const { uri, cleanFileName } = await downloadToFileSystem(localImageURI, localImageName);
-
-  return cleanFileName;
+  return finalCleanFileName;
 }
 //~ ------------------------------
 //~ Chunk passed array into smaller arrays

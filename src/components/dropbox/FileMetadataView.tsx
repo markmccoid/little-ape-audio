@@ -93,6 +93,45 @@ const FileMetadataView = ({ metadata, path_lower }: Props) => {
 
   return (
     <>
+      {!metadata && (
+        <View className="flex flex-row border-b border-amber-900 py-1 mt-1 justify-end pr-5">
+          <TouchableOpacity onPress={handleToggleFavorite}>
+            {currFolderAttributes?.isFavorite ? (
+              <MDHeartIcon color="red" size={30} />
+            ) : (
+              <EmptyMDHeartIcon size={30} />
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleToggleRead} className="ml-4">
+            {currFolderAttributes?.isRead ? (
+              <View>
+                <BookIcon color="green" size={30} />
+                <ReadIcon style={{ position: "absolute", top: 2, left: 5 }} size={20} />
+              </View>
+            ) : (
+              <BookIcon size={30} />
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={async () => {
+              const shareLink = Linking.createURL("audio/externalLink", {
+                queryParams: { fullPath: path_lower, backTitle: "Audio Sources" },
+              });
+              try {
+                const res = await Share.share({
+                  // message: `Share ${shareLink}`,
+                  url: shareLink,
+                });
+              } catch (e) {
+                Alert.alert("Error on Share->", e.message);
+              }
+            }}
+            className="ml-4"
+          >
+            <ShareIcon />
+          </TouchableOpacity>
+        </View>
+      )}
       {metadata && (
         <View
           className={`items-start flex-col justify-start border-b border-b-amber-900 pb-2 pt-2`}

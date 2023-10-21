@@ -5,6 +5,7 @@ import { formatSeconds } from "../../utils/formatUtils";
 import TrackPlayer, { useProgress } from "react-native-track-player";
 import { colors } from "../../constants/Colors";
 import sectionListGetItemLayout from "react-native-section-list-get-item-layout";
+import { keyBy } from "lodash";
 
 const { width, height } = Dimensions.get("window");
 type SectionChapter = {
@@ -12,7 +13,9 @@ type SectionChapter = {
   start: number;
   end: number;
 };
+type QueueSectionChapters = Record<string, SectionChapter[]>;
 type SectionListData = {
+  id: string;
   title: string;
   filename: string;
   queuePos: number;
@@ -30,8 +33,12 @@ const TrackList = () => {
   const trackActions = useTrackActions();
   const { position, duration } = useProgress();
   const [sectionList, setSectionList] = useState<SectionListData[]>([]);
-  const [chapters, setChapters] = useState<SectionChapter[]>();
+  const [chapters, setChapters] = useState<QueueSectionChapters>();
   const [currChapterIndex, setCurrChapterIndex] = useState(undefined);
+
+  //! ==== get current queue position
+  const currentQueueId = queue.find((el) => el.id === currentTrack.id).id;
+  //! ====
 
   const scrollViewRef = useRef<SectionList>(null);
 
@@ -45,24 +52,21 @@ const TrackList = () => {
     });
   };
 
+  // console.log("Q", queue[0].title, queue[0].duration);
   // Scroll to the current track and/or chapter
   useEffect(() => {
     if (scrollViewRef.current && currChapterIndex !== undefined) {
       scrollToRow(currentTrackIndex, currChapterIndex + 1);
-
-      // else {
-      //   console.log("scroll", currentTrackIndex, currChapterIndex);
-      //   scrollToRow(currentTrackIndex, 1);
-      //   scrollViewRef.current.scrollToLocation({ sectionIndex: 5, itemIndex: 0, viewPosition: 0 });
-      // }
     }
   }, [currentTrackIndex, scrollViewRef.current, currChapterIndex]);
 
   // set the currChapterIndex based on the progress position
   useEffect(() => {
-    if (chapters?.length > 0) {
-      for (let i = 0; i < chapters.length; i++) {
-        if (position <= chapters[i].end) {
+    // const queueChapters = chapters[currentTrack.]
+    const qChapters = chapters?.[currentQueueId];
+    if (qChapters?.length > 0) {
+      for (let i = 0; i < qChapters.length; i++) {
+        if (position <= qChapters[i].end) {
           setCurrChapterIndex(i);
           break;
         }
@@ -71,10 +75,14 @@ const TrackList = () => {
       setCurrChapterIndex(0);
     }
   }, [chapters, position]);
+
   useEffect(() => {
     if (queue) {
       const finalSectionList = queue.map((track, index) => {
+        //! Here might be where we can offset the start/end seconds based on
+        //! the position in the queue
         const chapters = track?.chapters?.map((chapt) => {
+          // console.log(`chapt - ${chapt.title}-- ${chapt.endSeconds}`);
           return {
             title: chapt.title,
             start: chapt.startSeconds,
@@ -92,7 +100,13 @@ const TrackList = () => {
         return sectionList;
       });
       setSectionList(finalSectionList);
-      setChapters(finalSectionList.flatMap((el) => el.data));
+      // setChapters(finalSectionList.flatMap((el) => el.data));
+      // Need to set chapters so that they correspond to the queue position
+      setChapters(
+        finalSectionList.reduce((final, el, index) => {
+          return { ...final, [el.id]: el.data };
+        }, {})
+      );
     }
   }, [queue]);
 
