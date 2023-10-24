@@ -44,7 +44,7 @@ type Props = {
   yOffset?: number;
 };
 
-const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
+const ExplorerContainer = ({ pathIn, onPathChange, yOffset = undefined }: Props) => {
   const [filesFolderObj, setFilesFolderObj] = React.useState<DropboxDir>();
   const [flatlistData, setFlatlistData] = React.useState<(FileEntry | FolderEntry)[]>([]);
   const [downloadAllId, setDownloadAllId] = React.useState<string>();
@@ -53,11 +53,12 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
 
   const [showMetadata, setShowMetadata] = React.useState<"off" | "on" | "loading">("off");
   const [displayMetadata, toggeleDisplayMetadata] = React.useReducer((prev) => !prev, false);
-  const allFoldersMetadata = useDropboxStore((state) => state.folderMetadata);
+  const allFoldersMetadata = useDropboxStore((state) => state.folderMetadata || {});
   const { pathToFolderKey, pathToBookFolderKey } = extractMetadataKeys(pathIn);
   const hasMetadata = !!Object.keys(allFoldersMetadata).find(
     (key) => key === `${pathToFolderKey}/${pathToBookFolderKey}`
   );
+
   // console.log(
   //   "hasMetadata0",
   //   `${pathToFolderKey}/${pathToBookFolderKey}`,
@@ -84,7 +85,7 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
   // Need to wait until loading is finished before flatlistRef will
   // be available.  Then we can scroll
   useEffect(() => {
-    if (flatlistRef.current && !isLoading) {
+    if (flatlistRef.current && !isLoading && yOffset) {
       flatlistRef.current.scrollToOffset({
         offset: Math.floor(yOffset),
       });
@@ -134,12 +135,16 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
         // setIsError(undefined)
       } catch (err) {
         // If we don't get data back from dropbox we will alert user and redirect to main audio sources route.
-        console.log(err);
-        Alert.alert(
-          `Error finding path ${pathIn}.  Error in Link or you are not authorized for that dropbox account.`
-        );
-        router.replace("/audio/dropbox");
-        // setIsError("Dropbox");
+        // Unless it is an invalid token, then we send to authorize dropbox page.
+        // console.log(err.message);
+        if (err.message.includes("Invalid Token")) {
+          router.replace("/settings/dropboxauth");
+        } else {
+          Alert.alert(
+            `Error finding path ${pathIn}.  Error in Link or you are not authorized for that dropbox account.`
+          );
+          router.back();
+        }
       }
       setIsLoading(false);
     };
@@ -295,13 +300,13 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = 0 }: Props) => {
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         horizontal={false}
-        maxToRenderPerBatch={10}
-        windowSize={10}
+        maxToRenderPerBatch={30}
+        windowSize={30}
         // scrollEventThrottle={16}
         onScroll={handleScroll}
         //! Need to update the length based on if it is open or not
         getItemLayout={(data, index) => {
-          let offset = !hasMetadata ? 45 : 210;
+          let offset = hasMetadata && displayMetadata ? 210 : 45;
           // let offset = showMetadata === "off" ? 45 : 210;
           if (filesFolderObj?.files?.length > 0) {
             offset = 45;

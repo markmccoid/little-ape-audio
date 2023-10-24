@@ -16,7 +16,7 @@ export const defaultImages = {
 };
 
 export function getRandomNumber() {
-  const randomNumber = Math.floor(Math.random() * 13) + 1; // Generate random number between 1 and 13
+  const randomNumber = Math.floor(Math.random() * 12) + 1; // Generate random number between 1 and 13
   return randomNumber.toString().padStart(2, "0"); // Pad number with leading zero if less than 10
 }
 

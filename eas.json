@@ -1,7 +1,7 @@
 {
   "cli": {
     "version": ">= 3.9.3",
-    "promptToConfigurePushNotifications": true
+    "promptToConfigurePushNotifications": false
   },
   "build": {
     "dev-simulator": {

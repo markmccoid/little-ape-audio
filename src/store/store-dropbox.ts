@@ -1,4 +1,4 @@
-import { Image } from "react-native";
+import { Alert, Image } from "react-native";
 import { defaultImages, getRandomNumber } from "./storeUtils";
 import uuid from "react-native-uuid";
 import { create } from "zustand";
@@ -385,7 +385,10 @@ export const folderFileReader = async (pathIn: string) => {
     //- Success reading directory, return data
     return finalFolderFileList;
   } catch (err) {
-    console.log(err);
+    console.log(err.message);
+    if (err.message === "Invalid Token") {
+      throw new Error(err);
+    }
     throw new Error("folderFileReader Error" + err);
   }
 };
@@ -622,7 +625,7 @@ export const getSingleFolderMetadata = async (folder) => {
         dropboxPath: folder.path_lower,
         folderName: folder.name,
         metadataFileName: metadataFile.name,
-        error,
+        error: error?.message,
       };
       await useDropboxStore.getState().actions.addMetadataError(errorObj);
       // Alert.alert(
