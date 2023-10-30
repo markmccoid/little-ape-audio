@@ -1,23 +1,10 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import React, { useRef, useState } from "react";
 import Constants from "expo-constants";
 import { makeRedirectUri } from "expo-auth-session";
 import { authorize } from "react-native-app-auth";
-import {
-  storeDropboxRefreshToken,
-  storeDropboxToken,
-} from "../../store/data/secureStorage";
-import {
-  checkDropboxToken,
-  revokeDropboxAccess,
-} from "../../utils/dropboxUtils";
+import { storeDropboxRefreshToken, storeDropboxToken } from "../../store/data/secureStorage";
+import { checkDropboxToken, revokeDropboxAccess } from "../../utils/dropboxUtils";
 import { Link } from "expo-router";
 import Monkey from "../common/svg/Monkey";
 
@@ -101,7 +88,7 @@ const DropboxAuthContainer = () => {
   }, []);
 
   return (
-    <View className="flex-1 flex-col items-center">
+    <View className="flex-col items-center justify-start border">
       {/* <TouchableOpacity style={styles.authButton} onPress={onAuthorize}>
         <Text style={{ color: "white" }}>Authorize Dropbox</Text>
       </TouchableOpacity>
@@ -118,12 +105,12 @@ const DropboxAuthContainer = () => {
         <View className="flex-col justify-center items-center">
           <View className="flex-col justify-center items-center px-2">
             <Text className="text-lg text-center">
-              Press the Authorize Dropbox button and you will be asked to log
-              into your Dropbox account.
+              Press the Authorize Dropbox button and you will be asked to log into your Dropbox
+              account.
             </Text>
             <Text className="text-lg text-center">
-              Once logged in, you will be be asked to give Little Ape Audio
-              access to your Dropbox folders and files!
+              Once logged in, you will be be asked to give Little Ape Audio access to your Dropbox
+              folders and files!
             </Text>
           </View>
           <View className="flex-row mt-3">
@@ -143,9 +130,7 @@ const DropboxAuthContainer = () => {
               </TouchableOpacity>
             </Link>
             <TouchableOpacity style={styles.revokeButton} onPress={onRevoke}>
-              <Text style={{ color: "white" }}>
-                Revoke Dropbox Authorization
-              </Text>
+              <Text style={{ color: "white" }}>Revoke Dropbox Authorization</Text>
             </TouchableOpacity>
           </View>
           <View className="flex-row justify-center">

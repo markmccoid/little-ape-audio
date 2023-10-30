@@ -5,13 +5,15 @@ import "dotenv/config";
 // for DEV or Prod
 const dropboxSecret = process.env.DROPBOX_SECRET;
 const dropboxAppKey = process.env.DROPBOX_APPKEY;
+const googleClientId = process.env.GOOGLE_CLIENT_ID;
+
 export default {
   name: "Little Ape Audio",
   slug: "little-ape-audio",
   scheme: "littleapeaudio",
   privacy: "unlisted",
   platforms: ["ios"],
-  version: "0.4.1",
+  version: "0.4.2",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "automatic",
@@ -33,7 +35,7 @@ export default {
     },
     supportsTablet: false,
     bundleIdentifier: "com.markmccoid.little-ape-audio",
-    buildNumber: "0.4.1",
+    buildNumber: "0.4.2",
     infoPlist: {
       RCTAsyncStorageExcludeFromBackup: false,
       NSMicrophoneUsageDescription:
@@ -56,6 +58,7 @@ export default {
         initialOrientation: "PORTRAIT",
       },
     ],
+    ["@react-native-google-signin/google-signin"],
   ],
   experiments: {
     tsconfigPaths: true,
@@ -66,6 +69,7 @@ export default {
   extra: {
     dropboxSecret,
     dropboxAppKey,
+    googleClientId,
     eas: {
       projectId: "7d63e7c8-a9bf-4be1-bf75-8a8bafe542b1",
     },

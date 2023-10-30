@@ -29,7 +29,7 @@ const SettingsLayout = () => {
         }}
       />
       <Stack.Screen
-        name="dropboxauth"
+        name="authroute"
         options={{
           title: "Dropbox Auth",
           headerStyle: { backgroundColor: colors.amber200 },

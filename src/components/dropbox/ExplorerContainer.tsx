@@ -138,7 +138,7 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = undefined }: Props)
         // Unless it is an invalid token, then we send to authorize dropbox page.
         // console.log(err.message);
         if (err.message.includes("Invalid Token")) {
-          router.replace("/settings/dropboxauth");
+          router.replace("/settings/authroute");
         } else {
           Alert.alert(
             `Error finding path ${pathIn}.  Error in Link or you are not authorized for that dropbox account.`
@@ -225,7 +225,7 @@ const ExplorerContainer = ({ pathIn, onPathChange, yOffset = undefined }: Props)
         <Text className="text-lg">Error: {isError}</Text>
         {isError === "Dropbox" && (
           <View className="flex-row justify-center mt-2">
-            <Link href="/settings/dropboxauth">
+            <Link href="/settings/authroute">
               <View
                 className="p-2 border border-amber-800 bg-blue-600 flex justify-center items-center"
                 style={{ borderRadius: 10 }}
