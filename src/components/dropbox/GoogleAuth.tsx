@@ -68,6 +68,9 @@ const GoogleAuthContainer = () => {
           <View className="flex-row justify-center">
             <Monkey size={100} />
           </View>
+          <TouchableOpacity onPress={async () => await GoogleSignin.signInSilently()}>
+            <Text>Test Silent SignIn</Text>
+          </TouchableOpacity>
           <Text className="text-lg">Happy Listening</Text>
         </View>
       )}
@@ -77,9 +80,9 @@ const GoogleAuthContainer = () => {
           onPress={async () => {
             try {
               const userInfo = await GoogleSignin.signIn();
-              console.log("USERINFO", userInfo);
-              const tokens = await GoogleSignin.getTokens();
-              storeGoogleAccessToken(tokens.accessToken);
+              // console.log("USERINFO", userInfo);
+              // const tokens = await GoogleSignin.getTokens();
+              // storeGoogleAccessToken(tokens.accessToken);
               setIsSignedIn(true);
             } catch (error) {
               console.log("Error Signing in-> ", error.code);

@@ -20,26 +20,8 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import SwipeableItem, { useSwipeableItemParams } from "react-native-swipeable-item";
-import { colors } from "@constants/Colors";
-import { usePlaybackStore, usePlaylists } from "@store/store";
-import { useProgress } from "react-native-track-player";
-import { useDropboxStore } from "@store/store-dropbox";
-import { listGoogleFiles } from "@utils/googleUtils";
+import { FilesAndFolders, listFiles, listGoogleFiles } from "@utils/googleUtils";
 import { MimeTypes } from "@robinbobin/react-native-google-drive-api-wrapper";
-
-type SectionChapter = {
-  title: string;
-  start: number;
-  end: number;
-};
-type SectionListData = {
-  title: string;
-  filename: string;
-  queuePos: number;
-  duration: number;
-  data: SectionChapter[];
-};
 
 //!! How to determine current chapter without looking at each chapter
 //!!
@@ -48,13 +30,12 @@ type SectionListData = {
 //!!
 //!!
 const playarea = () => {
-  const [files, setFiles] = useState([]);
+  const [filesAndFolder, setFilesAndFolder] = useState<FilesAndFolders>();
 
-  const getFiles = async () => {
-    const files = await listGoogleFiles();
-    console.log("FILES", files);
-
-    setFiles(files.files);
+  const getFiles = async (folderId = undefined) => {
+    // const filesAndFolder = await listGoogleFiles(folderId);
+    const filesAndFolder = await listFiles(folderId);
+    setFilesAndFolder(filesAndFolder);
   };
 
   React.useEffect(() => {
@@ -64,16 +45,22 @@ const playarea = () => {
   return (
     <View>
       <Text>GDrive Testing</Text>
-      {files.map((el) => {
+      {filesAndFolder?.folders.map((folder) => {
+        return (
+          <TouchableOpacity onPress={() => getFiles(folder.id)} key={folder.id}>
+            <Text className="font-semibold text-lg" key={folder.id}>
+              {folder.name}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+      {filesAndFolder?.files.map((file) => {
         let classT = "font-medium text-base text-amber-800";
-        if (el.mimeType === MimeTypes.FOLDER) {
-          classT = "font-semibold text-lg";
-        }
 
         return (
-          <Text className={classT} key={el.id}>
-            {el.name}
-          </Text>
+          <View key={file.id}>
+            <Text>{file.name}</Text>
+          </View>
         );
       })}
     </View>

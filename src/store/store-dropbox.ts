@@ -354,9 +354,20 @@ const updateFMDProcessingInfo = ({
 //------------------------------------------------------
 //-- FOLDER FILE READER FUNCTIONS
 //------------------------------------------------------
+export const AUDIO_FORMATS = [
+  "mp3",
+  "mb4",
+  "m4a",
+  "m4b",
+  "wav",
+  "aiff",
+  "aac",
+  "ogg",
+  "wma",
+  "flac",
+];
 function filterAudioFiles(filesAndFolders: DropboxDir) {
   const files = filesAndFolders.files;
-  const AUDIO_FORMATS = ["mp3", "mb4", "m4a", "m4b", "wav", "aiff", "aac", "ogg", "wma", "flac"];
   const newFiles = files.filter((file) =>
     AUDIO_FORMATS.includes(file.name.slice(file.name.lastIndexOf(".") + 1))
   );
