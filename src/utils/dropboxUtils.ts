@@ -298,7 +298,7 @@ export const listDropboxFiles = async (path: string = ""): Promise<DropboxDir> =
       }
     );
   } catch (err) {
-    console.log("Throw ERRPR", err.response.status, err.message, err);
+    console.log("Throw ERRPR ->", err.response.status, err.message, err);
     // Rethrow error to get picked up in code.
     // Did this because was thinking of create a custom error
     // class for my app error so

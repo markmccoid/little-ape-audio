@@ -3,6 +3,7 @@ import { Track } from "react-native-track-player";
 import { FileEntry } from "../utils/dropboxUtils";
 import { Chapters } from "@utils/audioUtils";
 import { Chapter } from "./store-functions";
+import { AudioSourceType } from "@app/audio/dropbox";
 
 //~ ================================
 //~ AudioTrack Type
@@ -112,15 +113,29 @@ export type AudioState = {
   actions: {
     // given the audio file location in storage, look up metadata and create
     // record in AudioState.audioFiles store array
-    addNewTrack: (
-      fileURI: string,
+    addNewTrack: ({
+      fileURI,
       // filename including extension
-      filename: string,
+      filename,
       // file.path_lower
-      sourceLocation: string,
-      playlistId?: string,
-      directory?: string
-    ) => void;
+      sourceLocation,
+      // folder path or folderId (google) of folder file lives in
+      pathIn,
+      // google or dropbox
+      audioSource,
+      playlistId,
+      directory,
+    }: {
+      fileURI: string;
+      // filename including extension
+      filename: string;
+      // file.path_lower
+      sourceLocation: string;
+      pathIn: string;
+      audioSource: AudioSourceType;
+      playlistId?: string;
+      directory?: string;
+    }) => void;
     // given passed id of audioFile, remove it from list AND Delete it from FileSystem storage
     //!! Need to make sure to remove from any playlist if we actually use this function anywhere
     removeTracks: (ids: string[]) => Promise<void>;

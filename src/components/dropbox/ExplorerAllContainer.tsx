@@ -35,6 +35,7 @@ import {
 } from "../../store/store-dropbox";
 import FileMetadataView from "./FileMetadataView";
 import { AudioSourceType } from "@app/audio/dropbox";
+import { listGoogleDriveFiles } from "@utils/googleUtils";
 // import { startDownloadAll } from "@store/data/fileSystemAccess";
 
 type Props = {
@@ -83,10 +84,10 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
 
   const renderItem = useCallback(
     ({ item, index }) => {
+      // console.log("ITEM", item);
       if (!item.path_lower) return;
       if (item[".tag"] === "folder") {
         const { pathToFolderKey, pathToBookFolderKey } = extractMetadataKeys(item.path_lower);
-
         // console.log("pathtobookRENDER", pathToFolderKey, pathToBookFolderKey);
         return (
           <ExplorerFolder
@@ -99,22 +100,42 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
             // setShowMetadata={setShowMetadata}
             folderMetadata={allFoldersMetadata?.[pathToFolderKey]?.[pathToBookFolderKey]}
             hasMetadata={hasMetadata}
+            audioSource={audioSource}
           />
         );
       } else if (item[".tag"] === "file") {
-        return <ExplorerFile key={item.id} file={item} playlistId={downloadAllId} />;
+        return (
+          <ExplorerFile
+            key={item.id}
+            file={item}
+            playlistId={downloadAllId}
+            pathIn={pathIn}
+            audioSource={audioSource}
+          />
+        );
       }
     },
-    [displayMetadata, downloadAllId, allFoldersMetadata, hasMetadata]
+    [displayMetadata, downloadAllId, allFoldersMetadata, hasMetadata, pathIn, audioSource]
   );
 
   //~ ====================
   //~ -- Whenever pathIn changes, load the folders and files to display
   //~ ====================
   React.useEffect(() => {
+    // Google Files
     const getFiles = async () => {
       setIsLoading(true);
-      setDownloadAllId(undefined);
+      if (audioSource === "google") {
+        //!! NOT IMPLEMENTED
+        // const filesFolders = await listGoogleDriveFiles(pathIn);
+        // setFilesFolderObj(filesFolders);
+        // setFlatlistData([...filesFolders.folders, ...filesFolders.files]);
+      } else if (audioSource === "dropbox") {
+        await getFilesFromDropbox();
+      }
+      setIsLoading(false);
+    };
+    const getFilesFromDropbox = async () => {
       try {
         // Read next list of folders and files
         const finalFolderFileList = await folderFileReader(pathIn);
@@ -134,9 +155,9 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
           router.back();
         }
       }
-      setIsLoading(false);
     };
 
+    setDownloadAllId(undefined);
     getFiles();
   }, [pathIn]);
 
@@ -261,6 +282,7 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
           <FileMetadataView
             metadata={allFoldersMetadata?.[pathToFolderKey]?.[pathToBookFolderKey]}
             path_lower={pathIn}
+            audioSource={audioSource}
           />
         </>
       )}

@@ -6,6 +6,8 @@ import { AudioMetadata, AudioState } from "./types";
 import { getCleanFileName } from "./data/fileSystemAccess";
 import { downloadDropboxFile } from "@utils/dropboxUtils";
 import { format } from "date-fns";
+import { getGoogleDownloadLink } from "@utils/googleUtils";
+import axios from "axios";
 
 type AddTrack = AudioState["actions"]["addNewTrack"];
 type ZSetGet<T> = {
@@ -41,7 +43,27 @@ type LAABData = {
 
 export const addTrack =
   (set: ZSetGet<AudioState>["set"], get: ZSetGet<AudioState>["get"]): AddTrack =>
-  async (fileURI, filename, sourceLocation, playlistId = undefined, directory = "") => {
+  async ({
+    fileURI,
+    filename,
+    sourceLocation,
+    pathIn,
+    audioSource,
+    playlistId = undefined,
+    directory = "",
+  }) => {
+    // console.log("PathIn", pathIn, audioSource, fileURI);
+    //!! TEST GOOGLE
+    if (audioSource === "google") {
+      const laabFile = await getGoogleDownloadLink({ folderId: pathIn, filename: laabFileName });
+      console.log("google Laab file", laabFile.webContentLink);
+      const laabJson = await axios.get(laabFile.webContentLink);
+      const final = await JSON.parse(laabJson.data);
+      console.log("LAAB JSON", laabJson);
+      return;
+    }
+
+    //!!
     // variable for final tags
     let finalTags: AudioMetadata;
     // Get metadata for passed audio file
@@ -49,6 +71,7 @@ export const addTrack =
       `${FileSystem.documentDirectory}${fileURI}`
     )) as AudioMetadata;
     // process track number info
+
     let trackNum = tags.trackRaw;
     let totalTracks = undefined;
     const trackRaw = `${tags.trackRaw}`;
@@ -61,7 +84,9 @@ export const addTrack =
     // Track Raw End
     //~~ Check for LAAB Meta file
     const laabPath = sourceLocation.slice(0, sourceLocation.lastIndexOf("/"));
-    const laabFileNameWithPath = `${laabPath}/${getCleanFileName(filename)}_laabmeta.json`;
+    const laabFileName = `${getCleanFileName(filename)}_laabmeta.json`;
+    const laabFileNameWithPath = `${laabPath}/${laabFileName}`;
+    // const laabFileNameWithPath = `${laabPath}/${getCleanFileName(filename)}_laabmeta.json`;
 
     let LAABMeta: LAABData;
     // laab file contains chapter data sometimes

@@ -62,6 +62,7 @@ const MainFavFolders = () => {
                 fullPath: item.folderPath,
                 backTitle: "Back",
                 baseFolder: item.folderPath,
+                audioSource: item.audioSource,
               },
             }}
             className="flex-1"

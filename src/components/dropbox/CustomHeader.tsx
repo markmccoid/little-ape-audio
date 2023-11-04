@@ -24,6 +24,7 @@ function CustomHeader({ title, backText }) {
       params: {
         fullPath: newPathInfo.fullPath,
         backTitle: newPathInfo.backTitle,
+        audioSource: newPathInfo.audioSource,
         yOffset: newPathInfo?.yOffset || 0,
       },
     });

@@ -181,6 +181,9 @@ export const EditIcon = ({ size = 25, color, style }: Props) => {
 export const DropboxIcon = ({ size = 25, color, style }: Props) => {
   return <FontAwesome name="dropbox" color={color} size={size} style={style} />;
 };
+export const GoogleDriveIcon = ({ size = 25, color, style }: Props) => {
+  return <Entypo name="google-drive" color={color} size={size} style={style} />;
+};
 
 export const FolderClosedIcon = ({ size = 25, color, style }: Props) => {
   return <AntDesign name="folder1" size={size} color={color} style={style} />;

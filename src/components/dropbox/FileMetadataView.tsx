@@ -30,13 +30,15 @@ import {
   useDropboxStore,
 } from "../../store/store-dropbox";
 import * as Linking from "expo-linking";
+import { AudioSourceType } from "@app/audio/dropbox";
 // import * as Sharing from "expo-sharing";
 
 type Props = {
   metadata: CleanBookMetadata;
   path_lower: string;
+  audioSource: AudioSourceType;
 };
-const FileMetadataView = ({ metadata, path_lower }: Props) => {
+const FileMetadataView = ({ metadata, path_lower, audioSource }: Props) => {
   const [showDescription, setShowDescription] = useState(false);
   const dropboxActions = useDropboxStore((state) => state.actions);
   const folderAttributes = useDropboxStore((state) => state.folderAttributes);
@@ -74,6 +76,7 @@ const FileMetadataView = ({ metadata, path_lower }: Props) => {
   };
 
   useEffect(() => {
+    if (audioSource === "google") return;
     if (!metadata) {
       downloadFolderMetadata();
     }

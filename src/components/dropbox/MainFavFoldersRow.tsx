@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  Pressable,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, StyleSheet, Dimensions, Pressable, TouchableOpacity } from "react-native";
 import React, { Ref, useState } from "react";
 import {
   PanGestureHandler,
@@ -24,11 +17,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import {
-  DeleteIcon,
-  EditIcon,
-  EnterKeyIcon,
-} from "@components/common/svg/Icons";
+import { DeleteIcon, EditIcon, EnterKeyIcon } from "@components/common/svg/Icons";
 import { AnimatedPressable } from "@components/common/buttons/Pressables";
 import { Bookmark } from "@store/types";
 import { AnimatePresence } from "moti";
@@ -46,12 +35,7 @@ type Props = {
   currentKey: string;
   activeKey: SharedValue<string>;
 };
-const MainFavFoldersRow = ({
-  favFolder,
-  simultaneousHandler,
-  currentKey,
-  activeKey,
-}: Props) => {
+const MainFavFoldersRow = ({ favFolder, simultaneousHandler, currentKey, activeKey }: Props) => {
   const offsetX = useSharedValue(0);
   const isOpen = useSharedValue(false);
   const iconOpacity = useSharedValue(0);
@@ -195,6 +179,7 @@ const MainFavFoldersRow = ({
   //     </PanGestureHandler>
   //   </View>
   // );
+  console.log("favFOLDER", favFolder.folderPath);
   return (
     <View className="flex-1 flex-row h-full bg-red-800">
       {/* START -- ICONS REVEALED ON SWIPE */}
@@ -213,9 +198,7 @@ const MainFavFoldersRow = ({
       <Pressable onPress={() => actions.removeFavorite(favFolder.folderPath)}>
         <Animated.View
           style={rIconStyle}
-          className={`absolute bg-red-800 h-[50] w-[${Math.floor(
-            SCREEN_WIDTH * 0.15
-          )}]
+          className={`absolute bg-red-800 h-[50] w-[${Math.floor(SCREEN_WIDTH * 0.15)}]
             right-[0] justify-center items-center bg-amber-200`}
         >
           <DeleteIcon color="white" size={18} />
@@ -240,9 +223,7 @@ const MainFavFoldersRow = ({
       >
         <Animated.View
           style={animatedStyles}
-          className={`py-1 px-2 bg-amber-100 mb-0 flex-1 h-full ${
-            isPanActive ? "border-l" : ""
-          }`}
+          className={`py-1 px-2 bg-amber-100 mb-0 flex-1 h-full ${isPanActive ? "border-l" : ""}`}
         >
           <View className="flex-row items-center h-full w-full ">
             <Pressable
@@ -254,9 +235,7 @@ const MainFavFoldersRow = ({
               }
               disabled={isOpen.value}
             >
-              <Text className="text-sm font-semibold">
-                {favFolder.folderPath}
-              </Text>
+              <Text className="text-sm font-semibold">{favFolder.folderPath}</Text>
             </Pressable>
           </View>
         </Animated.View>

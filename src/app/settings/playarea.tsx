@@ -20,7 +20,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import { FilesAndFolders, listFiles, listGoogleFiles } from "@utils/googleUtils";
+import { FilesAndFolders, listGoogleDriveFiles, listGoogleFiles } from "@utils/googleUtils";
 import { MimeTypes } from "@robinbobin/react-native-google-drive-api-wrapper";
 
 //!! How to determine current chapter without looking at each chapter
@@ -34,7 +34,7 @@ const playarea = () => {
 
   const getFiles = async (folderId = undefined) => {
     // const filesAndFolder = await listGoogleFiles(folderId);
-    const filesAndFolder = await listFiles(folderId);
+    const filesAndFolder = await listGoogleDriveFiles(folderId);
     setFilesAndFolder(filesAndFolder);
   };
 

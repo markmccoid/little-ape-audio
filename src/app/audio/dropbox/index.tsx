@@ -1,7 +1,12 @@
 import { View, Text, StyleSheet, Dimensions } from "react-native";
 import React, { useState } from "react";
-import { Link } from "expo-router";
-import { DropboxIcon, SearchIcon, StarFilledIcon } from "../../../components/common/svg/Icons";
+import { Href, Link } from "expo-router";
+import {
+  DropboxIcon,
+  GoogleDriveIcon,
+  SearchIcon,
+  StarFilledIcon,
+} from "../../../components/common/svg/Icons";
 import { colors } from "../../../constants/Colors";
 // import MainFavFolders from "../../../components/dropbox/MainFavFoldersOLD";
 import MainFavFolders from "@components/dropbox/MainFavFolders";
@@ -11,6 +16,13 @@ import { AnimatePresence, MotiView } from "moti";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 const { width, height } = Dimensions.get("window");
 
+export type AudioSourceType = "dropbox" | "google";
+export type AudioSourceLinkParams = {
+  fullPath: string;
+  backTitle: string;
+  yOffset?: string;
+  audioSource?: AudioSourceType;
+};
 const DropboxScreens = () => {
   const [currTab, setCurrTab] = useState<"folders" | "books">("folders");
   const insets = useSafeAreaInsets();
@@ -33,7 +45,11 @@ const DropboxScreens = () => {
           <Link
             href={{
               pathname: "audio/dropbox/dropboxstart",
-              params: { fullPath: "", backTitle: "Back" },
+              params: {
+                fullPath: "",
+                backTitle: "Back",
+                audioSource: "dropbox",
+              } as AudioSourceLinkParams,
             }}
           >
             <View className="flex-row px-2 py-3 items-center">
@@ -42,6 +58,30 @@ const DropboxScreens = () => {
             </View>
           </Link>
         </View>
+        {/* GOOGLE -- INACTIVE FOR NOW UNTIL DOWNLOAD BINARY WORKING */}
+        {/* <View
+          className="rounded-xl bg-white mt-2"
+          style={{
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.amber900,
+          }}
+        >
+          <Link
+            href={{
+              pathname: "audio/dropbox/googlestart",
+              params: {
+                fullPath: "",
+                backTitle: "Back",
+                audioSource: "google",
+              } as AudioSourceLinkParams,
+            }}
+          >
+            <View className="flex-row px-2 py-3 items-center">
+              <GoogleDriveIcon color={colors.amber500} />
+              <Text className="ml-3 text">Google Drive</Text>
+            </View>
+          </Link>
+        </View> */}
         {/* BOOK META SEARCH */}
         <View
           className="rounded-xl bg-white mt-2"

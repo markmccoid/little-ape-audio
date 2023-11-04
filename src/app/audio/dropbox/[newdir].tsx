@@ -5,20 +5,27 @@ import ExplorerContainer from "../../../components/dropbox/ExplorerContainer";
 import { useNavigation } from "expo-router";
 import CustomHeader from "../../../components/dropbox/CustomHeader";
 import { useDropboxStore } from "@store/store-dropbox";
-
-type SearchParms = { fullPath: string; backTitle: string; yOffset: string };
+import { AudioSourceLinkParams, AudioSourceType } from "./index";
+import ExplorerAllContainer from "@components/dropbox/ExplorerAllContainer";
 
 const NewDirectory = () => {
   const actions = useDropboxStore((state) => state.actions);
   const router = useRouter();
   const navigation = useNavigation();
-  const { newdir, fullPath, backTitle, yOffset } = useLocalSearchParams<SearchParms>();
+  const { newdir, fullPath, backTitle, audioSource, yOffset } =
+    useLocalSearchParams<AudioSourceLinkParams>();
+
   const [prevDir, setPrevDir] = useState("");
+  const audioSourceIn = audioSource as AudioSourceType;
 
   useEffect(() => {
     // console.log("PREV DIR", prevDir, newdir);
     if (prevDir !== newdir) {
-      actions.pushFolderNavigation({ fullPath: fullPath || "/", backTitle });
+      actions.pushFolderNavigation({
+        fullPath: fullPath || "/",
+        backTitle,
+        audioSource: audioSourceIn,
+      });
     }
     setPrevDir(newdir);
   }, [newdir]);
@@ -37,10 +44,11 @@ const NewDirectory = () => {
       params: {
         fullPath: newPath,
         backTitle: folderName,
-      },
+        audioSource: audioSourceIn || "dropbox",
+      } as AudioSourceLinkParams,
     });
   };
-
+  // console.log("NEWDIR Path", fullPath);
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Stack.Screen
@@ -50,12 +58,21 @@ const NewDirectory = () => {
           header: () => <CustomHeader title={fullPath || "/"} backText={backTitle} />,
         }}
       />
-
-      <ExplorerContainer
+      {/* {audioSourceIn === "dropbox" ? (
+        <ExplorerContainer
+          pathIn={fullPath || ""}
+          onPathChange={onPathChange}
+          audioSource={audioSourceIn}
+          yOffset={yOffset ? parseFloat(yOffset) : 0}
+        />
+      ) : ( */}
+      <ExplorerAllContainer
         pathIn={fullPath || ""}
         onPathChange={onPathChange}
+        audioSource={audioSourceIn}
         yOffset={yOffset ? parseFloat(yOffset) : 0}
       />
+      {/* )} */}
     </SafeAreaView>
   );
 };

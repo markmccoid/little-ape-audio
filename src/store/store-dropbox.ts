@@ -13,6 +13,8 @@ import {
 import { CleanBookMetadata, BookJSONMetadata, cleanOneBook } from "./../utils/audiobookMetadata";
 import { downloadToFileSystem } from "./data/fileSystemAccess";
 import { useTracksStore } from "./store";
+import { AudioSourceType } from "@app/audio/dropbox";
+import { AUDIO_FORMATS } from "@utils/constants";
 
 //-- ==================================
 //-- DROPBOX STORE
@@ -20,6 +22,8 @@ import { useTracksStore } from "./store";
 export type FavoriteFolders = {
   id: string;
   folderPath: string;
+  // What service did the folder come from "dropbox", "google"
+  audioSource: AudioSourceType;
   // order position when displaying
   position: number;
 };
@@ -62,6 +66,7 @@ type FolderNavigation = {
   fullPath: string;
   backTitle: string;
   yOffset?: number;
+  audioSource: AudioSourceType;
 };
 
 type DropboxState = {
@@ -94,7 +99,7 @@ type DropboxState = {
       type: "isFavorite" | "isRead",
       action: "add" | "remove"
     ) => Promise<void>;
-    addFavorite: (favPath: string) => Promise<void>;
+    addFavorite: (favPath: string, audioSource: AudioSourceType) => Promise<void>;
     removeFavorite: (favPath: string) => Promise<void>;
     isFolderFavorited: (folders: FolderEntry[]) => FolderEntry[];
     updateFavFolderArray: (favFolders: FavoriteFolders[]) => void;
@@ -208,11 +213,12 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       //!!!!!! IMPLEMENT Save to file system ()
       await saveToAsyncStorage("folderattributes", finalAttributes);
     },
-    addFavorite: async (favPath) => {
+    addFavorite: async (favPath, audioSource) => {
       const favs = [...(get().favoriteFolders || [])];
       const newFav: FavoriteFolders = {
         id: uuid.v4() as string,
         folderPath: favPath,
+        audioSource,
         position: favs.length + 1,
       };
       const updatedFolders = [...favs, newFav];
@@ -354,18 +360,7 @@ const updateFMDProcessingInfo = ({
 //------------------------------------------------------
 //-- FOLDER FILE READER FUNCTIONS
 //------------------------------------------------------
-export const AUDIO_FORMATS = [
-  "mp3",
-  "mb4",
-  "m4a",
-  "m4b",
-  "wav",
-  "aiff",
-  "aac",
-  "ogg",
-  "wma",
-  "flac",
-];
+
 function filterAudioFiles(filesAndFolders: DropboxDir) {
   const files = filesAndFolders.files;
   const newFiles = files.filter((file) =>

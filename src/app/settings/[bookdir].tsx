@@ -5,6 +5,7 @@ import ExplorerContainer from "@components/dropbox/ExplorerContainer";
 import { useNavigation } from "expo-router";
 import CustomHeader from "@components/dropbox/CustomHeader";
 import { useDropboxStore } from "@store/store-dropbox";
+import { AudioSourceLinkParams, AudioSourceType } from "@app/audio/dropbox";
 
 type SearchParms = { fullPath: string; backTitle: string; yOffset: string };
 
@@ -12,9 +13,12 @@ const NewDirectory = () => {
   const actions = useDropboxStore((state) => state.actions);
   const router = useRouter();
   const navigation = useNavigation();
-  const { newdir, fullPath, backTitle, yOffset } = useLocalSearchParams<SearchParms>();
+  const { newdir, fullPath, backTitle, audioSource, yOffset } =
+    useLocalSearchParams<AudioSourceLinkParams>();
+
+  const audioSourceIn = audioSource as AudioSourceType;
   useEffect(() => {
-    actions.pushFolderNavigation({ fullPath, backTitle });
+    actions.pushFolderNavigation({ fullPath, backTitle, audioSource: audioSourceIn });
   }, [newdir]);
 
   // Need a listener that will clear the dropbox store folderNavigation array
@@ -30,6 +34,7 @@ const NewDirectory = () => {
       params: {
         fullPath: newPath,
         backTitle: folderName,
+        audioSource: audioSourceIn,
       },
     });
   };

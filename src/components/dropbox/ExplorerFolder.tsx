@@ -22,6 +22,7 @@ import { colors } from "../../constants/Colors";
 import ExplorerFolderRow from "./ExplorerFolderRow";
 import { MotiView } from "moti";
 import { CleanBookMetadata } from "@utils/audiobookMetadata";
+import { AudioSourceType } from "@app/audio/dropbox";
 
 type Props = {
   folder: FolderEntry;
@@ -31,6 +32,7 @@ type Props = {
   onDownloadMetadata: (startingFolder: FolderEntry[]) => Promise<void>;
   hasMetadata: boolean;
   folderMetadata: CleanBookMetadata;
+  audioSource: AudioSourceType;
 };
 
 const ExplorerFolder = ({
@@ -42,6 +44,7 @@ const ExplorerFolder = ({
   hasMetadata,
   // setShowMetadata,
   folderMetadata,
+  audioSource,
 }: Props) => {
   const [isFavorite, setIsFavorite] = useState(!!folder.favorited);
   const actions = useDropboxStore((state) => state.actions);
@@ -62,13 +65,13 @@ const ExplorerFolder = ({
     // setFolderMetaState(showFolderMetadata);
     setMetadataInfo(folderMetadata);
   }, [displayFolderMetadata, folderMetadata]);
-  const setFavorite = async () => {
+  const toggleStarredFolder = async () => {
     if (isFavorite) {
       setIsFavorite(false);
       await actions.removeFavorite(folder.path_lower);
     } else {
       setIsFavorite(true);
-      await actions.addFavorite(folder.path_lower);
+      await actions.addFavorite(folder.path_lower, audioSource);
     }
   };
 
@@ -169,7 +172,7 @@ const ExplorerFolder = ({
           </Text>
           <TouchableOpacity
             className="border-l border-l-gray-400 pl-2 w-[35] py-2"
-            onPress={setFavorite}
+            onPress={toggleStarredFolder}
           >
             {isFavorite && <StarFilledIcon color="#74be73" />}
             {!isFavorite && <StarUnFilledIcon color="gray" />}

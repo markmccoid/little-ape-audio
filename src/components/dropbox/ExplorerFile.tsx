@@ -1,12 +1,7 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { FileEntry, getDropboxFileLink } from "../../utils/dropboxUtils";
-import {
-  AsteriskIcon,
-  CloseIcon,
-  CloudDownloadIcon,
-  FileAudioIcon,
-} from "../common/svg/Icons";
+import { AsteriskIcon, CloseIcon, CloudDownloadIcon, FileAudioIcon } from "../common/svg/Icons";
 import { formatBytes } from "../../utils/formatUtils";
 import { DownloadPauseState } from "expo-file-system";
 import { Lato_700Bold } from "@expo-google-fonts/lato";
@@ -15,15 +10,25 @@ import { colors } from "../../constants/Colors";
 import {
   DownloadProgress,
   downloadWithProgress,
+  getCleanFileName,
 } from "../../store/data/fileSystemAccess";
 import { useTrackActions } from "../../store/store";
 import * as Progress from "react-native-progress";
+import { AudioSourceType } from "@app/audio/dropbox";
+
+import * as FileSystem from "expo-file-system";
+import { getAccessToken } from "@utils/googleUtils";
+import axios from "axios";
 
 type Props = {
   file: FileEntry;
+  audioSource: AudioSourceType;
+  // This will be the path or folderId (google) of the folder the file resides in
+  // Google will need this to AddTrack can look for metadata files.
+  pathIn: string;
   playlistId?: string;
 };
-const ExplorerFile = ({ file, playlistId }: Props) => {
+const ExplorerFile = ({ file, playlistId, audioSource, pathIn }: Props) => {
   const trackActions = useTrackActions();
   const [progress, setProgress] = useState<DownloadProgress>();
 
@@ -64,8 +69,17 @@ const ExplorerFile = ({ file, playlistId }: Props) => {
   //~ --- downloadFile function to download file while setting progress state --------------
   const downloadFile = async (file: FileEntry) => {
     setIsDownloading(true);
-
-    const downloadLink = await getDropboxFileLink(file.path_lower);
+    let downloadLink;
+    // Get download link based on audioSource
+    if (audioSource === "dropbox") {
+      downloadLink = await getDropboxFileLink(file.path_lower);
+    } else if (audioSource === "google") {
+      //!! GOOGLE NOT IMPLEMENTED
+      // const accessToken = await getAccessToken();
+      // console.log(accessToken);
+      // downloadLink = `${file?.webContentLink}`;
+      return;
+    }
     const { startDownload, pauseDownload } = downloadWithProgress(
       downloadLink,
       file.name,
@@ -86,12 +100,14 @@ const ExplorerFile = ({ file, playlistId }: Props) => {
     }
     setIsDownloaded(true);
     // Add new Track to store
-    trackActions.addNewTrack(
-      cleanFileName,
-      file.name,
-      file.path_lower,
-      playlistId
-    );
+    trackActions.addNewTrack({
+      fileURI: cleanFileName,
+      filename: file.name,
+      sourceLocation: file.path_lower,
+      playlistId: playlistId,
+      pathIn,
+      audioSource,
+    });
   };
 
   return (
@@ -124,11 +140,7 @@ const ExplorerFile = ({ file, playlistId }: Props) => {
           {formatBytes(file.size)}
         </Text>
         {isDownloaded && (
-          <AsteriskIcon
-            color="green"
-            size={20}
-            style={{ marginLeft: 2, marginRight: 2 }}
-          />
+          <AsteriskIcon color="green" size={20} style={{ marginLeft: 2, marginRight: 2 }} />
         )}
         {!isDownloading && !isDownloaded && (
           <Pressable onPress={() => downloadFile(file)} disabled={isDownloaded}>
