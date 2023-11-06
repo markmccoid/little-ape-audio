@@ -17,6 +17,7 @@
     "@types/jsmediatags": "^3.9.3",
     "@types/react": "~18.2.14",
     "axios": "^1.4.0",
+    "base64-js": "^1.5.1",
     "buffer": "^6.0.3",
     "date-fns": "^2.30.0",
     "dotenv": "^16.0.3",

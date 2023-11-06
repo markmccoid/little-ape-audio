@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet, ActivityIndicator } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { FileEntry, getDropboxFileLink } from "../../utils/dropboxUtils";
 import { AsteriskIcon, CloseIcon, CloudDownloadIcon, FileAudioIcon } from "../common/svg/Icons";
@@ -17,7 +17,7 @@ import * as Progress from "react-native-progress";
 import { AudioSourceType } from "@app/audio/dropbox";
 
 import * as FileSystem from "expo-file-system";
-import { getAccessToken } from "@utils/googleUtils";
+import { downloadGoogleFile, getAccessToken } from "@utils/googleUtils";
 import axios from "axios";
 
 type Props = {
@@ -29,6 +29,8 @@ type Props = {
   playlistId?: string;
 };
 const ExplorerFile = ({ file, playlistId, audioSource, pathIn }: Props) => {
+  const isDropbox = !!(audioSource === "dropbox");
+  const isGoogle = !!(audioSource === "google");
   const trackActions = useTrackActions();
   const [progress, setProgress] = useState<DownloadProgress>();
 
@@ -74,7 +76,22 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn }: Props) => {
     if (audioSource === "dropbox") {
       downloadLink = await getDropboxFileLink(file.path_lower);
     } else if (audioSource === "google") {
-      //!! GOOGLE NOT IMPLEMENTED
+      //!! GOOGLE
+      // console.log("GOOGLE DL->", file.id, file.name);
+      const { cleanFileName } = await downloadGoogleFile(file.id, file.name);
+      setIsDownloaded(true);
+      setIsDownloading(false);
+      // Add new Track to store
+      //!  NEED to clean filename and not send WHOLE Uri just filename
+      //! how is sourceLocation used if at all
+      trackActions.addNewTrack({
+        fileURI: cleanFileName,
+        filename: file.name,
+        sourceLocation: file.path_lower,
+        playlistId: playlistId,
+        pathIn,
+        audioSource,
+      });
       // const accessToken = await getAccessToken();
       // console.log(accessToken);
       // downloadLink = `${file?.webContentLink}`;
@@ -153,12 +170,10 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn }: Props) => {
           </Pressable>
         )}
       </View>
-      {isDownloading && (
+      {isDownloading && isDropbox && (
         <View
           style={{
             position: "absolute",
-            // marginHorizontal: 20,
-            // marginVertical: 5,
             bottom: 5,
             right: 30,
             backgroundColor: "white",
@@ -166,6 +181,20 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn }: Props) => {
           }}
         >
           <Progress.Bar progress={progress?.downloadProgress} width={250} />
+        </View>
+      )}
+      {/* Google Progress Indicator */}
+      {isDownloading && isGoogle && (
+        <View
+          style={{
+            position: "absolute",
+            bottom: 5,
+            left: 8,
+            backgroundColor: "white",
+            borderRadius: 10,
+          }}
+        >
+          <ActivityIndicator size="small" color="red" />
         </View>
       )}
     </View>

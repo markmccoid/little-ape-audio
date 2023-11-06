@@ -20,7 +20,7 @@ const DropboxAuthScreen = () => {
         }}
       />
       <DropboxAuth />
-      {/* <GoogleAuth /> */}
+      <GoogleAuth />
     </View>
   );
 };

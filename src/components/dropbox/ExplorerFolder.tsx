@@ -71,7 +71,8 @@ const ExplorerFolder = ({
       await actions.removeFavorite(folder.path_lower);
     } else {
       setIsFavorite(true);
-      await actions.addFavorite(folder.path_lower, audioSource);
+      const name = audioSource === "dropbox" ? folder.path_lower : folder.name;
+      await actions.addFavorite(folder.path_lower, name, audioSource);
     }
   };
 

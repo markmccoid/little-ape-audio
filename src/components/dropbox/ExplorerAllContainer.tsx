@@ -127,9 +127,9 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
       setIsLoading(true);
       if (audioSource === "google") {
         //!! NOT IMPLEMENTED
-        // const filesFolders = await listGoogleDriveFiles(pathIn);
-        // setFilesFolderObj(filesFolders);
-        // setFlatlistData([...filesFolders.folders, ...filesFolders.files]);
+        const filesFolders = await listGoogleDriveFiles(pathIn);
+        setFilesFolderObj(filesFolders);
+        setFlatlistData([...filesFolders.folders, ...filesFolders.files]);
       } else if (audioSource === "dropbox") {
         await getFilesFromDropbox();
       }

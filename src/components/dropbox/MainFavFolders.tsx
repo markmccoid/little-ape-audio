@@ -69,7 +69,7 @@ const MainFavFolders = () => {
           >
             <View className="flex-row flex-1 items-center ">
               <Text className="ml-3 text" ellipsizeMode="tail" numberOfLines={2}>
-                {item.folderPath}
+                {item.name}
               </Text>
             </View>
           </Link>

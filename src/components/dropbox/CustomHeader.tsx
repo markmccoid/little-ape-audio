@@ -3,8 +3,9 @@ import { View, Text, TouchableOpacity, useWindowDimensions, SafeAreaView } from 
 import { useNavigation, usePathname, useRouter, useSegments } from "expo-router";
 import { ChevronBackIcon } from "../common/svg/Icons";
 import { useDropboxStore } from "@store/store-dropbox";
+import { colors } from "@constants/Colors";
 
-function CustomHeader({ title, backText }) {
+function CustomHeader({ title, backText, sessionAudioSource }) {
   const actions = useDropboxStore((state) => state.actions);
   const navigation = useNavigation();
   const router = useRouter();
@@ -32,14 +33,20 @@ function CustomHeader({ title, backText }) {
 
   return (
     <SafeAreaView
-      style={{ flexDirection: "row", alignItems: "center" }}
-      className="h-12 border-b border-b-black bg-amber-300"
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: sessionAudioSource === "dropbox" ? colors.dropboxBlue : colors.amber300,
+      }}
+      className="h-12 border-b border-b-black "
     >
       <TouchableOpacity onPress={onNavigateBack}>
         <View className="flex-row items-center flex-1 ">
-          <ChevronBackIcon size={30} />
+          <ChevronBackIcon size={30} color={sessionAudioSource === "dropbox" ? "white" : "black"} />
           <Text
-            className="text-amber-950 text-lg"
+            className={`text-lg ${
+              sessionAudioSource === "dropbox" ? "text-white" : "text-amber-950"
+            }`}
             style={{ width: width / 1.25 }}
             numberOfLines={1}
             ellipsizeMode="tail"

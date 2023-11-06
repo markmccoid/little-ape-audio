@@ -21,7 +21,11 @@ import { AUDIO_FORMATS } from "@utils/constants";
 //-- ==================================
 export type FavoriteFolders = {
   id: string;
+  // dropbox -> path to folder
+  // google -> folderId
   folderPath: string;
+  // Name to display
+  name: string;
   // What service did the folder come from "dropbox", "google"
   audioSource: AudioSourceType;
   // order position when displaying
@@ -99,7 +103,7 @@ type DropboxState = {
       type: "isFavorite" | "isRead",
       action: "add" | "remove"
     ) => Promise<void>;
-    addFavorite: (favPath: string, audioSource: AudioSourceType) => Promise<void>;
+    addFavorite: (favPath: string, name: string, audioSource: AudioSourceType) => Promise<void>;
     removeFavorite: (favPath: string) => Promise<void>;
     isFolderFavorited: (folders: FolderEntry[]) => FolderEntry[];
     updateFavFolderArray: (favFolders: FavoriteFolders[]) => void;
@@ -213,11 +217,12 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       //!!!!!! IMPLEMENT Save to file system ()
       await saveToAsyncStorage("folderattributes", finalAttributes);
     },
-    addFavorite: async (favPath, audioSource) => {
+    addFavorite: async (favPath, name, audioSource) => {
       const favs = [...(get().favoriteFolders || [])];
       const newFav: FavoriteFolders = {
         id: uuid.v4() as string,
         folderPath: favPath,
+        name,
         audioSource,
         position: favs.length + 1,
       };

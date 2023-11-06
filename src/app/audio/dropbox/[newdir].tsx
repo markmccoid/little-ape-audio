@@ -55,7 +55,13 @@ const NewDirectory = () => {
         options={{
           headerBackTitleVisible: false,
           headerBackVisible: false,
-          header: () => <CustomHeader title={fullPath || "/"} backText={backTitle} />,
+          header: () => (
+            <CustomHeader
+              title={fullPath || "/"}
+              backText={backTitle}
+              sessionAudioSource={audioSourceIn}
+            />
+          ),
         }}
       />
       {/* {audioSourceIn === "dropbox" ? (

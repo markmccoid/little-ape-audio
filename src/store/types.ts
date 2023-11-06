@@ -114,8 +114,9 @@ export type AudioState = {
     // given the audio file location in storage, look up metadata and create
     // record in AudioState.audioFiles store array
     addNewTrack: ({
+      // Bad name, this is just the clean file name
       fileURI,
-      // filename including extension
+      // filename including extension (not cleaned)
       filename,
       // file.path_lower
       sourceLocation,

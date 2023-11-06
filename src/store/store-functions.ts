@@ -6,8 +6,11 @@ import { AudioMetadata, AudioState } from "./types";
 import { getCleanFileName } from "./data/fileSystemAccess";
 import { downloadDropboxFile } from "@utils/dropboxUtils";
 import { format } from "date-fns";
-import { getGoogleDownloadLink } from "@utils/googleUtils";
+import { getJsonData } from "@utils/googleUtils";
 import axios from "axios";
+import { GDrive } from "@robinbobin/react-native-google-drive-api-wrapper";
+
+const gdrive = new GDrive();
 
 type AddTrack = AudioState["actions"]["addNewTrack"];
 type ZSetGet<T> = {
@@ -44,24 +47,17 @@ type LAABData = {
 export const addTrack =
   (set: ZSetGet<AudioState>["set"], get: ZSetGet<AudioState>["get"]): AddTrack =>
   async ({
-    fileURI,
-    filename,
-    sourceLocation,
-    pathIn,
-    audioSource,
+    fileURI, // Clean filename including extension
+    filename, // non cleaned filename including extension
+    sourceLocation, // Either full path with filename or google fileId TO THE FILE
+    pathIn, // This is the path or fileId to the **FOLDER** where the track was located.
+    audioSource, // google or dropbox
     playlistId = undefined,
     directory = "",
   }) => {
     // console.log("PathIn", pathIn, audioSource, fileURI);
+    console.log("Add Trck ->", fileURI, filename, sourceLocation);
     //!! TEST GOOGLE
-    if (audioSource === "google") {
-      const laabFile = await getGoogleDownloadLink({ folderId: pathIn, filename: laabFileName });
-      console.log("google Laab file", laabFile.webContentLink);
-      const laabJson = await axios.get(laabFile.webContentLink);
-      const final = await JSON.parse(laabJson.data);
-      console.log("LAAB JSON", laabJson);
-      return;
-    }
 
     //!!
     // variable for final tags
@@ -82,41 +78,20 @@ export const addTrack =
       totalTracks = trackNumInfo[1] || undefined;
     }
     // Track Raw End
-    //~~ Check for LAAB Meta file
-    const laabPath = sourceLocation.slice(0, sourceLocation.lastIndexOf("/"));
-    const laabFileName = `${getCleanFileName(filename)}_laabmeta.json`;
-    const laabFileNameWithPath = `${laabPath}/${laabFileName}`;
-    // const laabFileNameWithPath = `${laabPath}/${getCleanFileName(filename)}_laabmeta.json`;
+    // ------------------------------------
+    // -- GET LAAB Metadata if it exists
+    let LAABMeta: LAABData = undefined;
+    if (audioSource === "dropbox") {
+      LAABMeta = await laabMetaDropbox(sourceLocation, filename);
+    } else if (audioSource === "google") {
+      const laabFileName = `${getCleanFileName(filename)}_laabmeta.json`;
+      const laabData = await getJsonData({ folderId: pathIn, filename: laabFileName });
 
-    let LAABMeta: LAABData;
-    // laab file contains chapter data sometimes
-    try {
-      const laabData = (await downloadDropboxFile(`${laabFileNameWithPath}`)) as LAABData;
-      LAABMeta = {
-        fileName: laabData?.fileName,
-        // album: laabData?.album,
-        // albumArtist: laabData?.albumArtist,
-        author: laabData?.artist,
-        // copyright: laabData?.copyright,
-        // genre: laabData?.genre,
-        narrator: laabData?.narrator,
-        publisher: laabData?.publisher,
-        publishedYear: laabData?.publishingDate
-          ? format(new Date(laabData.publishingDate), "yyyy")
-          : undefined,
-        title: laabData?.title,
-        chapters: laabData?.chapters,
-      };
-      // Get rid of undefined keys
-      Object.keys(LAABMeta).forEach((key) => {
-        if (!LAABMeta[key]) {
-          delete LAABMeta[key];
-        }
-      });
-    } catch (err) {
-      LAABMeta = undefined;
-      // Assume the laab meta file was not found
-      // console.log("Error in LAABMeta", err);
+      if (laabData) {
+        LAABMeta = createLAABMeta(laabData);
+      } else {
+        LAABMeta = undefined;
+      }
     }
 
     //- merge LAABMeta with the final tag info, this only merges like keys
@@ -196,3 +171,49 @@ function mergeObjects(source, target) {
 
   return target;
 }
+
+const laabMetaDropbox = async (sourceLocation: string, filename: string) => {
+  //~~ Check for LAAB Meta file
+  const laabPath = sourceLocation.slice(0, sourceLocation.lastIndexOf("/"));
+  const laabFileName = `${getCleanFileName(filename)}_laabmeta.json`;
+  const laabFileNameWithPath = `${laabPath}/${laabFileName}`;
+  // const laabFileNameWithPath = `${laabPath}/${getCleanFileName(filename)}_laabmeta.json`;
+
+  let LAABMeta: LAABData;
+  // laab file contains chapter data sometimes
+  try {
+    const laabData = (await downloadDropboxFile(`${laabFileNameWithPath}`)) as LAABData;
+    LAABMeta = createLAABMeta(laabData);
+  } catch (err) {
+    LAABMeta = undefined;
+    // Assume the laab meta file was not found
+    // console.log("Error in LAABMeta", err);
+  }
+  return LAABMeta;
+};
+
+const createLAABMeta = (laabData) => {
+  const LAABMeta = {
+    fileName: laabData?.fileName,
+    // album: laabData?.album,
+    // albumArtist: laabData?.albumArtist,
+    author: laabData?.artist,
+    // copyright: laabData?.copyright,
+    // genre: laabData?.genre,
+    narrator: laabData?.narrator,
+    publisher: laabData?.publisher,
+    publishedYear: laabData?.publishingDate
+      ? format(new Date(laabData.publishingDate), "yyyy")
+      : undefined,
+    title: laabData?.title,
+    chapters: laabData?.chapters,
+  };
+  // Get rid of undefined keys
+  Object.keys(LAABMeta).forEach((key) => {
+    if (!LAABMeta[key]) {
+      delete LAABMeta[key];
+    }
+  });
+
+  return LAABMeta;
+};

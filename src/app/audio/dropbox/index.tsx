@@ -59,7 +59,7 @@ const DropboxScreens = () => {
           </Link>
         </View>
         {/* GOOGLE -- INACTIVE FOR NOW UNTIL DOWNLOAD BINARY WORKING */}
-        {/* <View
+        <View
           className="rounded-xl bg-white mt-2"
           style={{
             borderWidth: StyleSheet.hairlineWidth,
@@ -81,7 +81,7 @@ const DropboxScreens = () => {
               <Text className="ml-3 text">Google Drive</Text>
             </View>
           </Link>
-        </View> */}
+        </View>
         {/* BOOK META SEARCH */}
         <View
           className="rounded-xl bg-white mt-2"
