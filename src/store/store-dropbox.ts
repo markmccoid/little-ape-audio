@@ -5,6 +5,7 @@ import { create } from "zustand";
 import { saveToAsyncStorage } from "./data/asyncStorage";
 import {
   DropboxDir,
+  FileEntry,
   FolderEntry,
   downloadDropboxFile,
   getDropboxFileLink,
@@ -57,6 +58,7 @@ export type FolderAttributeItem = {
   categoryTwo?: string;
   genre?: string;
   flagForDelete?: boolean;
+  audioSource: AudioSourceType;
 };
 
 export type MetadataErrorObj = {
@@ -101,7 +103,9 @@ type DropboxState = {
     updateFolderAttribute: (
       id: string,
       type: "isFavorite" | "isRead",
-      action: "add" | "remove"
+      action: "add" | "remove",
+      folderNameIn: string,
+      audioSource: AudioSourceType
     ) => Promise<void>;
     addFavorite: (favPath: string, name: string, audioSource: AudioSourceType) => Promise<void>;
     removeFavorite: (favPath: string) => Promise<void>;
@@ -159,7 +163,7 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
     clearFolderNavigation: () => {
       set({ folderNavigation: [] });
     },
-    updateFolderAttribute: async (pathIn, type, action) => {
+    updateFolderAttribute: async (pathIn, type, action, folderNameIn, audioSource) => {
       const id = createFolderMetadataKey(pathIn);
       const attributes = [...get().folderAttributes];
       let currAttribute = attributes?.find((el) => el.id === id);
@@ -169,20 +173,24 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
         const { pathToFolderKey, pathToBookFolderKey } = extractMetadataKeys(pathIn);
         const bookMetadata = get().folderMetadata?.[pathToFolderKey]?.[pathToBookFolderKey];
         if (!bookMetadata) {
-          console.log("PathIn", pathIn);
-          const folderName = pathIn.slice(pathIn.lastIndexOf("/") + 1);
+          let folderName = "";
+          if (audioSource === "google") {
+            folderName = folderNameIn;
+          } else {
+            folderName = pathIn.slice(pathIn.lastIndexOf("/") + 1);
+          }
           console.log("Data", id, folderName);
           attributes.push({
             id,
             pathToFolder: pathIn,
             imageURL: undefined,
-            defaultImage: Image.resolveAssetSource(defaultImages[`image${getRandomNumber(10)}`])
-              .uri,
+            defaultImage: Image.resolveAssetSource(defaultImages[`image${getRandomNumber()}`]).uri,
             localImageName: undefined,
             title: folderName,
             author: "unknown",
             categoryOne: "unknown",
             categoryTwo: "unknown",
+            audioSource,
           });
         } else {
           // Push a new attribute into the array.  It will be process in tne for loop
@@ -196,6 +204,7 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
             author: bookMetadata.author,
             categoryOne: bookMetadata.categoryOne,
             categoryTwo: bookMetadata.categoryTwo,
+            audioSource,
           });
         }
       }
@@ -379,20 +388,19 @@ function filterAudioFiles(filesAndFolders: DropboxDir) {
 //~~ focused on dropbox only now.
 //~~=================================
 export const folderFileReader = async (pathIn: string) => {
-  const trackActions = useTracksStore.getState().actions;
-  const dropboxActions = useDropboxStore.getState().actions;
   try {
     const files = await listDropboxFiles(pathIn);
 
     const filteredFoldersFiles = filterAudioFiles(files);
-    // tag tracks as being already downloaded
-    const taggedFiles = trackActions.isTrackDownloaded(filteredFoldersFiles.files);
-    // Tag folders as being favorited
-    const taggedFolders = dropboxActions.isFolderFavorited(filteredFoldersFiles.folders);
-    const finalFolderFileList: DropboxDir = {
-      folders: taggedFolders, //filteredFoldersFiles.folders,
-      files: taggedFiles,
-    };
+    const finalFolderFileList = tagFilesAndFolders(filteredFoldersFiles);
+    // // tag tracks as being already downloaded
+    // const taggedFiles = trackActions.isTrackDownloaded(filteredFoldersFiles.files);
+    // // Tag folders as being favorited
+    // const taggedFolders = dropboxActions.isFolderFavorited(filteredFoldersFiles.folders);
+    // const finalFolderFileList: DropboxDir = {
+    //   folders: taggedFolders, //filteredFoldersFiles.folders,
+    //   files: taggedFiles,
+    // };
     //- Success reading directory, return data
     return finalFolderFileList;
   } catch (err) {
@@ -402,6 +410,23 @@ export const folderFileReader = async (pathIn: string) => {
     }
     throw new Error("folderFileReader Error" + err);
   }
+};
+
+export const tagFilesAndFolders = (foldersAndFiles: {
+  folders: FolderEntry[];
+  files: FileEntry[];
+}) => {
+  const trackActions = useTracksStore.getState().actions;
+  const dropboxActions = useDropboxStore.getState().actions;
+
+  const taggedFiles = trackActions.isTrackDownloaded(foldersAndFiles.files);
+  // Tag folders as being favorited
+  const taggedFolders = dropboxActions.isFolderFavorited(foldersAndFiles.folders);
+  const finalFolderFileList: DropboxDir = {
+    folders: taggedFolders, //filteredFoldersFiles.folders,
+    files: taggedFiles,
+  };
+  return finalFolderFileList;
 };
 //------------------------------------------------------
 //------------------------------------------------------

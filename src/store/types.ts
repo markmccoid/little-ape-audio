@@ -25,7 +25,7 @@ export type AudioMetadata = {
   narratedBy?: string;
   genre?: string;
   trackRaw?: string;
-  trackNum?: number;
+  trackNum?: number | string;
   totalTracks?: number;
   year?: number;
   durationSeconds?: number;

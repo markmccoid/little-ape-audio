@@ -12,6 +12,7 @@ import {
   GoogleSigninButton,
   User,
 } from "@react-native-google-signin/google-signin";
+import { colors } from "@constants/Colors";
 
 const GOOGLE_CLIENT_ID = Constants?.expoConfig?.extra?.googleClientId;
 
@@ -36,13 +37,13 @@ const GoogleAuthContainer = () => {
       console.log("SignOut ERR", err);
     }
   };
-  // // ----------------------------------
-  // // Function to call on component mount to check if token
-  // // is valid.
+  // ----------------------------------
+  // Function to call on component mount to check if token
+  // is valid.
   const checkLoginStatus = async () => {
     setIsCheckingStatus(true);
     const isSignedIn = await GoogleSignin.isSignedIn();
-    console.log("IS SIGNED IN", isSignedIn);
+    // console.log("IS SIGNED IN", isSignedIn);
     if (!isSignedIn) {
       setIsSignedIn(false);
     } else {
@@ -58,7 +59,7 @@ const GoogleAuthContainer = () => {
   }, []);
 
   return (
-    <View className="flex-col items-center">
+    <View className="flex-col items-center border-b border-amber-950">
       {isSignedIn && (
         <View className="flex-col items-center">
           <Text className="text-lg font-bold">Google Is Authorized</Text>
@@ -66,7 +67,7 @@ const GoogleAuthContainer = () => {
             <Text style={{ color: "white" }}>Revoke Google Authorization</Text>
           </TouchableOpacity>
           <View className="flex-row justify-center">
-            <Monkey size={100} />
+            <Monkey size={100} color={colors.amber500} />
           </View>
           <TouchableOpacity onPress={async () => await GoogleSignin.signInSilently()}>
             <Text>Test Silent SignIn</Text>

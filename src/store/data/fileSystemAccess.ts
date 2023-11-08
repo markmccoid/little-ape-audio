@@ -1,7 +1,10 @@
-import uuid from "react-native-uuid";
-import { useTracksStore } from "@store/store";
-import { FileEntry, getDropboxFileLink } from "@utils/dropboxUtils";
+// import uuid from "react-native-uuid";
+// import { useTracksStore } from "@store/store";
+// import { FileEntry, getDropboxFileLink } from "@utils/dropboxUtils";
 import * as FileSystem from "expo-file-system";
+import rnfs, { DownloadProgressCallbackResult } from "react-native-fs";
+import { AudioSourceType } from "@app/audio/dropbox";
+import { getAccessToken } from "@utils/googleUtils";
 
 //--============================================================
 //-- readFileSystem - Reads file system from Root dir
@@ -67,6 +70,44 @@ export type DownloadProgress = {
   downloadProgress: number;
   bytesWritten: number;
   bytesExpected: number;
+};
+
+//~ ==========================================
+//~ Download a file with Progress using
+//~ react-native-fs
+//~ Works for either Google or Dropbox
+//~ ==========================================
+export const downloadFileWProgress = async (
+  downloadLink: string,
+  filename: string,
+  progress: (res: DownloadProgressCallbackResult) => void,
+  audioSource: AudioSourceType
+) => {
+  const cleanFileName = getCleanFileName(filename);
+  const fileUri = `${FileSystem.documentDirectory}${cleanFileName}`;
+  const isGoogle = audioSource === "google";
+  const accessToken = isGoogle ? await getAccessToken() : undefined;
+  const includeHeaders = isGoogle ? { headers: { Authorization: `Bearer ${accessToken}` } } : {};
+  const downloadUri = isGoogle
+    ? `https://www.googleapis.com/drive/v3/files/${downloadLink}?alt=media`
+    : downloadLink;
+
+  try {
+    const res = rnfs.downloadFile({
+      fromUrl: downloadUri,
+      toFile: fileUri,
+      ...includeHeaders,
+      begin: (dl) => {},
+      progress: progress,
+      progressInterval: 100,
+    });
+
+    const stopDownload = () => rnfs.stopDownload(res.jobId);
+    const startDownload = async () => await res.promise;
+    return { cleanFileName, stopDownload, startDownload };
+  } catch (err) {
+    console.log("downloadDropboxFile ERR --> ", err.code);
+  }
 };
 /**
  * USAGE: calling this function will return two async function

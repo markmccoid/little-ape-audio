@@ -53,7 +53,7 @@ const SettingsContainer = () => {
         <View className="px-2 py-3" style={[styles.borderBottom]}>
           <Link href="/settings/authroute" asChild>
             <Pressable>
-              <Text className="text-sm">Dropbox Authorization</Text>
+              <Text className="text-sm">Cloud Authorization</Text>
             </Pressable>
           </Link>
         </View>

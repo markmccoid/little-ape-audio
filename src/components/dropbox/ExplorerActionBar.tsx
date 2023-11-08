@@ -10,12 +10,14 @@ import { MotiView } from "moti";
 import { colors } from "@constants/Colors";
 import { useDropboxStore } from "@store/store-dropbox";
 import { useShallow } from "zustand/react/shallow";
+import { AudioSourceType } from "@app/audio/dropbox";
 
 type Props = {
-  currentPath: string;
+  // currentPath: string;
+  audioSource: AudioSourceType;
   fileCount: number;
   folderCount: number;
-  showMetadata: "on" | "off" | "loading";
+  // showMetadata: "on" | "off" | "loading";
   displayMetadata: boolean;
   handleDownloadAll: () => void;
   handleDownloadMetadata: () => void;
@@ -23,10 +25,11 @@ type Props = {
 };
 
 const ExplorerActionBar = ({
-  currentPath,
+  // currentPath,
+  audioSource,
   fileCount,
   folderCount,
-  showMetadata,
+  // showMetadata,
   displayMetadata,
   handleDownloadAll,
   handleDownloadMetadata,
@@ -43,7 +46,10 @@ const ExplorerActionBar = ({
     <View className="flex flex-row items-center justify-end mt-1 pb-1 pr-2 border-b border-black">
       {/* DOWNLOAD METADATA Button */}
       {folderCount > 0 ? (
-        <View className="flex flex-row justify-between items-center flex-1">
+        <View
+          className="flex flex-row justify-between items-center flex-1"
+          style={{ display: audioSource === "google" ? "none" : "flex" }}
+        >
           <TouchableOpacity onPress={handleDisplayMetadata} className="mx-2 ">
             {displayMetadata ? <EyeOutlineIcon /> : <EyeOffOutlineIcon />}
           </TouchableOpacity>

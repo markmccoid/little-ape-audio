@@ -2,12 +2,12 @@
 import { getAudioFileTags } from "../utils/audioUtils";
 import { saveToAsyncStorage } from "./data/asyncStorage";
 import * as FileSystem from "expo-file-system";
-import { AudioMetadata, AudioState } from "./types";
-import { getCleanFileName } from "./data/fileSystemAccess";
+import { AudioMetadata, AudioState, AudioTrack } from "./types";
+import { getCleanFileName } from "@store/data/fileSystemAccess";
+// import { getCleanFileName } from "./data/fileSystemAccess";
 import { downloadDropboxFile } from "@utils/dropboxUtils";
 import { format } from "date-fns";
 import { getJsonData } from "@utils/googleUtils";
-import axios from "axios";
 import { GDrive } from "@robinbobin/react-native-google-drive-api-wrapper";
 
 const gdrive = new GDrive();
@@ -55,11 +55,7 @@ export const addTrack =
     playlistId = undefined,
     directory = "",
   }) => {
-    // console.log("PathIn", pathIn, audioSource, fileURI);
-    console.log("Add Trck ->", fileURI, filename, sourceLocation);
-    //!! TEST GOOGLE
-
-    //!!
+    // console.log("Add Trck ->", fileURI, filename, sourceLocation);
     // variable for final tags
     let finalTags: AudioMetadata;
     // Get metadata for passed audio file
@@ -67,15 +63,16 @@ export const addTrack =
       `${FileSystem.documentDirectory}${fileURI}`
     )) as AudioMetadata;
     // process track number info
-
-    let trackNum = tags.trackRaw;
+    // let trackNum = tags.trackRaw;
+    let trackNum: number | string = "";
     let totalTracks = undefined;
     const trackRaw = `${tags.trackRaw}`;
-
     if (trackRaw?.includes("/")) {
       const trackNumInfo = tags.trackRaw.split("/");
-      trackNum = trackNumInfo[0] || undefined;
-      totalTracks = trackNumInfo[1] || undefined;
+      trackNum = parseInt(trackNumInfo[0]) || "";
+      totalTracks = trackNumInfo[1] || 1;
+    } else {
+      trackNum = parseInt(tags.trackRaw) || "";
     }
     // Track Raw End
     // ------------------------------------
@@ -84,6 +81,7 @@ export const addTrack =
     if (audioSource === "dropbox") {
       LAABMeta = await laabMetaDropbox(sourceLocation, filename);
     } else if (audioSource === "google") {
+      //! Google LaabMeta check
       const laabFileName = `${getCleanFileName(filename)}_laabmeta.json`;
       const laabData = await getJsonData({ folderId: pathIn, filename: laabFileName });
 
@@ -144,11 +142,11 @@ export const addTrack =
      */
     // If no playlist ID passed, then assume single download and create new playlist
     // and add track
-
     const plName =
       newAudioFile.metadata?.album || newAudioFile.metadata?.title || newAudioFile.filename;
     const plAuthor = newAudioFile.metadata?.artist || "Unknown";
     const finalPlaylistId = await get().actions.addNewPlaylist(plName, plAuthor, playlistId);
+
     await get().actions.addTracksToPlaylist(finalPlaylistId, [newAudioFile.id]);
 
     await saveToAsyncStorage("tracks", newAudioFileList);

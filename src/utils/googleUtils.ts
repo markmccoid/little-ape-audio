@@ -1,13 +1,18 @@
+import rnfs, { DownloadProgressCallbackResult } from "react-native-fs";
+
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import { getGoogleAccessToken, storeGoogleAccessToken } from "../store/data/secureStorage";
+
 import { GDrive, MimeTypes } from "@robinbobin/react-native-google-drive-api-wrapper";
 import { AUDIO_FORMATS } from "@utils/constants";
 import axios from "axios";
-import { fromByteArray } from "base64-js";
-import * as FileSystem from "expo-file-system";
-import { getCleanFileName } from "@store/data/fileSystemAccess";
 
+import * as FileSystem from "expo-file-system";
+// import { getCleanFileName } from "@store/data/fileSystemAccess";
 const gdrive = new GDrive();
+
+// const base64 = require("base-64");
+import ReactNativeBlobUtil from "react-native-blob-util";
+import sortBy from "lodash/sortBy";
 
 export const getAccessToken = async () => {
   // let tokens = undefined;
@@ -15,7 +20,7 @@ export const getAccessToken = async () => {
     const tokens = await GoogleSignin.getTokens();
     return tokens.accessToken;
   } catch (e) {
-    console.log("Sign In Silently !!!!!!");
+    // console.log("Sign In Silently !!!!!!");
     await GoogleSignin.signInSilently();
     const tokens = await GoogleSignin.getTokens();
     return tokens.accessToken;
@@ -36,22 +41,6 @@ export type GoogleFile = {
   webContentLink: string;
   mimeType: MimeTypes;
   resourceKey: string;
-};
-
-//!! NOT USED this is using @robinbobin/react-native-google-drive-api-wrapper
-export const listGoogleFiles = async (folderId: string = undefined) => {
-  const accessToken = await getAccessToken();
-  gdrive.accessToken = accessToken;
-
-  let query = folderId ? `'${folderId}' in parents` : `'root' in parents`;
-  let files: GoogleResponse = undefined;
-  try {
-    files = await gdrive.files.list({ q: query });
-  } catch (err) {
-    console.log("ERROR --- ", err.message);
-  }
-  // return files;
-  return separateFilesFolders(files.files);
 };
 
 export const getJsonData = async ({
@@ -83,6 +72,8 @@ export const listGoogleDriveFiles = async (
 ) => {
   const accessToken = await getAccessToken();
 
+  // If root folder we get "/" need to cover to "root"
+  // otherwise use passed in folderId
   let query = `'${folderId === "/" || !folderId ? "root" : folderId}' in parents`;
 
   const apiUrl = `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name,size,mimeType,fileExtension,webContentLink)`;
@@ -91,8 +82,11 @@ export const listGoogleDriveFiles = async (
       Authorization: `Bearer ${accessToken}`,
     },
   });
+  // Separate folders and Files
+  const filteredFoldersFiles = separateFilesFolders(resp.data.files, includeAllFiles);
 
-  return separateFilesFolders(resp.data.files, includeAllFiles);
+  //- Success reading directory, return data
+  return filteredFoldersFiles;
 };
 
 //~ -------------------------------------
@@ -119,19 +113,9 @@ const separateFilesFolders = (list, includeAllFiles: boolean) => {
         webContentLink: file.webContentLink,
       });
     }
-    // else if (AUDIO_FORMATS.includes(file.name.slice(file.name.lastIndexOf(".") + 1))) {
-    //   files.push({
-    //     [".tag"]: "file",
-    //     name: file.name,
-    //     path_lower: file.id,
-    //     path_display: file.id,
-    //     id: file.id,
-    //     size: file.size,
-    //     webContentLink: file.webContentLink,
-    //   });
-    // }
   }
-
+  folders = sortBy(folders, [(o) => o.name.toLowerCase()]);
+  files = sortBy(files, [(o) => o.name.toLowerCase()]);
   return { files, folders };
 };
 //~ ---------------------------------------------------
@@ -139,29 +123,35 @@ const separateFilesFolders = (list, includeAllFiles: boolean) => {
 //~ downloads the fileId file saves to document dir
 //~ with filename (includes extension)
 //~ ---------------------------------------------------
-export const downloadGoogleFile = async (fileId: string, filename: string) => {
-  const accessToken = await getAccessToken();
-  const apiUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
-  const resp = await axios.get(apiUrl, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-    responseType: "arraybuffer",
-  });
-  // console.log("DATA", resp.data);
-  // return await resp.data;
-  // Define the path where you want to save the file
-  const cleanFileName = getCleanFileName(filename);
-  const fileUri = `${FileSystem.documentDirectory}${cleanFileName}`;
-  // console.log("Google Write To -> ", fileUri);
-  const base64String = fromByteArray(new Uint8Array(resp.data));
-  // Write the file to the local file system
-  await FileSystem.writeAsStringAsync(fileUri, base64String, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
+// export const downloadGoogleFile = async (
+//   fileId: string,
+//   filename: string,
+//   progress: (res: DownloadProgressCallbackResult) => void
+// ) => {
+//   const accessToken = await getAccessToken();
+// //  IF YOU USE THIS HERE you will get "require cycles"
+//   const cleanFileName = getCleanFileName(filename);
+//   const fileUri = `${FileSystem.documentDirectory}${cleanFileName}`;
 
-  return { cleanFileName };
-};
+//   try {
+//     const res = rnfs.downloadFile({
+//       fromUrl: `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+//       toFile: fileUri,
+//       headers: { Authorization: `Bearer ${accessToken}` },
+//       begin: (dl) => {},
+//       progress: progress,
+//       progressInterval: 100,
+//     });
+
+//     const stopDownload = () => rnfs.stopDownload(res.jobId);
+//     const startDownload = async () => await res.promise;
+//     return { cleanFileName, stopDownload, startDownload };
+//   } catch (err) {
+//     console.log("downloadGoogleFile ERR --> ", err.code);
+//   }
+// };
+//~ ------------------------------------------------------------------------------------
+
 //!! DROPBOX TYPES
 type FolderEntry = {
   [".tag"]: "folder"; // Used in ExplorerContianer.tsx, dropboxUtils.ts

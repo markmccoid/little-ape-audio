@@ -14,7 +14,6 @@ type Props = {
 };
 const MainFavFolders = () => {
   const favFolders = useDropboxStore((state) => state.favoriteFolders) || [];
-  const activeKey = useSharedValue(undefined);
   const actions = useDropboxStore((state) => state.actions);
   const [extra, setExtra] = useState(false);
   const flatRef = useRef();
@@ -35,7 +34,9 @@ const MainFavFolders = () => {
       <OpacityDecorator activeOpacity={0.9}>
         <View
           id={item.id}
-          className={`bg-white w-full flex-row h-[50]  items-center
+          className={`${
+            item.audioSource === "google" ? "bg-amber-500/30" : "bg-blue-500/30"
+          } w-full flex-row h-[50]  items-center 
           ${isFirst ? "border-b-0" : "border-b-0"}
            
           ${isActive ? "border border-amber-500 bg-white" : ""}`}

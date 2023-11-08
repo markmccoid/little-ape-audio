@@ -1,24 +1,14 @@
-import { View, Text, Pressable, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { FileEntry, getDropboxFileLink } from "../../utils/dropboxUtils";
-import { AsteriskIcon, CloseIcon, CloudDownloadIcon, FileAudioIcon } from "../common/svg/Icons";
+import { AsteriskIcon, CloseIcon, CloudDownloadIcon } from "../common/svg/Icons";
 import { formatBytes } from "../../utils/formatUtils";
-import { DownloadPauseState } from "expo-file-system";
-import { Lato_700Bold } from "@expo-google-fonts/lato";
 import { colors } from "../../constants/Colors";
-
-import {
-  DownloadProgress,
-  downloadWithProgress,
-  getCleanFileName,
-} from "../../store/data/fileSystemAccess";
+import { DownloadProgress, downloadFileWProgress } from "../../store/data/fileSystemAccess";
 import { useTrackActions } from "../../store/store";
 import * as Progress from "react-native-progress";
 import { AudioSourceType } from "@app/audio/dropbox";
-
-import * as FileSystem from "expo-file-system";
-import { downloadGoogleFile, getAccessToken } from "@utils/googleUtils";
-import axios from "axios";
+import { DownloadProgressCallbackResult } from "react-native-fs";
 
 type Props = {
   file: FileEntry;
@@ -38,7 +28,7 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn }: Props) => {
   const [stopped, setStopped] = useState(false);
   const [isDownloaded, setIsDownloaded] = useState(file.alreadyDownload);
 
-  const stopDownloadRef = useRef<() => Promise<DownloadPauseState>>();
+  const stopDownloadRef = useRef<() => void>();
 
   useEffect(() => {
     // Using the playlistId as the trigger to download a file
@@ -60,10 +50,8 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn }: Props) => {
   //     }
   //   };
   // }, []);
-  //~ --- Download All Trigger -----
-  const downloadAll = () => {};
   //~ --- stopDownload of file -----
-  const stopDownload = async () => {
+  const stopDownload = () => {
     setStopped(true);
     // this ref has a function that will cancel the download
     stopDownloadRef?.current && stopDownloadRef.current();
@@ -71,51 +59,40 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn }: Props) => {
   //~ --- downloadFile function to download file while setting progress state --------------
   const downloadFile = async (file: FileEntry) => {
     setIsDownloading(true);
-    let downloadLink;
-    // Get download link based on audioSource
-    if (audioSource === "dropbox") {
-      downloadLink = await getDropboxFileLink(file.path_lower);
-    } else if (audioSource === "google") {
-      //!! GOOGLE
-      // console.log("GOOGLE DL->", file.id, file.name);
-      const { cleanFileName } = await downloadGoogleFile(file.id, file.name);
-      setIsDownloaded(true);
-      setIsDownloading(false);
-      // Add new Track to store
-      //!  NEED to clean filename and not send WHOLE Uri just filename
-      //! how is sourceLocation used if at all
-      trackActions.addNewTrack({
-        fileURI: cleanFileName,
-        filename: file.name,
-        sourceLocation: file.path_lower,
-        playlistId: playlistId,
-        pathIn,
-        audioSource,
+    // Progress callback
+    const onHandleProgress = (progressData: DownloadProgressCallbackResult) => {
+      setProgress({
+        downloadProgress: progressData.bytesWritten / progressData.contentLength,
+        bytesExpected: progressData.contentLength,
+        bytesWritten: progressData.bytesWritten,
       });
-      // const accessToken = await getAccessToken();
-      // console.log(accessToken);
-      // downloadLink = `${file?.webContentLink}`;
-      return;
+    };
+    // based on if google or dropbox
+    const downloadLink = isGoogle ? file.id : await getDropboxFileLink(file.path_lower);
+    // Prepare to start the download
+    const {
+      cleanFileName,
+      stopDownload: cancelDownload,
+      startDownload,
+    } = await downloadFileWProgress(downloadLink, file.name, onHandleProgress, audioSource);
+    // Set the stop download function in a ref
+    stopDownloadRef.current = cancelDownload;
+    // Start the download
+    try {
+      const res = await startDownload();
+    } catch (err) {
+      if (err.message.toLowerCase().includes("abort")) {
+        setIsDownloaded(false);
+        setIsDownloading(false);
+        return;
+      }
     }
-    const { startDownload, pauseDownload } = downloadWithProgress(
-      downloadLink,
-      file.name,
-      setProgress
-    );
-    stopDownloadRef.current = pauseDownload;
-    const { fileURI, cleanFileName } = await startDownload();
 
-    // RESET Progress and other clean up
+    // Reset Progress and download flags
     setProgress({ downloadProgress: 0, bytesExpected: 0, bytesWritten: 0 });
+    setIsDownloaded(true);
     setIsDownloading(false);
     stopDownloadRef.current = undefined;
-
-    // Bail if stopped OR no fileURI, assumption is download was cancelled
-    if (stopped || !fileURI) {
-      setStopped(false);
-      return;
-    }
-    setIsDownloaded(true);
     // Add new Track to store
     trackActions.addNewTrack({
       fileURI: cleanFileName,
@@ -170,7 +147,7 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn }: Props) => {
           </Pressable>
         )}
       </View>
-      {isDownloading && isDropbox && (
+      {isDownloading && (
         <View
           style={{
             position: "absolute",
@@ -183,8 +160,8 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn }: Props) => {
           <Progress.Bar progress={progress?.downloadProgress} width={250} />
         </View>
       )}
-      {/* Google Progress Indicator */}
-      {isDownloading && isGoogle && (
+
+      {/* {isDownloading && isGoogle && (
         <View
           style={{
             position: "absolute",
@@ -194,9 +171,9 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn }: Props) => {
             borderRadius: 10,
           }}
         >
-          <ActivityIndicator size="small" color="red" />
+          <Progress.Bar indeterminate />
         </View>
-      )}
+      )} */}
     </View>
   );
 };

@@ -2,10 +2,7 @@ import { View, Text, TouchableOpacity, Image, StyleSheet, Pressable } from "reac
 import React, { useState } from "react";
 import { CleanBookMetadata } from "../../utils/audiobookMetadata";
 import { colors } from "../../constants/Colors";
-import { AnimateHeight } from "../common/animations/AnimateHeight";
-import { PowerIcon } from "../common/svg/Icons";
-import { MotiText, MotiView } from "moti";
-import * as FileSystem from "expo-file-system";
+
 import ExplorerImage from "./ExplorerImage";
 
 type Props = {
@@ -13,6 +10,8 @@ type Props = {
   showMetadata?: boolean;
   index: number;
 };
+//~ -- This component is only shown when the metadata flag is set to true
+//~ -- It shows as a new row under the folder name.
 const ExplorerFolderRow = ({ metadata, showMetadata = false, index }: Props) => {
   const [showDescription, setShowDescription] = useState(false);
   // const [imgDims, setImgDims] = useState({ width: 0, height: 0 });

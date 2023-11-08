@@ -69,13 +69,21 @@ const ShowFavoritedBooks = () => {
               params: {
                 fullPath: item?.pathToFolder,
                 backTitle: "Back",
+                audioSource: item.audioSource,
               },
             })
           }
         >
           <View className="flex-row justify-start w-full mb-1">
             <View className="flex-col justify-start w-full ">
-              <Text className="font-semibold text-sm pl-3 bg-amber-500">
+              <Text
+                className="font-semibold text-sm pl-3"
+                style={{
+                  backgroundColor:
+                    item.audioSource === "dropbox" ? colors.dropboxBlue : colors.amber500,
+                  color: item.audioSource === "dropbox" ? "white" : colors.amber900,
+                }}
+              >
                 {item.categoryOne} - {item.categoryTwo}
               </Text>
               <Text className="text-base font-bold px-2" style={{}}>

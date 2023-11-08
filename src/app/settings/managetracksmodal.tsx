@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { useLocalSearchParams, useSearchParams } from "expo-router";
 import { useTracksStore } from "@store/store";
 import { AudioTrack } from "@store/types";
+import * as FileSystem from "expo-file-system";
 
 const managetracksmodal = () => {
   const params = useLocalSearchParams();
@@ -21,6 +22,10 @@ const managetracksmodal = () => {
       <View className="p-1 border-b border-b-amber-800">
         <Text className="font-semibold">Track Id</Text>
         <Text>{currTrack.id}</Text>
+      </View>
+      <View className="p-1 border-b border-b-amber-800">
+        <Text className="font-semibold">File URI</Text>
+        <Text>{`${FileSystem.documentDirectory}${currTrack.fileURI}`}</Text>
       </View>
       <View className="p-1 border-b border-b-amber-800">
         <Text className="font-semibold">Track Title</Text>

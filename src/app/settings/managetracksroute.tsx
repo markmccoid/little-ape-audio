@@ -44,16 +44,7 @@ const ManageTracksRoute = () => {
           },
         ]}
       />
-      <TouchableOpacity
-        onPress={() =>
-          route.push({
-            pathname: "/settings/managetracksmodal",
-            params: { trackId: "x" },
-          })
-        }
-      >
-        <Text>Modal</Text>
-      </TouchableOpacity>
+
       <ManageTracks />
     </View>
   );

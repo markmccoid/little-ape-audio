@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import uuid from "react-native-uuid";
-import { Link, router } from "expo-router";
+import { Link, router, useLocalSearchParams } from "expo-router";
 import { DropboxDir, FileEntry, FolderEntry } from "../../utils/dropboxUtils";
 import ExplorerActionBar from "./ExplorerActionBar";
 // import { useTrackActions } from "../../store/store";
@@ -31,6 +31,7 @@ import {
   extractMetadataKeys,
   folderFileReader,
   recurseFolderMetadata,
+  tagFilesAndFolders,
   useDropboxStore,
 } from "../../store/store-dropbox";
 import FileMetadataView from "./FileMetadataView";
@@ -52,13 +53,13 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
   const [isLoading, setIsLoading] = React.useState(false);
   const [isError, setIsError] = React.useState(undefined);
 
-  const [showMetadata, setShowMetadata] = React.useState<"off" | "on" | "loading">("off");
   const [displayMetadata, toggeleDisplayMetadata] = React.useReducer((prev) => !prev, false);
   const allFoldersMetadata = useDropboxStore((state) => state.folderMetadata || {});
   const { pathToFolderKey, pathToBookFolderKey } = extractMetadataKeys(pathIn);
   const hasMetadata = !!Object.keys(allFoldersMetadata).find(
     (key) => key === `${pathToFolderKey}/${pathToBookFolderKey}`
   );
+  const { backTitle } = useLocalSearchParams();
 
   const dropboxActions = useDropboxStore((state) => state.actions);
   const flatlistRef = useRef<FlatList>();
@@ -128,8 +129,10 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
       if (audioSource === "google") {
         //!! NOT IMPLEMENTED
         const filesFolders = await listGoogleDriveFiles(pathIn);
-        setFilesFolderObj(filesFolders);
-        setFlatlistData([...filesFolders.folders, ...filesFolders.files]);
+        // tag tracks as being already downloaded and marked as a Starred folder
+        const finalFolderFileList = tagFilesAndFolders(filesFolders);
+        setFilesFolderObj(finalFolderFileList);
+        setFlatlistData([...finalFolderFileList.folders, ...finalFolderFileList.files]);
       } else if (audioSource === "dropbox") {
         await getFilesFromDropbox();
       }
@@ -266,10 +269,11 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
     >
       <View style={{ zIndex: 5 }}>
         <ExplorerActionBar
-          currentPath={pathIn}
+          // currentPath={pathIn}
+          audioSource={audioSource}
           fileCount={filesFolderObj?.files?.length || 0}
           folderCount={filesFolderObj?.folders?.length || 0}
-          showMetadata={showMetadata}
+          // showMetadata={showMetadata}
           displayMetadata={displayMetadata}
           handleDownloadAll={onDownloadAll}
           handleDownloadMetadata={onDownloadMetadata}
@@ -282,6 +286,7 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
           <FileMetadataView
             metadata={allFoldersMetadata?.[pathToFolderKey]?.[pathToBookFolderKey]}
             path_lower={pathIn}
+            folderName={backTitle}
             audioSource={audioSource}
           />
         </>

@@ -424,6 +424,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       const currPlaylist = useTracksStore.getState().actions.getPlaylist(playlistId);
       // console.log("CURR Playlist", currPlaylist.name, currPlaylist.currentPosition);
       const queue = buildTrackPlayerQueue(currPlaylist.trackIds);
+
       set({
         currentPlaylistId: playlistId,
         // currentPlaylist: currPlaylist,

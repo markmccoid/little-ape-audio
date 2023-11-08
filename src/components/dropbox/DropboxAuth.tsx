@@ -7,6 +7,7 @@ import { storeDropboxRefreshToken, storeDropboxToken } from "../../store/data/se
 import { checkDropboxToken, revokeDropboxAccess } from "../../utils/dropboxUtils";
 import { Link } from "expo-router";
 import Monkey from "../common/svg/Monkey";
+import { colors } from "@constants/Colors";
 
 //-- ----------------------
 //-- APP AUTH CONFIG SETUP
@@ -134,7 +135,7 @@ const DropboxAuthContainer = () => {
             </TouchableOpacity>
           </View>
           <View className="flex-row justify-center">
-            <Monkey size={100} />
+            <Monkey size={100} color={colors.dropboxBlue} />
           </View>
           <Text className="text-lg">Happy Listening</Text>
         </View>

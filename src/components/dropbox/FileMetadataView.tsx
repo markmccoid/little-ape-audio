@@ -36,9 +36,11 @@ import { AudioSourceType } from "@app/audio/dropbox";
 type Props = {
   metadata: CleanBookMetadata;
   path_lower: string;
+  // This is using the "backTitle" from the localParams.  Should be correct most of the time!
+  folderName: string;
   audioSource: AudioSourceType;
 };
-const FileMetadataView = ({ metadata, path_lower, audioSource }: Props) => {
+const FileMetadataView = ({ metadata, path_lower, audioSource, folderName }: Props) => {
   const [showDescription, setShowDescription] = useState(false);
   const dropboxActions = useDropboxStore((state) => state.actions);
   const folderAttributes = useDropboxStore((state) => state.folderAttributes);
@@ -86,12 +88,24 @@ const FileMetadataView = ({ metadata, path_lower, audioSource }: Props) => {
   const handleToggleFavorite = async () => {
     const action = !!currFolderAttributes?.isFavorite ? "remove" : "add";
 
-    await dropboxActions.updateFolderAttribute(path_lower, "isFavorite", action);
+    await dropboxActions.updateFolderAttribute(
+      path_lower,
+      "isFavorite",
+      action,
+      folderName,
+      audioSource
+    );
   };
 
   const handleToggleRead = async () => {
     const action = !!currFolderAttributes?.isRead ? "remove" : "add";
-    await dropboxActions.updateFolderAttribute(path_lower, "isRead", action);
+    await dropboxActions.updateFolderAttribute(
+      path_lower,
+      "isRead",
+      action,
+      folderName,
+      audioSource
+    );
   };
 
   return (

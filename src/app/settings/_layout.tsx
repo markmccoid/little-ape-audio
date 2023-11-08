@@ -31,7 +31,7 @@ const SettingsLayout = () => {
       <Stack.Screen
         name="authroute"
         options={{
-          title: "Dropbox Auth",
+          title: "Cloud Auhtorizations",
           headerStyle: { backgroundColor: colors.amber200 },
           headerTintColor: colors.amber900,
         }}

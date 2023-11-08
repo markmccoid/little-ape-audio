@@ -23,9 +23,7 @@ export const getAudioFileTags = async (fullFileURI: string) => {
   try {
     const tag = (await jsMediaAsync(workingURI)) as TagType;
     // Get chapter information if any exists
-    const chaptersInfo = processChapters(
-      tag.tags?.CHAP as unknown as TagChapters[]
-    );
+    const chaptersInfo = processChapters(tag.tags?.CHAP as unknown as TagChapters[]);
     metadata = {
       title: tag.tags?.title,
       artist: tag.tags?.artist,
@@ -34,9 +32,7 @@ export const getAudioFileTags = async (fullFileURI: string) => {
       trackRaw: tag.tags?.track,
       comment: tag.tags?.comment?.text,
       chapters: chaptersInfo?.chapterArray,
-      year: isNaN(parseInt(tag.tags?.year))
-        ? undefined
-        : parseInt(tag.tags?.year),
+      year: isNaN(parseInt(tag.tags?.year)) ? undefined : parseInt(tag.tags?.year),
       durationSeconds: chaptersInfo?.duration || durationSeconds,
       pictureURI: undefined,
       pictureAspectRatio: undefined,
@@ -131,14 +127,20 @@ const processChapters = (
 //--=================================
 export const getAudioFileDuration = async (fileURI: string) => {
   const soundObj = new Audio.Sound();
-  await soundObj.loadAsync({ uri: `${fileURI}` });
-  const metadata = (await soundObj.getStatusAsync()) as AVPlaybackStatusSuccess;
 
-  const durationSeconds = metadata.durationMillis
-    ? metadata.durationMillis / 1000
-    : 0;
-  await soundObj.unloadAsync();
-  return durationSeconds;
+  const info = await FileSystem.getInfoAsync(fileURI);
+
+  try {
+    await soundObj.loadAsync({ uri: `${fileURI}` });
+    const metadata = (await soundObj.getStatusAsync()) as AVPlaybackStatusSuccess;
+
+    const durationSeconds = metadata.durationMillis ? metadata.durationMillis / 1000 : 0;
+    await soundObj.unloadAsync();
+    return durationSeconds;
+  } catch (err) {
+    console.log("Error in getAudioFileDuration ->", err);
+    return 0;
+  }
 };
 
 /**

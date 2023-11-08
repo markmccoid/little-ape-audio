@@ -1,17 +1,7 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  SafeAreaView,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, ScrollView, SafeAreaView, StyleSheet, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useTracksStore } from "../../store/store";
-import {
-  deleteFromFileSystem,
-  readFileSystemDir,
-} from "../../store/data/fileSystemAccess";
+import { deleteFromFileSystem, readFileSystemDir } from "../../store/data/fileSystemAccess";
 import { AudioTrack } from "../../store/types";
 import { colors } from "../../constants/Colors";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -60,9 +50,11 @@ const ManageTracks = () => {
       <ScrollView
         // ref={scrollRef}
         className="mx-2  rounded-lg bg-white"
+        // contentContainerStyle={{ flexGrow: 1, marginBottom: 150 }}
         style={{
           borderWidth: StyleSheet.hairlineWidth,
           borderColor: colors.amber900,
+          marginBottom: 150,
         }}
       >
         {files &&
