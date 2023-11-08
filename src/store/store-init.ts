@@ -1,4 +1,4 @@
-import { loadFromAsyncStorage } from "./data/asyncStorage";
+import { loadFromAsyncStorage, saveToAsyncStorage } from "./data/asyncStorage";
 import { useTracksStore } from "./store";
 import { useDropboxStore } from "./store-dropbox";
 import { useSettingStore } from "./store-settings";
@@ -22,7 +22,13 @@ export const onInitialize = async () => {
 
   useTracksStore.setState({ tracks: tracks || [], playlists: playlists || {} });
 
-  useDropboxStore.setState({ favoriteFolders: favFolders });
+  // * patch favFolders
+  const patchedFavs = favFolders.map((folder) => ({
+    ...folder,
+    audioSource: folder?.audioSource ? folder.audioSource : "dropbox",
+  }));
+  saveToAsyncStorage("favfolders", patchedFavs);
+  useDropboxStore.setState({ favoriteFolders: patchedFavs });
 
   useDropboxStore.setState({
     folderMetadata: folderMetadata,
