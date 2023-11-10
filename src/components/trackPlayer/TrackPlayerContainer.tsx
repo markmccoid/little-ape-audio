@@ -1,25 +1,47 @@
-import { View, Text, StyleSheet, Image, Dimensions } from "react-native";
+import { View, Text, StyleSheet, SafeAreaView, Dimensions } from "react-native";
 import React, { useEffect, useState } from "react";
-import { Audio } from "expo-av";
 import TrackPlayerControls from "./TrackPlayerControls";
-import { AudioTrack } from "../../store/types";
 import TrackPlayerProgressBar from "./TrackPlayerProgressBar";
-import TrackList from "./TrackList";
-import PlaylistImage from "../common/PlaylistImage";
 import TrackPlayerImage from "./TrackPlayerImage";
-import { useCurrentPlaylist, useTracksStore } from "@store/store";
-import { shallow } from "zustand/shallow";
+import BottomSheetContainer from "./bottomSheet/BottomSheetContainer";
+import { useCurrentPlaylist } from "@store/store";
+import { colors } from "@constants/Colors";
+import { LinearGradient } from "expo-linear-gradient";
 
 const { width, height } = Dimensions.get("window");
 
 const TrackPlayerContainer = () => {
+  const playlist = useCurrentPlaylist();
+  const [colorP, setColorP] = useState({ background: colors.amber600, secondary: colors.amber200 });
+
+  useEffect(() => {
+    if (playlist?.imageColors) {
+      setColorP(playlist.imageColors);
+    }
+  }, [playlist]);
+
   return (
-    <View className="flex-1 flex-col">
-      <TrackPlayerImage />
-      <TrackPlayerControls />
-      <TrackPlayerProgressBar />
-      <TrackList />
-    </View>
+    <SafeAreaView className="flex-1 flex-col">
+      <LinearGradient
+        // colors={[`${colorP.secondary}55`, `${colorP.background}55`]}
+        colors={[`${colorP.secondary}`, `${colorP.background}`, colors.amber50]}
+        style={{}}
+        // start={{ x: 0, y: 0 }}
+        // end={{ x: 1, y: 1 }}
+      >
+        <View className="pb-5">
+          <TrackPlayerImage />
+
+          <TrackPlayerProgressBar />
+        </View>
+      </LinearGradient>
+      <View className="flex-1">
+        <TrackPlayerControls />
+      </View>
+      {/* <TrackList /> */}
+      {/* <TrackPlayerBottomSheet /> */}
+      <BottomSheetContainer />
+    </SafeAreaView>
   );
 };
 

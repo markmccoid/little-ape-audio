@@ -16,7 +16,7 @@ const PlaylistScreen = () => {
   const imageSource =
     playlist?.imageType === "uri" ? { uri: playlist.imageURI } : playlist.imageURI;
   return (
-    <View className="flex-1 bg-amber-50 pt-2">
+    <View className="flex-1 bg-amber-50">
       <Stack.Screen
         options={{
           headerBackTitle: "Back",

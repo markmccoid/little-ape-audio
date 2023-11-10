@@ -25,7 +25,7 @@ const TrackPlayerImage = () => {
 
   return (
     <View
-      className="flex-row justify-between items-center "
+      className="flex-row justify-between items-center"
       style={{
         marginHorizontal: 5,
       }}

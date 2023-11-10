@@ -77,7 +77,7 @@ const TrackPlayerControls = ({ style }: Props) => {
   };
 
   return (
-    <View className="flex-col justify-center items-center ">
+    <View className="flex-col justify-center items-center">
       <Text
         className="text-sm text-center py-2"
         style={{ width: width / 1.25 }}

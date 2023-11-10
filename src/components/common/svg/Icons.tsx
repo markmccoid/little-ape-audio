@@ -241,3 +241,8 @@ export const TimerSandIcon = ({ size = 25, color, style }: Props) => {
     <MaterialCommunityIcons name="timer-sand-complete" size={size} color={color} style={style} />
   );
 };
+
+// Bottom Menu
+export const ListIcon = ({ size = 25, color, style }: Props) => {
+  return <Ionicons name="list-outline" size={size} color={color} style={style} />;
+};

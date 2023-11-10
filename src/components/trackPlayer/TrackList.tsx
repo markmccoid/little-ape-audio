@@ -1,4 +1,12 @@
-import { View, Text, ScrollView, SectionList, TouchableOpacity, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  SectionList,
+  TouchableOpacity,
+  Dimensions,
+  StyleSheet,
+} from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { usePlaybackStore, useTrackActions } from "../../store/store";
 import { formatSeconds } from "../../utils/formatUtils";
@@ -131,13 +139,14 @@ const TrackList = () => {
         className=""
       >
         <View
-          className={`p-2 border items-center flex-row ${
-            section.position === 0 ? "border" : "border-b"
-          } border-amber-500 h-[45] ${isCurrentTrack ? "bg-amber-200" : "bg-white"}`}
+          className={`p-3 items-center flex-row ${
+            "" /* section.position === 0 ? "border" : "border-b" */
+          }
+           border-amber-500 h-[45] ${isCurrentTrack ? "bg-amber-200" : "bg-amber-50"}`}
         >
-          <View className="flex-row items-center justify-between ">
+          <View className={`flex-row items-center justify-between `}>
             <Text
-              className="text-sm font-semibold flex-1 flex-grow"
+              className={`text-sm flex-1 flex-grow ${isCurrentTrack ? "font-semibold" : ""}`}
               numberOfLines={2}
               ellipsizeMode="tail"
               // style={{ width: width / 1.2 }}
@@ -198,13 +207,20 @@ const TrackList = () => {
   }
 
   return (
-    <View className="flex-1" style={{ borderWidth: 1, borderColor: colors.amber500 }}>
+    <View
+      className="flex-1"
+      style={{
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: colors.amber950,
+        borderTopWidth: 0,
+      }}
+    >
       <SectionList
         ref={scrollViewRef}
         sections={sectionList}
         renderSectionHeader={renderSectionHeader}
         renderItem={renderItem}
-        style={{ flex: 1, marginBottom: 40, paddingBottom: 10 }}
+        style={{ flex: 1, paddingBottom: 10 }}
         contentContainerStyle={{ paddingBottom: 2 }}
         getItemLayout={getItemLayout}
       />

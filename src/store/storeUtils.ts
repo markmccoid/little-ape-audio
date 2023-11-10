@@ -1,4 +1,4 @@
-import { AudioTrack } from "./types";
+import { AudioTrack, IOSImageColors } from "./types";
 
 export const defaultImages = {
   image01: require("../../assets/images/LittleApAudio01.jpg"),
@@ -33,7 +33,7 @@ export const analyzePlaylistTracks = (storedTracks: AudioTrack[], tracks: string
   let totalDuration = 0;
   // let imageSet = new Set();
   let genreSet = new Set();
-  let images = [] as { image: string; aspectRatio: number }[];
+  let images = [] as { image: string; aspectRatio: number; imageColors: IOSImageColors }[];
   for (let trackId of tracks) {
     const track = storedTracks.find((el) => el.id === trackId);
     // imageSet.add(track?.metadata?.pictureURI);
@@ -42,6 +42,7 @@ export const analyzePlaylistTracks = (storedTracks: AudioTrack[], tracks: string
       images.push({
         image: track?.metadata?.pictureURI,
         aspectRatio: track?.metadata?.pictureAspectRatio,
+        imageColors: track?.metadata?.pictureColors,
       });
     }
     genreSet.add(track?.metadata?.genre);

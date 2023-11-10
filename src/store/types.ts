@@ -1,4 +1,3 @@
-import { Chapters } from "./../utils/audioUtils";
 import { Track } from "react-native-track-player";
 import { FileEntry } from "../utils/dropboxUtils";
 import { Chapters } from "@utils/audioUtils";
@@ -30,11 +29,19 @@ export type AudioMetadata = {
   year?: number;
   durationSeconds?: number;
   pictureURI?: string;
+  pictureColors?: IOSImageColors;
   pictureAspectRatio?: number;
   comment?: string;
   chapters?: Chapters[];
 };
 
+export type IOSImageColors = {
+  background: string;
+  primary: string;
+  secondary: string;
+  detail: string;
+  platform: "ios";
+};
 export type Chapters = {
   id: string;
   description: string;
@@ -64,6 +71,7 @@ export type Playlist = {
   author: string;
   lastPlayedDateTime: number;
   imageURI: string; //{ uri: string } | number | undefined;
+  imageColors: IOSImageColors;
   imageAspectRatio: number;
   //! imageType is depricated TEST GETTING RID OF
   imageType: "uri" | "imported" | "url";

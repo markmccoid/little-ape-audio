@@ -150,6 +150,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         // There was an image, store the first one on the playlist
         playlist.imageURI = images[0].image;
         playlist.imageAspectRatio = images[0].aspectRatio;
+        playlist.imageColors = images[0].imageColors;
       }
       // Image type is depricated because we are using the resolveAssetSource
       // to standardize local images
