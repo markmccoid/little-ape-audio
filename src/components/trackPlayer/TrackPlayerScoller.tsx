@@ -19,17 +19,33 @@ const componentArray = [
   },
   {
     component: ({ imageURI }) => (
-      <Image
-        source={{ uri: imageURI }}
+      <View
         style={{
+          backgroundColor: "white",
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.8,
+          shadowRadius: 2,
+          elevation: 1,
           width: width / 1.35,
           height: width / 1.35,
-          // width: width - 100, //width / 1.35,
-          // height: width - 100, // width / 1.35,
-          resizeMode: "stretch",
+          borderRadius: 20,
           alignSelf: "center",
         }}
-      />
+      >
+        <Image
+          source={{ uri: imageURI }}
+          style={{
+            width: width / 1.35,
+            height: width / 1.35,
+            borderRadius: 20,
+            // width: width - 100, //width / 1.35,
+            // height: width - 100, // width / 1.35,
+            resizeMode: "stretch",
+            alignSelf: "center",
+          }}
+        />
+      </View>
     ),
     label: "",
   },

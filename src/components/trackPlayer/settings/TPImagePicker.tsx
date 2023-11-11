@@ -1,8 +1,10 @@
 import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { usePlaybackStore, useTracksStore } from "@store/store";
 import { getImageSize } from "@utils/audioUtils";
 import { colors } from "@constants/Colors";
+import { IOSImageColors } from "@store/types";
+import { getColors } from "react-native-image-colors";
 
 type Props = {
   setHeight: (height: number) => void;
@@ -14,7 +16,14 @@ const TPImagePicker = ({ currPlaylistId }) => {
   // THis is just used when a new pic is made the default on playlist
   // it forces playlistImage memo to update
   const [picUpdate, setPicUpdate] = useState(false);
-
+  const [tracks, setTracks] = useState<
+    {
+      id: string;
+      pictureURI: string;
+      pictureAspectRatio: number;
+      pictureColors: IOSImageColors;
+    }[]
+  >([]);
   const playlistImage = useMemo(() => {
     const plImage = trackActions.getPlaylist(currPlaylistId);
     return {
@@ -24,27 +33,68 @@ const TPImagePicker = ({ currPlaylistId }) => {
     };
   }, [currPlaylistId, picUpdate, playlistUpdated]);
 
-  const tracks = useMemo(() => {
-    const tracks = trackActions.getPlaylistTracks(currPlaylistId);
-    let prevTrack = "";
-    let images = [];
-    for (const track of tracks) {
-      if (prevTrack !== track.metadata.pictureURI) {
-        images.push({
-          id: track.id,
-          pictureURI: track.metadata.pictureURI,
-          pictureAspectRatio: track.metadata.pictureAspectRatio,
-        });
+  useEffect(() => {
+    const buildImageList = async () => {
+      const tracks = trackActions.getPlaylistTracks(currPlaylistId);
+      let prevTrack = "";
+      let images = [];
+      for (const track of tracks) {
+        if (prevTrack !== track.metadata.pictureURI) {
+          let pictureColors = undefined;
+          if (!track.metadata.pictureColors) {
+            pictureColors = (await getColors(track.metadata.pictureURI, {
+              quality: "highest",
+            })) as IOSImageColors;
+          }
+          images.push({
+            id: track.id,
+            pictureURI: track.metadata.pictureURI,
+            pictureAspectRatio: track.metadata.pictureAspectRatio,
+            pictureColors: track.metadata.pictureColors || pictureColors,
+          });
+        }
+        prevTrack = track.metadata.pictureURI;
       }
-      prevTrack = track.metadata.pictureURI;
-    }
+      setTracks(images);
+      //   return images as {
+      //     id: string;
+      //     pictureURI: string;
+      //     pictureAspectRatio: number;
+      //     pictureColors: IOSImageColors;
+      //   }[];
+    };
+    buildImageList();
+  });
 
-    return images as {
-      id: string;
-      pictureURI: string;
-      pictureAspectRatio: number;
-    }[];
-  }, [currPlaylistId]);
+  // const tracks = useMemo(async () => {
+  //   const tracks = trackActions.getPlaylistTracks(currPlaylistId);
+  //   let prevTrack = "";
+  //   let images = [];
+  //   for (const track of tracks) {
+  //     if (prevTrack !== track.metadata.pictureURI) {
+  //       let pictureColors = undefined;
+  //       if (!track.metadata.pictureColors) {
+  //         pictureColors = (await getColors(track.metadata.pictureURI, {
+  //           quality: "highest",
+  //         })) as IOSImageColors;
+  //       }
+  //       images.push({
+  //         id: track.id,
+  //         pictureURI: track.metadata.pictureURI,
+  //         pictureAspectRatio: track.metadata.pictureAspectRatio,
+  //         pictureColors: track.metadata.pictureColors || pictureColors,
+  //       });
+  //     }
+  //     prevTrack = track.metadata.pictureURI;
+  //   }
+
+  //   return images as {
+  //     id: string;
+  //     pictureURI: string;
+  //     pictureAspectRatio: number;
+  //     pictureColors: IOSImageColors;
+  //   }[];
+  // }, [currPlaylistId]);
 
   // console.log("CurrPlaylist", currPlaylistId, tracks.length);
 
@@ -97,6 +147,7 @@ const TPImagePicker = ({ currPlaylistId }) => {
                 await trackActions.updatePlaylistFields(currPlaylistId, {
                   imageURI: track?.pictureURI,
                   imageAspectRatio: track?.pictureAspectRatio,
+                  imageColors: track?.pictureColors,
                 });
                 setPicUpdate((prev) => !prev);
               }}

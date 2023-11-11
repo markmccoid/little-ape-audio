@@ -204,7 +204,15 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       saveToAsyncStorage("playlists", playlists);
     },
     updatePlaylistFields: async (playlistId, updateObj) => {
-      const { name, author, lastPlayedDateTime, imageType, imageURI, imageAspectRatio } = updateObj;
+      const {
+        name,
+        author,
+        lastPlayedDateTime,
+        imageType,
+        imageURI,
+        imageAspectRatio,
+        imageColors,
+      } = updateObj;
 
       const playlists = { ...get().playlists };
       // lastPlayedDateTime processing
@@ -224,6 +232,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       let newPlaylists = {};
       if (imageURI) {
         let aspectRatio = imageAspectRatio;
+
         // If the aspectRatio was passed use it instead of calculating it
         if (!imageAspectRatio) {
           const { aspectRatio: aspectCalced } = await getImageSize(imageURI);
@@ -233,6 +242,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         if (!isNaN(aspectRatio)) {
           playlists[playlistId].imageAspectRatio = aspectRatio;
           playlists[playlistId].imageURI = imageURI;
+          playlists[playlistId].imageColors = imageColors;
         }
       }
       set({ playlists, playlistUpdated: new Date() });

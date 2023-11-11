@@ -102,6 +102,7 @@ type PlaylistUpdateObj = {
   imageURI?: string | undefined;
   imageAspectRatio?: number;
   imageType?: "uri" | "imported" | "url";
+  imageColors?: IOSImageColors;
   //~ Current Position is updated separately
   // currentPosition?: { trackIndex: number; position: number };
   //~ Current Rate has its own update function

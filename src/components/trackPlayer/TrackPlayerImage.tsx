@@ -6,6 +6,7 @@ import { colors } from "../../constants/Colors";
 import { useCurrentPlaylist, usePlaybackStore } from "../../store/store";
 import Animated from "react-native-reanimated";
 import TrackPlayerScoller from "./TrackPlayerScoller";
+import { chooseTextColor } from "@utils/otherUtils";
 
 const { width, height } = Dimensions.get("window");
 
@@ -14,6 +15,10 @@ const TrackPlayerImage = () => {
   const queue = usePlaybackStore((state) => state.trackPlayerQueue);
   const currTrackIndex = usePlaybackStore((state) => state.currentTrackIndex);
   const playlist = useCurrentPlaylist();
+
+  const textColor =
+    playlist?.imageColors?.background && chooseTextColor(playlist?.imageColors?.background);
+
   // const playlist = actions.getCurrentPlaylist();
 
   /**
@@ -35,7 +40,7 @@ const TrackPlayerImage = () => {
         disabled={!displayPrev}
         className={`${displayPrev ? "opacity-100" : "opacity-10"}`}
       >
-        <BackIcon size={35} color={colors.amber800} />
+        <BackIcon size={35} color={textColor === "black" ? colors.amber800 : colors.amber100} />
       </TouchableOpacity>
       {/* <Image
         source={{ uri: playlist?.imageURI }}
@@ -56,7 +61,7 @@ const TrackPlayerImage = () => {
         disabled={!displayNext}
         className={`${displayNext ? "opacity-100" : "opacity-10"}`}
       >
-        <NextIcon size={35} color={colors.amber800} />
+        <NextIcon size={35} color={textColor === "black" ? colors.amber800 : colors.amber100} />
       </TouchableOpacity>
     </View>
   );
