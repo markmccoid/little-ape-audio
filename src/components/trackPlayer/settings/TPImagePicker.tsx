@@ -1,10 +1,9 @@
 import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import React, { useEffect, useMemo, useState } from "react";
-import { usePlaybackStore, useTracksStore } from "@store/store";
-import { getImageSize } from "@utils/audioUtils";
+import { getCurrentPlaylist, usePlaybackStore, useTracksStore } from "@store/store";
 import { colors } from "@constants/Colors";
-import { IOSImageColors } from "@store/types";
-import { getColors } from "react-native-image-colors";
+import { PlaylistImageColors } from "@store/types";
+import { getImageColors } from "@utils/otherUtils";
 
 type Props = {
   setHeight: (height: number) => void;
@@ -13,6 +12,8 @@ const TPImagePicker = ({ currPlaylistId }) => {
   // const currPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
   const trackActions = useTracksStore((state) => state.actions);
   const playlistUpdated = useTracksStore((state) => state.playlistUpdated);
+  const pl = getCurrentPlaylist();
+
   // THis is just used when a new pic is made the default on playlist
   // it forces playlistImage memo to update
   const [picUpdate, setPicUpdate] = useState(false);
@@ -21,7 +22,7 @@ const TPImagePicker = ({ currPlaylistId }) => {
       id: string;
       pictureURI: string;
       pictureAspectRatio: number;
-      pictureColors: IOSImageColors;
+      pictureColors: PlaylistImageColors;
     }[]
   >([]);
   const playlistImage = useMemo(() => {
@@ -41,16 +42,15 @@ const TPImagePicker = ({ currPlaylistId }) => {
       for (const track of tracks) {
         if (prevTrack !== track.metadata.pictureURI) {
           let pictureColors = undefined;
-          if (!track.metadata.pictureColors) {
-            pictureColors = (await getColors(track.metadata.pictureURI, {
-              quality: "highest",
-            })) as IOSImageColors;
-          }
+
+          const picToRead = track.metadata.pictureURI || playlistImage.pictureURI;
+          pictureColors = (await getImageColors(picToRead)) as PlaylistImageColors;
+
           images.push({
             id: track.id,
             pictureURI: track.metadata.pictureURI,
             pictureAspectRatio: track.metadata.pictureAspectRatio,
-            pictureColors: track.metadata.pictureColors || pictureColors,
+            pictureColors: pictureColors,
           });
         }
         prevTrack = track.metadata.pictureURI;
@@ -64,7 +64,7 @@ const TPImagePicker = ({ currPlaylistId }) => {
       //   }[];
     };
     buildImageList();
-  });
+  }, []);
 
   // const tracks = useMemo(async () => {
   //   const tracks = trackActions.getPlaylistTracks(currPlaylistId);

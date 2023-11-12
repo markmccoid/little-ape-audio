@@ -1,6 +1,5 @@
 import { Track } from "react-native-track-player";
 import { FileEntry } from "../utils/dropboxUtils";
-import { Chapters } from "@utils/audioUtils";
 import { Chapter } from "./store-functions";
 import { AudioSourceType } from "@app/audio/dropbox";
 
@@ -29,19 +28,45 @@ export type AudioMetadata = {
   year?: number;
   durationSeconds?: number;
   pictureURI?: string;
-  pictureColors?: IOSImageColors;
+  pictureColors?: PlaylistImageColors;
   pictureAspectRatio?: number;
   comment?: string;
   chapters?: Chapters[];
 };
 
-export type IOSImageColors = {
-  background: string;
-  primary: string;
-  secondary: string;
-  detail: string;
-  platform: "ios";
-};
+export type PlaylistImageColors = {
+  darkestColor?: string;
+  lightestColor?: string;
+} & Partial<
+  Record<
+    "background" | "primary" | "secondary" | "detail",
+    {
+      color: string;
+      colorType: string;
+      colorLuminance: number;
+      tintColor: string;
+    }
+  >
+>;
+// {
+//   background: string;
+//   backgroundColorType: "dark" | "light";
+//   // The color to use for text or items if background is the bg color.
+//   backgroundTintColor: string;
+//   primary: string;
+//   primaryColorType: "dark" | "light";
+//   // The color to use for text or items if primary is the bg color.
+//   primaryTintColor: string;
+//   secondary: string;
+//   secondaryColorType: "dark" | "light";
+//   // The color to use for text or items ifsecondary is the bg color.
+//   secondaryTintColor: string;
+//   detail: string;
+//   detailColorType: "dark" | "light";
+//   // The color to use for text or items if detail is the bg color.
+//   detailTintColor: string;
+//   platform: "ios";
+// };
 export type Chapters = {
   id: string;
   description: string;
@@ -71,7 +96,7 @@ export type Playlist = {
   author: string;
   lastPlayedDateTime: number;
   imageURI: string; //{ uri: string } | number | undefined;
-  imageColors: IOSImageColors;
+  imageColors: PlaylistImageColors;
   imageAspectRatio: number;
   //! imageType is depricated TEST GETTING RID OF
   imageType: "uri" | "imported" | "url";
@@ -102,7 +127,7 @@ type PlaylistUpdateObj = {
   imageURI?: string | undefined;
   imageAspectRatio?: number;
   imageType?: "uri" | "imported" | "url";
-  imageColors?: IOSImageColors;
+  imageColors?: PlaylistImageColors;
   //~ Current Position is updated separately
   // currentPosition?: { trackIndex: number; position: number };
   //~ Current Rate has its own update function

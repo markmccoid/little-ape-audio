@@ -7,29 +7,28 @@ import BottomSheetContainer from "./bottomSheet/BottomSheetContainer";
 import { useCurrentPlaylist } from "@store/store";
 import { colors } from "@constants/Colors";
 import { LinearGradient } from "expo-linear-gradient";
+import { PlaylistImageColors } from "@store/types";
+import usePlaylistColors from "hooks/usePlaylistColors";
 
 const { width, height } = Dimensions.get("window");
 
 const TrackPlayerContainer = () => {
   const playlist = useCurrentPlaylist();
-  const [colorP, setColorP] = useState({ background: colors.amber600, secondary: colors.amber200 });
-
-  useEffect(() => {
-    if (playlist?.imageColors) {
-      setColorP(playlist.imageColors);
-    }
-  }, [playlist]);
+  const playlistColors = usePlaylistColors();
 
   return (
     <SafeAreaView className="flex-1 flex-col">
       <LinearGradient
         // colors={[`${colorP.secondary}55`, `${colorP.background}55`]}
-        colors={[`${colorP.secondary}`, `${colorP.background}`, colors.amber50]}
-        style={{}}
+        colors={[
+          `${playlistColors?.secondary?.color}`,
+          `${playlistColors?.background?.color}`,
+          colors.amber50,
+        ]}
         // start={{ x: 0, y: 0 }}
         // end={{ x: 1, y: 1 }}
       >
-        <View className="pb-5">
+        <View className="pb-[75]">
           <TrackPlayerImage />
 
           <TrackPlayerProgressBar />

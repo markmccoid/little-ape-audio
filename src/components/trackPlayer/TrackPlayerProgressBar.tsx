@@ -21,6 +21,9 @@ const TrackPlayerProgressBar = () => {
   const [isSeeking, setIsSeeking] = useState(false);
   const [currPos, setCurrPos] = useState(position);
   const currTrack = usePlaybackStore((state) => state.currentTrack);
+  const playlist = getCurrentPlaylist();
+  const textColor = "black";
+
   useEffect(() => {
     if (isSeeking) {
       setCurrPos(seeking);
@@ -77,7 +80,16 @@ const TrackPlayerProgressBar = () => {
           </MotiView>
         )}
       </AnimatePresence>
-
+      <View>
+        <Text
+          className="text-sm text-center "
+          style={{ width: width / 1.25, color: textColor }}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {`${currTrack.trackNum} ${currTrack.title}`}
+        </Text>
+      </View>
       <NewSlider
         containerStyle={{
           width: width - 20,
@@ -115,12 +127,16 @@ const TrackPlayerProgressBar = () => {
         // onSlidingComplete={(val) => soundActions.updatePosition(val)}
       /> */}
       <View className="flex-row w-full px-1 justify-between mt-[-5]">
-        <Text className="font-semibold text-xs">{formatSeconds(Math.floor(position))}</Text>
-        <Text className="font-semibold text-xs">
+        <Text className="font-semibold text-xs" style={{ color: textColor }}>
+          {formatSeconds(Math.floor(position))}
+        </Text>
+        <Text className="font-semibold text-xs" style={{ color: textColor }}>
           {formatSeconds(Math.floor(position + queuePos))} of{" "}
           {formatSeconds(Math.floor(queueDuration))}
         </Text>
-        <Text className="font-semibold">{formatSeconds(Math.floor(duration))}</Text>
+        <Text className="font-semibold" style={{ color: textColor }}>
+          {formatSeconds(Math.floor(duration))}
+        </Text>
       </View>
     </View>
   );

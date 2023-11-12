@@ -9,8 +9,8 @@ import { downloadDropboxFile } from "@utils/dropboxUtils";
 import { format } from "date-fns";
 import { getJsonData } from "@utils/googleUtils";
 import { GDrive } from "@robinbobin/react-native-google-drive-api-wrapper";
-import { getColors } from "react-native-image-colors";
-import { IOSImageColors } from "@store/types";
+import { PlaylistImageColors } from "@store/types";
+import { getImageColors } from "@utils/otherUtils";
 
 const gdrive = new GDrive();
 
@@ -79,7 +79,7 @@ export const addTrack =
     // Track Raw End
     // Get picture colors if available
     if (tags.pictureURI) {
-      const colors = (await getColors(tags.pictureURI, { quality: "highest" })) as IOSImageColors;
+      const colors = (await getImageColors(tags.pictureURI)) as PlaylistImageColors;
       tags.pictureColors = colors;
     }
     // ------------------------------------

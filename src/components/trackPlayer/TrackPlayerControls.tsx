@@ -6,23 +6,25 @@ import {
   ViewStyle,
   Dimensions,
   Alert,
+  Pressable,
 } from "react-native";
 import React, { useEffect, useMemo, useState } from "react";
-import { usePlaybackStore, useTracksStore } from "../../store/store";
+import { getCurrentPlaylist, usePlaybackStore, useTracksStore } from "../../store/store";
 import { BookmarkIcon, PauseIcon, PlayIcon, RewindIcon } from "../common/svg/Icons";
 import { State } from "react-native-track-player";
 import { useSettingStore } from "../../store/store-settings";
 import { colors } from "../../constants/Colors";
 import { SpinnerForwardIcon } from "../common/svg/Icons";
 import { formatSeconds } from "../../utils/formatUtils";
+import { AnimatePresence, MotiView } from "moti";
+import usePlaylistColors from "hooks/usePlaylistColors";
 
 const { width, height } = Dimensions.get("window");
 
 type Props = {
   style?: ViewStyle;
 };
-const CONTROLSIZE = 35;
-const CONTROLCOLOR = colors.amber800;
+const CONTROLSIZE = 45;
 
 const TrackPlayerControls = ({ style }: Props) => {
   const jumpSecondsForward = useSettingStore((state) => state.jumpForwardSeconds);
@@ -36,6 +38,17 @@ const TrackPlayerControls = ({ style }: Props) => {
   const currentTrack = usePlaybackStore((state) => state.currentTrack);
   const [bookmarkLength, setBookmarkLength] = useState<number>();
   const isPlaying = playerState === State.Playing;
+  const playlist = getCurrentPlaylist();
+
+  const playlistColors = usePlaylistColors();
+  // If textColor returned is light, then we know background color is dark enough to use
+  // for controls, otherwise use default
+  const CONTROLCOLOR =
+    playlistColors?.background?.colorType === "dark"
+      ? playlistColors.background?.color
+      : playlistColors?.secondary?.colorType === "dark"
+      ? playlistColors.secondary?.color
+      : "black";
 
   // Set bookmark number once on load
   // Then if bookmark added, it will update in handleAddBookmark
@@ -78,34 +91,33 @@ const TrackPlayerControls = ({ style }: Props) => {
 
   return (
     <View className="flex-col justify-center items-center">
-      <Text
+      {/* <Text
         className="text-sm text-center py-2"
         style={{ width: width / 1.25 }}
         numberOfLines={2}
         ellipsizeMode="tail"
       >
         {currentTrack?.title}
-      </Text>
+      </Text> */}
       <View className="flex-row w-full justify-between items-center">
         <View className="flex-row  items-center justify-center flex-grow ml-[55]">
           {/* SEEK BACK */}
           <TouchableOpacity
             onPress={() => playbackActions.jumpBack(jumpSecondsBackward)}
-            className="mx-3"
+            className="mx-3 relative justify-center items-center"
           >
             <SpinnerForwardIcon
               size={CONTROLSIZE}
               color={CONTROLCOLOR}
               style={{
-                transform: [{ rotateZ: "-45deg" }, { rotateY: "180deg" }, { scale: 1.1 }],
+                transform: [{ rotateZ: "-0deg" }, { rotateY: "180deg" }, { scale: 1.1 }],
               }}
             />
             {/* <Text style={{ position: "absolute", bottom: -10, left: 12 }}> */}
             <Text
               style={{
                 position: "absolute",
-                bottom: 8,
-                left: 11,
+                paddingTop: 2,
                 color: colors.amber950,
               }}
             >
@@ -113,35 +125,87 @@ const TrackPlayerControls = ({ style }: Props) => {
             </Text>
           </TouchableOpacity>
           {/* PLAY/PAUSE */}
-          <TouchableOpacity
+          <Pressable
             onPress={isPlaying ? () => pause() : () => play()}
             style={styles.actionButton}
             className="mx-3"
           >
-            <View>
-              {!isPlaying ? (
-                <PlayIcon size={CONTROLSIZE} color={CONTROLCOLOR} />
-              ) : (
-                <PauseIcon size={CONTROLSIZE} color={CONTROLCOLOR} />
-              )}
-            </View>
-          </TouchableOpacity>
+            <AnimatePresence>
+              <View
+                className="relative "
+                style={{
+                  width: CONTROLSIZE,
+                  height: CONTROLSIZE,
+                }}
+              >
+                {!isPlaying && (
+                  <MotiView
+                    key={1}
+                    className="absolute"
+                    from={{
+                      opacity: 0.2,
+                      transform: [
+                        { rotateZ: isPlaying ? "0deg" : "-50deg" },
+                        { scale: isPlaying ? 1 : 0.7 },
+                      ],
+                    }}
+                    animate={{
+                      opacity: isPlaying ? 0 : 1,
+                      transform: [
+                        { rotateZ: isPlaying ? "-50deg" : "0deg" },
+                        { scale: isPlaying ? 0.7 : 1 },
+                      ],
+                    }}
+                    exit={{ opacity: 0 }}
+                    transition={{ type: "timing", duration: 500 }}
+                  >
+                    <PlayIcon size={CONTROLSIZE + 5} color={CONTROLCOLOR} />
+                  </MotiView>
+                )}
+                {isPlaying && (
+                  <MotiView
+                    key={3}
+                    className="absolute"
+                    from={{
+                      opacity: 0.2,
+                      transform: [
+                        { rotateZ: isPlaying ? "50deg" : "0deg" },
+                        { scale: isPlaying ? 0.7 : 1 },
+                      ],
+                    }}
+                    animate={{
+                      opacity: isPlaying ? 1 : 0,
+                      transform: [
+                        { rotateZ: isPlaying ? "0deg" : "50deg" },
+                        { scale: isPlaying ? 1 : 0.7 },
+                      ],
+                    }}
+                    exit={{ opacity: 0 }}
+                    transition={{ type: "timing", duration: 500 }}
+                  >
+                    <PauseIcon size={CONTROLSIZE + 5} color={CONTROLCOLOR} />
+                  </MotiView>
+                )}
+              </View>
+            </AnimatePresence>
+          </Pressable>
           {/* SEEK FORWARD */}
           <TouchableOpacity
             onPress={() => playbackActions.jumpForward(jumpSecondsForward)}
-            className="mx-3"
+            className="mx-3 relative flex justify-center items-center"
           >
             <SpinnerForwardIcon
               size={CONTROLSIZE}
               color={CONTROLCOLOR}
-              style={{ transform: [{ rotateZ: "45deg" }, { scale: 1.1 }] }}
+              style={{ transform: [{ scale: 1.1 }] }}
             />
             {/* <Text style={{ position: "absolute", bottom: -10, right: 12 }}> */}
             <Text
               style={{
                 position: "absolute",
-                bottom: 8,
-                right: 11,
+                paddingTop: 2,
+                // bottom: 8,
+                // right: 11,
                 color: colors.amber950,
               }}
             >

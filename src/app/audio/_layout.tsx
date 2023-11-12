@@ -3,13 +3,8 @@ import React, { useEffect, useState } from "react";
 import { Link, Stack } from "expo-router";
 import AddBook from "../../components/common/svg/AddBook";
 import Monkey from "../../components/common/svg/Monkey";
-import { SettingsIcon } from "../../components/common/svg/Icons";
 import { colors } from "../../constants/Colors";
-import useSleepTimer from "@components/common/sleepTimer/useSleepTimer";
 import { useSettingStore } from "@store/store-settings";
-import { useCurrentPlaylist } from "@store/store";
-import { pl } from "date-fns/locale";
-import { chooseTextColor } from "@utils/otherUtils";
 
 const AudioLayout = () => {
   const countdownActive = useSettingStore((state) => state.countdownActive);

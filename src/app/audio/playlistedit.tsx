@@ -26,8 +26,7 @@ const playlistedit = () => {
       [
         {
           text: "OK",
-          onPress: (text) =>
-            trackActions.updatePlaylistFields(playlist.id, { name: text }),
+          onPress: (text) => trackActions.updatePlaylistFields(playlist.id, { name: text }),
         },
 
         { text: "Cancel", onPress: () => {} },
@@ -37,6 +36,10 @@ const playlistedit = () => {
     );
   };
 
+  const handleGetImageFromWeb = async (searchString) => {
+    const imageResults = await getImageFromWeb(searchString);
+    await trackActions.updatePlaylistFields(playlistId, imageResults);
+  };
   if (!playlist) return null;
   return (
     <View className="flex-1 flex-col mt-2">
@@ -46,11 +49,7 @@ const playlistedit = () => {
         }}
       />
       <View className="flex-row w-full mr-4 p-2 mb-2 justify-between ">
-        <Text
-          className="text-base font-medium flex-1 mr-2"
-          numberOfLines={1}
-          lineBreakMode="tail"
-        >
+        <Text className="text-base font-medium flex-1 mr-2" numberOfLines={1} lineBreakMode="tail">
           {playlist?.name}
         </Text>
 
@@ -60,16 +59,13 @@ const playlistedit = () => {
           </AnimatedPressable>
         </View>
       </View>
-      <View
-        className="w-full bg-black"
-        style={{ height: StyleSheet.hairlineWidth }}
-      />
+      <View className="w-full bg-black" style={{ height: StyleSheet.hairlineWidth }} />
       <View className="mt-3 px-2">
         <TPImagePicker currPlaylistId={playlist.id} />
       </View>
       <View className="items-center justify-end flex-row ">
         <AnimatedPressable
-          onPress={() => getImageFromWeb(playlist.id, playlist.name)}
+          onPress={() => handleGetImageFromWeb(playlist.name)}
           buttonStyle="default"
         >
           <Text>Find New Image</Text>
