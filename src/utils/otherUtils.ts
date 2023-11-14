@@ -3,11 +3,9 @@ import * as Clipboard from "expo-clipboard";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 
-import { useTracksStore } from "@store/store";
 import { getColors } from "react-native-image-colors";
 import { IOSImageColors } from "react-native-image-colors/build/types";
 import { PlaylistImageColors } from "@store/types";
-import { colors } from "@constants/Colors";
 
 export const getImageFromWeb = async (searchString: string) => {
   let webURL = `https://www.google.com/search?q=${searchString} book&tbm=isch`;
@@ -53,25 +51,9 @@ type ColorObj = Record<
   }
 >;
 
-// type ImageColors = {
-//   darkestColor: string;
-//   lightesColor: string;
-// } & ColorObj;
-
-// type ImageColors = {
-//   darkestColor?: string;
-//   lightestColor?: string;
-// } & Partial<
-//   Record<
-//     "background" | "primary" | "secondary" | "detail",
-//     {
-//       color: string;
-//       colorType: string;
-//       colorLuminance: number;
-//       tintColor: string;
-//     }
-//   >
-// >;
+//~ ------------------------------------------
+//~ getImageColors
+//~ ------------------------------------------
 export const getImageColors = async (imagedata: string): Promise<PlaylistImageColors> => {
   const iosImageColors = (await getColors(imagedata, {
     quality: "highest",

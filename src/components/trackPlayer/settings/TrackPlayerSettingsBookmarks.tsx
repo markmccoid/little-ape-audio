@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { usePlaybackState } from "react-native-track-player";
 import { usePlaybackStore } from "../../../store/store";
 import { ScrollView } from "react-native-gesture-handler";
@@ -15,10 +15,11 @@ const TrackPlayerSettingsBookmarks = () => {
   const activeKey = useSharedValue(undefined);
   //--
   const playbackActions = usePlaybackStore((state) => state.actions);
+  const didUpdate = usePlaybackStore((state) => state.didUpdate);
   const router = useRouter();
   const [updateBookmarks, setUpdateBookmarks] = useState(false);
-  const bookmarks = useMemo(() => playbackActions.getBookmarks(), [updateBookmarks]);
-
+  const bookmarks = playbackActions.getBookmarks();
+  // const bookmarks = useMemo(() => playbackActions.getBookmarks(), [updateBookmarks]);
   const handleApplyBookmark = async (bookmarkId) => {
     playbackActions.applyBookmark(bookmarkId);
     router.back();

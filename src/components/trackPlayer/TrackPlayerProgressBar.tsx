@@ -7,6 +7,7 @@ import { colors } from "../../constants/Colors";
 import { AnimatePresence, MotiView } from "moti";
 import Slider from "@react-native-community/slider";
 import { Slider as NewSlider } from "@miblanchard/react-native-slider";
+import usePlaylistColors from "hooks/usePlaylistColors";
 
 const { width, height } = Dimensions.get("window");
 const leftOffset = (width - width / 2.25) / 2;
@@ -21,7 +22,9 @@ const TrackPlayerProgressBar = () => {
   const [isSeeking, setIsSeeking] = useState(false);
   const [currPos, setCurrPos] = useState(position);
   const currTrack = usePlaybackStore((state) => state.currentTrack);
-  const playlist = getCurrentPlaylist();
+  const currChapterInfo = usePlaybackStore((state) => state.currentChapterInfo);
+  // const playlist = getCurrentPlaylist();
+  // const playlistColors = usePlaylistColors();
   const textColor = "black";
 
   useEffect(() => {
@@ -82,13 +85,23 @@ const TrackPlayerProgressBar = () => {
       </AnimatePresence>
       <View>
         <Text
-          className="text-sm text-center "
+          className="text-base text-center "
           style={{ width: width / 1.25, color: textColor }}
           numberOfLines={1}
           ellipsizeMode="tail"
         >
-          {`${currTrack.trackNum} ${currTrack.title}`}
+          {`${currTrack.trackNum || ""} ${currTrack.title}`}
         </Text>
+        {currChapterInfo?.title && (
+          <Text
+            className="text-sm text-center "
+            style={{ width: width / 1.25, color: textColor }}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {currChapterInfo?.title}
+          </Text>
+        )}
       </View>
       <NewSlider
         containerStyle={{

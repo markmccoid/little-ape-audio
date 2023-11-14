@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, SafeAreaView, Dimensions } from "react-native";
+import { View, Text, StyleSheet, Dimensions } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useEffect, useState } from "react";
 import TrackPlayerControls from "./TrackPlayerControls";
 import TrackPlayerProgressBar from "./TrackPlayerProgressBar";
@@ -17,7 +18,7 @@ const TrackPlayerContainer = () => {
   const playlistColors = usePlaylistColors();
 
   return (
-    <SafeAreaView className="flex-1 flex-col">
+    <View className="flex-1 flex-col">
       <LinearGradient
         // colors={[`${colorP.secondary}55`, `${colorP.background}55`]}
         colors={[
@@ -28,19 +29,27 @@ const TrackPlayerContainer = () => {
         // start={{ x: 0, y: 0 }}
         // end={{ x: 1, y: 1 }}
       >
-        <View className="pb-[75]">
+        <View className="">
           <TrackPlayerImage />
 
           <TrackPlayerProgressBar />
         </View>
       </LinearGradient>
-      <View className="flex-1">
+      <View className="flex-1 ">
         <TrackPlayerControls />
       </View>
+
       {/* <TrackList /> */}
       {/* <TrackPlayerBottomSheet /> */}
+      {/* <LinearGradient colors={[colors.amber50, `${playlistColors?.secondary?.color}`]}> */}
       <BottomSheetContainer />
-    </SafeAreaView>
+      {/* </LinearGradient> */}
+      {/* <SafeAreaView
+        edges={["bottom"]}
+        className=""
+        // style={{ backgroundColor: playlistColors?.secondary?.color }}
+      ></SafeAreaView> */}
+    </View>
   );
 };
 

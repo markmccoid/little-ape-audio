@@ -13,7 +13,7 @@ import orderBy from "lodash/orderBy";
 import map from "lodash/map";
 import TrackPlayer, { Track, State, Event, PitchAlgorithm } from "react-native-track-player";
 import { useEffect, useState } from "react";
-import { addTrack } from "./store-functions";
+import { Chapter, addTrack } from "./store-functions";
 import { deleteFromFileSystem } from "./data/fileSystemAccess";
 import { useDropboxStore } from "./store-dropbox";
 import { useSettingStore } from "./store-settings";
@@ -24,6 +24,7 @@ import { getImageSize } from "@utils/audioUtils";
 import { shallow } from "zustand/shallow";
 import { router } from "expo-router";
 import { formatSeconds } from "@utils/formatUtils";
+import { getCurrentChapter } from "@utils/chapterUtils";
 // export function getRandomNumber() {
 
 //   const randomNumber = Math.floor(Math.random() * 13) + 1; // Generate random number between 1 and 13
@@ -360,6 +361,10 @@ type PlaybackState = {
   currentTrackPosition: number;
   // The TOTAL number of seconds into the queue
   currentQueuePosition: number;
+  currentChapterInfo: Pick<Chapter, "title" | "startSeconds" | "endSeconds">;
+  currentChapterIndex: number;
+  currentRate: number;
+  didUpdate: string;
   actions: {
     // New playlist being loaded
     setCurrentPlaylist: (playlistId: string) => Promise<void>;
@@ -395,8 +400,12 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
   currentTrackIndex: 0,
   currentTrackPosition: 0,
   currentQueuePosition: 0,
+  currentChapterInfo: undefined,
+  currentChapterIndex: 0,
   playerState: undefined,
   playlistLoaded: false,
+  currentRate: 1,
+  didUpdate: "init",
   actions: {
     resetPlaybackStore: async () => {
       set({
@@ -404,9 +413,12 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
         // currentPlaylist: undefined,
         trackPlayerQueue: undefined,
         currentTrack: undefined,
+        currentChapterInfo: undefined,
+        currentChapterIndex: 0,
         currentTrackIndex: 0,
         currentTrackPosition: 0,
         currentQueuePosition: 0,
+        currentRate: 1,
         playerState: undefined,
         playlistLoaded: false,
       });
@@ -446,10 +458,19 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       const currTrackIndex = currPlaylist.currentPosition?.trackIndex || 0;
       const currTrackPosition = currPlaylist.currentPosition?.position || 0;
       // console.log("currtrackpos", currTrackPosition);
+      // Call function to get current chapter Info
+
+      const { chapterInfo, chapterIndex } = getCurrentChapter({
+        chapters: queue[currTrackIndex]?.chapters,
+        position: currTrackPosition,
+      });
+
       set({
         currentTrack: queue[currTrackIndex],
         currentTrackIndex: currTrackIndex,
         currentTrackPosition: currTrackPosition,
+        currentChapterInfo: chapterInfo,
+        currentChapterIndex: chapterIndex,
       });
       // when a track changes, set the currentQueuePosition.  This is the total of all
       // track durations in queue UP TO, but NOT including the current track
@@ -467,7 +488,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       await TrackPlayer.setRate(currPlaylist.currentRate);
 
       mountTrackPlayerListeners();
-      set({ playlistLoaded: true });
+      set({ playlistLoaded: true, currentRate: currPlaylist.currentRate });
     },
     getCurrentPlaylist: () => {
       const plId = get().currentPlaylistId;
@@ -484,6 +505,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
         // currPlaylist.currentRate = newRate;
         // set({ currentPlaylist: currPlaylist });
         await TrackPlayer.setRate(newRate);
+        set({ currentRate: newRate });
       }
     },
     updatePlaylistTracks: async (playlistId, trackIdArray) => {
@@ -572,6 +594,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       useTracksStore
         .getState()
         .actions.addBookmarkToPlaylist(bookmarkName, currPlaylistId, currTrack.id, currPosition);
+      set({ didUpdate: uuid.v4().toString() });
     },
     deleteBookmark: async (bookmarkId) => {
       const currPlaylistId = get().currentPlaylistId;
@@ -579,6 +602,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       await useTracksStore
         .getState()
         .actions.deleteBookmarkFromPlaylist(currPlaylistId, bookmarkId);
+      set({ didUpdate: uuid.v4().toString() });
     },
     getBookmarks: () => {
       const currPlaylistId = get().currentPlaylistId;
@@ -954,7 +978,19 @@ const mountTrackPlayerListeners = () => {
       // Progress Updates {"buffered": 127.512, "duration": 127.512, "position": 17.216, "track": 0}
       // console.log("Progress Updates", event);
       //! Not sure if this is needed
+      const position = Math.floor(event.position);
       usePlaybackStore.getState().actions.setCurrentTrackPosition(Math.floor(event.position));
+      const queue = usePlaybackStore.getState().trackPlayerQueue;
+      const trackIndex = usePlaybackStore.getState().currentTrackIndex;
+      const { chapterInfo, chapterIndex } = getCurrentChapter({
+        chapters: queue[trackIndex]?.chapters,
+        position,
+      });
+      usePlaybackStore.setState({
+        currentChapterInfo: chapterInfo,
+        currentChapterIndex: chapterIndex,
+      });
+      // console.log("Q", chapterInfo?.title, chapterIndex);
     }
   );
 };

@@ -40,7 +40,13 @@ export const EnterKeyIcon = ({ size = 25, color, style }: Props) => {
   return <Ionicons name="ios-return-down-back" size={size} color={color} style={style} />;
 };
 export const BookmarkIcon = ({ size = 25, color, style }: Props) => {
-  return <Fontisto name="favorite" size={size} color={color} style={style} />;
+  return <MaterialCommunityIcons name="bookmark" size={size} color={color} style={style} />;
+};
+export const BookmarkOutlineIcon = ({ size = 25, color, style }: Props) => {
+  return <MaterialCommunityIcons name="bookmark-outline" size={size} color={color} style={style} />;
+};
+export const BookmarkPlusIcon = ({ size = 25, color, style }: Props) => {
+  return <MaterialCommunityIcons name="bookmark-plus" size={size} color={color} style={style} />;
 };
 
 export const TagIcon = ({ size = 25, color, style }: Props) => {

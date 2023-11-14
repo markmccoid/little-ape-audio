@@ -8,15 +8,15 @@ import React, {
   useState,
 } from "react";
 import BottomSheet, { useBottomSheetDynamicSnapPoints } from "@gorhom/bottom-sheet";
-import BottomSheetMenu from "./BottomSheetMenu";
 import { colors } from "@constants/Colors";
-import TrackPlayerScoller from "../TrackPlayerScoller";
-import PagerView from "react-native-pager-view";
+import PagerView, { PagerViewOnPageSelectedEvent } from "react-native-pager-view";
 import TrackPlayerScrollerRateTimer from "../TrackPlayerScrollerRateTimer";
 import TrackList from "../TrackList";
 import { BottomSheetImpRef } from "./BottomSheetContainer";
-import { ListIcon, SpeedIcon } from "@components/common/svg/Icons";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import usePlaylistColors from "hooks/usePlaylistColors";
+import BottomSheetHeader from "./BottomSheetHeader";
+import TrackPlayerSettingsBookmarks from "../settings/TrackPlayerSettingsBookmarks";
+import RateSelector from "../settings/RateSelector";
 
 type Ref = BottomSheetImpRef;
 type Props = {};
@@ -25,6 +25,8 @@ const TrackPlayerBottomSheet = forwardRef<Ref, Props>((props, ref) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const pagerRef = useRef<PagerView>();
   const bottomSheetRef = useRef<BottomSheet>();
+  const playlistColors = usePlaylistColors();
+  const [currPage, setCurrPage] = useState(0);
   // props.setPage((pageIndex) => {
   //   if (pagerRef?.current) {
   //     pagerRef.current.setPage(pageIndex);
@@ -58,31 +60,30 @@ const TrackPlayerBottomSheet = forwardRef<Ref, Props>((props, ref) => {
     []
   );
 
-  const snapPoints = ["75%", "100%"];
+  const snapPoints = ["85%"];
   const { animatedHandleHeight, animatedSnapPoints, animatedContentHeight, handleContentLayout } =
     useBottomSheetDynamicSnapPoints(snapPoints);
   // console.log("animate", animatedContentHeight.value);
+  const handlePageSelected = (e: PagerViewOnPageSelectedEvent) => {
+    // console.log(e.nativeEvent.position);
+    // Current page index
+    setCurrPage(e.nativeEvent.position);
+  };
   return (
     <BottomSheet
       ref={bottomSheetRef}
       handleComponent={() => (
-        <View
-          className="flex-row justify-between px-4 py-2"
-          style={{ borderBottomWidth: StyleSheet.hairlineWidth }}
-        >
-          <TouchableOpacity onPress={() => pagerRef.current.setPage(0)}>
-            <ListIcon />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => pagerRef.current.setPage(1)}>
-            <SpeedIcon />
-          </TouchableOpacity>
-        </View>
+        <BottomSheetHeader
+          pagerRef={pagerRef}
+          bottomSheetRef={bottomSheetRef}
+          currPage={currPage}
+        />
       )}
       index={-1}
       snapPoints={snapPoints}
       enablePanDownToClose
       backgroundStyle={{
-        backgroundColor: colors.amber50,
+        backgroundColor: colors.amber100,
         borderWidth: StyleSheet.hairlineWidth,
 
         // marginBottom: 50,
@@ -107,15 +108,19 @@ const TrackPlayerBottomSheet = forwardRef<Ref, Props>((props, ref) => {
         </View>
 
         <PagerView
-          style={{ flex: 1, width: "100%", marginBottom: 150 }}
+          style={{ flex: 1, width: "100%" }}
           orientation="horizontal"
           ref={pagerRef}
+          onPageSelected={handlePageSelected}
         >
           <View key="1" className="flex-1">
             <TrackList />
           </View>
-          <View key="2">
-            <TrackPlayerScrollerRateTimer />
+          <View key="2" className="mt-4">
+            <RateSelector />
+          </View>
+          <View key="3">
+            <TrackPlayerSettingsBookmarks />
           </View>
         </PagerView>
       </View>
