@@ -31,6 +31,7 @@ type SectionListData = {
 };
 
 const TrackList = () => {
+  const queueOffset = usePlaybackStore((state) => state.currentQueuePosition);
   const queue = usePlaybackStore((state) => state.trackPlayerQueue);
   const currentTrack = usePlaybackStore((state) => state.currentTrack);
   const currentPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
@@ -160,14 +161,20 @@ const TrackList = () => {
     }
     const isCurrChapter = index === currChapterIndex;
     const isCurrentTrack = currentTrackIndex === section?.queuePos;
+    const isCurrentSection = isCurrChapter && isCurrentTrack;
+    // isCurrentSection && console.log("IS CURR", queueOffset, index, currChapterIndex);
+    // console.log("section index, chaptIndex", index, currChapterIndex);
+    // console.log("Que", currentTrackIndex, section?.queuePos);
+
     return (
       <View
         className={`flex-row items-center justify-between ml-4 ${
           index === 0 ? "border" : "border-b border-l"
-        } border-amber-500 h-[45] ${isCurrChapter ? "bg-amber-300" : "bg-white"}`}
+        } border-amber-500 h-[45] ${isCurrentSection ? "bg-amber-300" : "bg-white"}`}
       >
         <TouchableOpacity
           onPress={async () => {
+            // console.log("press", section.queuePos, item?.title, item?.startSeconds, queueOffset);
             if (!isCurrentTrack) {
               await playbackActions.goToTrack(section.queuePos);
             }
@@ -183,7 +190,7 @@ const TrackList = () => {
         <View className={`flex-row  p-2  items-center justify-between flex-grow`}>
           {/* <Text className="text-base">{props.item.title}</Text> */}
           <Text className="text-sm">{item.title}</Text>
-          <Text className="text-xs">{`${formatSeconds(item.startSeconds)} - ${formatSeconds(
+          <Text className="text-xs">{`${formatSeconds(item?.startSeconds)} - ${formatSeconds(
             item.endSeconds
           )}`}</Text>
         </View>

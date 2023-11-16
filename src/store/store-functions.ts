@@ -211,7 +211,7 @@ const createLAABMeta = (laabData) => {
       ? format(new Date(laabData.publishingDate), "yyyy")
       : undefined,
     title: laabData?.title,
-    chapters: laabData?.chapters,
+    chapters: verifyChapterData(laabData?.chapters),
   };
   // Get rid of undefined keys
   Object.keys(LAABMeta).forEach((key) => {
@@ -222,3 +222,23 @@ const createLAABMeta = (laabData) => {
 
   return LAABMeta;
 };
+
+//~ --------------------------------
+//~ Works to make sure that the start seconds of the
+//~ NEXT track is not the same as the end seconds of the PREV track
+//~ --------------------------------
+function verifyChapterData(chapterData: Chapter[]) {
+  let prevEndSeconds = undefined;
+  if (!chapterData) return undefined;
+  return chapterData.map((chapt) => {
+    if (chapt.startSeconds === prevEndSeconds) {
+      prevEndSeconds = chapt.endSeconds;
+      return {
+        ...chapt,
+        startSeconds: chapt.startSeconds + 1,
+      };
+    }
+    prevEndSeconds = chapt.endSeconds;
+    return chapt;
+  });
+}

@@ -38,17 +38,7 @@ const TrackPlayerContainer = () => {
       <View className="flex-1 ">
         <TrackPlayerControls />
       </View>
-
-      {/* <TrackList /> */}
-      {/* <TrackPlayerBottomSheet /> */}
-      {/* <LinearGradient colors={[colors.amber50, `${playlistColors?.secondary?.color}`]}> */}
       <BottomSheetContainer />
-      {/* </LinearGradient> */}
-      {/* <SafeAreaView
-        edges={["bottom"]}
-        className=""
-        // style={{ backgroundColor: playlistColors?.secondary?.color }}
-      ></SafeAreaView> */}
     </View>
   );
 };

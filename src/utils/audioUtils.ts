@@ -31,7 +31,7 @@ export const getAudioFileTags = async (fullFileURI: string) => {
       genre: tag.tags?.genre,
       trackRaw: tag.tags?.track,
       comment: tag.tags?.comment?.text,
-      chapters: chaptersInfo?.chapterArray,
+      // chapters: chaptersInfo?.chapterArray,
       year: isNaN(parseInt(tag.tags?.year)) ? undefined : parseInt(tag.tags?.year),
       durationSeconds: chaptersInfo?.duration || durationSeconds,
       pictureURI: undefined,

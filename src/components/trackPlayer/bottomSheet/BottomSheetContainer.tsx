@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import React, { useRef, useState } from "react";
 import TrackPlayerBottomSheet from "./TrackPlayerBottomSheet";
 import BottomSheetMenu from "./BottomSheetMenu";
@@ -6,6 +6,7 @@ import usePlaylistColors from "hooks/usePlaylistColors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { colors } from "@constants/Colors";
+import { TouchableWithoutFeedback } from "@gorhom/bottom-sheet";
 
 export type BottomSheetImpRef = {
   expand: () => void;
@@ -24,11 +25,10 @@ const BottomSheetContainer = () => {
   return (
     <>
       {/* <LinearGradient colors={[colors.amber50, `${playlistColors?.secondary?.color}`]}>
-        <View className="h-5" />
-      </LinearGradient> */}
+            <View className="h-5" />
+          </LinearGradient> */}
       <SafeAreaView
         edges={["bottom"]}
-        className=""
         // style={{ backgroundColor: playlistColors.secondary.color }}
       >
         <BottomSheetMenu

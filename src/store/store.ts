@@ -359,7 +359,8 @@ type PlaybackState = {
   playlistLoaded: boolean;
   // Seconds into current track that is playing
   currentTrackPosition: number;
-  // The TOTAL number of seconds into the queue
+  // This is the total of all track durations in queue UP TO,
+  //  but NOT including the current track
   currentQueuePosition: number;
   currentChapterInfo: Pick<Chapter, "title" | "startSeconds" | "endSeconds">;
   currentChapterIndex: number;
@@ -620,12 +621,27 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
     getPrevTrackDuration: () => {
       // used is calculating progress acroos all tracks in playlist
       const queue = get().trackPlayerQueue;
-      return queue.reduce((final, el, index) => {
-        if (index < get().currentTrackIndex) {
-          final = final + el.duration;
+      let final = 0;
+      let index = 0;
+
+      for (let el of queue) {
+        if (index >= get().currentTrackIndex) {
+          break;
         }
-        return final;
-      }, 0);
+        // console.log("getPrev", index, get().currentTrackIndex, final, el.duration);
+        final += el.duration;
+        index++;
+      }
+
+      return final;
+      // return queue.reduce((final, el, index) => {
+      //   if (index < get().currentTrackIndex) {
+      //     console.log("getPrev", index, get().currentTrackIndex, final, el.duration);
+      //     final = final + el.duration;
+      //   }
+      //   return final;
+
+      // }, 0);
     },
     play: async () => {
       await TrackPlayer.play();
@@ -636,13 +652,16 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
     next: async () => {
       const trackIndex = await TrackPlayer.getCurrentTrack();
       const queue = await TrackPlayer.getQueue();
-
       if (queue.length - 1 === trackIndex) {
         await TrackPlayer.skip(0);
         await TrackPlayer.pause();
       } else {
         await TrackPlayer.skipToNext();
       }
+      const chapt = get().currentChapterInfo;
+      const chaptIndex = get().currentChapterIndex;
+      const currTrack = get().currentTrack;
+      // console.log("chapt", chapt, chaptIndex, currTrack?.chapters);
     },
     prev: async () => {
       const trackIndex = await TrackPlayer.getCurrentTrack();
@@ -978,14 +997,18 @@ const mountTrackPlayerListeners = () => {
       // Progress Updates {"buffered": 127.512, "duration": 127.512, "position": 17.216, "track": 0}
       // console.log("Progress Updates", event);
       //! Not sure if this is needed
+
       const position = Math.floor(event.position);
       usePlaybackStore.getState().actions.setCurrentTrackPosition(Math.floor(event.position));
       const queue = usePlaybackStore.getState().trackPlayerQueue;
       const trackIndex = usePlaybackStore.getState().currentTrackIndex;
+
+      // console.log("Progress", position,  trackIndex);
       const { chapterInfo, chapterIndex } = getCurrentChapter({
         chapters: queue[trackIndex]?.chapters,
-        position,
+        position: position,
       });
+      // console.log("chapter index", chapterIndex, position);
       usePlaybackStore.setState({
         currentChapterInfo: chapterInfo,
         currentChapterIndex: chapterIndex,
