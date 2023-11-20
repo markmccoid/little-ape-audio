@@ -13,8 +13,6 @@ import { formatSeconds } from "../../utils/formatUtils";
 import TrackPlayer, { useProgress } from "react-native-track-player";
 import { colors } from "../../constants/Colors";
 import sectionListGetItemLayout from "react-native-section-list-get-item-layout";
-import { keyBy } from "lodash";
-import { Chapters } from "@store/types";
 import { Chapter } from "@store/store-functions";
 import { getCurrentChapter } from "@utils/chapterUtils";
 
@@ -31,17 +29,13 @@ type SectionListData = {
 };
 
 const TrackList = () => {
-  const queueOffset = usePlaybackStore((state) => state.currentQueuePosition);
   const queue = usePlaybackStore((state) => state.trackPlayerQueue);
   const currentTrack = usePlaybackStore((state) => state.currentTrack);
-  const currentPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
   const isPlaylistLoaded = usePlaybackStore((state) => state.playlistLoaded);
   const currentTrackIndex = usePlaybackStore((state) => state.currentTrackIndex);
   const playbackActions = usePlaybackStore((state) => state.actions);
   const { position, duration } = useProgress();
   const [sectionList, setSectionList] = useState<SectionListData[]>([]);
-  const [chapters, setChapters] = useState<QueueSectionChapters>();
-
   const currChapterIndex = usePlaybackStore((state) => state.currentChapterIndex);
 
   //! ==== get current queue position
@@ -187,10 +181,12 @@ const TrackList = () => {
             <Text className="text-base font-bold">{index + 1}</Text>
           </View>
         </TouchableOpacity>
-        <View className={`flex-row  p-2  items-center justify-between flex-grow`}>
+        <View className={`flex-row py-2 items-center justify-between flex-1`}>
           {/* <Text className="text-base">{props.item.title}</Text> */}
-          <Text className="text-sm">{item.title}</Text>
-          <Text className="text-xs">{`${formatSeconds(item?.startSeconds)} - ${formatSeconds(
+          <Text className="text-sm flex-1" numberOfLines={1} ellipsizeMode="tail">
+            {item.title}
+          </Text>
+          <Text className="text-xs pr-2">{`${formatSeconds(item?.startSeconds)} - ${formatSeconds(
             item.endSeconds
           )}`}</Text>
         </View>

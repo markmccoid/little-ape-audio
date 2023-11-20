@@ -1,11 +1,16 @@
+import { AudioMetadata } from "./../store/types";
 import TrackPlayer, { Event } from "react-native-track-player";
-import { usePlaybackStore } from "../store/store";
+import { usePlaybackStore, useTracksStore } from "../store/store";
+import { getCurrentChapter } from "./chapterUtils";
+import { Chapter } from "@store/store-functions";
+import { ApeTrack } from "@store/types";
+import { reverse } from "lodash";
 
 //! =================================
 //! REMOTE FUNCTIONS
 //! =================================
 export const handleRemoteNext = async () => {
-  const trackIndex = await TrackPlayer.getCurrentTrack();
+  const trackIndex = await TrackPlayer.getActiveTrackIndex();
   const queue = await TrackPlayer.getQueue();
   const rate = await TrackPlayer.getRate();
   const plId = usePlaybackStore.getState().currentPlaylistId;
@@ -20,7 +25,7 @@ export const handleRemoteNext = async () => {
 };
 
 export const handleRemotePrev = async () => {
-  const trackIndex = await TrackPlayer.getCurrentTrack();
+  const trackIndex = await TrackPlayer.getActiveTrackIndex();
   const rate = await TrackPlayer.getRate();
 
   if (trackIndex === 0) {
@@ -32,8 +37,8 @@ export const handleRemotePrev = async () => {
 };
 
 export const handleRemoteJumpForward = async () => {
-  const currPos = await TrackPlayer.getPosition();
-  const currDuration = await TrackPlayer.getDuration();
+  const { position: currPos, duration: currDuration } = await TrackPlayer.getProgress();
+  // const currDuration = await TrackPlayer.getDuration();
   const newPos = currPos + 10;
   if (newPos > currDuration) {
     await handleRemoteNext();
@@ -42,11 +47,11 @@ export const handleRemoteJumpForward = async () => {
   }
 };
 export const handleRemoteJumpBackward = async () => {
-  const currPos = await TrackPlayer.getPosition();
+  const { position: currPos } = await TrackPlayer.getProgress();
   const newPos = currPos - 10;
   if (newPos < 0) {
     await handleRemotePrev();
-    const duration = await TrackPlayer.getDuration();
+    const { duration } = await TrackPlayer.getProgress();
     await TrackPlayer.seekTo(duration + newPos);
   } else {
     await TrackPlayer.seekTo(newPos);
@@ -58,19 +63,11 @@ export const PlaybackService = async () => {
   TrackPlayer.addEventListener(Event.RemotePlay, () => TrackPlayer.play());
   TrackPlayer.addEventListener(Event.RemotePause, () => TrackPlayer.pause());
   TrackPlayer.addEventListener(Event.RemoteNext, handleRemoteNext);
-  TrackPlayer.addEventListener(
-    Event.RemoteJumpForward,
-    handleRemoteJumpForward
-  );
-  TrackPlayer.addEventListener(
-    Event.RemoteJumpBackward,
-    handleRemoteJumpBackward
-  );
+  TrackPlayer.addEventListener(Event.RemoteJumpForward, handleRemoteJumpForward);
+  TrackPlayer.addEventListener(Event.RemoteJumpBackward, handleRemoteJumpBackward);
   TrackPlayer.addEventListener(Event.RemotePrevious, handleRemotePrev);
   TrackPlayer.addEventListener(Event.RemoteBookmark, handleRemotePrev);
-  TrackPlayer.addEventListener(Event.RemoteSeek, (seek) =>
-    TrackPlayer.seekTo(seek.position)
-  );
+  TrackPlayer.addEventListener(Event.RemoteSeek, (seek) => TrackPlayer.seekTo(seek.position));
   TrackPlayer.addEventListener(Event.RemoteDuck, async (event) => {
     const { paused, permanent } = event;
 
@@ -78,6 +75,77 @@ export const PlaybackService = async () => {
       TrackPlayer.pause();
     } else {
       TrackPlayer.play();
+    }
+  });
+  TrackPlayer.addEventListener(Event.PlaybackProgressUpdated, async (event) => {
+    // Progress Updates {"buffered": 127.512, "duration": 127.512, "position": 17.216, "track": 0}
+
+    // Update the playback store with the current info:
+    // - currentTrackPosition
+    // - chapterInfo -> undefined if no chapters
+    // - chapterIndex -> -1 if no chapters
+
+    const position = Math.floor(event.position);
+    const queue = usePlaybackStore.getState().trackPlayerQueue;
+    const trackIndex = await TrackPlayer.getActiveTrackIndex();
+
+    // console.log("Progress", position, trackIndex);
+    const { chapterInfo, chapterIndex, chapterProgressOffset, nextChapterExists } =
+      getCurrentChapter({
+        chapters: queue[trackIndex]?.chapters,
+        position: position,
+      });
+    // console.log("chapter index", chapterIndex, position, chapterInfo);
+    // Set Data
+    usePlaybackStore.getState().actions.setCurrentTrackPosition(position);
+    usePlaybackStore.setState({
+      currentChapterInfo: chapterInfo,
+      currentChapterIndex: chapterIndex,
+      chapterProgressOffset,
+      nextChapterExists,
+    });
+  });
+  // ------------------------------
+  // -- METADATA Chapters IOS only
+  // ------------------------------
+  TrackPlayer.addEventListener(Event.MetadataChapterReceived, async (event) => {
+    let metaChapters: Chapter[] = [];
+    const currTrack = (await TrackPlayer.getActiveTrack()) as ApeTrack;
+    // console.log(
+    //   "METADATA 1 - CurrTrack MetaLength",
+    //   event?.metadata?.length,
+    //   currTrack?.chapters?.length,
+    //   currTrack.id
+    // );
+    // return;
+
+    // If book has chapters don't do anything
+    if (currTrack?.chapters) return;
+    // if we have metadata get chapter info
+    if (event?.metadata) {
+      // console.log("chapt Data rec", event.metadata);
+      const reverseChapt = reverse(event.metadata);
+      let lastEndTime = Math.floor(currTrack.duration);
+      for (const chapt of reverseChapt) {
+        const startSeconds = Math.floor(chapt?.raw[0].time);
+        const durationSeconds = lastEndTime === 0 ? 0 : lastEndTime - startSeconds;
+
+        metaChapters.push({
+          title: chapt?.raw[0].value as string,
+          startSeconds: startSeconds,
+          endSeconds: lastEndTime,
+          startMilliSeconds: startSeconds * 1000,
+          endMilliSeconds: lastEndTime * 1000,
+          durationSeconds: durationSeconds,
+          lengthMilliSeconds: durationSeconds * 1000,
+        });
+        lastEndTime = startSeconds - 1;
+      }
+      const finalChapters = reverse(metaChapters);
+
+      await useTracksStore
+        .getState()
+        .actions.updateTrackMetadata(currTrack.id, { chapters: finalChapters });
     }
   });
 };

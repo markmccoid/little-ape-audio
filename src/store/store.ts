@@ -1,4 +1,4 @@
-import { Playlist, AudioState, ApeTrack, Bookmark, TrackAttributes } from "./types";
+import { Playlist, AudioState, ApeTrack, Bookmark, TrackAttributes, AudioTrack } from "./types";
 import { create } from "zustand";
 import { Alert, Image } from "react-native";
 import uuid from "react-native-uuid";
@@ -25,6 +25,7 @@ import { shallow } from "zustand/shallow";
 import { router } from "expo-router";
 import { formatSeconds } from "@utils/formatUtils";
 import { getCurrentChapter } from "@utils/chapterUtils";
+import { debounce, reverse } from "lodash";
 // export function getRandomNumber() {
 
 //   const randomNumber = Math.floor(Math.random() * 13) + 1; // Generate random number between 1 and 13
@@ -35,6 +36,7 @@ let eventPlayerTrackChange = undefined;
 let eventEndOfQueue = undefined;
 let eventPlayerStateChange = undefined;
 let eventProgressUpdated = undefined;
+let eventMetadataChapterReceived = undefined;
 let saveIntervalId = undefined;
 //-- ==================================
 //-- TRACK STORE
@@ -45,6 +47,24 @@ export const useTracksStore = create<AudioState>((set, get) => ({
   playlistUpdated: new Date(),
   actions: {
     addNewTrack: addTrack(set, get),
+    updateTrackMetadata: async (trackId, trackMetadata) => {
+      const tracks = [...get().tracks];
+      // Find the track to update
+      const trackToUpdate = tracks.find((track) => track.id === trackId);
+      const currTrackMetadata = trackToUpdate.metadata;
+      // bail if no track found
+      if (!trackToUpdate) return;
+      const mergedTrack = {
+        ...trackToUpdate,
+        metadata: { ...currTrackMetadata, ...trackMetadata },
+      };
+
+      // Merge changes
+      const newTracks = [...tracks.filter((track) => track.id !== trackId), mergedTrack];
+
+      await saveToAsyncStorage("tracks", newTracks);
+      set({ tracks: newTracks });
+    },
     removeTracks: async (ids) => {
       // Use passed id to do the following:
       // - lookup audioFile information in audioFiles array
@@ -285,7 +305,8 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       const playlists = useTracksStore.getState().playlists;
       let newPosition = position;
       if (!position) {
-        newPosition = await TrackPlayer.getPosition();
+        const { position: tpPosition } = await TrackPlayer.getProgress();
+        newPosition = tpPosition;
       }
       playlists[playlistId].positionHistory = [
         newPosition,
@@ -364,6 +385,11 @@ type PlaybackState = {
   currentQueuePosition: number;
   currentChapterInfo: Pick<Chapter, "title" | "startSeconds" | "endSeconds">;
   currentChapterIndex: number;
+  // Number of seconds of previous chapters.  if three chapters and on third, then
+  // this is the time of the first two chapters
+  chapterProgressOffset: number;
+  // true indicates another chapter in track after chapter indicated by currentChapterIndex
+  nextChapterExists: boolean;
   currentRate: number;
   didUpdate: string;
   actions: {
@@ -403,6 +429,8 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
   currentQueuePosition: 0,
   currentChapterInfo: undefined,
   currentChapterIndex: 0,
+  chapterProgressOffset: 0,
+  nextChapterExists: false,
   playerState: undefined,
   playlistLoaded: false,
   currentRate: 1,
@@ -436,13 +464,15 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
         set({ playlistLoaded: true });
         return;
       }
+
       //----------
       // Pause the player before loading the new track.  Even though
       // store existing playlist information in TrackStore -> playlists
       // before loading new playlist
-      // await saveCurrentTrackInfo();
+      await saveCurrentTrackInfo();
       await TrackPlayer.pause();
-      await TrackPlayer.reset();
+      get().actions.resetPlaybackStore();
+      // await TrackPlayer.reset();
       //---------
       // Load new Playlist
       const currPlaylist = useTracksStore.getState().actions.getPlaylist(playlistId);
@@ -458,13 +488,14 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       //!!
       const currTrackIndex = currPlaylist.currentPosition?.trackIndex || 0;
       const currTrackPosition = currPlaylist.currentPosition?.position || 0;
-      // console.log("currtrackpos", currTrackPosition);
+
       // Call function to get current chapter Info
 
-      const { chapterInfo, chapterIndex } = getCurrentChapter({
-        chapters: queue[currTrackIndex]?.chapters,
-        position: currTrackPosition,
-      });
+      const { chapterInfo, chapterIndex, chapterProgressOffset, nextChapterExists } =
+        getCurrentChapter({
+          chapters: queue[currTrackIndex]?.chapters,
+          position: currTrackPosition,
+        });
 
       set({
         currentTrack: queue[currTrackIndex],
@@ -472,7 +503,10 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
         currentTrackPosition: currTrackPosition,
         currentChapterInfo: chapterInfo,
         currentChapterIndex: chapterIndex,
+        chapterProgressOffset,
+        nextChapterExists,
       });
+
       // when a track changes, set the currentQueuePosition.  This is the total of all
       // track durations in queue UP TO, but NOT including the current track
       const prevTracksDuration = usePlaybackStore.getState().actions.getPrevTrackDuration();
@@ -480,15 +514,14 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       set({ currentQueuePosition: prevTracksDuration });
 
       // - Reset TrackPlayer and add the Queue
-
       await TrackPlayer.add(queue);
       // - Make sure current track is loaded and set to proper position
       await TrackPlayer.skip(currTrackIndex);
       await TrackPlayer.seekTo(currTrackPosition);
-      // console.log("Seeked to ", currTrackPosition);
       await TrackPlayer.setRate(currPlaylist.currentRate);
 
       mountTrackPlayerListeners();
+
       set({ playlistLoaded: true, currentRate: currPlaylist.currentRate });
     },
     getCurrentPlaylist: () => {
@@ -551,6 +584,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       await TrackPlayer.seekTo(get().currentTrackPosition);
       await TrackPlayer.setRate(getCurrentPlaylist().currentRate);
       mountTrackPlayerListeners();
+
       set({ playlistLoaded: true });
     },
     removePlaylistTrack: async (playlistId, trackIdToDelete) => {
@@ -650,21 +684,61 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       await TrackPlayer.pause();
     },
     next: async () => {
-      const trackIndex = await TrackPlayer.getCurrentTrack();
+      const trackIndex = await TrackPlayer.getActiveTrackIndex();
       const queue = await TrackPlayer.getQueue();
+      const { currentTrack, currentChapterIndex } = get();
+      // Need to determine if we are moving to the next track or the next chapter
+      // the Queue has tracks in it and each track may or may NOT have chapters.
+      let moveToAction = "track";
+      let nextChapter = {} as Chapter;
+
+      if (currentTrack?.chapters?.length > 0) {
+        if (currentTrack?.chapters?.length - 1 !== currentChapterIndex) {
+          moveToAction = "chapter";
+          nextChapter = currentTrack.chapters[currentChapterIndex + 1];
+        }
+      }
+      // console.log("NEXT Chapt", nextChapter);
+      // console.log("movetoaction", moveToAction, currentTrack?.chapters?.length, currentChapterIndex);
+      if (moveToAction === "chapter") {
+        await TrackPlayer.seekTo(nextChapter.startSeconds);
+        return;
+      }
       if (queue.length - 1 === trackIndex) {
         await TrackPlayer.skip(0);
         await TrackPlayer.pause();
       } else {
         await TrackPlayer.skipToNext();
       }
-      const chapt = get().currentChapterInfo;
-      const chaptIndex = get().currentChapterIndex;
-      const currTrack = get().currentTrack;
       // console.log("chapt", chapt, chaptIndex, currTrack?.chapters);
     },
     prev: async () => {
-      const trackIndex = await TrackPlayer.getCurrentTrack();
+      const trackIndex = await TrackPlayer.getActiveTrackIndex();
+      const queue = await TrackPlayer.getQueue();
+      const { currentTrack, currentChapterIndex } = get();
+      // Need to determine if we are moving to the next track or the next chapter
+      // the Queue has tracks in it and each track may or may NOT have chapters.
+      let moveToAction = "track";
+      let prevChapter = {} as Chapter;
+
+      if (currentTrack?.chapters?.length > 0) {
+        if (currentChapterIndex !== 0) {
+          moveToAction = "chapter";
+          prevChapter = currentTrack.chapters[currentChapterIndex - 1];
+        }
+      }
+      // console.log("PREV Chapt", prevChapter);
+      // console.log(
+      //   "movetoaction",
+      //   moveToAction,
+      //   currentTrack?.chapters?.length,
+      //   currentChapterIndex
+      // );
+      if (moveToAction === "chapter") {
+        await TrackPlayer.seekTo(prevChapter.startSeconds);
+        return;
+      }
+
       if (trackIndex === 0) {
         await TrackPlayer.seekTo(0);
       } else {
@@ -672,9 +746,9 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       }
     },
     jumpForward: async (jumpForwardSeconds: number) => {
-      const currPos = await TrackPlayer.getPosition();
-      const currDuration = await TrackPlayer.getDuration();
-      const trackIndex = await TrackPlayer.getCurrentTrack();
+      const { position: currPos, duration: currDuration } = await TrackPlayer.getProgress();
+      // const currDuration = await TrackPlayer.getDuration();
+      const trackIndex = await TrackPlayer.getActiveTrackIndex();
       const qLength = get().trackPlayerQueue.length;
       const newPos = currPos + jumpForwardSeconds;
       if (newPos > currDuration) {
@@ -692,7 +766,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       }
     },
     jumpBack: async (jumpBackSeconds: number) => {
-      const currPos = await TrackPlayer.getPosition();
+      const { position: currPos } = await TrackPlayer.getProgress();
       const newPos = currPos - jumpBackSeconds;
       if (newPos < 0) {
         // go to prev track.  You could get crazy and calculate how much "seekBack" is in
@@ -700,10 +774,10 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
         // currPos = 25 currDuration = 30, seekTo = 10
         // We go to prev track and start 5 seconds in prev track
         //!  IMPLEMENTED Below
-        const trackIndex = await TrackPlayer.getCurrentTrack();
+        const trackIndex = await TrackPlayer.getActiveTrackIndex();
         await get().actions.prev();
         if (trackIndex !== 0) {
-          const duration = await TrackPlayer.getDuration();
+          const { duration } = await TrackPlayer.getProgress();
           await TrackPlayer.seekTo(duration + newPos);
         }
       } else {
@@ -734,7 +808,6 @@ export const useGetQueue = () => {
   useEffect(() => {
     const getQueue = async () => {
       const tracks = await TrackPlayer.getQueue();
-      const currTrack = await TrackPlayer.getCurrentTrack();
       setTracks(tracks);
     };
     getQueue();
@@ -749,7 +822,6 @@ const buildTrackPlayerQueue = (trackIds: string[]): ApeTrack[] => {
 
   for (const trackId of trackIds) {
     const trackInfo = trackActions.getTrack(trackId);
-
     const trackPlayerTrack = {
       id: trackInfo.id,
       filename: trackInfo.filename,
@@ -780,20 +852,20 @@ const buildTrackPlayerQueue = (trackIds: string[]): ApeTrack[] => {
  * information AND stores to asyncStorage "playlists".
  *
  */
-const saveCurrentTrackInfo = async () => {
-  const trackIndex = await TrackPlayer.getCurrentTrack();
+// Debounce the saving function so that we don't get multiple saves if not needed.
+const saveCurrentTrackInfo = debounce(async () => await saveCurrentTrackInfoBase(), 500);
+const saveCurrentTrackInfoBase = async () => {
+  const trackIndex = await TrackPlayer.getActiveTrackIndex();
   if (trackIndex !== null && trackIndex !== undefined) {
     //! Instead of polling TrackPlayer for position, get it from PlaybackStore
     //! We are updating this field every second in the PlaybackProgressUpdate listener
-    // const position = await TrackPlayer.getPosition();
-    // usePlaybackStore.setState({ currentTrackPosition: position });
-    const position = await TrackPlayer.getPosition(); // usePlaybackStore.getState().currentTrackPosition;
+    const { position } = await TrackPlayer.getProgress(); // usePlaybackStore.getState().currentTrackPosition;
 
     const playlist = {
       ...useTracksStore.getState().playlists[usePlaybackStore.getState().currentPlaylistId],
     };
 
-    playlist.positionHistory = [position, ...(playlist.positionHistory || [])].slice(0, 5);
+    playlist.positionHistory = [position, ...(playlist.positionHistory || [])].slice(0, 15);
     playlist.currentPosition = {
       trackIndex: trackIndex,
       position,
@@ -826,20 +898,12 @@ const unmountTrackListeners = () => {
   if (eventProgressUpdated) {
     eventProgressUpdated.remove();
   }
+  if (eventMetadataChapterReceived) {
+    eventMetadataChapterReceived.remove();
+  }
 };
 
 const mountTrackPlayerListeners = () => {
-  // -- METADATA
-  // https://react-native-track-player.js.org/docs/api/events#playbackmetadatareceived
-  // if (eventMetadata) {
-  //   eventMetadata.remove();
-  // }
-  // eventMetadata = TrackPlayer.addEventListener(
-  //   Event.PlaybackMetadataReceived,
-  //   async (event) => {
-  //     console.log("Metadata received", event);
-  //   }
-  // );
   // -- END OF QUEUE
   // if (eventEndOfQueue) {
   //   eventEndOfQueue.remove();
@@ -848,29 +912,45 @@ const mountTrackPlayerListeners = () => {
   //! If it is, then will need to check "WHY" it is being called.  Seems to be called when going to "NEXT" or
   //! if on last queue track and go to previous track, it is called.
   //! I'm sure ways around it.  Check if current track is still last track, etc.
-  // eventEndOfQueue = TrackPlayer.addEventListener(
-  //   Event.PlaybackQueueEnded,
-  //   async (event) => {
-  //     console.log("END OF QUEUE", event);
-  //     const queue = await TrackPlayer.getQueue();
-  //     if (queue.length > 1) {
-  //       TrackPlayer.skip(0);
-  //       TrackPlayer.pause();
-  //     }
-  //   }
-  // );
-
+  if (eventEndOfQueue) {
+    eventEndOfQueue.remove();
+  }
+  eventEndOfQueue = TrackPlayer.addEventListener(Event.PlaybackQueueEnded, async (event) => {
+    console.log("END OF QUEUE", event);
+    const queue = await TrackPlayer.getQueue();
+    if (queue.length > 1) {
+      TrackPlayer.skip(0);
+      TrackPlayer.pause();
+    }
+  });
+  // ------------------------
   // -- TRACK CHANGED
+  // ------------------------
   if (eventPlayerTrackChange) {
     eventPlayerTrackChange.remove();
   }
   eventPlayerTrackChange = TrackPlayer.addEventListener(
-    Event.PlaybackTrackChanged,
+    Event.PlaybackActiveTrackChanged,
     async (event) => {
-      // event = { nextTrack, position (in seconds), track (current track)}
-      // console.log("TRACK CHANGE", event);
+      // event = { "lastTrack", "lastIndex", "lastPosition", "index", "track"}
+      // when reset is called you just get "lastTrack", "lastIndex", "lastPosition"
+      // when new queue is loaded you just get "lastPosition", "index", "track" and
+      //  the lastPosition will be zero.
+
       // If there is no next track OR if we are in a loading state, just return
-      if (event?.nextTrack === undefined) return;
+      // console.log("ACTIVE TRACKCHANGED", `\n     `, Object.keys(event));
+      // console.log(
+      //   `---------\n     `,
+      //   Object.keys(event).map((el) => {
+      //     if (!el.toLowerCase().includes("track")) {
+      //       return event[el];
+      //     } else {
+      //       return event[el]?.id;
+      //     }
+      //   })
+      // );
+      if (event?.track === undefined || event?.lastIndex === undefined) return;
+      //! This keeps this event from running if we are loading a new playlist
       if (!usePlaybackStore.getState().playlistLoaded) return;
       // ON TRACK CHANGE -
       // Get Next Track (if there is one) and update
@@ -880,21 +960,24 @@ const mountTrackPlayerListeners = () => {
       // =======================================
       // Get the event params
       const {
-        nextTrack: nextTrackIndex,
-        position: prevPositionSeconds,
-        track: prevTrackIndex,
+        index: nextTrackIndex,
+        lastPosition: prevPositionSeconds,
+        lastIndex: prevTrackIndex,
+        // track,
       } = event;
 
-      // console.log("Playback Track Changed", nextTrackIndex, prevPositionSeconds, prevTrackIndex);
+      console.log("Playback Track Changed", nextTrackIndex, prevPositionSeconds, prevTrackIndex);
       const track = (await TrackPlayer.getTrack(nextTrackIndex)) as ApeTrack;
-
-      const prevTrack = (await TrackPlayer.getTrack(prevTrackIndex)) as ApeTrack;
-
-      // Track has reached end of track (at least 1 second from end of track)
-      // We take this to assume we are moving to the next track "naturally"
-      // we will use this to start at the beginning of the next track instead of
-      // looking at its set current position
-      const naturalTrackChange = Math.floor(prevTrack.duration - prevPositionSeconds) < 1;
+      // default is to look at saved position unless there was a previous track
+      let naturalTrackChange = false;
+      if (prevTrackIndex) {
+        const prevTrack = (await TrackPlayer.getTrack(prevTrackIndex)) as ApeTrack;
+        // Track has reached end of track (at least 1 second from end of track)
+        // We take this to assume we are moving to the next track "naturally"
+        // we will use this to start at the beginning of the next track instead of
+        // looking at its set current position
+        naturalTrackChange = Math.floor(prevTrack.duration - prevPositionSeconds) < 1;
+      }
 
       // update playback store's info
       // used in track playback components track list, etc
@@ -910,11 +993,13 @@ const mountTrackPlayerListeners = () => {
       //~~START TrackAttributes
       //~~ Code to store and prevTracks position and restore "next" tracks position
       //~~ if one exists this exists on the playlist
+      //! since we will only be in this code AFTER the playlist has loaded and the first track
+      //! has been mounted, there will ALWAYS be a previous track.
       const prevTrackId = playlist.trackIds[prevTrackIndex];
       const nextTrackId = playlist.trackIds[nextTrackIndex];
       const prevTrackAtrributes = playlist?.trackAttributes?.[prevTrackId];
       const nextTrackAtrributes = playlist?.trackAttributes?.[nextTrackId];
-
+      // console.log("PREV", prevTrackId, prevTrackAtrributes);
       // If it was a natural track change, then reset to zero
       // otherwise use the stored trackAttributes
       const nextTrackPosition = naturalTrackChange ? 0 : nextTrackAtrributes?.currentPosition ?? 0;
@@ -924,7 +1009,7 @@ const mountTrackPlayerListeners = () => {
         position: nextTrackPosition,
       };
 
-      TrackPlayer.seekTo(nextTrackPosition);
+      await TrackPlayer.seekTo(nextTrackPosition);
       playlist.positionHistory = [nextTrackPosition, ...(playlist.positionHistory || [])];
       // Update a copy of the trackattributes object, updating the prevTrackId's entry
       // We will RESET the prevTrack's position to zero IF we have reached the end of the track
@@ -953,7 +1038,7 @@ const mountTrackPlayerListeners = () => {
       // when a track changes, set the currentQueuePosition.  This is the total of all
       // track durations in queue UP TO, but NOT including the current track
       const prevTracksDuration =
-        event.nextTrack === 0 ? 0 : usePlaybackStore.getState().actions.getPrevTrackDuration();
+        nextTrackIndex === 0 ? 0 : usePlaybackStore.getState().actions.getPrevTrackDuration();
 
       usePlaybackStore.setState({
         currentQueuePosition: prevTracksDuration,
@@ -970,7 +1055,8 @@ const mountTrackPlayerListeners = () => {
     // console.log("STATE CHANGE", event);
     // Whenever state chagnes to Paused, then save the current position
     // on PlaybackStore AND TrackStore
-    // console.log("PLAYBACK State Changed", event);
+    const { position } = await TrackPlayer.getProgress();
+    // console.log("PLAYBACK State Changed", event, position);
     usePlaybackStore.setState({ playerState: event.state });
     if (event.state === State.Stopped) {
       clearAutoSaveInterval(saveIntervalId);
@@ -991,31 +1077,31 @@ const mountTrackPlayerListeners = () => {
   if (eventProgressUpdated) {
     eventProgressUpdated.remove();
   }
-  eventProgressUpdated = TrackPlayer.addEventListener(
-    Event.PlaybackProgressUpdated,
-    async (event) => {
-      // Progress Updates {"buffered": 127.512, "duration": 127.512, "position": 17.216, "track": 0}
-      // console.log("Progress Updates", event);
-      //! Not sure if this is needed
+  // eventProgressUpdated = TrackPlayer.addEventListener(
+  //   Event.PlaybackProgressUpdated,
+  //   async (event) => {
+  //     // Progress Updates {"buffered": 127.512, "duration": 127.512, "position": 17.216, "track": 0}
+  //     // console.log("Progress Updates", event);
+  //     //! Not sure if this is needed
 
-      const position = Math.floor(event.position);
-      usePlaybackStore.getState().actions.setCurrentTrackPosition(Math.floor(event.position));
-      const queue = usePlaybackStore.getState().trackPlayerQueue;
-      const trackIndex = usePlaybackStore.getState().currentTrackIndex;
+  //     const position = Math.floor(event.position);
+  //     usePlaybackStore.getState().actions.setCurrentTrackPosition(Math.floor(event.position));
+  //     const queue = usePlaybackStore.getState().trackPlayerQueue;
+  //     const trackIndex = usePlaybackStore.getState().currentTrackIndex;
 
-      // console.log("Progress", position,  trackIndex);
-      const { chapterInfo, chapterIndex } = getCurrentChapter({
-        chapters: queue[trackIndex]?.chapters,
-        position: position,
-      });
-      // console.log("chapter index", chapterIndex, position);
-      usePlaybackStore.setState({
-        currentChapterInfo: chapterInfo,
-        currentChapterIndex: chapterIndex,
-      });
-      // console.log("Q", chapterInfo?.title, chapterIndex);
-    }
-  );
+  //     // console.log("Progress", position,  trackIndex);
+  //     const { chapterInfo, chapterIndex } = getCurrentChapter({
+  //       chapters: queue[trackIndex]?.chapters,
+  //       position: position,
+  //     });
+  //     // console.log("chapter index", chapterIndex, position);
+  //     usePlaybackStore.setState({
+  //       currentChapterInfo: chapterInfo,
+  //       currentChapterIndex: chapterIndex,
+  //     });
+  //     // console.log("Q", chapterInfo?.title, chapterIndex);
+  //   }
+  // );
 };
 
 function clearAutoSaveInterval(intervalId: number) {

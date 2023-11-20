@@ -23,6 +23,7 @@ const TrackPlayerProgressBar = () => {
   const [currPos, setCurrPos] = useState(position);
   const currTrack = usePlaybackStore((state) => state.currentTrack);
   const currChapterInfo = usePlaybackStore((state) => state.currentChapterInfo);
+  const chapterProgressOffset = usePlaybackStore((state) => state.chapterProgressOffset);
   // const playlist = getCurrentPlaylist();
   // const playlistColors = usePlaylistColors();
   const textColor = "black";
@@ -103,6 +104,26 @@ const TrackPlayerProgressBar = () => {
           </Text>
         )}
       </View>
+      {/* NEED something to indicate what is seeking so */}
+      {/* <NewSlider
+        containerStyle={{
+          width: width - 20,
+        }}
+        minimumValue={0}
+        maximumValue={currChapterInfo.endSeconds - currChapterInfo.startSeconds}
+        minimumTrackTintColor={colors.amber700}
+        maximumTrackTintColor={colors.amber400}
+        thumbTintColor={colors.amber600}
+        value={currPos - chapterProgressOffset} // {seeking ? seeking : Math.floor(position)}
+        onValueChange={(val) => {
+          setIsSeeking(true);
+          console.log("VAl", val, chapterProgressOffset);
+          setSeeking(val[0] + chapterProgressOffset);
+        }}
+        onSlidingComplete={(val) => handleChange([val[0] + chapterProgressOffset])}
+        step={1}
+      /> */}
+
       <NewSlider
         containerStyle={{
           width: width - 20,

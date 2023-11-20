@@ -11,6 +11,7 @@ import { getJsonData } from "@utils/googleUtils";
 import { GDrive } from "@robinbobin/react-native-google-drive-api-wrapper";
 import { PlaylistImageColors } from "@store/types";
 import { getImageColors } from "@utils/otherUtils";
+import TrackPlayer from "react-native-track-player";
 
 const gdrive = new GDrive();
 
@@ -25,9 +26,9 @@ export type Chapter = {
   startSeconds: number;
   endSeconds: number;
   durationSeconds: number;
-  startMilliSeconds: number;
-  endMilliSeconds: number;
-  lengthMilliSeconds: number;
+  startMilliSeconds?: number;
+  endMilliSeconds?: number;
+  lengthMilliSeconds?: number;
 };
 type LAABData = {
   fileName: string;
@@ -82,6 +83,7 @@ export const addTrack =
       const colors = (await getImageColors(tags.pictureURI)) as PlaylistImageColors;
       tags.pictureColors = colors;
     }
+
     // ------------------------------------
     // -- GET LAAB Metadata if it exists
     let LAABMeta: LAABData = undefined;
@@ -136,6 +138,29 @@ export const addTrack =
     // Add the new track to current track list
     const newAudioFileList = [...filteredList, newAudioFile];
     set({ tracks: newAudioFileList });
+    //! ----- ----- ----- ----- ----- ----- -----
+    //! This code is to only here to make the
+    //! AudioCommonMetadataReceived event fire
+    //! It will cause the chapter event to emit and then
+    //! we can grab any chapter data found in the mp3 file
+    //~ ONE Caveat, I am resetting the TrackPlayer, which means if
+    //~ playlist is active it will be cleared.  Oh well.
+    //~ We could probably use this techinique for the other metadata
+    //~ but for now above works.
+    //! ----- ----- ----- ----- ----- ----- -----
+    const trackPlayerTrack = {
+      id: `${filename}`,
+      filename: `${filename}`,
+      url: `${FileSystem.documentDirectory}${fileURI}`,
+      duration: tags.durationSeconds,
+    };
+
+    await TrackPlayer.reset();
+    await TrackPlayer.add([trackPlayerTrack]);
+    await TrackPlayer.skip(0);
+    // await TrackPlayer.seekTo(0);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    //!!!!!!!
 
     //! -- When a new track is added, we need to get the title and author
     //!    information.  This will be our Playlist name

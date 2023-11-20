@@ -31,7 +31,7 @@ export type AudioMetadata = {
   pictureColors?: PlaylistImageColors;
   pictureAspectRatio?: number;
   comment?: string;
-  chapters?: Chapters[];
+  chapters?: Chapter[];
 };
 
 export type PlaylistImageColors = {
@@ -67,12 +67,12 @@ export type PlaylistImageColors = {
 //   detailTintColor: string;
 //   platform: "ios";
 // };
-export type Chapters = {
-  id: string;
-  description: string;
-  startTime: number;
-  endTime: number;
-  duration: number;
+// export type Chapters = {
+//   id: string;
+//   description: string;
+//   startTime: number;
+//   endTime: number;
+//   duration: number;
 };
 //~ ================================
 //~ Playlist Type
@@ -171,6 +171,10 @@ export type AudioState = {
       playlistId?: string;
       directory?: string;
     }) => void;
+    updateTrackMetadata: (
+      trackId: string,
+      trackMetadata: Partial<AudioMetadata>
+    ) => Promise<void>;
     // given passed id of audioFile, remove it from list AND Delete it from FileSystem storage
     //!! Need to make sure to remove from any playlist if we actually use this function anywhere
     removeTracks: (ids: string[]) => Promise<void>;

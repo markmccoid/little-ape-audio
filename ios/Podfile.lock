@@ -86,7 +86,7 @@ PODS:
     - ExpoModulesCore
   - ExpoCrypto (12.4.1):
     - ExpoModulesCore
-  - ExpoHaptics (12.2.1):
+  - ExpoHaptics (12.4.0):
     - ExpoModulesCore
   - ExpoHead (0.0.11):
     - ExpoModulesCore
@@ -452,9 +452,9 @@ PODS:
     - ReactCommon/turbomodule/core
   - react-native-slider (4.4.2):
     - React-Core
-  - react-native-track-player (3.2.0):
+  - react-native-track-player (4.0.1):
     - React-Core
-    - SwiftAudioEx (= 0.15.3)
+    - SwiftAudioEx (= 1.0.0)
   - React-NativeModulesApple (0.72.3):
     - hermes-engine
     - React-callinvoker
@@ -609,7 +609,7 @@ PODS:
   - RNSVG (13.9.0):
     - React-Core
   - SocketRocket (0.6.1)
-  - SwiftAudioEx (0.15.3)
+  - SwiftAudioEx (1.0.0)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -883,7 +883,7 @@ SPEC CHECKSUMS:
   ExpoAdapterGoogleSignIn: d20c9bd110725db21da6f4e188508bee352e86d8
   ExpoClipboard: 695f274f8e028cd113837f917da40c76850877eb
   ExpoCrypto: a382ab9a2fa91f0b511ce1fe4d6baecee40a1615
-  ExpoHaptics: 5156bc5160d8e04c170dd6e645a71154951a2ad9
+  ExpoHaptics: 360af6898407ee4e8265d30a1a8fb16491a660eb
   ExpoHead: 8da645502363b53eeb99d99276a0adbe0ec8cff0
   ExpoKeepAwake: be4cbd52d9b177cde0fd66daa1913afa3161fc1d
   ExpoLinearGradient: 5966dd5d49872cc9c104fedc8bbc298b6049b2e8
@@ -923,7 +923,7 @@ SPEC CHECKSUMS:
   react-native-pager-view: 0ccb8bf60e2ebd38b1f3669fa3650ecce81db2df
   react-native-safe-area-context: 36cc67648134e89465663b8172336a19eeda493d
   react-native-slider: 33b8d190b59d4f67a541061bb91775d53d617d9d
-  react-native-track-player: 0c26d981b5097910486cbbeb6d8f5352d41be069
+  react-native-track-player: 97d76dbbd35f27cc709e5f04540615e54264b3f9
   React-NativeModulesApple: c57f3efe0df288a6532b726ad2d0322a9bf38472
   React-perflogger: 6bd153e776e6beed54c56b0847e1220a3ff92ba5
   React-RCTActionSheet: c0b62af44e610e69d9a2049a682f5dba4e9dff17
@@ -949,7 +949,7 @@ SPEC CHECKSUMS:
   RNScreens: 50ffe2fa2342eabb2d0afbe19f7c1af286bc7fb3
   RNSVG: 53c661b76829783cdaf9b7a57258f3d3b4c28315
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
-  SwiftAudioEx: 83eabba2940924fc1c0d5cb0896049921365229c
+  SwiftAudioEx: 6f511018b7a0fdfd14ed1bb4081f953588245cc0
   Yoga: 8796b55dba14d7004f980b54bcc9833ee45b28ce
 
 PODFILE CHECKSUM: dea1ee4e77b66d7530a2e8e0c9541506d5bc09c7

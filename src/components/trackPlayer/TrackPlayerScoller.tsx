@@ -31,6 +31,7 @@ const componentArray = [
           height: width / 1.35,
           borderRadius: 20,
           alignSelf: "center",
+          alignItems: "center",
         }}
       >
         <Image
@@ -76,8 +77,8 @@ const TrackPlayerScoller = () => {
 
   const getItemLayout = (_, index) => {
     return {
-      length: COMPONENT_WIDTH + 10,
-      offset: (COMPONENT_WIDTH + 10) * (index - 1),
+      length: COMPONENT_WIDTH,
+      offset: COMPONENT_WIDTH * (index - 1),
       index,
     };
   };

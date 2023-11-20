@@ -7,11 +7,14 @@ import { useSettingStore } from "./store-settings";
 //~ ON INITIALIZE
 //~ ----------------------------------
 export const onInitialize = async () => {
-  // await removeFromAsyncStorage("tracks");
   // await removeFromAsyncStorage("playlists");
   // await removeFromAsyncStorage("favfolders");
   // await removeFromAsyncStorage("foldermetadata");
   const tracks = await loadFromAsyncStorage("tracks");
+  // const tracks = tracksx.map((el) => ({
+  //   ...el,
+  //   metadata: { ...el.metadata, chapters: undefined },
+  // }));
   const playlists = await loadFromAsyncStorage("playlists");
   const favFolders = await loadFromAsyncStorage("favfolders");
   const folderMetadata = await loadFromAsyncStorage("foldermetadata");
