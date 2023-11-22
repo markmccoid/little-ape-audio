@@ -181,7 +181,7 @@ const TrackList = () => {
             <Text className="text-base font-bold">{index + 1}</Text>
           </View>
         </TouchableOpacity>
-        <View className={`flex-row py-2 items-center justify-between flex-1`}>
+        <View className={`flex-row pl-2 py-2 items-center justify-between flex-1`}>
           {/* <Text className="text-base">{props.item.title}</Text> */}
           <Text className="text-sm flex-1" numberOfLines={1} ellipsizeMode="tail">
             {item.title}

@@ -4,10 +4,11 @@ import { usePlaybackState } from "react-native-track-player";
 import { usePlaybackStore } from "../../../store/store";
 import { ScrollView } from "react-native-gesture-handler";
 import { formatSeconds } from "../../../utils/formatUtils";
-import { useRouter } from "expo-router";
+import { useRouter, useSegments } from "expo-router";
 import { colors } from "../../../constants/Colors";
 import { useSharedValue } from "react-native-reanimated";
 import BookmarkRow from "./TrackPlayerSettingsBookmarkRow";
+import { useSettingStore } from "@store/store-settings";
 
 const TrackPlayerSettingsBookmarks = () => {
   //-- Setup for swipe left gestures
@@ -15,18 +16,26 @@ const TrackPlayerSettingsBookmarks = () => {
   const activeKey = useSharedValue(undefined);
   //--
   const playbackActions = usePlaybackStore((state) => state.actions);
+  // I'm sure there is a better way BUT....
+  // This forces a rerender when a bookmark is deleted
   const didUpdate = usePlaybackStore((state) => state.didUpdate);
   const router = useRouter();
-  const [updateBookmarks, setUpdateBookmarks] = useState(false);
   const bookmarks = playbackActions.getBookmarks();
-  // const bookmarks = useMemo(() => playbackActions.getBookmarks(), [updateBookmarks]);
+  const segments = useSegments();
+  const playerBottomSheetRef = useSettingStore((state) => state.playerBottomSheetRef);
+
   const handleApplyBookmark = async (bookmarkId) => {
+    const currSegment = segments[segments.length - 1];
     playbackActions.applyBookmark(bookmarkId);
-    router.back();
+    // Need to know if we are in route or if we are on bottomsheet
+    if (currSegment === "playersettings") {
+      router.back();
+    } else {
+      playerBottomSheetRef.close();
+    }
   };
   const handleDeleteBookmark = async (bookmarkId) => {
     playbackActions.deleteBookmark(bookmarkId);
-    setUpdateBookmarks((prev) => !prev);
   };
 
   if (!bookmarks || bookmarks?.length === 0) {

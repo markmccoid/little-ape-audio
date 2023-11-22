@@ -1,5 +1,5 @@
-import { View, Text, Dimensions } from "react-native";
-import React, { useEffect, useMemo, useState } from "react";
+import { View, Text, Dimensions, TouchableOpacity } from "react-native";
+import React, { useEffect, useMemo, useReducer, useState } from "react";
 import TrackPlayer, { useProgress } from "react-native-track-player";
 import { getCurrentPlaylist, usePlaybackStore } from "../../store/store";
 import { formatSeconds } from "../../utils/formatUtils";
@@ -12,19 +12,17 @@ const { width, height } = Dimensions.get("window");
 const leftOffset = (width - width / 2.25) / 2;
 
 const TrackPlayerProgressBar = () => {
-  const playbackActions = usePlaybackStore((state) => state.actions);
-  const { position, duration } = useProgress();
-  // const { position } = useMyProgress();
+  const currTrack = usePlaybackStore((state) => state.currentTrack);
   const queuePos = usePlaybackStore((state) => state.currentQueuePosition);
   const queueDuration = getCurrentPlaylist()?.totalDurationSeconds;
+  const playbackActions = usePlaybackStore((state) => state.actions);
+  const { position } = useProgress();
   const [seeking, setSeeking] = useState<number>();
   const [isSeeking, setIsSeeking] = useState(false);
   const [currPos, setCurrPos] = useState(position);
-  const currTrack = usePlaybackStore((state) => state.currentTrack);
   const currChapterInfo = usePlaybackStore((state) => state.currentChapterInfo);
-
-  // const playlist = getCurrentPlaylist();
-  // const playlistColors = usePlaylistColors();
+  const chapterProgressOffset = usePlaybackStore((state) => state.chapterProgressOffset);
+  const [showPercent, togglePercent] = useReducer((state) => !state, false);
   const textColor = "black";
 
   useEffect(() => {
@@ -35,8 +33,6 @@ const TrackPlayerProgressBar = () => {
     }
   }, [position, seeking]);
 
-  // console.log("chapter ", currTrack.chapters.find((el) => currPos < el.endSeconds)?.title, currPos);
-
   async function handleChange(valueArr: number[]) {
     let value = valueArr[0];
     if (value < 0) value = 0;
@@ -44,7 +40,7 @@ const TrackPlayerProgressBar = () => {
     setIsSeeking(false);
   }
 
-  if (currChapterInfo?.startSeconds !== undefined) return null;
+  if (currChapterInfo?.startSeconds === undefined) return null;
 
   return (
     <View className="flex-col justify-center items-center mt-3 mb-4">
@@ -85,18 +81,31 @@ const TrackPlayerProgressBar = () => {
           </MotiView>
         )}
       </AnimatePresence>
-      <View>
+      <View className="w-full px-2 justify-center items-center">
         <Text
           className="text-base text-center "
-          style={{ width: width / 1.25, color: textColor }}
+          style={{ color: textColor }}
           numberOfLines={1}
           ellipsizeMode="tail"
         >
           {`${currTrack.trackNum || ""} ${currTrack.title}`}
         </Text>
+        {currChapterInfo?.title && (
+          <View className="flex-row justify-center w-full">
+            {/* <Text className="absolute left-0 font-semibold">Chapter</Text> */}
+            <Text
+              className="text-sm text-center font-semibold"
+              style={{ color: textColor }}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {currChapterInfo?.title}
+            </Text>
+          </View>
+        )}
       </View>
       {/* NEED something to indicate what is seeking so */}
-      {/* <NewSlider
+      <NewSlider
         containerStyle={{
           width: width - 20,
         }}
@@ -108,14 +117,13 @@ const TrackPlayerProgressBar = () => {
         value={currPos - chapterProgressOffset} // {seeking ? seeking : Math.floor(position)}
         onValueChange={(val) => {
           setIsSeeking(true);
-          console.log("VAl", val, chapterProgressOffset);
           setSeeking(val[0] + chapterProgressOffset);
         }}
         onSlidingComplete={(val) => handleChange([val[0] + chapterProgressOffset])}
         step={1}
-      /> */}
+      />
 
-      <NewSlider
+      {/* <NewSlider
         containerStyle={{
           width: width - 20,
         }}
@@ -131,7 +139,7 @@ const TrackPlayerProgressBar = () => {
         }}
         onSlidingComplete={handleChange}
         step={1}
-      />
+      /> */}
 
       {/* <Slider
         style={{
@@ -152,15 +160,30 @@ const TrackPlayerProgressBar = () => {
         // onSlidingComplete={(val) => soundActions.updatePosition(val)}
       /> */}
       <View className="flex-row w-full px-1 justify-between mt-[-5]">
-        <Text className="font-semibold text-xs" style={{ color: textColor }}>
+        <Text className="font-semibold " style={{ color: textColor }}>
+          {formatSeconds(currPos - chapterProgressOffset)}
+        </Text>
+        {/* <Text className="font-semibold text-xs" style={{ color: textColor }}>
           {formatSeconds(Math.floor(position))}
-        </Text>
-        <Text className="font-semibold text-xs" style={{ color: textColor }}>
-          {formatSeconds(Math.floor(position + queuePos))} of{" "}
-          {formatSeconds(Math.floor(queueDuration))}
-        </Text>
+        </Text> */}
+        <TouchableOpacity
+          onPress={togglePercent}
+          className="flex-grow justify-center flex-row mx-1"
+        >
+          {!showPercent && (
+            <Text className="font-semibold text-xs" style={{ color: textColor }}>
+              {formatSeconds(Math.floor(position + queuePos))} of{" "}
+              {formatSeconds(Math.floor(queueDuration))}
+            </Text>
+          )}
+          {showPercent && (
+            <Text className="font-semibold text-xs">
+              {((Math.floor(position + queuePos) / Math.floor(queueDuration)) * 100).toFixed(0)}%
+            </Text>
+          )}
+        </TouchableOpacity>
         <Text className="font-semibold" style={{ color: textColor }}>
-          {formatSeconds(Math.floor(duration))}
+          {formatSeconds(Math.floor(currChapterInfo.endSeconds - currChapterInfo.startSeconds))}
         </Text>
       </View>
     </View>

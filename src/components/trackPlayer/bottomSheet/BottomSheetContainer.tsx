@@ -1,12 +1,9 @@
-import { View, Text, StyleSheet } from "react-native";
 import React, { useRef, useState } from "react";
 import TrackPlayerBottomSheet from "./TrackPlayerBottomSheet";
 import BottomSheetMenu from "./BottomSheetMenu";
 import usePlaylistColors from "hooks/usePlaylistColors";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import { colors } from "@constants/Colors";
-import { TouchableWithoutFeedback } from "@gorhom/bottom-sheet";
+import { useSettingStore } from "@store/store-settings";
 
 export type BottomSheetImpRef = {
   expand: () => void;
@@ -17,11 +14,17 @@ export type BottomSheetImpRef = {
 
 const BottomSheetContainer = () => {
   const bottomSheetRef = useRef<BottomSheetImpRef | null>();
+  const setBottomSheetRef = useSettingStore((state) => state.actions.setBottomSheetRef);
   const playlistColors = usePlaylistColors();
   const handleExpand = () => bottomSheetRef.current?.expand();
   const handleSetPage = (page: number) => bottomSheetRef.current?.setPage(page);
   const handleSnapToIndex = (index: number) => bottomSheetRef.current?.snapToIndex(index);
 
+  React.useEffect(() => {
+    if (bottomSheetRef.current) {
+      setBottomSheetRef(bottomSheetRef.current);
+    }
+  }, [bottomSheetRef.current]);
   return (
     <>
       {/* <LinearGradient colors={[colors.amber50, `${playlistColors?.secondary?.color}`]}>

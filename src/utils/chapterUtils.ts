@@ -10,16 +10,14 @@ export const getCurrentChapter = ({ chapters = [], position }: Params) => {
   // const qChapters = chapters?.[currentQueueId];
 
   if (chapters?.length > 0 && chapters[0].title !== "~NO CHAPTERS~") {
-    let chapterProgressOffset = 0;
     for (let i = 0; i < chapters.length; i++) {
-      chapterProgressOffset += chapters[i].startSeconds;
       // console.log("in GCC", position, i, chapters[i]?.endSeconds);
       if (position <= chapters[i]?.endSeconds) {
         return {
           chapterInfo: chapters[i],
           chapterIndex: i,
           nextChapterExists: i < chapters.length,
-          chapterProgressOffset,
+          chapterProgressOffset: chapters[i].startSeconds,
         };
         break;
       }

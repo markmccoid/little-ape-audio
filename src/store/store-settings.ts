@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { saveToAsyncStorage } from "./data/asyncStorage";
 import TrackPlayer from "react-native-track-player";
 import { formatSeconds, timeBetween } from "@utils/formatUtils";
+import { BottomSheetImpRef } from "@components/trackPlayer/bottomSheet/BottomSheetContainer";
 
 //-- ==================================
 //-- SETTINGS STORE
@@ -16,6 +17,7 @@ type SettingsState = {
   cancelSleepTimeout: () => void;
   countdownActive: boolean;
   intervalActive: boolean;
+  playerBottomSheetRef: BottomSheetImpRef;
   sleepCountDown: {
     secondsLeft: number;
     formattedOutput: string;
@@ -28,6 +30,7 @@ type SettingsState = {
     startSleepTimer: () => void;
     stopSleepTimer: () => void;
     runSleepCountdown: () => void;
+    setBottomSheetRef: (BottomSheetRef: BottomSheetImpRef) => void;
   };
 };
 export const useSettingStore = create<SettingsState>((set, get) => ({
@@ -43,7 +46,11 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
   },
   cancelSleepTimeout: undefined,
   cancelSleepInterval: undefined,
+  playerBottomSheetRef: undefined,
   actions: {
+    setBottomSheetRef: (bottomSheetRef) => {
+      set({ playerBottomSheetRef: bottomSheetRef });
+    },
     updateJumpForwardSeconds: async (seconds) => {
       set({ jumpForwardSeconds: seconds });
 
@@ -137,11 +144,7 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
         );
         // We want to show the seconds left (i.e. countdown)
         const secondsLeft = get().sleepTimeMinutes * 60 - secondsBetween;
-        const sleepCountDown = formatSeconds(
-          secondsLeft,
-          "minimal",
-          get().sleepTimeMinutes > 59
-        );
+        const sleepCountDown = formatSeconds(secondsLeft, "minimal", get().sleepTimeMinutes > 59);
         set({
           sleepCountDown: {
             secondsLeft,

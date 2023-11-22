@@ -111,7 +111,7 @@ export type Playlist = {
   currentRate: number;
   // position history stores the last 5 position
   // Helpful if your place in book gets reset accidentally.
-  positionHistory: number[];
+  positionHistory: {trackIndex: number; position: number}[];
 };
 
 export type Bookmark = {
@@ -194,7 +194,7 @@ export type AudioState = {
     updatePlaylistFields: (playlistId: string, updateObj: PlaylistUpdateObj) => Promise<void>;
     updatePlaylistTracks: (playlistId: string, newTracksArray: string[]) => Promise<void>;
     deleteTrackFromPlaylist: (playlistId: string, trackToDeleteId: string) => Promise<void>;
-    updatePlaylistPostionHistory: (playlistId: string, position?: number) => Promise<void>;
+    updatePlaylistPostionHistory: (playlistId: string, position: number, trackIndex: number) => Promise<void>;
     addBookmarkToPlaylist: (
       bookmarkName: string,
       playlistId: string,

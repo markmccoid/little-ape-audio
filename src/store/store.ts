@@ -301,7 +301,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       }
       return trackArray;
     },
-    updatePlaylistPostionHistory: async (playlistId, position) => {
+    updatePlaylistPostionHistory: async (playlistId, position, trackIndex) => {
       const playlists = useTracksStore.getState().playlists;
       let newPosition = position;
       if (!position) {
@@ -309,7 +309,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         newPosition = tpPosition;
       }
       playlists[playlistId].positionHistory = [
-        newPosition,
+        { trackIndex, position: newPosition },
         ...(playlists[playlistId].positionHistory || []),
       ];
       set({ playlists });
@@ -865,7 +865,10 @@ const saveCurrentTrackInfoBase = async () => {
       ...useTracksStore.getState().playlists[usePlaybackStore.getState().currentPlaylistId],
     };
 
-    playlist.positionHistory = [position, ...(playlist.positionHistory || [])].slice(0, 15);
+    playlist.positionHistory = [
+      { trackIndex, position },
+      ...(playlist.positionHistory || []),
+    ].slice(0, 15);
     playlist.currentPosition = {
       trackIndex: trackIndex,
       position,
@@ -966,7 +969,7 @@ const mountTrackPlayerListeners = () => {
         // track,
       } = event;
 
-      console.log("Playback Track Changed", nextTrackIndex, prevPositionSeconds, prevTrackIndex);
+      // console.log("Playback Track Changed", nextTrackIndex, prevPositionSeconds, prevTrackIndex);
       const track = (await TrackPlayer.getTrack(nextTrackIndex)) as ApeTrack;
       // default is to look at saved position unless there was a previous track
       let naturalTrackChange = false;
@@ -1010,7 +1013,10 @@ const mountTrackPlayerListeners = () => {
       };
 
       await TrackPlayer.seekTo(nextTrackPosition);
-      playlist.positionHistory = [nextTrackPosition, ...(playlist.positionHistory || [])];
+      playlist.positionHistory = [
+        { trackIndex: nextTrackIndex, position: nextTrackPosition },
+        ...(playlist.positionHistory || []),
+      ];
       // Update a copy of the trackattributes object, updating the prevTrackId's entry
       // We will RESET the prevTrack's position to zero IF we have reached the end of the track
       // naturalTrackChange = true will cause the reset to zero

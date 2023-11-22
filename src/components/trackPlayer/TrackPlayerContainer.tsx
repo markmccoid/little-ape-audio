@@ -10,6 +10,7 @@ import { colors } from "@constants/Colors";
 import { LinearGradient } from "expo-linear-gradient";
 import { PlaylistImageColors } from "@store/types";
 import usePlaylistColors from "hooks/usePlaylistColors";
+import TrackPlayerChaptProgressBar from "./TrackPlayerChaptProgressBar";
 
 const { width, height } = Dimensions.get("window");
 
@@ -33,6 +34,7 @@ const TrackPlayerContainer = () => {
           <TrackPlayerImage />
 
           <TrackPlayerProgressBar />
+          <TrackPlayerChaptProgressBar />
         </View>
       </LinearGradient>
       <View className="flex-1 ">
