@@ -27,6 +27,7 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
+				<string>com.googleusercontent.apps.7341344916-s7s48gfijshrnjjh60koigq33b32dn4d</string>
 				<string>littleapeaudio</string>
 				<string>com.markmccoid.little-ape-audio</string>
 			</array>

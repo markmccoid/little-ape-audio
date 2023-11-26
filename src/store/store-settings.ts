@@ -10,19 +10,28 @@ import { BottomSheetImpRef } from "@components/trackPlayer/bottomSheet/BottomShe
 //-- ==================================
 
 type SettingsState = {
+  // Stores the forward/backware jump seconds
   jumpForwardSeconds: number;
   jumpBackwardSeconds: number;
+  // Sleep Timer ----
   sleepTimeMinutes: number;
   sleepStartDateTime: Date;
   cancelSleepTimeout: () => void;
   countdownActive: boolean;
   intervalActive: boolean;
-  playerBottomSheetRef: BottomSheetImpRef;
   sleepCountDown: {
     secondsLeft: number;
     formattedOutput: string;
   };
   cancelSleepInterval: () => void;
+  // Sleep Timer END ----
+  // You do not need to use .current when accessing info
+  playerBottomSheetRef: BottomSheetImpRef;
+  // Cloud services authorization status
+  cloudAuth: {
+    dropbox?: boolean;
+    google?: boolean;
+  };
   actions: {
     updateJumpForwardSeconds: (seconds: number) => Promise<void>;
     updateJumpBackwardSeconds: (seconds: number) => Promise<void>;
@@ -31,6 +40,7 @@ type SettingsState = {
     stopSleepTimer: () => void;
     runSleepCountdown: () => void;
     setBottomSheetRef: (BottomSheetRef: BottomSheetImpRef) => void;
+    setCloudAuth: (service: "dropbox" | "google", authStatus: boolean) => Promise<void>;
   };
 };
 export const useSettingStore = create<SettingsState>((set, get) => ({
@@ -47,7 +57,20 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
   cancelSleepTimeout: undefined,
   cancelSleepInterval: undefined,
   playerBottomSheetRef: undefined,
+  cloudAuth: {
+    dropbox: false,
+    google: false,
+  },
   actions: {
+    // CLOUD AUTH
+    setCloudAuth: async (service, authStatus) => {
+      set({ cloudAuth: { ...get().cloudAuth, [service]: authStatus } });
+      const newSettingsData = { ...get() };
+      delete newSettingsData.actions;
+
+      await saveToAsyncStorage("settings", newSettingsData);
+    },
+    // BOTTOM SHEET REF
     setBottomSheetRef: (bottomSheetRef) => {
       set({ playerBottomSheetRef: bottomSheetRef });
     },

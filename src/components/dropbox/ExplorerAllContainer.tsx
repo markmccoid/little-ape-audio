@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import uuid from "react-native-uuid";
-import { Link, router, useLocalSearchParams } from "expo-router";
+import { Link, router, useLocalSearchParams, useRouter } from "expo-router";
 import { DropboxDir, FileEntry, FolderEntry } from "../../utils/dropboxUtils";
 import ExplorerActionBar from "./ExplorerActionBar";
 // import { useTrackActions } from "../../store/store";
@@ -37,6 +37,7 @@ import {
 import FileMetadataView from "./FileMetadataView";
 import { AudioSourceType } from "@app/audio/dropbox";
 import { listGoogleDriveFiles } from "@utils/googleUtils";
+import { useSettingStore } from "@store/store-settings";
 // import { startDownloadAll } from "@store/data/fileSystemAccess";
 
 type Props = {
@@ -60,6 +61,8 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
     (key) => key === `${pathToFolderKey}/${pathToBookFolderKey}`
   );
   const { backTitle } = useLocalSearchParams();
+  const cloudAuth = useSettingStore((state) => state.cloudAuth);
+  const route = useRouter();
 
   const dropboxActions = useDropboxStore((state) => state.actions);
   const flatlistRef = useRef<FlatList>();
@@ -123,11 +126,15 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
   //~ -- Whenever pathIn changes, load the folders and files to display
   //~ ====================
   React.useEffect(() => {
+    // check if we are authorized for passed source
+    if (cloudAuth?.[audioSource] === false) {
+      route.replace("/settings/authroute");
+      return;
+    }
     // Google Files
     const getFiles = async () => {
       setIsLoading(true);
       if (audioSource === "google") {
-        //!! NOT IMPLEMENTED
         const filesFolders = await listGoogleDriveFiles(pathIn);
         // tag tracks as being already downloaded and marked as a Starred folder
         const finalFolderFileList = tagFilesAndFolders(filesFolders);

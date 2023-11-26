@@ -24,7 +24,14 @@ const TrackPlayerProgressBar = () => {
   const chapterProgressOffset = usePlaybackStore((state) => state.chapterProgressOffset);
   const [showPercent, togglePercent] = useReducer((state) => !state, false);
   const textColor = "black";
+  const cl = usePlaylistColors();
 
+  // console.log(
+  //   "cl",
+  //   cl.background.colorLuminance,
+
+  //   cl.secondary.colorLuminance
+  // );
   useEffect(() => {
     if (isSeeking) {
       setCurrPos(seeking);

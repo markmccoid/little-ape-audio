@@ -96,6 +96,7 @@ export const getImageColors = async (imagedata: string): Promise<PlaylistImageCo
   let newObj;
   Object.keys(colorObj).forEach((key) => {
     const colorType = colorObj[key].colorType;
+
     newObj = {
       ...newObj,
       [key]: {

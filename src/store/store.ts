@@ -488,7 +488,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       //!!
       const currTrackIndex = currPlaylist.currentPosition?.trackIndex || 0;
       const currTrackPosition = currPlaylist.currentPosition?.position || 0;
-
+      // console.log("setCurrPL", currTrackIndex, currTrackPosition);
       // Call function to get current chapter Info
 
       const { chapterInfo, chapterIndex, chapterProgressOffset, nextChapterExists } =
@@ -503,6 +503,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
         currentTrackPosition: currTrackPosition,
         currentChapterInfo: chapterInfo,
         currentChapterIndex: chapterIndex,
+        currentRate: currPlaylist.currentRate,
         chapterProgressOffset,
         nextChapterExists,
       });
@@ -519,10 +520,10 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       await TrackPlayer.skip(currTrackIndex);
       await TrackPlayer.seekTo(currTrackPosition);
       await TrackPlayer.setRate(currPlaylist.currentRate);
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       mountTrackPlayerListeners();
-
-      set({ playlistLoaded: true, currentRate: currPlaylist.currentRate });
+      set({ playlistLoaded: true });
     },
     getCurrentPlaylist: () => {
       const plId = get().currentPlaylistId;
@@ -684,6 +685,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       await TrackPlayer.pause();
     },
     next: async () => {
+      console.log("Next Function");
       const trackIndex = await TrackPlayer.getActiveTrackIndex();
       const queue = await TrackPlayer.getQueue();
       const { currentTrack, currentChapterIndex } = get();
@@ -919,7 +921,7 @@ const mountTrackPlayerListeners = () => {
     eventEndOfQueue.remove();
   }
   eventEndOfQueue = TrackPlayer.addEventListener(Event.PlaybackQueueEnded, async (event) => {
-    console.log("END OF QUEUE", event);
+    // console.log("END OF QUEUE", event);
     const queue = await TrackPlayer.getQueue();
     if (queue.length > 1) {
       TrackPlayer.skip(0);
@@ -939,19 +941,19 @@ const mountTrackPlayerListeners = () => {
       // when reset is called you just get "lastTrack", "lastIndex", "lastPosition"
       // when new queue is loaded you just get "lastPosition", "index", "track" and
       //  the lastPosition will be zero.
+      //~ ----
+      // The only time we "use" this listener is when a track goes to the next track or previous
+      // track.  This can happen when calling TrackPlayer.skip or usePlaybackStore action "next", "previous"
+      // OR if a track ends and track player starts the next track.
+      // There are two main purposes for this event
+      //  - To keep the playlist object and playbackStore properties in sync with track changes
+      //     position changes are kept up to date in the progress event
+      //  - to set the position of the NEXT track based on information stored
+      //     in the playlist?.trackAttributes object.
+      //  -
+      //~ ----
 
       // If there is no next track OR if we are in a loading state, just return
-      // console.log("ACTIVE TRACKCHANGED", `\n     `, Object.keys(event));
-      // console.log(
-      //   `---------\n     `,
-      //   Object.keys(event).map((el) => {
-      //     if (!el.toLowerCase().includes("track")) {
-      //       return event[el];
-      //     } else {
-      //       return event[el]?.id;
-      //     }
-      //   })
-      // );
       if (event?.track === undefined || event?.lastIndex === undefined) return;
       //! This keeps this event from running if we are loading a new playlist
       if (!usePlaybackStore.getState().playlistLoaded) return;
@@ -968,8 +970,8 @@ const mountTrackPlayerListeners = () => {
         lastIndex: prevTrackIndex,
         // track,
       } = event;
+      // console.log("Track Changed Event", prevTrackIndex, nextTrackIndex);
 
-      // console.log("Playback Track Changed", nextTrackIndex, prevPositionSeconds, prevTrackIndex);
       const track = (await TrackPlayer.getTrack(nextTrackIndex)) as ApeTrack;
       // default is to look at saved position unless there was a previous track
       let naturalTrackChange = false;
@@ -1012,6 +1014,7 @@ const mountTrackPlayerListeners = () => {
         position: nextTrackPosition,
       };
 
+      // console.log("Track Change", event?.lastPosition, nextTrackPosition);
       await TrackPlayer.seekTo(nextTrackPosition);
       playlist.positionHistory = [
         { trackIndex: nextTrackIndex, position: nextTrackPosition },

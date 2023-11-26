@@ -13,6 +13,7 @@ import {
   User,
 } from "@react-native-google-signin/google-signin";
 import { colors } from "@constants/Colors";
+import { useSettingStore } from "@store/store-settings";
 
 const GOOGLE_CLIENT_ID = Constants?.expoConfig?.extra?.googleClientId;
 
@@ -28,10 +29,13 @@ const GoogleAuthContainer = () => {
   // const [userInfo, setUserInfo] = useState<User>();
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isCheckingStatus, setIsCheckingStatus] = useState(true);
+  const setAuthStatus = useSettingStore((state) => state.actions.setCloudAuth);
+  const { google: isGoogleAuthed } = useSettingStore((state) => state.cloudAuth);
 
   const signUserOut = async () => {
     try {
       await GoogleSignin.signOut();
+      await setAuthStatus("google", false);
       setIsSignedIn(false);
     } catch (err) {
       console.log("SignOut ERR", err);
@@ -45,8 +49,10 @@ const GoogleAuthContainer = () => {
     const isSignedIn = await GoogleSignin.isSignedIn();
     // console.log("IS SIGNED IN", isSignedIn);
     if (!isSignedIn) {
+      await setAuthStatus("google", false);
       setIsSignedIn(false);
     } else {
+      await setAuthStatus("google", true);
       setIsSignedIn(true);
     }
 
@@ -84,9 +90,11 @@ const GoogleAuthContainer = () => {
               // console.log("USERINFO", userInfo);
               // const tokens = await GoogleSignin.getTokens();
               // storeGoogleAccessToken(tokens.accessToken);
+              await setAuthStatus("google", true);
               setIsSignedIn(true);
             } catch (error) {
               console.log("Error Signing in-> ", error.code);
+              await setAuthStatus("google", false);
               setIsSignedIn(false);
             }
           }}

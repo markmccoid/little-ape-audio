@@ -6,6 +6,7 @@ import React, { useState } from "react";
 const usePlaylistColors = () => {
   const currPlaylist = getCurrentPlaylist();
   const [playlistColors, setPlaylistColors] = useState();
+
   let currColors = currPlaylist.imageColors;
   if (!currPlaylist?.imageColors?.background?.color) {
     currColors = {

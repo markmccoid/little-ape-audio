@@ -39,6 +39,7 @@ export const onInitialize = async () => {
     folderMetadataErrors,
   });
 
+  console.log("SETTINGS INIT", settings);
   useSettingStore.setState({
     ...settings,
     jumpForwardSeconds: settings?.jumpForwardSeconds || 15,

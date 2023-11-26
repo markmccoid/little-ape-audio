@@ -8,6 +8,7 @@ import { checkDropboxToken, revokeDropboxAccess } from "../../utils/dropboxUtils
 import { Link } from "expo-router";
 import Monkey from "../common/svg/Monkey";
 import { colors } from "@constants/Colors";
+import { useSettingStore } from "@store/store-settings";
 
 //-- ----------------------
 //-- APP AUTH CONFIG SETUP
@@ -41,6 +42,8 @@ const config = {
 const DropboxAuthContainer = () => {
   const [validToken, setValidToken] = useState<string | undefined>(undefined);
   const [isCheckingToken, setIsCheckingToken] = useState(true);
+  const setAuthStatus = useSettingStore((state) => state.actions.setCloudAuth);
+  const { dropbox: isDropboxAuthed } = useSettingStore((state) => state.cloudAuth);
 
   const onAuthorize = async () => {
     // Alert.alert("Before Authorize call");
@@ -49,6 +52,7 @@ const DropboxAuthContainer = () => {
       authState = await authorize(config);
     } catch (err) {
       console.log(`authState Errorr`);
+      await setAuthStatus("dropbox", false);
       // Alert.alert("authState Caught Error", JSON.stringify(err));
       return;
     }
@@ -64,6 +68,7 @@ const DropboxAuthContainer = () => {
     // Store the token and refresh token in secure storage
     await storeDropboxToken(dropboxToken);
     await storeDropboxRefreshToken(dropboxRefreshToken);
+    await setAuthStatus("dropbox", true);
     checkToken();
   };
 
@@ -79,7 +84,10 @@ const DropboxAuthContainer = () => {
   const checkToken = async () => {
     setIsCheckingToken(true);
     const { token } = await checkDropboxToken();
-
+    // set the global auth status if not already set.
+    if (token && !isDropboxAuthed) {
+      await setAuthStatus("dropbox", true);
+    }
     setValidToken(token);
     setIsCheckingToken(false);
   };
