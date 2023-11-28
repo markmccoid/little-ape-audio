@@ -7,6 +7,7 @@ import { MotiView } from "moti";
 import { colors } from "@constants/Colors";
 import { usePlaybackStore } from "@store/store";
 import TrackPlayerScrollerSleepTime from "./TrackPlayerScrollerSleepTime";
+import usePlaylistColors from "hooks/usePlaylistColors";
 
 const { width, height } = Dimensions.get("window");
 const COMPONENT_WIDTH = width - 90;
@@ -16,6 +17,7 @@ const TrackPlayerScrollerRateTimer = () => {
   const playbackActions = usePlaybackStore((state) => state.actions);
   const [rate, setRate] = useState<number>(1);
   const [isSliding, setIsSliding] = useState(false);
+  const playlistColors = usePlaylistColors();
 
   useEffect(() => {
     const getRate = async () => {
@@ -38,18 +40,26 @@ const TrackPlayerScrollerRateTimer = () => {
       style={{ width: COMPONENT_WIDTH, paddingHorizontal: COMPONENT_PADDING }}
     >
       {/* <Text className="ml-2 text-lg font-bold">Audio Speed:</Text> */}
-      <View className="flex flex-col p-2 mb-2 bg-amber-200 border border-amber-950 rounded-lg z-20">
+      <View
+        className="flex flex-col p-2 mb-2 bg-amber-200 border border-amber-950 rounded-lg z-20"
+        style={{ backgroundColor: playlistColors.bg }}
+      >
         {/* RATE COMPONENT */}
         <View className="flex-row justify-center space-x-1 w-full items-center mb-2">
           {fixedRates.map((el) => (
             <TouchableOpacity
               key={el}
               onPress={() => updateRate(el)}
-              className={`px-2 py-1 rounded-md border border-amber-800 ${
-                el === rate ? "bg-amber-300" : "bg-white"
-              }`}
+              className={`px-2 py-1 rounded-md ${el === rate ? "bg-amber-300" : "bg-white"}`}
+              style={{
+                backgroundColor: el === rate ? playlistColors.btnText : playlistColors.btnBg,
+                borderColor: playlistColors.btnBorder,
+                borderWidth: 1,
+              }}
             >
-              <Text>{el.toFixed(2)}</Text>
+              <Text style={{ color: el === rate ? playlistColors.btnBg : playlistColors.btnText }}>
+                {el.toFixed(2)}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -59,9 +69,9 @@ const TrackPlayerScrollerRateTimer = () => {
             width: COMPONENT_WIDTH - 40,
             paddingHorizontal: COMPONENT_PADDING,
           }}
-          minimumTrackTintColor={colors.amber700}
-          maximumTrackTintColor={colors.amber400}
-          thumbTintColor={colors.amber600}
+          minimumTrackTintColor={playlistColors.sliderMinTrack}
+          maximumTrackTintColor={playlistColors.sliderMaxTrack}
+          thumbTintColor={playlistColors.sliderThumb}
           minimumValue={50}
           maximumValue={400}
           step={5}
@@ -91,11 +101,7 @@ const TrackPlayerScrollerRateTimer = () => {
               isSliding ? "border border-amber-800 justify-center" : ""
             }`}
           >
-            <Text
-              className={`text-amber-900 text-lg px-2  ${
-                isSliding ? "text-black" : ""
-              }`}
-            >
+            <Text className={`text-amber-900 text-lg px-2  ${isSliding ? "text-black" : ""}`}>
               {rate.toFixed(2)}
             </Text>
           </MotiView>

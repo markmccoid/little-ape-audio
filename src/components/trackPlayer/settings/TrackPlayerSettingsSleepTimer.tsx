@@ -1,21 +1,22 @@
-import { View, Text, Dimensions, TouchableOpacity, Alert } from "react-native";
+import { View, Text, Dimensions, TouchableOpacity, Alert, StyleSheet } from "react-native";
 import React, { useEffect, useState } from "react";
 import SleepButton from "./SleepButton";
-import { AnimatedPressable } from "@components/common/buttons/Pressables";
 import { useSettingStore } from "@store/store-settings";
-import { update } from "lodash";
-import { formatSeconds, timeBetween } from "@utils/formatUtils";
+
 import useSleepTimer from "@components/common/sleepTimer/useSleepTimer";
 import TimerCountdown from "@components/common/sleepTimer/TimerCountdown";
 import { AnimatePresence, MotiView } from "moti";
+import usePlaylistColors from "hooks/usePlaylistColors";
+import { play } from "react-native-track-player/lib/trackPlayer";
+import { colors } from "@constants/Colors";
 
 const { width, height } = Dimensions.get("window");
 const COMPONENT_PADDING = 10;
 
 const TrackPlayerSettingsSleepTimer = () => {
-  const { secondsLeft } = useSleepTimer();
   const countdownActive = useSettingStore((state) => state.countdownActive);
   const sleepTime = useSettingStore((state) => state.sleepTimeMinutes);
+  const playlistColors = usePlaylistColors();
 
   const { updateSleepTime, startSleepTimer, stopSleepTimer } = useSettingStore(
     (state) => state.actions
@@ -32,9 +33,18 @@ const TrackPlayerSettingsSleepTimer = () => {
 
   return (
     <View style={{ width: width, paddingHorizontal: COMPONENT_PADDING }}>
-      <View className="flex flex-col bg-white border border-amber-950 rounded-lg">
+      <View
+        className="flex flex-col  rounded-lg"
+        style={{
+          backgroundColor: playlistColors.bg,
+          borderWidth: StyleSheet.hairlineWidth,
+          borderColor: playlistColors.bgBorder,
+        }}
+      >
         <View className="flex-row justify-center p-2">
-          <Text className="font-bold text-lg">Sleep in {sleepTime} min</Text>
+          <Text className="font-bold text-lg" style={{ color: playlistColors.bgText }}>
+            Sleep in {sleepTime} min
+          </Text>
           {/* START and STOP Buttons */}
           <View className="absolute right-1 px-2 h-full top-2">
             {!countdownActive && sleepTime > 0 && (
@@ -43,8 +53,18 @@ const TrackPlayerSettingsSleepTimer = () => {
                 onPress={() => {
                   startSleepTimer();
                 }}
+                style={{
+                  backgroundColor: "green",
+                  borderRadius: 5,
+                  paddingHorizontal: 7,
+                  paddingVertical: 2,
+                }}
               >
-                <Text className="text-base font-semibold text-green-900">
+                <Text
+                  allowFontScaling={false}
+                  className="text-base font-semibold "
+                  style={{ color: "white" }}
+                >
                   Start
                 </Text>
               </TouchableOpacity>
@@ -54,8 +74,18 @@ const TrackPlayerSettingsSleepTimer = () => {
                 onPress={() => {
                   stopSleepTimer();
                 }}
+                style={{
+                  backgroundColor: colors.deleteRed,
+                  borderRadius: 5,
+                  paddingHorizontal: 7,
+                  paddingVertical: 2,
+                }}
               >
-                <Text className="text-base font-semibold text-red-900">
+                <Text
+                  allowFontScaling={false}
+                  className="text-base font-semibold "
+                  style={{ color: "white" }}
+                >
                   Stop
                 </Text>
               </TouchableOpacity>
@@ -88,31 +118,13 @@ const TrackPlayerSettingsSleepTimer = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0.2, scale: 0.5 }}
               >
-                <SleepButton
-                  onPress={() => handleSetSleepTime(-5)}
-                  buttonTime="-5"
-                />
-                <SleepButton
-                  onPress={() => handleSetSleepTime(-10)}
-                  buttonTime="-10"
-                />
-                <SleepButton
-                  onPress={() => handleSetSleepTime(-15)}
-                  buttonTime="-15"
-                />
+                <SleepButton onPress={() => handleSetSleepTime(-5)} buttonTime="-5" />
+                <SleepButton onPress={() => handleSetSleepTime(-10)} buttonTime="-10" />
+                <SleepButton onPress={() => handleSetSleepTime(-15)} buttonTime="-15" />
                 <View className="w-[20]" />
-                <SleepButton
-                  onPress={() => handleSetSleepTime(5)}
-                  buttonTime="+5"
-                />
-                <SleepButton
-                  onPress={() => handleSetSleepTime(10)}
-                  buttonTime="+10"
-                />
-                <SleepButton
-                  onPress={() => handleSetSleepTime(15)}
-                  buttonTime="+15"
-                />
+                <SleepButton onPress={() => handleSetSleepTime(5)} buttonTime="+5" />
+                <SleepButton onPress={() => handleSetSleepTime(10)} buttonTime="+10" />
+                <SleepButton onPress={() => handleSetSleepTime(15)} buttonTime="+15" />
               </MotiView>
             )}
           </AnimatePresence>

@@ -27,6 +27,7 @@ const PlaylistContainer = () => {
   const [onShow, setOnShow] = useState(false);
   const [layoutHeight, setLayoutHeight] = useState(0);
   const playlists = usePlaylists(); //useTracksStore((state) => state.playlists);
+  const { getPlaylist } = useTrackActions();
   const currentPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
   const prevPlaylistId = useRef(undefined);
   const scrollRef = useRef<FlatList>(null);
@@ -70,8 +71,16 @@ const PlaylistContainer = () => {
     }
   };
 
+  //~ Playlist select
   const handleRowSelect = async (playlistId) => {
     setUpdate(true);
+    const playlist = getPlaylist(playlistId);
+    // Check to make sure playlist has at least one track
+    if (!playlist?.trackIds || playlist?.trackIds.length === 0) {
+      alert("Playlist Still Loading");
+      setTimeout(() => setUpdate(false), 100);
+      return;
+    }
     await setCurrPlaylist(playlistId);
     route.push({ pathname: "/audio/player", params: {} });
     setTimeout(() => setUpdate(false), 500);

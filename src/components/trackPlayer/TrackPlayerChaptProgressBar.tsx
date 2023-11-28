@@ -7,6 +7,7 @@ import { colors } from "../../constants/Colors";
 import { AnimatePresence, MotiView } from "moti";
 import { Slider as NewSlider } from "@miblanchard/react-native-slider";
 import usePlaylistColors from "hooks/usePlaylistColors";
+import { getTextColor } from "@utils/otherUtils";
 
 const { width, height } = Dimensions.get("window");
 const leftOffset = (width - width / 2.25) / 2;
@@ -23,8 +24,8 @@ const TrackPlayerProgressBar = () => {
   const currChapterInfo = usePlaybackStore((state) => state.currentChapterInfo);
   const chapterProgressOffset = usePlaybackStore((state) => state.chapterProgressOffset);
   const [showPercent, togglePercent] = useReducer((state) => !state, false);
-  const textColor = "black";
-  const cl = usePlaylistColors();
+  const playlistColors = usePlaylistColors();
+  const textColor = getTextColor(playlistColors.background.colorLuminance);
 
   // console.log(
   //   "cl",
@@ -88,10 +89,12 @@ const TrackPlayerProgressBar = () => {
           </MotiView>
         )}
       </AnimatePresence>
-      <View className="w-full px-2 justify-center items-center">
+      <View className="w-full px-2 justify-center items-center ">
         <Text
-          className="text-base text-center "
-          style={{ color: textColor }}
+          className="text-base text-cente"
+          style={{
+            color: textColor,
+          }}
           numberOfLines={1}
           ellipsizeMode="tail"
         >
@@ -130,42 +133,6 @@ const TrackPlayerProgressBar = () => {
         step={1}
       />
 
-      {/* <NewSlider
-        containerStyle={{
-          width: width - 20,
-        }}
-        minimumValue={0}
-        maximumValue={duration}
-        minimumTrackTintColor={colors.amber700}
-        maximumTrackTintColor={colors.amber400}
-        thumbTintColor={colors.amber600}
-        value={currPos} // {seeking ? seeking : Math.floor(position)}
-        onValueChange={(val) => {
-          setIsSeeking(true);
-          setSeeking(val[0]);
-        }}
-        onSlidingComplete={handleChange}
-        step={1}
-      /> */}
-
-      {/* <Slider
-        style={{
-          width: width - 20,
-        }}
-        minimumValue={0}
-        maximumValue={duration}
-        minimumTrackTintColor={colors.amber700}
-        maximumTrackTintColor={colors.amber400}
-        thumbTintColor={colors.amber600}
-        value={Math.floor(position)}
-        onValueChange={(val) => {
-          setSeeking(val);
-        }}
-        onSlidingComplete={handleChange}
-        step={1}
-        // onSlidingStart={() => soundActions.pause()}
-        // onSlidingComplete={(val) => soundActions.updatePosition(val)}
-      /> */}
       <View className="flex-row w-full px-1 justify-between mt-[-5]">
         <Text className="font-semibold " style={{ color: textColor }}>
           {formatSeconds(currPos - chapterProgressOffset)}
@@ -184,7 +151,7 @@ const TrackPlayerProgressBar = () => {
             </Text>
           )}
           {showPercent && (
-            <Text className="font-semibold text-xs">
+            <Text className="font-semibold text-base">
               {((Math.floor(position + queuePos) / Math.floor(queueDuration)) * 100).toFixed(0)}%
             </Text>
           )}

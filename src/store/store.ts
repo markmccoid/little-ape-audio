@@ -1,4 +1,12 @@
-import { Playlist, AudioState, ApeTrack, Bookmark, TrackAttributes, AudioTrack } from "./types";
+import {
+  Playlist,
+  AudioState,
+  ApeTrack,
+  Bookmark,
+  TrackAttributes,
+  AudioTrack,
+  PlaylistImageColors,
+} from "./types";
 import { create } from "zustand";
 import { Alert, Image } from "react-native";
 import uuid from "react-native-uuid";
@@ -26,6 +34,7 @@ import { router } from "expo-router";
 import { formatSeconds } from "@utils/formatUtils";
 import { getCurrentChapter } from "@utils/chapterUtils";
 import { debounce, reverse } from "lodash";
+import { getImageColors } from "@utils/otherUtils";
 // export function getRandomNumber() {
 
 //   const randomNumber = Math.floor(Math.random() * 13) + 1; // Generate random number between 1 and 13
@@ -167,6 +176,8 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         const randomImageAspect = randomImageInfo.width / randomImageInfo.height;
         playlist.imageURI = randomImageInfo.uri;
         playlist.imageAspectRatio = randomImageAspect;
+        const colors = (await getImageColors(playlist.imageURI)) as PlaylistImageColors;
+        playlist.imageColors = colors;
       } else {
         // There was an image, store the first one on the playlist
         playlist.imageURI = images[0].image;
@@ -184,6 +195,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
 
       // Update playlists in Store and Async Storage
       const playlists = { ...get().playlists, [playlistId]: playlist };
+
       set({ playlists });
       await saveToAsyncStorage("playlists", playlists);
     },
@@ -540,7 +552,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
         // currPlaylist.currentRate = newRate;
         // set({ currentPlaylist: currPlaylist });
         await TrackPlayer.setRate(newRate);
-        set({ currentRate: newRate });
+        set({ currentRate: newRate, didUpdate: uuid.v4().toString() });
       }
     },
     updatePlaylistTracks: async (playlistId, trackIdArray) => {

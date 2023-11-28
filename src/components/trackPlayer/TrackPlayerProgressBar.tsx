@@ -7,6 +7,7 @@ import { colors } from "../../constants/Colors";
 import { AnimatePresence, MotiView } from "moti";
 import { Slider as NewSlider } from "@miblanchard/react-native-slider";
 import usePlaylistColors from "hooks/usePlaylistColors";
+import { getTextColor } from "@utils/otherUtils";
 
 const { width, height } = Dimensions.get("window");
 const leftOffset = (width - width / 2.25) / 2;
@@ -24,8 +25,8 @@ const TrackPlayerProgressBar = () => {
   const currChapterInfo = usePlaybackStore((state) => state.currentChapterInfo);
 
   // const playlist = getCurrentPlaylist();
-  // const playlistColors = usePlaylistColors();
-  const textColor = "black";
+  const playlistColors = usePlaylistColors();
+  const textColor = getTextColor(playlistColors.background.colorLuminance); //"black";
 
   useEffect(() => {
     if (isSeeking) {

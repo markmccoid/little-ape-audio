@@ -1,19 +1,9 @@
-import {
-  View,
-  Text,
-  Dimensions,
-  TouchableOpacity,
-  FlatList,
-} from "react-native";
+import { View, Text, Dimensions, TouchableOpacity, FlatList } from "react-native";
 import React, { useCallback, useRef, useState } from "react";
 import TrackPlayerSettingsRate from "./TrackPlayerSettingsRate";
 import TrackPlayerSettingsSleepTimer from "./TrackPlayerSettingsSleepTimer";
 import TPImagePicker from "./TPImagePicker";
-import {
-  ImageIcon,
-  SpeedIcon,
-  TimerSandIcon,
-} from "@components/common/svg/Icons";
+import { ImageIcon, SpeedIcon, TimerSandIcon } from "@components/common/svg/Icons";
 import Animated, {
   interpolate,
   runOnJS,
@@ -28,6 +18,7 @@ import Animated, {
 import { MotiView } from "moti";
 import { colors } from "@constants/Colors";
 import { usePlaybackStore } from "@store/store";
+import usePlaylistColors from "hooks/usePlaylistColors";
 
 //-- COMPONENT ARRAY holds the info for the components --------------
 //-- used in scroller
@@ -60,14 +51,13 @@ const { width, height } = Dimensions.get("window");
 const INDICATOR_WIDTH = 25;
 const INDICATOR_SPACING = 20;
 const INDICATORS_CENTER =
-  width / 2 -
-  ((INDICATOR_WIDTH + INDICATOR_SPACING) * componentArray.length) / 2;
+  width / 2 - ((INDICATOR_WIDTH + INDICATOR_SPACING) * componentArray.length) / 2;
 
 const TPSettingsScroller = () => {
   const flatRef = useRef<FlatList>();
   const flatLabelRef = useAnimatedRef<FlatList>();
   const [flIndex, setFLIndex] = useState(0);
-  const [componentHeight, setComponentHeight] = useState();
+  const playlistColors = usePlaylistColors();
 
   const currPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
 
@@ -133,11 +123,7 @@ const TPSettingsScroller = () => {
           [OPACITY_END, OPACITY_START]
         );
       } else if (nextIndex === index && isScrolling) {
-        scale = interpolate(
-          scrollX.value / width,
-          [index - 1, index],
-          [SMALL_SCALE, FINAL_SCALE]
-        );
+        scale = interpolate(scrollX.value / width, [index - 1, index], [SMALL_SCALE, FINAL_SCALE]);
         opacity = interpolate(
           scrollX.value / width,
           [index - 1, index],
@@ -167,6 +153,7 @@ const TPSettingsScroller = () => {
           className="font-bold text-lg"
           style={{
             transform: [{ translateX: 10 }],
+            color: playlistColors.gradientTopText,
           }}
         >
           {item}
@@ -182,9 +169,9 @@ const TPSettingsScroller = () => {
         style={{ transform: [{ translateX: INDICATORS_CENTER }] }}
       >
         {componentArray.map((el, index) => {
-          let color = colors.amber950;
+          let color = playlistColors.gradientTopText; // colors.amber950;
           if (index === flIndex) {
-            color = colors.amber600;
+            color = playlistColors.gradientTopText; // colors.amber600;
           }
           return (
             <TouchableOpacity
@@ -192,10 +179,7 @@ const TPSettingsScroller = () => {
               onPress={() => onIndicatorPress(index)}
               className="mr-[20]"
             >
-              <MotiView
-                from={{ opacity: 0.4 }}
-                animate={{ opacity: index === flIndex ? 1 : 0.4 }}
-              >
+              <MotiView from={{ opacity: 0.4 }} animate={{ opacity: index === flIndex ? 1 : 0.4 }}>
                 {/* {el(color)} */}
                 <el.icon color={color} />
               </MotiView>
@@ -204,10 +188,14 @@ const TPSettingsScroller = () => {
         })}
         {/* MOVING INDICATOR */}
         <Animated.View
-          className="absolute h-[5] bg-amber-600 z-20"
+          className="absolute h-[5]  z-20"
           style={[
             animatedStyles,
-            { width: INDICATOR_WIDTH, top: INDICATOR_WIDTH },
+            {
+              width: INDICATOR_WIDTH,
+              top: INDICATOR_WIDTH,
+              backgroundColor: playlistColors.gradientTopText,
+            },
           ]}
         />
       </View>

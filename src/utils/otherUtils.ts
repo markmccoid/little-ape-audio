@@ -59,8 +59,8 @@ export const getImageColors = async (imagedata: string): Promise<PlaylistImageCo
     quality: "highest",
   })) as IOSImageColors;
   let imageColors = { ...iosImageColors } as IOSImageColors;
-  let darkestColor;
-  let lightestColor;
+  let darkestColor = { color: "black", darkness: 0 };
+  let lightestColor = { color: "white", lightness: 255 };
   // Create Color Obj
   const colorObj: ColorObj = Object.keys(imageColors).reduce((fin, key, idx) => {
     if (key === "quality" || key === "platform") return fin;
@@ -84,7 +84,7 @@ export const getImageColors = async (imagedata: string): Promise<PlaylistImageCo
         colorType: colorType,
         colorLuminance,
         // second pass will correct these tint colors
-        tintColor: colorType === "dark" ? "#ffffff" : "#000000",
+        tintColor: colorType === "dark" ? "ffffff" : "000000",
       },
     };
 
@@ -96,12 +96,19 @@ export const getImageColors = async (imagedata: string): Promise<PlaylistImageCo
   let newObj;
   Object.keys(colorObj).forEach((key) => {
     const colorType = colorObj[key].colorType;
+    const isDark = colorType === "dark";
+    const foregroundLum = isDark ? lightestColor?.lightness : darkestColor?.darkness;
+    const foregroundDefault = isDark ? lightestColor?.color : darkestColor?.color;
+    const foregroundOverrid = isDark ? "white" : "black";
+    const contrast = getContrast(foregroundLum, colorObj[key].colorLuminance);
+    // If contrast between fore and back ground luminance, then just use black or white
+    const tintColor = contrast < 0.7 ? foregroundOverrid : foregroundDefault;
 
     newObj = {
       ...newObj,
       [key]: {
         ...colorObj[key],
-        tintColor: colorType === "dark" ? lightestColor?.color : darkestColor?.color,
+        tintColor, // : colorType === "dark" ? lightestColor?.color : darkestColor?.color,
       },
     };
   });
@@ -119,6 +126,7 @@ export const getColorLuminance = (backgroundColor: string) => {
   // Calculate the luminance of the background color.
   const luminance = 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
   // Choose the best text color based on the luminance.
+
   return luminance > 150
     ? { colorType: "light", colorLuminance: luminance }
     : { colorType: "dark", colorLuminance: luminance };
@@ -130,7 +138,72 @@ function hexToRgb(hexColor: string) {
   const b = parseInt(hexColor.substring(5, 7), 16);
   return [r, g, b];
 }
+//~-=======================================
+//~- return "white" or "black" for the text
+//~~ color that should work on a color with the passed luminance
+//~-=======================================
+export const getTextColor = (bgLuminance: number) => {
+  const whiteTextcontrast = (255 - bgLuminance) / 255;
+  if (whiteTextcontrast >= 0.7) return "white";
+  return "black";
+};
+//~- Get contrast between two color
+export const getContrast = (foregroundLuminance: number, bg2Luminance: number) => {
+  const contrast = (foregroundLuminance - bg2Luminance) / foregroundLuminance;
+  return contrast;
+};
+//~~========================================
+//~~ Lighten and Darken color functions
+//~~========================================
+export const lightenColor = (hexColor: string, magnitude: number) => {
+  hexColor = hexColor.replace(`#`, ``);
+  if (hexColor === "white") {
+    hexColor = "ffffff";
+  }
+  if (hexColor === "black") {
+    hexColor = "000000";
+  }
+  if (hexColor.length === 6) {
+    const decimalColor = parseInt(hexColor, 16);
+    let r = (decimalColor >> 16) + magnitude;
+    r > 255 && (r = 255);
+    r < 0 && (r = 0);
+    let g = (decimalColor & 0x0000ff) + magnitude;
+    g > 255 && (g = 255);
+    g < 0 && (g = 0);
+    let b = ((decimalColor >> 8) & 0x00ff) + magnitude;
+    b > 255 && (b = 255);
+    b < 0 && (b = 0);
+    return `#${(g | (b << 8) | (r << 16)).toString(16)}`;
+  } else {
+    return hexColor;
+  }
+};
 
+export const darkenColor = (hexColor: string, magnitude: number) => {
+  hexColor = hexColor.replace(`#`, ``);
+  if (hexColor === "white") {
+    hexColor = "ffffff";
+  }
+  if (hexColor === "black") {
+    hexColor = "000000";
+  }
+  if (hexColor.length === 6) {
+    const decimalColor = parseInt(hexColor, 16);
+    let r = (decimalColor >> 16) - magnitude;
+    r > 255 && (r = 255);
+    r < 0 && (r = 0);
+    let g = (decimalColor & 0x0000ff) - magnitude;
+    g > 255 && (g = 255);
+    g < 0 && (g = 0);
+    let b = ((decimalColor >> 8) & 0x00ff) - magnitude;
+    b > 255 && (b = 255);
+    b < 0 && (b = 0);
+    return `#${(g | (b << 8) | (r << 16)).toString(16)}`;
+  } else {
+    return hexColor;
+  }
+};
 //~-=======================================
 //~ Shares passed JSON using ios share option
 //~-=======================================

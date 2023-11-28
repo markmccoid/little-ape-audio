@@ -67,7 +67,7 @@ export const listGoogleDriveFiles = async (
 
   // If root folder we get "/" need to cover to "root"
   // otherwise use passed in folderId
-  let query = `'${folderId === "/" || !folderId ? "root" : folderId}' in parents`;
+  let query = `'${folderId === "/" || !folderId ? "root" : folderId}' in parents and trashed=false`;
 
   const apiUrl = `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name,size,mimeType,fileExtension,webContentLink)`;
   const resp = await axios.get(apiUrl, {

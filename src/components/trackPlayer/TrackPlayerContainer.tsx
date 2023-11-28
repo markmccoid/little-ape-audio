@@ -15,11 +15,10 @@ import TrackPlayerChaptProgressBar from "./TrackPlayerChaptProgressBar";
 const { width, height } = Dimensions.get("window");
 
 const TrackPlayerContainer = () => {
-  const playlist = useCurrentPlaylist();
   const playlistColors = usePlaylistColors();
 
   return (
-    <View className="flex-1 flex-col">
+    <View className="flex-1 flex-col ">
       <LinearGradient
         // colors={[`${colorP.secondary}55`, `${colorP.background}55`]}
         colors={[
@@ -27,8 +26,10 @@ const TrackPlayerContainer = () => {
           `${playlistColors?.background?.color}`,
           colors.amber50,
         ]}
-        // start={{ x: 0, y: 0 }}
-        // end={{ x: 1, y: 1 }}
+        style={{ flex: 1 }}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 0.95 }}
+        locations={[0.3, 0.6, 1]}
       >
         <View className="">
           <TrackPlayerImage />
@@ -37,7 +38,7 @@ const TrackPlayerContainer = () => {
           <TrackPlayerChaptProgressBar />
         </View>
       </LinearGradient>
-      <View className="flex-1 ">
+      <View className=" justify-end mb-[30] mt-[25]">
         <TrackPlayerControls />
       </View>
       <BottomSheetContainer />

@@ -6,6 +6,7 @@ import Slider from "@react-native-community/slider";
 import { MotiView } from "moti";
 import { colors } from "@constants/Colors";
 import { usePlaybackStore } from "@store/store";
+import usePlaylistColors from "hooks/usePlaylistColors";
 
 const { width, height } = Dimensions.get("window");
 const COMPONENT_WIDTH = width - 90;
@@ -13,8 +14,10 @@ const COMPONENT_PADDING = 10;
 
 const RateSelector = () => {
   const playbackActions = usePlaybackStore((state) => state.actions);
+  const didUpdate = usePlaybackStore((state) => state.didUpdate);
   const [rate, setRate] = useState<number>(1);
   const [isSliding, setIsSliding] = useState(false);
+  const playlistColors = usePlaylistColors();
 
   useEffect(() => {
     const getRate = async () => {
@@ -22,7 +25,7 @@ const RateSelector = () => {
       setRate(rate);
     };
     getRate();
-  }, []);
+  }, [didUpdate]);
 
   const updateRate = async (newRate: number) => {
     setRate(newRate);
@@ -40,11 +43,16 @@ const RateSelector = () => {
           <TouchableOpacity
             key={el}
             onPress={() => updateRate(el)}
-            className={`px-2 py-1 rounded-md border border-amber-800 ${
-              el === rate ? "bg-amber-300" : "bg-white"
-            }`}
+            className={`px-2 py-1 rounded-md`}
+            style={{
+              backgroundColor: el === rate ? playlistColors.btnText : playlistColors.btnBg,
+              borderColor: playlistColors.btnBorder,
+              borderWidth: 1,
+            }}
           >
-            <Text>{el.toFixed(2)}</Text>
+            <Text style={{ color: el === rate ? playlistColors.btnBg : playlistColors.btnText }}>
+              {el.toFixed(2)}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -55,9 +63,9 @@ const RateSelector = () => {
             width: COMPONENT_WIDTH - 40,
             paddingHorizontal: COMPONENT_PADDING,
           }}
-          minimumTrackTintColor={colors.amber700}
-          maximumTrackTintColor={colors.amber400}
-          thumbTintColor={colors.amber600}
+          minimumTrackTintColor={playlistColors.sliderMinTrack}
+          maximumTrackTintColor={playlistColors.sliderMaxTrack}
+          thumbTintColor={playlistColors.sliderThumb}
           minimumValue={50}
           maximumValue={400}
           step={5}

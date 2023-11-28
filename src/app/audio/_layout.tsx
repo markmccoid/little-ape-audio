@@ -82,7 +82,7 @@ const AudioLayout = () => {
         name="playersettings"
         options={{
           presentation: "modal",
-          headerShown: true,
+          headerShown: false,
         }}
       />
       <Stack.Screen

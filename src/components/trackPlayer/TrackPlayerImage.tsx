@@ -16,7 +16,6 @@ const TrackPlayerImage = () => {
   const queue = usePlaybackStore((state) => state.trackPlayerQueue);
   const currTrackIndex = usePlaybackStore((state) => state.currentTrackIndex);
   const playlistColors = usePlaylistColors();
-  const nextChapterExists = usePlaybackStore((state) => state.nextChapterExists);
   const currentChapterIndex = usePlaybackStore((state) => state.currentChapterIndex);
 
   // const playlist = actions.getCurrentPlaylist();
