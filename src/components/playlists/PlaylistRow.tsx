@@ -19,6 +19,8 @@ import { DeleteIcon, EditIcon, ImageIcon } from "../common/svg/Icons";
 import { getImageFromWeb } from "@utils/otherUtils";
 import { Swipeable } from "react-native-gesture-handler";
 import { colors } from "@constants/Colors";
+import usePlaylistColors from "hooks/usePlaylistColors";
+import { LinearGradient } from "expo-linear-gradient";
 // import * as WebBrowser from "expo-web-browser";
 // import * as Clipboard from "expo-clipboard";
 // import { getImageSize } from "@utils/audioUtils";
@@ -36,6 +38,7 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
   const currentPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
 
   const isActive = useMemo(() => currentPlaylistId === playlist.id, [currentPlaylistId]);
+  const playlistColors = usePlaylistColors(playlist.id);
 
   const handleRemovePlaylist = async () => {
     Alert.alert(
@@ -73,31 +76,41 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
       rightThreshold={45}
       leftThreshold={10}
     >
-      <View
-        className={`flex-row flex-1 pt-2 pb-3 px-2 border-r border-r-amber-800 ${
-          isActive ? "bg-amber-300" : "bg-amber-50"
-        }`}
+      <LinearGradient
+        colors={[playlistColors.gradientTop, playlistColors.gradientLast]}
+        style={{ flex: 1 }}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0.5, y: 0 }}
+        // locations={[0.001, 1]}
       >
-        <Pressable className="flex-1 flex-row" onPress={() => onPlaylistSelect(playlist.id)}>
-          {/* IMAGE */}
-          <PlaylistImage style={styles.trackImage} playlistId={playlist.id} noTransition />
-          {/* TITLE AUTHOR LENGTH */}
-          <View className="flex-col flex-1 ml-2 justify-between pb-1 ">
-            <View className="flex-col flex-shrink">
-              <Text className="text-lg font-ssp_semibold" numberOfLines={2} ellipsizeMode="tail">
-                {playlist?.name}
-              </Text>
-              <Text className="text-sm font-ssp_regular" ellipsizeMode="tail">
-                {playlist.author}
+        <View
+          className={`flex-row flex-1 pt-2 pb-3 px-2 border-r border-r-amber-800 ${
+            // isActive ? "bg-amber-300" : "bg-amber-50"
+            isActive
+          }`}
+          // style={{ backgroundColor: playlistColors.gradientTop }}
+        >
+          <Pressable className="flex-1 flex-row" onPress={() => onPlaylistSelect(playlist.id)}>
+            {/* IMAGE */}
+            <PlaylistImage style={styles.trackImage} playlistId={playlist.id} noTransition />
+            {/* TITLE AUTHOR LENGTH */}
+            <View className="flex-col flex-1 ml-2 justify-between pb-1 ">
+              <View className="flex-col flex-shrink">
+                <Text className="text-lg font-ssp_semibold" numberOfLines={2} ellipsizeMode="tail">
+                  {playlist?.name}
+                </Text>
+                <Text className="text-sm font-ssp_regular" ellipsizeMode="tail">
+                  {playlist.author}
+                </Text>
+              </View>
+              <Text className="text-sm font-ssp_regular">
+                {formatSeconds(playlist.totalListenedToSeconds, "minimal")} -
+                {formatSeconds(playlist.totalDurationSeconds, "minimal")}
               </Text>
             </View>
-            <Text className="text-sm font-ssp_regular">
-              {formatSeconds(playlist.totalListenedToSeconds, "minimal")} -
-              {formatSeconds(playlist.totalDurationSeconds, "minimal")}
-            </Text>
-          </View>
-        </Pressable>
-      </View>
+          </Pressable>
+        </View>
+      </LinearGradient>
     </Swipeable>
   );
 };

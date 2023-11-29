@@ -4,6 +4,7 @@ import BottomSheetMenu from "./BottomSheetMenu";
 import usePlaylistColors from "hooks/usePlaylistColors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSettingStore } from "@store/store-settings";
+import { colors } from "@constants/Colors";
 
 export type BottomSheetImpRef = {
   expand: () => void;
@@ -30,10 +31,7 @@ const BottomSheetContainer = () => {
       {/* <LinearGradient colors={[colors.amber50, `${playlistColors?.secondary?.color}`]}>
             <View className="h-5" />
           </LinearGradient> */}
-      <SafeAreaView
-        edges={["bottom"]}
-        // style={{ backgroundColor: playlistColors.secondary.color }}
-      >
+      <SafeAreaView edges={["bottom"]}>
         <BottomSheetMenu
           isExpanded={false}
           setPage={handleSetPage}

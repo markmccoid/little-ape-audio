@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  Pressable,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, StyleSheet, Dimensions, Pressable, TouchableOpacity } from "react-native";
 import React, { Ref, useState } from "react";
 import {
   PanGestureHandler,
@@ -29,6 +22,7 @@ import { AnimatedPressable } from "../../common/buttons/Pressables";
 import { Bookmark } from "../../../store/types";
 import { AnimatePresence } from "moti";
 import { formatSeconds } from "../../../utils/formatUtils";
+import usePlaylistColors from "hooks/usePlaylistColors";
 
 const { width: SCREEN_WIDTH, height } = Dimensions.get("window");
 
@@ -55,6 +49,7 @@ const BookmarkRow = ({
   const iconOpacity = useSharedValue(0);
   const iconPos = useSharedValue(0);
   const [isPanActive, setIsPanActive] = useState(false);
+  const playlistColors = usePlaylistColors();
 
   const animatedStyles = useAnimatedStyle(() => {
     return {
@@ -146,7 +141,7 @@ const BookmarkRow = ({
   });
 
   return (
-    <View className="w-full bg-amber-200">
+    <View className="w-full" style={{ backgroundColor: playlistColors.bg }}>
       {/* START -- ICONS REVEALED ON SWIPE */}
       <AnimatedPressable onPress={() => onDeleteBookmark(bookmark.id)}>
         <Animated.View
@@ -173,20 +168,25 @@ const BookmarkRow = ({
         onEnded={() => setIsPanActive(false)}
       >
         <Animated.View
-          style={animatedStyles}
-          className="border border-amber-600 py-1 px-2 bg-white mb-0"
+          style={[animatedStyles, { borderWidth: 1, borderColor: playlistColors.bgBorder }]}
+          className="py-1 px-2 bg-white mb-0"
         >
           <View className="flex-row items-center">
             <AnimatedPressable onPress={() => onApplyBookmark(bookmark.id)}>
-              <View className="mr-4 p-1 border border-amber-800 bg-amber-200 rounded-lg">
-                <EnterKeyIcon />
+              <View
+                className="mr-4 p-1  bg-amber-200 rounded-lg"
+                style={{
+                  borderWidth: 1,
+                  borderColor: playlistColors.btnBorder,
+                  backgroundColor: playlistColors.btnBg,
+                }}
+              >
+                <EnterKeyIcon color={playlistColors.btnText} />
               </View>
             </AnimatedPressable>
             <View>
               <Text className="text-sm font-semibold">{bookmark.name}</Text>
-              <Text className="text-xs">
-                {formatSeconds(bookmark.positionSeconds)}
-              </Text>
+              <Text className="text-xs">{formatSeconds(bookmark.positionSeconds)}</Text>
             </View>
           </View>
         </Animated.View>

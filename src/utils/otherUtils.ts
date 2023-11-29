@@ -157,7 +157,7 @@ export const getContrast = (foregroundLuminance: number, bg2Luminance: number) =
 //~~========================================
 export const lightenColor = (hexColor: string, magnitude: number) => {
   hexColor = hexColor.replace(`#`, ``);
-  if (hexColor === "white") {
+  if (hexColor === "white" || !hexColor) {
     hexColor = "ffffff";
   }
   if (hexColor === "black") {

@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Link, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -14,7 +14,12 @@ const TrackPlayerSettingsHeader = () => {
   return (
     <View
       className={`flex-row py-2 px-2 items-center justify-start`}
-      style={{ backgroundColor: playlistColors.gradientTop }}
+      style={{
+        backgroundColor: playlistColors.gradientTop,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: playlistColors.gradientTopText,
+        // borderTopRightRadius: 11,
+      }}
     >
       {/* Playlist Name */}
       <View className="flex-row flex-1 pl-3 pr-1 justify-center">

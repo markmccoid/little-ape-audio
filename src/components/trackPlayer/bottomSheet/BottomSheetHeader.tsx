@@ -24,8 +24,12 @@ const BottomSheetHeader = ({ pagerRef, bottomSheetRef, currPage }) => {
     <View
       className="flex-row justify-between px-4 py-2 rounded-t-xl"
       style={{
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: playlistColors.gradientTopText, //colors.amber950, // playlistColors.secondary.tintColor,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: playlistColors.gradientTopText, //colors.amber950, // playlistColors.secondary.tintColor,
+        borderLeftWidth: StyleSheet.hairlineWidth,
+        borderLeftColor: playlistColors.gradientTopText, //colors.amber950, // playlistColors.secondary.tintColor,
+        borderRightWidth: StyleSheet.hairlineWidth,
+        borderRightColor: playlistColors.gradientTopText, //colors.amber950, // playlistColors.secondary.tintColor,
         // borderBottomWidth: StyleSheet.hairlineWidth,
         // borderBottomColor: playlistColors.secondary.tintColor,
         backgroundColor: playlistColors.gradientTop, //colors.amber50,

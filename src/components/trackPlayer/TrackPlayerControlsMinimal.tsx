@@ -14,6 +14,7 @@ import {
 import { useTrackPlayerEvents, Event, State } from "react-native-track-player";
 import { useSettingStore } from "../../store/store-settings";
 import { colors } from "../../constants/Colors";
+import usePlaylistColors from "hooks/usePlaylistColors";
 
 const { width, height } = Dimensions.get("window");
 // Subscribing to the following events inside MyComponent
@@ -34,7 +35,7 @@ const TrackPlayerControlsMinimal = ({ style }: Props) => {
   // const playlist = usePlaybackStore((state) => state.currentPlaylist);
   const playlist = getCurrentPlaylist();
   const actions = usePlaybackStore((state) => state.actions);
-  const currentTrack = usePlaybackStore((state) => state.currentTrack);
+  const playlistColors = usePlaylistColors();
 
   const isPlaying = playerState === State.Playing;
 

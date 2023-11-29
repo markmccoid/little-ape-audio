@@ -15,8 +15,9 @@ import TrackList from "../TrackList";
 import { BottomSheetImpRef } from "./BottomSheetContainer";
 import usePlaylistColors from "hooks/usePlaylistColors";
 import BottomSheetHeader from "./BottomSheetHeader";
-import TrackPlayerSettingsBookmarks from "../settings/TrackPlayerSettingsBookmarks";
-import RateSelector from "../settings/RateSelector";
+import BottomSheetsBookmarks from "./BottomSheetBookmarks";
+import RateSelector from "./RateSelector";
+import { LinearGradient } from "expo-linear-gradient";
 
 type Ref = BottomSheetImpRef;
 type Props = {};
@@ -83,7 +84,7 @@ const TrackPlayerBottomSheet = forwardRef<Ref, Props>((props, ref) => {
       snapPoints={snapPoints}
       enablePanDownToClose
       backgroundStyle={{
-        backgroundColor: colors.amber100,
+        backgroundColor: colors.amber50,
         borderWidth: StyleSheet.hairlineWidth,
 
         // marginBottom: 50,
@@ -98,31 +99,40 @@ const TrackPlayerBottomSheet = forwardRef<Ref, Props>((props, ref) => {
       }}
     >
       <View className="flex-1 mb-10">
-        <View>
-          {/* <BottomSheetMenu
+        <LinearGradient
+          // colors={[`${colorP.secondary}55`, `${colorP.background}55`]}
+          colors={[`${playlistColors.gradientTop}`, playlistColors.gradientLast, colors.amber50]}
+          style={{ flex: 1 }}
+          // start={{ x: 0, y: 0 }}
+          // end={{ x: 0, y: 0.95 }}
+          locations={[0.1, 0.8, 1]}
+        >
+          <View>
+            {/* <BottomSheetMenu
             isExpanded={isExpanded}
             setPage={setPage}
             expand={bottomSheetRef.current?.expand}
             snapToIndex={bottomSheetRef.current?.snapToIndex}
           /> */}
-        </View>
+          </View>
 
-        <PagerView
-          style={{ flex: 1, width: "100%" }}
-          orientation="horizontal"
-          ref={pagerRef}
-          onPageSelected={handlePageSelected}
-        >
-          <View key="1" className="flex-1">
-            <TrackList />
-          </View>
-          <View key="2" className="mt-4">
-            <RateSelector />
-          </View>
-          <View key="3">
-            <TrackPlayerSettingsBookmarks />
-          </View>
-        </PagerView>
+          <PagerView
+            style={{ flex: 1, width: "100%" }}
+            orientation="horizontal"
+            ref={pagerRef}
+            onPageSelected={handlePageSelected}
+          >
+            <View key="1" className="flex-1">
+              <TrackList />
+            </View>
+            <View key="2" className="mt-4">
+              <RateSelector />
+            </View>
+            <View key="3">
+              <BottomSheetsBookmarks />
+            </View>
+          </PagerView>
+        </LinearGradient>
       </View>
       {/* <View>
         <Text>BOTTOM</Text>

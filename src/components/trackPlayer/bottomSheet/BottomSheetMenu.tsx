@@ -49,6 +49,7 @@ const BottomSheetMenu = ({ isExpanded, setPage, expand, snapToIndex }: Props) =>
         }}
       >
         <ListIcon />
+        <Text className="text-white">H</Text>
       </TouchableOpacity>
       <TouchableOpacity
         onPress={() => {

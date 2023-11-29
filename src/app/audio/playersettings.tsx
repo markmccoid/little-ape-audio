@@ -9,7 +9,7 @@ const PlaylistSettings = () => {
     <SafeAreaView className="bg-amber-50 flex-1 ">
       <Stack.Screen
         options={{
-          headerShown: true,
+          headerShown: false,
           header: () => <TrackPlayerSettingsHeader />,
           // title: `${playlist.name} Settings`,
           // headerStyle: { backgroundColor: gradientTop },

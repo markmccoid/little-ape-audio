@@ -1,16 +1,22 @@
 import { colors } from "@constants/Colors";
-import { getCurrentPlaylist } from "@store/store";
+import { getCurrentPlaylist, useTrackActions } from "@store/store";
 import { PlaylistImageColors } from "@store/types";
 import { lightenColor } from "@utils/otherUtils";
 import React, { useState } from "react";
 
 // Currently doesn't do much, but in the future, may need to process something??
-const usePlaylistColors = () => {
+const usePlaylistColors = (playlistId?: string) => {
   const currPlaylist = getCurrentPlaylist();
+  const trackActions = useTrackActions();
   const [playlistColors, setPlaylistColors] = useState();
 
-  let currColors = currPlaylist.imageColors;
-  const standardColors = getStandardColors(currColors);
+  if (!currPlaylist && !playlistId) return;
+  let currColors = currPlaylist?.imageColors;
+  if (playlistId) {
+    currColors = trackActions.getPlaylist(playlistId).imageColors;
+  }
+
+  // Set option to turn off dynamic coloring and check it here
 
   if (!currPlaylist?.imageColors?.background?.color) {
     currColors = {
@@ -19,39 +25,41 @@ const usePlaylistColors = () => {
         colorType: "dark",
         // The color to use for text or items if background is the bg color.
         tintColor: colors.amber950,
-        colorLuminance: 0,
+        colorLuminance: 150.01,
       },
       primary: {
         color: colors.amber100,
         colorType: "light",
         // The color to use for text or items if primary is the bg color.
         tintColor: colors.amber950,
-        colorLuminance: 200,
+        colorLuminance: 185.76,
       },
       secondary: {
         color: colors.amber200,
         colorType: "light",
         // The color to use for text or items ifsecondary is the bg color.
         tintColor: colors.amber950,
-        colorLuminance: 180,
+        colorLuminance: 181.15,
       },
       detail: {
         color: colors.amber100,
         colorType: "light",
         // The color to use for text or items if detail is the bg color.
         tintColor: colors.amber950,
-        colorLuminance: 200,
+        colorLuminance: 185.76,
       },
     };
   }
+  const standardColors = getStandardColors(currColors);
   return { ...currColors, ...standardColors };
 };
 
 function getStandardColors(plColors: PlaylistImageColors) {
-  const background = plColors.background;
-  const secondary = plColors.secondary;
-  const primary = plColors.primary;
-  const detail = plColors.detail;
+  const background = plColors?.background;
+  const secondary = plColors?.secondary;
+  const primary = plColors?.primary;
+  const detail = plColors?.detail;
+
   const standard = {
     bg: background.color,
     bgText: background.tintColor,

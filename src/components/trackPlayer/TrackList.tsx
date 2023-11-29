@@ -15,6 +15,10 @@ import { colors } from "../../constants/Colors";
 import sectionListGetItemLayout from "react-native-section-list-get-item-layout";
 import { Chapter } from "@store/store-functions";
 import { getCurrentChapter } from "@utils/chapterUtils";
+import usePlaylistColors from "hooks/usePlaylistColors";
+import { darkenColor, lightenColor } from "@utils/otherUtils";
+import { play } from "react-native-track-player/lib/trackPlayer";
+import { pl } from "date-fns/locale";
 
 const { width, height } = Dimensions.get("window");
 
@@ -37,6 +41,20 @@ const TrackList = () => {
   const { position, duration } = useProgress();
   const [sectionList, setSectionList] = useState<SectionListData[]>([]);
   const currChapterIndex = usePlaybackStore((state) => state.currentChapterIndex);
+  const playlistColors = usePlaylistColors();
+
+  // Track List Colors
+  const trackActiveColor = playlistColors.bg;
+  const trackInactiveColor = lightenColor(playlistColors.bg, 75);
+  const trackText = playlistColors.bgText;
+  const trackBorder = playlistColors.bgBorder;
+
+  const chaptActiveColor = playlistColors.btnBg;
+  const chaptInactiveColor = lightenColor(playlistColors.btnBg, 40);
+  const chaptText = playlistColors.btnText;
+  const chaptBorder = playlistColors.btnBorder;
+  const chaptBtnBgInactive = lightenColor(playlistColors.bg, 75);
+  const chaptBtnBgActive = playlistColors.btnBg;
 
   //! ==== get current queue position
   const currentQueueId = queue.find((el) => el.id === currentTrack.id).id;
@@ -54,22 +72,12 @@ const TrackList = () => {
     });
   };
 
-  // console.log("Q", queue[0].title, queue[0].duration);
   // Scroll to the current track and/or chapter
   useEffect(() => {
     if (scrollViewRef.current && currChapterIndex !== undefined && sectionList.length > 0) {
       scrollToRow(currentTrackIndex, currChapterIndex + 1);
     }
   }, [currentTrackIndex, scrollViewRef.current, currChapterIndex]);
-
-  // set the currChapterIndex based on the progress position
-  // and the queue position (i.e. track in queue)
-  // useEffect(() => {
-  //   const qChapters = chapters?.[currentQueueId];
-  //   const { chapterIndex } = getCurrentChapter({ chapters: qChapters, position });
-
-  //   setCurrChapterIndex(chapterIndex);
-  // }, [chapters, position]);
 
   useEffect(() => {
     if (queue) {
@@ -123,20 +131,23 @@ const TrackList = () => {
         className=""
       >
         <View
-          className={`p-3 items-center flex-row ${
-            "" /* section.position === 0 ? "border" : "border-b" */
-          }
-           border-amber-500 h-[45] ${isCurrentTrack ? "bg-amber-200" : "bg-amber-50"}`}
+          className={`p-3 items-center flex-row`}
+          style={{
+            backgroundColor: isCurrentTrack ? trackActiveColor : trackInactiveColor,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: trackBorder,
+            height: 45,
+          }}
         >
           <View className={`flex-row items-center justify-between `}>
             <Text
               className={`text-sm flex-1 flex-grow ${isCurrentTrack ? "font-semibold" : ""}`}
               numberOfLines={2}
               ellipsizeMode="tail"
-              // style={{ width: width / 1.2 }}
+              style={{ color: trackText }}
             >{`${(section.queuePos + 1).toString().padStart(2, "0")} - ${section.title}`}</Text>
             <View style={{ width: 75 }} className="flex-row justify-end">
-              <Text className="text-xs">
+              <Text className="text-xs" style={{ color: trackText }}>
                 {isCurrentTrack
                   ? formatSeconds(section.duration - position)
                   : formatSeconds(section.duration)}
@@ -153,6 +164,9 @@ const TrackList = () => {
     if (item.title === "~NO CHAPTERS~") {
       return <View></View>;
     }
+    //! NOTE: we can't just use "isCurrChapter" as it is incex based
+    //!  and each section has many of same indexes
+    //! USE: isCurrentSection
     const isCurrChapter = index === currChapterIndex;
     const isCurrentTrack = currentTrackIndex === section?.queuePos;
     const isCurrentSection = isCurrChapter && isCurrentTrack;
@@ -162,9 +176,13 @@ const TrackList = () => {
 
     return (
       <View
-        className={`flex-row items-center justify-between ml-4 ${
-          index === 0 ? "border" : "border-b border-l"
-        } border-amber-500 h-[45] ${isCurrentSection ? "bg-amber-300" : "bg-white"}`}
+        className={`flex-row items-center justify-between ml-4`}
+        style={{
+          backgroundColor: isCurrentSection ? chaptActiveColor : chaptInactiveColor,
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: chaptBorder,
+          height: 45,
+        }}
       >
         <TouchableOpacity
           onPress={async () => {
@@ -176,19 +194,34 @@ const TrackList = () => {
             // setIsCurrChapter(true);
           }}
         >
-          <View className="w-[40] flex-row justify-center items-center border-r border-amber-600 bg-[#FFE194] flex-grow">
+          <View
+            className="w-[40] flex-row justify-center items-center border-r border-amber-600 bg-[#FFE194] flex-grow"
+            style={{
+              backgroundColor: isCurrentSection ? chaptBtnBgActive : chaptBtnBgInactive,
+            }}
+          >
             {/* <ToTopIcon /> */}
-            <Text className="text-base font-bold">{index + 1}</Text>
+            <Text
+              className={`text-base ${isCurrentSection ? "font-bold" : "font-semibold"}`}
+              style={{ color: isCurrentSection ? chaptText : trackText }}
+            >
+              {index + 1}
+            </Text>
           </View>
         </TouchableOpacity>
         <View className={`flex-row pl-2 py-2 items-center justify-between flex-1`}>
           {/* <Text className="text-base">{props.item.title}</Text> */}
-          <Text className="text-sm flex-1" numberOfLines={1} ellipsizeMode="tail">
+          <Text
+            className="text-sm flex-1"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={{ color: chaptText }}
+          >
             {item.title}
           </Text>
-          <Text className="text-xs pr-2">{`${formatSeconds(item?.startSeconds)} - ${formatSeconds(
-            item.endSeconds
-          )}`}</Text>
+          <Text className="text-xs pr-2" style={{ color: chaptText }}>{`${formatSeconds(
+            item?.startSeconds
+          )} - ${formatSeconds(item.endSeconds)}`}</Text>
         </View>
       </View>
     );

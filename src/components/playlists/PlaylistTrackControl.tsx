@@ -1,10 +1,4 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  SafeAreaView,
-} from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView } from "react-native";
 // import DropboxAuth from "@components/dropbox/DropboxAuth";
 import { Link, useRouter } from "expo-router";
 import PlaylistImage from "../common/PlaylistImage";
@@ -13,6 +7,7 @@ import { usePlaybackStore } from "../../store/store";
 import TrackPlayerControlsMinimal from "../trackPlayer/TrackPlayerControlsMinimal";
 import { OpenInNewIcon } from "../common/svg/Icons";
 import { MotiView } from "moti";
+import usePlaylistColors from "hooks/usePlaylistColors";
 
 export default function PlaylistTrackControl() {
   const currPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);

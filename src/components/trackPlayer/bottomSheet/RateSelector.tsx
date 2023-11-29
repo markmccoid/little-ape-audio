@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Dimensions } from "react-native";
+import { View, Text, TouchableOpacity, Dimensions, StyleSheet } from "react-native";
 import React, { useEffect, useState } from "react";
 
 import TrackPlayer from "react-native-track-player";
@@ -35,7 +35,14 @@ const RateSelector = () => {
   const fixedRates = [1, 1.25, 1.5, 1.75, 2];
 
   return (
-    <View className="flex flex-col z-20">
+    <View
+      className="flex flex-col z-20 m-2 p-3 rounded-xl"
+      style={{
+        borderColor: playlistColors.bgBorder,
+        borderWidth: StyleSheet.hairlineWidth,
+        backgroundColor: playlistColors.bg,
+      }}
+    >
       {/* <View className="flex flex-col p-2 mb-2 bg-amber-200 border border-amber-950 rounded-lg z-20"> */}
       {/* RATE COMPONENT */}
       <View className="flex-row justify-center space-x-1 w-full items-center mb-2">
