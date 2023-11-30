@@ -11,6 +11,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { PlaylistImageColors } from "@store/types";
 import usePlaylistColors from "hooks/usePlaylistColors";
 import TrackPlayerChaptProgressBar from "./TrackPlayerChaptProgressBar";
+import TrackPlayerBottomSheet from "./bottomSheet/TrackPlayerBottomSheet";
 
 const { width, height } = Dimensions.get("window");
 

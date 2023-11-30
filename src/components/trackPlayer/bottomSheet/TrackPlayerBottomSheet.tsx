@@ -7,7 +7,10 @@ import React, {
   useRef,
   useState,
 } from "react";
-import BottomSheet, { useBottomSheetDynamicSnapPoints } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  useBottomSheetDynamicSnapPoints,
+  BottomSheetBackdrop,
+} from "@gorhom/bottom-sheet";
 import { colors } from "@constants/Colors";
 import PagerView, { PagerViewOnPageSelectedEvent } from "react-native-pager-view";
 import TrackPlayerScrollerRateTimer from "../TrackPlayerScrollerRateTimer";
@@ -37,6 +40,10 @@ const TrackPlayerBottomSheet = forwardRef<Ref, Props>((props, ref) => {
     if (pagerRef?.current) {
       pagerRef.current.setPage(pageIndex);
     }
+  };
+  const handleBackdropPress = () => {
+    console.log("Press caught");
+    bottomSheetRef.current.close();
   };
 
   useImperativeHandle(
@@ -83,6 +90,15 @@ const TrackPlayerBottomSheet = forwardRef<Ref, Props>((props, ref) => {
       index={-1}
       snapPoints={snapPoints}
       enablePanDownToClose
+      backdropComponent={(props) => (
+        <BottomSheetBackdrop
+          {...props}
+          pressBehavior="close"
+          appearsOnIndex={0}
+          disappearsOnIndex={-1}
+          opacity={0.4}
+        />
+      )}
       backgroundStyle={{
         backgroundColor: colors.amber50,
         borderWidth: StyleSheet.hairlineWidth,

@@ -1,4 +1,4 @@
-import { ScrollView, View, Text, StyleSheet, Pressable, Alert } from "react-native";
+import { ScrollView, View, Text, StyleSheet, Pressable, Alert, Switch } from "react-native";
 import React from "react";
 import { colors } from "../../constants/Colors";
 import { Link } from "expo-router";
@@ -12,6 +12,7 @@ const SettingsContainer = () => {
   const actions = useSettingStore((state) => state.actions);
   const forwardSecs = useSettingStore((state) => state.jumpForwardSeconds);
   const backwardSecs = useSettingStore((state) => state.jumpBackwardSeconds);
+  const dynamicColors = useSettingStore((state) => state.isUsingDynamicColors);
   const handleUpdateSeek = async (type: "forward" | "backward") => {
     Alert.prompt("Enter Seek Seconds", `Enter ${type} seek seconds (Integer only!)`, [
       {
@@ -68,6 +69,21 @@ const SettingsContainer = () => {
             <Text className="text-sm">Seek Backward</Text>
           </Pressable>
           <Text>{backwardSecs}</Text>
+        </View>
+        {/* Dynamic Colors */}
+        <View className="px-2 " style={[styles.borderBottom]}>
+          <Pressable onPress={() => handleUpdateSeek("backward")} className="flex-grow py-3">
+            <Text className="text-sm">Dynamic Colors</Text>
+          </Pressable>
+
+          <Switch
+            style={{ marginRight: -10, transform: [{ scaleY: 0.7 }, { scaleX: 0.7 }] }}
+            trackColor={{ false: "#767577", true: "#4caf50" }}
+            thumbColor={dynamicColors ? "#8bc34a" : "#ddd"}
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={async () => await actions.toggleDynamicColors()}
+            value={dynamicColors}
+          />
         </View>
         <View className="px-2 py-3" style={[styles.borderBottom]}>
           <Link href="/settings/managetracksroute" asChild>

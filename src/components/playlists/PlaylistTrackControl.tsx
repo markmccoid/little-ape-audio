@@ -13,6 +13,14 @@ export default function PlaylistTrackControl() {
   const currPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
   const actions = usePlaybackStore((state) => state.actions);
   const route = useRouter();
+  const playlistColors = usePlaylistColors();
+
+  const CONTROLCOLOR =
+    playlistColors?.background?.colorType === "dark"
+      ? playlistColors.background?.color
+      : playlistColors?.secondary?.colorType === "dark"
+      ? playlistColors.secondary?.color
+      : "black";
 
   const onPlaylistSelect = async () => {
     await actions.setCurrentPlaylist(currPlaylistId);
@@ -24,7 +32,7 @@ export default function PlaylistTrackControl() {
       <TrackPlayerControlsMinimal />
       <View>
         <TouchableOpacity onPress={onPlaylistSelect} className="pr-3">
-          <OpenInNewIcon size={30} />
+          <OpenInNewIcon size={30} color={CONTROLCOLOR} />
         </TouchableOpacity>
       </View>
     </View>

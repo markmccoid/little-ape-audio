@@ -15,6 +15,7 @@ import { useTrackPlayerEvents, Event, State } from "react-native-track-player";
 import { useSettingStore } from "../../store/store-settings";
 import { colors } from "../../constants/Colors";
 import usePlaylistColors from "hooks/usePlaylistColors";
+import { darkenColor, lightenColor } from "@utils/otherUtils";
 
 const { width, height } = Dimensions.get("window");
 // Subscribing to the following events inside MyComponent
@@ -24,7 +25,6 @@ type Props = {
   style?: ViewStyle;
 };
 const CONTROLSIZE = 25;
-const CONTROLCOLOR = colors.amber800;
 
 const TrackPlayerControlsMinimal = ({ style }: Props) => {
   const jumpSecondsForward = useSettingStore((state) => state.jumpForwardSeconds);
@@ -47,6 +47,13 @@ const TrackPlayerControlsMinimal = ({ style }: Props) => {
     playbackActions.pause();
   };
 
+  const CONTROLCOLOR =
+    playlistColors?.background?.colorType === "dark"
+      ? playlistColors.background?.color
+      : playlistColors?.secondary?.colorType === "dark"
+      ? playlistColors.secondary?.color
+      : "black";
+
   return (
     <View className="flex flex-col justify-center items-center">
       <View className="flex-row gap-10 items-center justify-center" style={style}>
@@ -64,7 +71,7 @@ const TrackPlayerControlsMinimal = ({ style }: Props) => {
               position: "absolute",
               bottom: 4,
               right: 5,
-              color: colors.amber950,
+              color: CONTROLCOLOR,
             }}
             className="text-xs"
           >
@@ -96,7 +103,7 @@ const TrackPlayerControlsMinimal = ({ style }: Props) => {
               position: "absolute",
               bottom: 4,
               right: 7,
-              color: colors.amber950,
+              color: CONTROLCOLOR,
             }}
             className="text-xs"
           >
@@ -106,7 +113,7 @@ const TrackPlayerControlsMinimal = ({ style }: Props) => {
       </View>
       <Text
         className="text-sm text-center mt-2"
-        style={{ width: width / 1.5 }}
+        style={{ width: width / 1.5, color: CONTROLCOLOR }}
         numberOfLines={1}
         ellipsizeMode="tail"
       >

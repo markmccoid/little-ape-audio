@@ -16,7 +16,7 @@ import { Link, router, useRouter } from "expo-router";
 import { formatSeconds } from "../../utils/formatUtils";
 import PlaylistImage from "../common/PlaylistImage";
 import { DeleteIcon, EditIcon, ImageIcon } from "../common/svg/Icons";
-import { getImageFromWeb } from "@utils/otherUtils";
+import { getImageFromWeb, lightenColor } from "@utils/otherUtils";
 import { Swipeable } from "react-native-gesture-handler";
 import { colors } from "@constants/Colors";
 import usePlaylistColors from "hooks/usePlaylistColors";
@@ -77,18 +77,22 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
       leftThreshold={10}
     >
       <LinearGradient
-        colors={[playlistColors.gradientTop, playlistColors.gradientLast]}
+        colors={[
+          isActive ? playlistColors.gradientTop : colors.amber200,
+          isActive ? lightenColor(playlistColors.gradientTop, 30) : colors.amber200,
+          isActive ? lightenColor(playlistColors.gradientTop, 50) : colors.amber50,
+        ]}
         style={{ flex: 1 }}
         start={{ x: 0, y: 0 }}
-        end={{ x: 0.5, y: 0 }}
-        // locations={[0.001, 1]}
+        end={isActive ? { x: 0, y: 1 } : { x: 0.5, y: 0 }}
+        locations={isActive ? [0.4, 0.7, 1] : [0.001, 0.002, 1]}
       >
         <View
           className={`flex-row flex-1 pt-2 pb-3 px-2 border-r border-r-amber-800 ${
             // isActive ? "bg-amber-300" : "bg-amber-50"
             isActive
           }`}
-          // style={{ backgroundColor: playlistColors.gradientTop }}
+          // style={{ backgroundColor: isActive ? playlistColors.gradientTop : "" }}
         >
           <Pressable className="flex-1 flex-row" onPress={() => onPlaylistSelect(playlist.id)}>
             {/* IMAGE */}
@@ -96,14 +100,26 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
             {/* TITLE AUTHOR LENGTH */}
             <View className="flex-col flex-1 ml-2 justify-between pb-1 ">
               <View className="flex-col flex-shrink">
-                <Text className="text-lg font-ssp_semibold" numberOfLines={2} ellipsizeMode="tail">
+                <Text
+                  className="text-lg font-ssp_semibold"
+                  numberOfLines={2}
+                  ellipsizeMode="tail"
+                  style={{ color: isActive ? playlistColors.gradientTopText : "black" }}
+                >
                   {playlist?.name}
                 </Text>
-                <Text className="text-sm font-ssp_regular" ellipsizeMode="tail">
+                <Text
+                  className="text-sm font-ssp_regular"
+                  ellipsizeMode="tail"
+                  style={{ color: isActive ? playlistColors.gradientTopText : "black" }}
+                >
                   {playlist.author}
                 </Text>
               </View>
-              <Text className="text-sm font-ssp_regular">
+              <Text
+                className="text-sm font-ssp_regular"
+                style={{ color: isActive ? playlistColors.gradientTopText : "black" }}
+              >
                 {formatSeconds(playlist.totalListenedToSeconds, "minimal")} -
                 {formatSeconds(playlist.totalDurationSeconds, "minimal")}
               </Text>

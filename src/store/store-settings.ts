@@ -32,6 +32,7 @@ type SettingsState = {
     dropbox?: boolean;
     google?: boolean;
   };
+  isUsingDynamicColors: boolean;
   actions: {
     updateJumpForwardSeconds: (seconds: number) => Promise<void>;
     updateJumpBackwardSeconds: (seconds: number) => Promise<void>;
@@ -41,6 +42,7 @@ type SettingsState = {
     runSleepCountdown: () => void;
     setBottomSheetRef: (BottomSheetRef: BottomSheetImpRef) => void;
     setCloudAuth: (service: "dropbox" | "google", authStatus: boolean) => Promise<void>;
+    toggleDynamicColors: () => Promise<void>;
   };
 };
 export const useSettingStore = create<SettingsState>((set, get) => ({
@@ -61,7 +63,15 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
     dropbox: false,
     google: false,
   },
+  isUsingDynamicColors: true,
   actions: {
+    toggleDynamicColors: async () => {
+      set({ isUsingDynamicColors: !get().isUsingDynamicColors });
+      const newSettingsData = { ...get() };
+      delete newSettingsData.actions;
+
+      await saveToAsyncStorage("settings", newSettingsData);
+    },
     // CLOUD AUTH
     setCloudAuth: async (service, authStatus) => {
       set({ cloudAuth: { ...get().cloudAuth, [service]: authStatus } });

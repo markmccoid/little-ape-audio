@@ -1,5 +1,6 @@
 import { colors } from "@constants/Colors";
 import { getCurrentPlaylist, useTrackActions } from "@store/store";
+import { useSettingStore } from "@store/store-settings";
 import { PlaylistImageColors } from "@store/types";
 import { lightenColor } from "@utils/otherUtils";
 import React, { useState } from "react";
@@ -8,6 +9,7 @@ import React, { useState } from "react";
 const usePlaylistColors = (playlistId?: string) => {
   const currPlaylist = getCurrentPlaylist();
   const trackActions = useTrackActions();
+  const isUsingDynamicColors = useSettingStore((state) => state.isUsingDynamicColors);
   const [playlistColors, setPlaylistColors] = useState();
 
   if (!currPlaylist && !playlistId) return;
@@ -18,7 +20,7 @@ const usePlaylistColors = (playlistId?: string) => {
 
   // Set option to turn off dynamic coloring and check it here
 
-  if (!currPlaylist?.imageColors?.background?.color) {
+  if (!currPlaylist?.imageColors?.background?.color || !isUsingDynamicColors) {
     currColors = {
       background: {
         color: colors.amber600,
@@ -61,19 +63,20 @@ function getStandardColors(plColors: PlaylistImageColors) {
   const detail = plColors?.detail;
 
   const standard = {
-    bg: background.color,
-    bgText: background.tintColor,
-    bgBorder: primary.color,
-    btnBg: secondary.color,
-    btnText: secondary.tintColor,
-    btnBorder: primary.color,
-    sliderMinTrack: secondary.color,
-    sliderMaxTrack: lightenColor(secondary.color, 75), // May need to check if light or dark
-    sliderThumb: secondary.color,
-    gradientTop: secondary.color,
-    gradientTopText: secondary.tintColor,
-    gradientMiddle: background.color,
-    gradientLast: colors.amber50,
+    bg: background?.color,
+    bgText: background?.tintColor,
+    bgBorder: primary?.color,
+    btnBg: secondary?.color,
+    btnText: secondary?.tintColor,
+    btnBorder: primary?.color,
+    sliderMinTrack: secondary?.color,
+    sliderMaxTrack: lightenColor(secondary?.color, 75), // May need to check if light or dark
+    sliderThumb: secondary?.color,
+    gradientTop: secondary?.color,
+    gradientTopText: secondary?.tintColor,
+    gradientMiddle: background?.color,
+    gradientMiddleText: background?.tintColor,
+    gradientLast: colors?.amber50,
   };
   return standard;
 }
