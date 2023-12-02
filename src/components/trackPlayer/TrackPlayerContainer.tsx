@@ -1,22 +1,35 @@
-import { View, Text, StyleSheet, Dimensions } from "react-native";
+import { View, Image, StyleSheet, Dimensions, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useEffect, useState } from "react";
 import TrackPlayerControls from "./TrackPlayerControls";
 import TrackPlayerProgressBar from "./TrackPlayerProgressBar";
 import TrackPlayerImage from "./TrackPlayerImage";
 import BottomSheetContainer from "./bottomSheet/BottomSheetContainer";
-import { useCurrentPlaylist } from "@store/store";
+import { useCurrentPlaylist, usePlaybackStore, useTrackActions } from "@store/store";
 import { colors } from "@constants/Colors";
 import { LinearGradient } from "expo-linear-gradient";
 import { PlaylistImageColors } from "@store/types";
 import usePlaylistColors from "hooks/usePlaylistColors";
 import TrackPlayerChaptProgressBar from "./TrackPlayerChaptProgressBar";
 import TrackPlayerBottomSheet from "./bottomSheet/TrackPlayerBottomSheet";
+import { useGlobalSearchParams, useLocalSearchParams } from "expo-router";
+import { MotiView } from "moti";
+import Animated, { SharedTransition, withSpring } from "react-native-reanimated";
 
 const { width, height } = Dimensions.get("window");
+const transition = SharedTransition.custom((values) => {
+  "worklet";
+  return {
+    height: withSpring(values.targetHeight),
+    width: withSpring(values.targetWidth),
+  };
+});
 
 const TrackPlayerContainer = () => {
-  const playlistColors = usePlaylistColors();
+  const params = useLocalSearchParams();
+  const playlistColors = usePlaylistColors(params?.playlistId);
+  const isLoaded = usePlaybackStore((state) => state.playlistLoaded);
+  const playlist = useTrackActions().getPlaylist(params?.playlistId);
 
   return (
     <View className="flex-1 flex-col ">
@@ -32,17 +45,43 @@ const TrackPlayerContainer = () => {
         end={{ x: 0, y: 0.95 }}
         locations={[0.3, 0.6, 1]}
       >
-        <View className="">
-          <TrackPlayerImage />
-
-          <TrackPlayerProgressBar />
-          <TrackPlayerChaptProgressBar />
-        </View>
+        {isLoaded ? (
+          <>
+            <TrackPlayerImage />
+            <MotiView
+              key={1}
+              from={{ opacity: 0.2, scale: 0.5, translateY: 50 }}
+              animate={{ opacity: 1, scale: 1, translateY: 0 }}
+              transition={{ type: "timing", duration: 400 }}
+            >
+              <TrackPlayerProgressBar />
+              <TrackPlayerChaptProgressBar />
+            </MotiView>
+          </>
+        ) : (
+          <MotiView
+            key={2}
+            // from={{ opacity: 0.2, scale: 0.5, translateY: 50 }}
+            // animate={{ opacity: 1, scale: 1, translateY: 0 }}
+            // transition={{ type: "timing", duration: 400 }}
+            // exit={{ opacity: 0.2, scale: 0.5 }}
+          >
+            <View />
+          </MotiView>
+        )}
       </LinearGradient>
       <View className=" justify-end mb-[30] mt-[25]">
-        <TrackPlayerControls />
+        {isLoaded ? (
+          <MotiView
+            from={{ opacity: 0.2, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "timing", duration: 400 }}
+          >
+            <TrackPlayerControls />
+          </MotiView>
+        ) : null}
       </View>
-      <BottomSheetContainer />
+      {isLoaded ? <BottomSheetContainer /> : null}
     </View>
   );
 };

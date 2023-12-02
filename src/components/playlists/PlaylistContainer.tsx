@@ -9,16 +9,19 @@ import {
   Dimensions,
   NativeScrollEvent,
   StyleSheet,
+  ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { usePlaybackStore, usePlaylists, useTrackActions, useTracksStore } from "../../store/store";
 import { Link, useFocusEffect, useNavigation, useRouter } from "expo-router";
 import PlaylistRow from "./PlaylistRow";
 import { ScrollView, Swipeable } from "react-native-gesture-handler";
-import { AnimatePresence, MotiView } from "moti";
+import { AnimatePresence, MotiImage, MotiView } from "moti";
 import PlaylistActionBar from "./PlaylistActionBar";
 import { colors } from "@constants/Colors";
 import { router } from "expo-router";
+import { Playlist } from "@store/types";
+import ProgressIndetermined from "@components/common/animations/ProcessIndetermined";
 const { width, height: screenHeight } = Dimensions.get("window");
 
 const PlaylistContainer = () => {
@@ -32,6 +35,7 @@ const PlaylistContainer = () => {
   const prevPlaylistId = useRef(undefined);
   const scrollRef = useRef<FlatList>(null);
   const setCurrPlaylist = usePlaybackStore((state) => state.actions.setCurrentPlaylist);
+  const [currPlaylistInfo, setCurrPlaylistInfo] = useState<Playlist>();
 
   // Scroll to the active track
   const scrollToRow = () => {
@@ -48,6 +52,8 @@ const PlaylistContainer = () => {
 
   useEffect(() => {
     prevPlaylistId.current = currentPlaylistId;
+    setCurrPlaylistInfo(getPlaylist(currentPlaylistId));
+    if (update) return;
     scrollToRow();
   }, [currentPlaylistId]);
 
@@ -74,6 +80,7 @@ const PlaylistContainer = () => {
   //~ Playlist select
   const handleRowSelect = async (playlistId) => {
     setUpdate(true);
+    route.push({ pathname: "/audio/player", params: { playlistId } });
     const playlist = getPlaylist(playlistId);
     // Check to make sure playlist has at least one track
     if (!playlist?.trackIds || playlist?.trackIds.length === 0) {
@@ -82,8 +89,8 @@ const PlaylistContainer = () => {
       return;
     }
     await setCurrPlaylist(playlistId);
-    route.push({ pathname: "/audio/player", params: {} });
-    setTimeout(() => setUpdate(false), 500);
+    setUpdate(false);
+    // setTimeout(() => setUpdate(false), 500);
   };
 
   // Swipeable auto close code
@@ -135,6 +142,12 @@ const PlaylistContainer = () => {
     );
   };
 
+  // if (update)
+  //   return (
+  //     <View>
+  //       <Text>{currPlaylistInfo?.name}</Text>
+  //     </View>
+  //   );
   return (
     <View className="w-full flex-1">
       <AnimatePresence>
@@ -159,25 +172,65 @@ const PlaylistContainer = () => {
           </MotiView>
         )}
       </AnimatePresence>
-      <View className="flex-1">
-        <FlatList
-          ref={scrollRef}
-          contentContainerStyle={{ paddingBottom: 30 }}
-          data={playlists}
-          renderItem={renderItem}
-          keyExtractor={(item, index) => `${item.id}-${index}`}
-          onScroll={(e) => handleShowInput(e.nativeEvent)}
-          onLayout={(e) => {
-            // Store in state and then use in conjunction with other info
-            // to hide bar when at end of list
-            // contentHeight - scrollYOffset >= layoutHeight
-            // console.log("onLayout", e.nativeEvent.layout.height);
-            setLayoutHeight(e.nativeEvent.layout.height);
-          }}
-        />
-      </View>
+
+      {update && currPlaylistInfo && (
+        <MotiView
+          key={1}
+          from={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex-col items-center mt-[80]"
+        >
+          <MotiImage
+            source={{ uri: currPlaylistInfo?.imageURI }}
+            style={[styles.shadow, { width: 200, height: 200, borderRadius: 10 }]}
+            from={{ scale: 1 }}
+            animate={{ scale: 1.5 }}
+            transition={{ type: "timing", duration: 500, loop: true }}
+          />
+          <View className="h-[50]" />
+          <Text className="w-[350] text-center font-semibold text-lg">
+            {currPlaylistInfo?.name}
+          </Text>
+          <View className="h-[50]" />
+          <ProgressIndetermined thumbColor={colors.amber600} trackColor={colors.amber200} />
+          {/* <Image source={{ uri: currPlaylistInfo?.imageURI }} style={{ width: 100, height: 100 }} /> */}
+        </MotiView>
+      )}
+
+      {!update && (
+        <MotiView key={2} from={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1">
+          <FlatList
+            ref={scrollRef}
+            contentContainerStyle={{ paddingBottom: 30 }}
+            data={playlists}
+            renderItem={renderItem}
+            keyExtractor={(item, index) => `${item.id}-${index}`}
+            onScroll={(e) => handleShowInput(e.nativeEvent)}
+            onLayout={(e) => {
+              // Store in state and then use in conjunction with other info
+              // to hide bar when at end of list
+              // contentHeight - scrollYOffset >= layoutHeight
+              // console.log("onLayout", e.nativeEvent.layout.height);
+              setLayoutHeight(e.nativeEvent.layout.height);
+            }}
+          />
+        </MotiView>
+      )}
     </View>
   );
 };
 
+const styles = StyleSheet.create({
+  shadow: {
+    borderRadius: 10,
+    backgroundColor: colors.amber100,
+    shadowColor: "#000000",
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: 5.62,
+  },
+});
 export default PlaylistContainer;

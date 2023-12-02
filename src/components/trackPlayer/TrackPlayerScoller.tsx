@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, FlatList, Image, Dimensions } from "react-native";
 import React, { useState } from "react";
-import { useCurrentPlaylist } from "@store/store";
+import { useCurrentPlaylist, usePlaybackStore } from "@store/store";
 import Animated, {
   runOnJS,
   useAnimatedScrollHandler,
@@ -60,7 +60,7 @@ const COMPONENT_WIDTH = width - 80;
 
 const TrackPlayerScoller = () => {
   const playlist = useCurrentPlaylist();
-
+  const isLoaded = usePlaybackStore((state) => state.playlistLoaded);
   const scrollX = useSharedValue(0);
   const [currIndex, setCurrIndex] = useState(1);
 
@@ -118,12 +118,12 @@ const TrackPlayerScoller = () => {
                   opacity: currIndex === index ? 1 : 0.4,
                   scale: currIndex === index ? 1 : 0.7,
                 }}
-                transition={{ type: "timing", duration: 500 }}
+                transition={{ type: "timing", duration: 300 }}
               >
                 <Comp imageURI={playlist?.imageURI} />
               </MotiView>
             )}
-            {index !== 1 && (
+            {index !== 1 && isLoaded && (
               <MotiView
                 from={{ opacity: 0.5, scale: 0.8 }}
                 animate={{

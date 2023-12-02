@@ -89,7 +89,7 @@ export type TrackAttributes = {
 };
 type TrackId = string;
 
-type PlaylistId = string;
+export type PlaylistId = string;
 export type Playlist = {
   id: string;
   name: string;
@@ -170,7 +170,7 @@ export type AudioState = {
       audioSource: AudioSourceType;
       playlistId?: string;
       directory?: string;
-    }) => void;
+    }) => Promise<void>;
     updateTrackMetadata: (
       trackId: string,
       trackMetadata: Partial<AudioMetadata>
@@ -182,7 +182,7 @@ export type AudioState = {
     // to the "tracks" array.  Returns the same array with a "alreadyDownload" key set to true or false
     isTrackDownloaded: (tracksToCheck: FileEntry[]) => FileEntry[];
     // creates playlist with the passed name and returns the playlistId
-    addNewPlaylist: (title: string, author?: string, playlistId?: string) => Promise<string>;
+    addNewPlaylist: (title: string, author?: string, playlistId?: string) => string;
     // Add track(s) to playlist ID
     addTracksToPlaylist: (playlistId: string, trackIds: string[]) => Promise<void>;
     removePlaylist: (playlistId: string, removeAllTracks?: boolean) => Promise<void>;

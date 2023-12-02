@@ -1,47 +1,72 @@
 import { View, Text, ScrollView, SafeAreaView, StyleSheet, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
-import { useTracksStore } from "../../store/store";
+import { useTrackActions, useTracksStore } from "../../store/store";
 import { deleteFromFileSystem, readFileSystemDir } from "../../store/data/fileSystemAccess";
-import { AudioTrack } from "../../store/types";
+import { AudioTrack, Playlist, PlaylistId } from "../../store/types";
 import { colors } from "../../constants/Colors";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { Audio } from "expo-av";
 
-const getOutliers = (tracks: AudioTrack[], files) => {
+type Outliers = ReturnType<typeof getOutliers>;
+const getOutliers = (playlists: Record<PlaylistId, Playlist>, tracks: AudioTrack[], files) => {
   // { filename: "", orphaned: boolean}
-  let filesProcessed = [];
+  type FilesProcessed = {
+    id: string;
+    filename: string;
+    orphaned: boolean;
+    playlistOrphan: boolean;
+    foundTrack: AudioTrack;
+  };
+  let filesProcessed: FilesProcessed[] = [];
+  // get list of tracks in playlists
+  let playlistTracks = [];
 
+  Object.keys(playlists).forEach((key, index) => {
+    playlistTracks.push(playlists[key].trackIds);
+  });
+  playlistTracks = playlistTracks.flatMap((el) => el);
+  // console.log(playlistTracks);
   const tracksFileNames = tracks.map((el) => el.fileURI);
-  for (const file of files) {
+
+  for (const track of tracks) {
     // Don't include the local images in this track list
-    if (file.includes("localimages_")) continue;
-    const foundTrack = tracks.find((el) => el.fileURI === file);
+    if (track.fileURI.includes("localimages_")) continue;
+    const foundTrack = tracks.find((el) => el.fileURI === track.fileURI);
 
     filesProcessed.push({
-      filename: file,
-      orphaned: !tracksFileNames.includes(file),
+      id: track.id,
+      filename: track.fileURI,
+      orphaned: !tracksFileNames.includes(track.fileURI),
+      playlistOrphan: !playlistTracks.includes(track.id),
       foundTrack,
     });
   }
-  return { filesProcessed };
+  return filesProcessed;
 };
 const ManageTracks = () => {
   const route = useRouter();
   const tracks = useTracksStore((state) => state.tracks);
+  const trackActions = useTrackActions();
+  const playlists = useTracksStore((state) => state.playlists);
+
   const [files, setFiles] = useState(undefined);
 
   useEffect(() => {
     const readFiles = async () => {
       const files = await readFileSystemDir();
-      const { filesProcessed } = getOutliers(tracks, files);
+      const filesProcessed = getOutliers(playlists, tracks, files);
       setFiles(filesProcessed);
     };
     readFiles();
-  }, []);
+  }, [tracks]);
 
-  const deleteAnOrphan = async (filename) => {
-    await deleteFromFileSystem(filename, false);
-    setFiles((prev) => prev.filter((el) => el.filename !== filename));
+  const deleteAnOrphan = async (file: AudioTrack) => {
+    // await deleteFromFileSystem(file.fileURI, false);
+    // The removeTracks will delete from the filesystem also.
+    await trackActions.removeTracks([file.id]);
+    //!  NEED TO CREATE -> deleteFromTracksStore(file.id)
   };
+
   return (
     <SafeAreaView className="flex ">
       <View className="mx-3 mt-3 mb-1">
@@ -63,6 +88,7 @@ const ManageTracks = () => {
               file: {
                 filename: string;
                 orphaned: boolean;
+                playlistOrphan: boolean;
                 foundTrack: AudioTrack;
               },
               idx: number
@@ -70,7 +96,7 @@ const ManageTracks = () => {
               <View
                 key={idx}
                 className={`flex-row flex-1 justify-between  px-1 py-2  ${
-                  file.orphaned ? "bg-red-500" : "bg-white"
+                  file.orphaned ? "bg-red-500" : file.playlistOrphan ? "bg-blue-600" : "bg-white"
                 }`}
                 style={{
                   borderBottomColor: colors.amber800,
@@ -94,18 +120,12 @@ const ManageTracks = () => {
                     {file.filename}
                   </Text>
                 </TouchableOpacity>
-                {/* <Text className={`flex-1 font-semibold`}>
-                  {file.foundTrack &&
-                    file.foundTrack?.metadata?.chapters &&
-                    file.foundTrack?.metadata?.chapters.map(
-                      (el) => el?.description
-                    )}
-                </Text> */}
+
                 <TouchableOpacity
-                  onPress={async () => await deleteAnOrphan(file.filename)}
-                  disabled={!file.orphaned}
+                  onPress={async () => await deleteAnOrphan(file.foundTrack)}
+                  disabled={!file.orphaned && !file.playlistOrphan}
                 >
-                  <Text>{file.orphaned ? "Delete Orphan" : "Good"}</Text>
+                  <Text>{file.orphaned || file.playlistOrphan ? "Delete Orphan" : "Good"}</Text>
                 </TouchableOpacity>
               </View>
             )

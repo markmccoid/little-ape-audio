@@ -19,7 +19,6 @@ const usePlaylistColors = (playlistId?: string) => {
   }
 
   // Set option to turn off dynamic coloring and check it here
-
   if (!currPlaylist?.imageColors?.background?.color || !isUsingDynamicColors) {
     currColors = {
       background: {

@@ -55,9 +55,15 @@ type ColorObj = Record<
 //~ getImageColors
 //~ ------------------------------------------
 export const getImageColors = async (imagedata: string): Promise<PlaylistImageColors> => {
-  const iosImageColors = (await getColors(imagedata, {
-    quality: "highest",
-  })) as IOSImageColors;
+  let iosImageColors;
+  try {
+    iosImageColors = (await getColors(imagedata, {
+      quality: "highest",
+    })) as IOSImageColors;
+  } catch (e) {
+    console.log("getImageColors Error", e);
+    return;
+  }
   let imageColors = { ...iosImageColors } as IOSImageColors;
   let darkestColor = { color: "black", darkness: 0 };
   let lightestColor = { color: "white", lightness: 255 };
@@ -156,6 +162,7 @@ export const getContrast = (foregroundLuminance: number, bg2Luminance: number) =
 //~~ Lighten and Darken color functions
 //~~========================================
 export const lightenColor = (hexColor: string, magnitude: number) => {
+  if (!hexColor) return "#ffffff";
   hexColor = hexColor.replace(`#`, ``);
   if (hexColor === "white" || !hexColor) {
     hexColor = "ffffff";
@@ -181,6 +188,7 @@ export const lightenColor = (hexColor: string, magnitude: number) => {
 };
 
 export const darkenColor = (hexColor: string, magnitude: number) => {
+  if (!hexColor) return "#000000";
   hexColor = hexColor.replace(`#`, ``);
   if (hexColor === "white") {
     hexColor = "ffffff";

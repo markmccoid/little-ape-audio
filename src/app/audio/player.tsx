@@ -1,8 +1,9 @@
-import { Dimensions, View } from "react-native";
+import { Dimensions, View, Text } from "react-native";
 import React from "react";
 import { Stack } from "expo-router";
 import TrackPlayerContainer from "@components/trackPlayer/TrackPlayerContainer";
 import PlayerHeaderComponent from "@components/trackPlayer/PlayerRouteHeader";
+import { usePlaybackStore } from "@store/store";
 
 const { width, height } = Dimensions.get("window");
 

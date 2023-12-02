@@ -60,6 +60,7 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn }: Props) => {
   const downloadFile = async (file: FileEntry) => {
     setIsDownloading(true);
     // Progress callback
+
     const onHandleProgress = (progressData: DownloadProgressCallbackResult) => {
       setProgress({
         downloadProgress: progressData.bytesWritten / progressData.contentLength,
@@ -81,6 +82,7 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn }: Props) => {
     try {
       const res = await startDownload();
     } catch (err) {
+      console.log("ExplorerFile Download ERRROR");
       if (err.message.toLowerCase().includes("abort")) {
         setIsDownloaded(false);
         setIsDownloading(false);
@@ -94,7 +96,7 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn }: Props) => {
     setIsDownloading(false);
     stopDownloadRef.current = undefined;
     // Add new Track to store
-    trackActions.addNewTrack({
+    await trackActions.addNewTrack({
       fileURI: cleanFileName,
       filename: file.name,
       sourceLocation: file.path_lower,
@@ -137,7 +139,7 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn }: Props) => {
           <AsteriskIcon color="green" size={20} style={{ marginLeft: 2, marginRight: 2 }} />
         )}
         {!isDownloading && !isDownloaded && (
-          <Pressable onPress={() => downloadFile(file)} disabled={isDownloaded}>
+          <Pressable onPress={async () => await downloadFile(file)} disabled={isDownloaded}>
             <CloudDownloadIcon />
           </Pressable>
         )}

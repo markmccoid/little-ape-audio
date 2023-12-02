@@ -177,8 +177,7 @@ export const addTrack =
     const plName =
       newAudioFile.metadata?.album || newAudioFile.metadata?.title || newAudioFile.filename;
     const plAuthor = newAudioFile.metadata?.artist || "Unknown";
-    const finalPlaylistId = await get().actions.addNewPlaylist(plName, plAuthor, playlistId);
-
+    const finalPlaylistId = get().actions.addNewPlaylist(plName, plAuthor, playlistId);
     await get().actions.addTracksToPlaylist(finalPlaylistId, [newAudioFile.id]);
 
     await saveToAsyncStorage("tracks", newAudioFileList);

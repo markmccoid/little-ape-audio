@@ -7,6 +7,7 @@ import { TextInput } from "react-native-gesture-handler";
 import { AnimatedPressable } from "@components/common/buttons/Pressables";
 import TPImagePicker from "@components/trackPlayer/settings/TPImagePicker";
 import { getImageFromWeb } from "@utils/otherUtils";
+import PlaylistDetails from "@components/playlists/PlaylistDetails";
 
 const playlistedit = () => {
   const { playlistId } = useLocalSearchParams() as { playlistId: string };
@@ -71,6 +72,7 @@ const playlistedit = () => {
           <Text>Find New Image</Text>
         </AnimatedPressable>
       </View>
+      <PlaylistDetails playlistId={playlist.id} />
     </View>
   );
 };

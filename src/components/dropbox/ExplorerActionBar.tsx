@@ -19,8 +19,8 @@ type Props = {
   folderCount: number;
   // showMetadata: "on" | "off" | "loading";
   displayMetadata: boolean;
-  handleDownloadAll: () => void;
-  handleDownloadMetadata: () => void;
+  handleDownloadAll: () => Promise<void>;
+  handleDownloadMetadata: () => Promise<void>;
   handleDisplayMetadata: () => void;
 };
 
@@ -61,7 +61,7 @@ const ExplorerActionBar = ({
             )}
           </View>
           <TouchableOpacity
-            onPress={() => handleDownloadMetadata()}
+            onPress={async () => await handleDownloadMetadata()}
             className="mx-2"
             disabled={metadataProcessingFlag}
           >
@@ -92,7 +92,7 @@ const ExplorerActionBar = ({
         <View className="flex-shrink flex justify-end">
           <TouchableOpacity
             className="flex-row flex-grow items-center space-x-1 pl-2 py-1 "
-            onPress={handleDownloadAll}
+            onPress={async () => await handleDownloadAll()}
           >
             <CloudDownloadIcon />
             <Text>All</Text>

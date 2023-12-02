@@ -97,6 +97,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       });
       await Promise.all(deletePromises);
       await saveToAsyncStorage("tracks", newTracks);
+
       set({ tracks: newTracks });
     },
     isTrackDownloaded: (tracksToCheck) => {
@@ -111,7 +112,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
 
       return taggedFiles;
     },
-    addNewPlaylist: async (name, author = "Unknown", playlistId) => {
+    addNewPlaylist: (name, author = "Unknown", playlistId) => {
       //!const playlists = [...get().playlists];
       // If playlist ID is passed, check to see if the playlist exists
       if (playlistId) {
@@ -144,6 +145,8 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         imageURI: undefined,
         imageAspectRatio: undefined,
         imageType: undefined,
+        imageColors: undefined,
+        positionHistory: undefined,
         trackAttributes: undefined,
         genre: undefined,
         totalDurationSeconds: 0,
@@ -153,17 +156,17 @@ export const useTracksStore = create<AudioState>((set, get) => ({
 
       const newPlaylistObj = { ...get().playlists, [id]: newPlaylist };
       set({ playlists: newPlaylistObj });
-      await saveToAsyncStorage("playlists", newPlaylistObj);
+      // await saveToAsyncStorage("playlists", newPlaylistObj);
       return id;
     },
     addTracksToPlaylist: async (playlistId, tracks) => {
       const storedTracks = [...get().tracks];
       const playlist = get().playlists[playlistId];
 
-      // console.log("ADD TRACK TO PL", playlistId, tracks);
       // Take the tracks being added and merge them with existing tracks
       // in playlist.  Get rid of dups.
       const uniqueTracksPlaylist = [...new Set([...tracks, ...(playlist.trackIds || [])])];
+
       const { images, genres, totalDuration } = analyzePlaylistTracks(
         storedTracks,
         uniqueTracksPlaylist
@@ -176,8 +179,10 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         const randomImageAspect = randomImageInfo.width / randomImageInfo.height;
         playlist.imageURI = randomImageInfo.uri;
         playlist.imageAspectRatio = randomImageAspect;
-        const colors = (await getImageColors(playlist.imageURI)) as PlaylistImageColors;
-        playlist.imageColors = colors;
+        // Getting the colors for the default image was causing issues  Think the async nature
+        // was the problem.  Need to keep this function synchronous
+        // const colors = (await getImageColors(playlist.imageURI)) as PlaylistImageColors;
+        // playlist.imageColors = colors;
       } else {
         // There was an image, store the first one on the playlist
         playlist.imageURI = images[0].image;
@@ -275,8 +280,10 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         if (!isNaN(aspectRatio)) {
           playlists[playlistId].imageAspectRatio = aspectRatio;
           playlists[playlistId].imageURI = imageURI;
-          playlists[playlistId].imageColors = imageColors;
         }
+      }
+      if (imageColors) {
+        playlists[playlistId].imageColors = imageColors;
       }
       set({ playlists, playlistUpdated: new Date() });
       await saveToAsyncStorage("playlists", playlists);
@@ -534,6 +541,10 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       await TrackPlayer.setRate(currPlaylist.currentRate);
       await new Promise((resolve) => setTimeout(resolve, 100));
 
+      if (!currPlaylist.imageColors) {
+        const colors = (await getImageColors(currPlaylist.imageURI)) as PlaylistImageColors;
+        useTracksStore.getState().actions.updatePlaylistFields(playlistId, { imageColors: colors });
+      }
       mountTrackPlayerListeners();
       set({ playlistLoaded: true });
     },
@@ -883,6 +894,7 @@ const saveCurrentTrackInfoBase = async () => {
       { trackIndex, position },
       ...(playlist.positionHistory || []),
     ].slice(0, 15);
+
     playlist.currentPosition = {
       trackIndex: trackIndex,
       position,

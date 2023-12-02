@@ -195,9 +195,11 @@ const TrackList = () => {
           }}
         >
           <View
-            className="w-[40] flex-row justify-center items-center border-r border-amber-600 bg-[#FFE194] flex-grow"
+            className="w-[40] flex-row justify-center items-center flex-grow"
             style={{
               backgroundColor: isCurrentSection ? chaptBtnBgActive : chaptBtnBgInactive,
+              borderRightWidth: StyleSheet.hairlineWidth,
+              borderRightColor: chaptBorder,
             }}
           >
             {/* <ToTopIcon /> */}

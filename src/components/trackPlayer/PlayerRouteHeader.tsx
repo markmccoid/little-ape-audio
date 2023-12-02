@@ -17,21 +17,23 @@ const PlayerHeaderComponent = () => {
   return (
     <View
       className={`flex-row px-2 items-center justify-start`}
-      style={{ backgroundColor: playlistColors.secondary.color, paddingTop: insets.top - 5 }}
+      style={{ backgroundColor: playlistColors?.secondary.color, paddingTop: insets.top - 5 }}
     >
       <StatusBar
-        barStyle={playlistColors.secondary.colorType === "light" ? "dark-content" : "light-content"}
+        barStyle={
+          playlistColors?.secondary.colorType === "light" ? "dark-content" : "light-content"
+        }
       />
       {/* Back Icon */}
       <TouchableOpacity onPress={() => router.back()} className="flex-row items-center w-[25]">
-        <IOSBack strokeColor={playlistColors.secondary.tintColor} />
+        <IOSBack strokeColor={playlistColors?.secondary.tintColor} />
       </TouchableOpacity>
 
       {/* Playlist Name */}
       <View className="flex-row flex-1 pl-3 pr-1 justify-center">
         <Text
           className="text-base font-bold text-amber-950 text-center"
-          style={{ color: playlistColors.secondary.tintColor }}
+          style={{ color: playlistColors?.secondary.tintColor }}
           numberOfLines={2}
           ellipsizeMode="tail"
         >
@@ -43,7 +45,7 @@ const PlayerHeaderComponent = () => {
       <View className="">
         <Link href="/audio/playersettings" asChild>
           <Pressable className="p-[10] mr-[-10]">
-            <SettingsIcon size={25} color={playlistColors.secondary.tintColor} />
+            <SettingsIcon size={25} color={playlistColors?.secondary.tintColor} />
           </Pressable>
         </Link>
       </View>
