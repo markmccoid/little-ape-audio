@@ -95,6 +95,7 @@ export type Playlist = {
   name: string;
   author: string;
   lastPlayedDateTime: number;
+  overrideTrackImage: boolean;
   imageURI: string; //{ uri: string } | number | undefined;
   imageColors: PlaylistImageColors;
   imageAspectRatio: number;
@@ -124,6 +125,7 @@ type PlaylistUpdateObj = {
   name?: string;
   author?: string;
   lastPlayedDateTime?: number;
+  overrideTrackImage?: boolean;
   imageURI?: string | undefined;
   imageAspectRatio?: number;
   imageType?: "uri" | "imported" | "url";

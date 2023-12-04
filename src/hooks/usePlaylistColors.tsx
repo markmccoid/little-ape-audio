@@ -1,21 +1,20 @@
 import { colors } from "@constants/Colors";
-import { getCurrentPlaylist, useTrackActions } from "@store/store";
+import { getCurrentPlaylist, usePlaybackStore, useTrackActions } from "@store/store";
 import { useSettingStore } from "@store/store-settings";
 import { PlaylistImageColors } from "@store/types";
 import { lightenColor } from "@utils/otherUtils";
-import React, { useState } from "react";
 
 // Currently doesn't do much, but in the future, may need to process something??
 const usePlaylistColors = (playlistId?: string) => {
+  const didUpdate = usePlaybackStore((state) => state.didUpdate);
   const currPlaylist = getCurrentPlaylist();
   const trackActions = useTrackActions();
   const isUsingDynamicColors = useSettingStore((state) => state.isUsingDynamicColors);
-  const [playlistColors, setPlaylistColors] = useState();
 
   if (!currPlaylist && !playlistId) return;
   let currColors = currPlaylist?.imageColors;
   if (playlistId) {
-    currColors = trackActions.getPlaylist(playlistId).imageColors;
+    currColors = trackActions.getPlaylist(playlistId)?.imageColors;
   }
 
   // Set option to turn off dynamic coloring and check it here

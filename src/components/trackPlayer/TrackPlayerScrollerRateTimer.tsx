@@ -26,7 +26,6 @@ const TrackPlayerScrollerRateTimer = () => {
     };
     getRate();
   }, []);
-
   const updateRate = async (newRate: number) => {
     setRate(newRate);
     playbackActions.updatePlaybackRate(newRate);

@@ -77,6 +77,9 @@ export const PlaybackService = async () => {
       TrackPlayer.play();
     }
   });
+  //------------------------------------------
+  //-- PROGRESS UPDATED
+  //------------------------------------------
   TrackPlayer.addEventListener(Event.PlaybackProgressUpdated, async (event) => {
     // Progress Updates {"buffered": 127.512, "duration": 127.512, "position": 17.216, "track": 0}
 
@@ -89,7 +92,6 @@ export const PlaybackService = async () => {
     const queue = usePlaybackStore.getState().trackPlayerQueue;
     const trackIndex = await TrackPlayer.getActiveTrackIndex();
 
-    // console.log("Progress", position, trackIndex);
     const { chapterInfo, chapterIndex, chapterProgressOffset, nextChapterExists } =
       getCurrentChapter({
         chapters: queue[trackIndex]?.chapters,
@@ -99,11 +101,21 @@ export const PlaybackService = async () => {
     // Set Data
     usePlaybackStore.getState().actions.setCurrentTrackPosition(position);
     usePlaybackStore.setState({
+      currentTrack: queue[trackIndex],
+      currentTrackIndex: trackIndex,
       currentChapterInfo: chapterInfo,
       currentChapterIndex: chapterIndex,
       chapterProgressOffset,
       nextChapterExists,
     });
+  });
+  // ------------------------------
+  // -- PlaybackState
+  // -- ALSO in store.ts mountListeneres
+  // ------------------------------
+  TrackPlayer.addEventListener(Event.PlaybackState, async (event) => {
+    // console.log("STATE CHANGE", event);
+    usePlaybackStore.setState({ playerState: event.state });
   });
   // ------------------------------
   // -- METADATA Chapters IOS only

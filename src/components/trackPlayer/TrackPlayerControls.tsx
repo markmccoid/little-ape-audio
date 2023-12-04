@@ -63,7 +63,7 @@ const TrackPlayerControls = ({ style }: Props) => {
     await playbackActions.play();
   };
   const pause = async () => {
-    playbackActions.pause();
+    await playbackActions.pause();
   };
 
   if (!isPlaylistLoaded) {
@@ -103,7 +103,7 @@ const TrackPlayerControls = ({ style }: Props) => {
         </TouchableOpacity>
         {/* PLAY/PAUSE */}
         <Pressable
-          onPress={isPlaying ? () => pause() : () => play()}
+          onPress={isPlaying ? async () => await pause() : async () => await play()}
           style={styles.actionButton}
           className="mx-3 flex-grow items-center"
         >

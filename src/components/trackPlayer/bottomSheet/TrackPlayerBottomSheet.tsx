@@ -107,10 +107,10 @@ const TrackPlayerBottomSheet = forwardRef<Ref, Props>((props, ref) => {
         // flex: 1,
       }}
       onChange={(index) => {
-        if (index === 0) {
-          setIsExpanded(false);
-        } else {
+        if (index > -1) {
           setIsExpanded(true);
+        } else {
+          setIsExpanded(false);
         }
       }}
     >
@@ -139,7 +139,7 @@ const TrackPlayerBottomSheet = forwardRef<Ref, Props>((props, ref) => {
             onPageSelected={handlePageSelected}
           >
             <View key="1" className="flex-1">
-              <TrackList />
+              <TrackList isExpanded={isExpanded} />
             </View>
             <View key="2" className="mt-4">
               <RateSelector />

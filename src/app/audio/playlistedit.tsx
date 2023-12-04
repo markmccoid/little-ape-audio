@@ -1,4 +1,4 @@
-import { View, Text, Alert, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, Alert, StyleSheet, TouchableOpacity, Switch } from "react-native";
 import React, { useMemo, useState } from "react";
 import { Stack, useLocalSearchParams, useSearchParams } from "expo-router";
 import { useTrackActions, useTracksStore } from "@store/store";
@@ -64,7 +64,22 @@ const playlistedit = () => {
       <View className="mt-3 px-2">
         <TPImagePicker currPlaylistId={playlist.id} />
       </View>
-      <View className="items-center justify-end flex-row ">
+      <View className="items-center justify-end flex-row w-full ">
+        <View className="flex-row justify-start item-center ml-2 flex-1">
+          <Text className="mr-2 mt-1">Override Track Images?</Text>
+          <Switch
+            style={{ marginRight: 20, transform: [{ scaleY: 0.7 }, { scaleX: 0.7 }] }}
+            trackColor={{ false: "#767577", true: "#4caf50" }}
+            thumbColor={playlist?.overrideTrackImage ? "#8bc34a" : "#ddd"}
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={async () =>
+              await trackActions.updatePlaylistFields(playlistId, {
+                overrideTrackImage: !playlist.overrideTrackImage,
+              })
+            }
+            value={playlist?.overrideTrackImage}
+          />
+        </View>
         <AnimatedPressable
           onPress={() => handleGetImageFromWeb(playlist.name)}
           buttonStyle="default"

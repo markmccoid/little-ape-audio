@@ -12,7 +12,7 @@ const TPImagePicker = ({ currPlaylistId }) => {
   // const currPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
   const trackActions = useTracksStore((state) => state.actions);
   const playlistUpdated = useTracksStore((state) => state.playlistUpdated);
-  const pl = getCurrentPlaylist();
+  // const pl = getCurrentPlaylist();
 
   // THis is just used when a new pic is made the default on playlist
   // it forces playlistImage memo to update

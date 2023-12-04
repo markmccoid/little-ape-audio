@@ -32,7 +32,7 @@ type SectionListData = {
   data: Chapter[];
 };
 
-const TrackList = () => {
+const TrackList = ({ isExpanded }) => {
   const queue = usePlaybackStore((state) => state.trackPlayerQueue);
   const currentTrack = usePlaybackStore((state) => state.currentTrack);
   const isPlaylistLoaded = usePlaybackStore((state) => state.playlistLoaded);
@@ -42,6 +42,14 @@ const TrackList = () => {
   const [sectionList, setSectionList] = useState<SectionListData[]>([]);
   const currChapterIndex = usePlaybackStore((state) => state.currentChapterIndex);
   const playlistColors = usePlaylistColors();
+
+  //! Store "curr" track and chapter
+  const [currLocation, setCurrLocation] = useState({
+    trackIndex: currentTrackIndex,
+    chapterIndex: currChapterIndex,
+  });
+
+  //!
 
   // Track List Colors
   const trackActiveColor = playlistColors.bg;
@@ -74,10 +82,15 @@ const TrackList = () => {
 
   // Scroll to the current track and/or chapter
   useEffect(() => {
-    if (scrollViewRef.current && currChapterIndex !== undefined && sectionList.length > 0) {
+    if (
+      scrollViewRef.current &&
+      currChapterIndex !== undefined &&
+      sectionList.length > 0 &&
+      isExpanded
+    ) {
       scrollToRow(currentTrackIndex, currChapterIndex + 1);
     }
-  }, [currentTrackIndex, scrollViewRef.current, currChapterIndex]);
+  }, [currentTrackIndex, scrollViewRef.current, currChapterIndex, isExpanded]);
 
   useEffect(() => {
     if (queue) {
@@ -123,9 +136,9 @@ const TrackList = () => {
     return (
       <TouchableOpacity
         key={section.id}
-        onPress={() => {
+        onPress={async () => {
           if (!isCurrentTrack) {
-            playbackActions.goToTrack(section?.queuePos);
+            await playbackActions.goToTrack(section?.queuePos);
           }
         }}
         className=""
@@ -167,12 +180,9 @@ const TrackList = () => {
     //! NOTE: we can't just use "isCurrChapter" as it is incex based
     //!  and each section has many of same indexes
     //! USE: isCurrentSection
-    const isCurrChapter = index === currChapterIndex;
+    const isCurrChapter = index === currLocation.chapterIndex; // currChapterIndex;
     const isCurrentTrack = currentTrackIndex === section?.queuePos;
     const isCurrentSection = isCurrChapter && isCurrentTrack;
-    // isCurrentSection && console.log("IS CURR", queueOffset, index, currChapterIndex);
-    // console.log("section index, chaptIndex", index, currChapterIndex);
-    // console.log("Que", currentTrackIndex, section?.queuePos);
 
     return (
       <View
@@ -187,10 +197,19 @@ const TrackList = () => {
         <TouchableOpacity
           onPress={async () => {
             // console.log("press", section.queuePos, item?.title, item?.startSeconds, queueOffset);
+            const { chapterInfo, chapterIndex, chapterProgressOffset, nextChapterExists } =
+              getCurrentChapter({
+                chapters: queue[section.queuePos]?.chapters,
+                position: item?.startSeconds,
+              });
+            setCurrLocation({ trackIndex: section.queuePos, chapterIndex });
             if (!isCurrentTrack) {
-              await playbackActions.goToTrack(section.queuePos);
+              await TrackPlayer.skip(section.queuePos);
+              await new Promise((resolve) => setTimeout(resolve, 100));
+              // await playbackActions.goToTrack(section.queuePos);
             }
             await playbackActions.seekTo(item?.startSeconds);
+            // await TrackPlayer.seekTo(item?.startSeconds);
             // setIsCurrChapter(true);
           }}
         >

@@ -29,12 +29,10 @@ const TrackPlayerContainer = () => {
   const params = useLocalSearchParams();
   const playlistColors = usePlaylistColors(params?.playlistId);
   const isLoaded = usePlaybackStore((state) => state.playlistLoaded);
-  const playlist = useTrackActions().getPlaylist(params?.playlistId);
-
+  // const playlist = useTrackActions().getPlaylist(params?.playlistId);
   return (
-    <View className="flex-1 flex-col ">
+    <MotiView className="flex-1 flex-col" from={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <LinearGradient
-        // colors={[`${colorP.secondary}55`, `${colorP.background}55`]}
         colors={[
           `${playlistColors?.secondary?.color}`,
           `${playlistColors?.background?.color}`,
@@ -58,17 +56,7 @@ const TrackPlayerContainer = () => {
               <TrackPlayerChaptProgressBar />
             </MotiView>
           </>
-        ) : (
-          <MotiView
-            key={2}
-            // from={{ opacity: 0.2, scale: 0.5, translateY: 50 }}
-            // animate={{ opacity: 1, scale: 1, translateY: 0 }}
-            // transition={{ type: "timing", duration: 400 }}
-            // exit={{ opacity: 0.2, scale: 0.5 }}
-          >
-            <View />
-          </MotiView>
-        )}
+        ) : null}
       </LinearGradient>
       <View className=" justify-end mb-[30] mt-[25]">
         {isLoaded ? (
@@ -82,7 +70,7 @@ const TrackPlayerContainer = () => {
         ) : null}
       </View>
       {isLoaded ? <BottomSheetContainer /> : null}
-    </View>
+    </MotiView>
   );
 };
 

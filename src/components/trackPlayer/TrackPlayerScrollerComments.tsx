@@ -22,19 +22,12 @@ const TrackPlayerScrollerComments = () => {
   const playbackActions = usePlaybackStore((state) => state.actions);
 
   const positionHistory = playlists[playlistId]?.positionHistory;
-  const [trackComment, setTrackComment] = React.useState("");
   const plColors = usePlaylistColors();
 
   const textColor = plColors.background.tintColor;
   const bgColor = plColors.background.color;
   const histTextColor = plColors.secondary.tintColor;
   const histbgColor = plColors.secondary.color;
-  // Track comment
-  React.useEffect(() => {
-    const track = actions.getTrack(playbackTrack.id);
-    const trackComment = track.metadata.comment;
-    setTrackComment(trackComment);
-  }, [playbackTrack]);
 
   return (
     <ScrollView
@@ -51,33 +44,34 @@ const TrackPlayerScrollerComments = () => {
         <Text className="font-semibold text-base mb-2" style={{ color: textColor }}>
           Progress History
         </Text>
-        {positionHistory?.map((posObj, index) => {
-          return (
-            <Pressable
-              onPress={async () => {
-                if (currTrackIndex !== posObj?.trackIndex) {
-                  await playbackActions.goToTrack(posObj?.trackIndex);
-                }
-                await playbackActions.seekTo(posObj?.position);
-              }}
-              key={`${posObj?.position}-${index}`}
-            >
-              <View
-                className={`flex-row justify-between items-center  bg-amber-300 p-2 mb-2 pr-4`}
-                style={{
-                  backgroundColor: histbgColor,
-                  borderColor: plColors.primary.color,
-                  borderWidth: StyleSheet.hairlineWidth,
+        {positionHistory &&
+          positionHistory?.map((posObj, index) => {
+            return (
+              <Pressable
+                onPress={async () => {
+                  if (currTrackIndex !== posObj?.trackIndex) {
+                    await playbackActions.goToTrack(posObj?.trackIndex);
+                  }
+                  await playbackActions.seekTo(posObj?.position);
                 }}
+                key={`${posObj?.position}-${index}`}
               >
-                <Text style={{ color: histTextColor }}>
-                  Track {posObj?.trackIndex + 1} - {formatSeconds(posObj?.position)}
-                </Text>
-                <EnterKeyIcon color={histTextColor} />
-              </View>
-            </Pressable>
-          );
-        })}
+                <View
+                  className={`flex-row justify-between items-center  bg-amber-300 p-2 mb-2 pr-4`}
+                  style={{
+                    backgroundColor: histbgColor,
+                    borderColor: plColors.primary.color,
+                    borderWidth: StyleSheet.hairlineWidth,
+                  }}
+                >
+                  <Text style={{ color: histTextColor }}>
+                    Track {posObj?.trackIndex + 1} - {formatSeconds(posObj?.position)}
+                  </Text>
+                  <EnterKeyIcon color={histTextColor} />
+                </View>
+              </Pressable>
+            );
+          })}
       </View>
     </ScrollView>
   );

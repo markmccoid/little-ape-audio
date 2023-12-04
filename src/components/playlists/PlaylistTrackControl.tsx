@@ -24,7 +24,7 @@ export default function PlaylistTrackControl() {
 
   const onPlaylistSelect = async () => {
     await actions.setCurrentPlaylist(currPlaylistId);
-    route.push({ pathname: "/audio/player", params: {} });
+    route.push({ pathname: "/audio/player", params: { playlistId: currPlaylistId } });
   };
   return (
     <View className="flex-row items-center px-3 py-2 justify-between bg-amber-200 border-t border-amber-900">

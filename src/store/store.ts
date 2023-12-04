@@ -142,6 +142,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         name,
         author,
         lastPlayedDateTime: Date.now(),
+        overrideTrackImage: false,
         imageURI: undefined,
         imageAspectRatio: undefined,
         imageType: undefined,
@@ -246,6 +247,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         name,
         author,
         lastPlayedDateTime,
+        overrideTrackImage,
         imageType,
         imageURI,
         imageAspectRatio,
@@ -284,6 +286,9 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       }
       if (imageColors) {
         playlists[playlistId].imageColors = imageColors;
+      }
+      if (overrideTrackImage !== undefined) {
+        playlists[playlistId].overrideTrackImage = overrideTrackImage;
       }
       set({ playlists, playlistUpdated: new Date() });
       await saveToAsyncStorage("playlists", playlists);
@@ -377,7 +382,6 @@ export const useCurrentPlaylist = () => {
 
   const currPlaylistId = usePlaybackStore.getState().currentPlaylistId;
   const [currPlaylist, setCurrentPlaylist] = useState<Playlist>();
-
   useEffect(() => {
     const playlist = actions.getPlaylist(currPlaylistId);
     setCurrentPlaylist(playlist);
@@ -476,7 +480,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
     setCurrentPlaylist: async (playlistId) => {
       set({ playlistLoaded: false });
 
-      useTracksStore.getState().actions.updatePlaylistFields(playlistId, {
+      await useTracksStore.getState().actions.updatePlaylistFields(playlistId, {
         lastPlayedDateTime: Date.now(),
       });
       if (get().currentPlaylistId === playlistId) {
@@ -490,11 +494,14 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       // before loading new playlist
       await saveCurrentTrackInfo();
       await TrackPlayer.pause();
-      get().actions.resetPlaybackStore();
+      await get().actions.resetPlaybackStore();
+
       // await TrackPlayer.reset();
       //---------
       // Load new Playlist
       const currPlaylist = useTracksStore.getState().actions.getPlaylist(playlistId);
+
+      //!
       // console.log("CURR Playlist", currPlaylist.name, currPlaylist.currentPosition);
       const queue = buildTrackPlayerQueue(currPlaylist.trackIds);
 
@@ -504,7 +511,6 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
         trackPlayerQueue: queue,
       });
 
-      //!!
       const currTrackIndex = currPlaylist.currentPosition?.trackIndex || 0;
       const currTrackPosition = currPlaylist.currentPosition?.position || 0;
       // console.log("setCurrPL", currTrackIndex, currTrackPosition);
@@ -532,18 +538,20 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       const prevTracksDuration = usePlaybackStore.getState().actions.getPrevTrackDuration();
       // usePlaybackStore.setState({ currentQueuePosition: prevTracksDuration });
       set({ currentQueuePosition: prevTracksDuration });
-
+      set({ playlistLoaded: true });
       // - Reset TrackPlayer and add the Queue
       await TrackPlayer.add(queue);
       // - Make sure current track is loaded and set to proper position
       await TrackPlayer.skip(currTrackIndex);
+      //!
       await TrackPlayer.seekTo(currTrackPosition);
       await TrackPlayer.setRate(currPlaylist.currentRate);
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      // await new Promise((resolve) => setTimeout(resolve, 100));
 
-      if (!currPlaylist.imageColors) {
+      if (!currPlaylist?.imageColors) {
         const colors = (await getImageColors(currPlaylist.imageURI)) as PlaylistImageColors;
         useTracksStore.getState().actions.updatePlaylistFields(playlistId, { imageColors: colors });
+        set({ didUpdate: uuid.v4().toString() });
       }
       mountTrackPlayerListeners();
       set({ playlistLoaded: true });
@@ -708,7 +716,6 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       await TrackPlayer.pause();
     },
     next: async () => {
-      console.log("Next Function");
       const trackIndex = await TrackPlayer.getActiveTrackIndex();
       const queue = await TrackPlayer.getQueue();
       const { currentTrack, currentChapterIndex } = get();
@@ -890,10 +897,16 @@ const saveCurrentTrackInfoBase = async () => {
       ...useTracksStore.getState().playlists[usePlaybackStore.getState().currentPlaylistId],
     };
 
-    playlist.positionHistory = [
-      { trackIndex, position },
-      ...(playlist.positionHistory || []),
-    ].slice(0, 15);
+    //! Only store different value  NOTE: Had issues because needed to deal with NULL positionHistory
+    const newPosCheck = `${trackIndex}-${Math.floor(position)}`;
+    const lastPos = playlist?.positionHistory?.slice(0)[0] || {};
+    const oldPosCheck = `${lastPos?.trackIndex}-${lastPos?.position}`;
+    if (newPosCheck !== oldPosCheck) {
+      playlist.positionHistory = [
+        { trackIndex, position: Math.floor(position) },
+        ...(playlist.positionHistory || []),
+      ].slice(0, 15);
+    }
 
     playlist.currentPosition = {
       trackIndex: trackIndex,
@@ -999,7 +1012,7 @@ const mountTrackPlayerListeners = () => {
       const track = (await TrackPlayer.getTrack(nextTrackIndex)) as ApeTrack;
       // default is to look at saved position unless there was a previous track
       let naturalTrackChange = false;
-      if (prevTrackIndex) {
+      if (prevTrackIndex && !naturalTrackChange) {
         const prevTrack = (await TrackPlayer.getTrack(prevTrackIndex)) as ApeTrack;
         // Track has reached end of track (at least 1 second from end of track)
         // We take this to assume we are moving to the next track "naturally"
@@ -1038,8 +1051,15 @@ const mountTrackPlayerListeners = () => {
         position: nextTrackPosition,
       };
 
-      // console.log("Track Change", event?.lastPosition, nextTrackPosition);
-      await TrackPlayer.seekTo(nextTrackPosition);
+      // if no chapters then seek to next track position.  this allows the app to go to a the last position
+      // the a given track was on (Need to have a flag to turn this off probably)
+      if (!track?.chapters) {
+        await TrackPlayer.seekTo(nextTrackPosition);
+      } else {
+        // If chapters then we need to clear the index.  keeps the track list from jumping to chapter 0
+        // when initial move to the track is made i.e. before seek of the time.
+        usePlaybackStore.setState({ currentChapterIndex: undefined });
+      }
       playlist.positionHistory = [
         { trackIndex: nextTrackIndex, position: nextTrackPosition },
         ...(playlist.positionHistory || []),
@@ -1089,8 +1109,11 @@ const mountTrackPlayerListeners = () => {
     // Whenever state chagnes to Paused, then save the current position
     // on PlaybackStore AND TrackStore
     const { position } = await TrackPlayer.getProgress();
-    // console.log("PLAYBACK State Changed", event, position);
-    usePlaybackStore.setState({ playerState: event.state });
+    //! NOTE: in trackPlayerUtils.ts, I setup another state change event listener
+    //! its only job is to update teh playerState in the Playback Store
+    //! I found some issues when the listeners were unmounted and state change happeneed not being recorded
+    //!! Probably would be fine with one
+    // usePlaybackStore.setState({ playerState: event.state });
     if (event.state === State.Stopped) {
       clearAutoSaveInterval(saveIntervalId);
     }
@@ -1105,11 +1128,11 @@ const mountTrackPlayerListeners = () => {
     }
   });
   //-- =================
-  // -- PROGRESS UPDATES
+  // -- PROGRESS UPDATES IN trackPlayerUtils.ts now
   //-- =================
-  if (eventProgressUpdated) {
-    eventProgressUpdated.remove();
-  }
+  // if (eventProgressUpdated) {
+  //   eventProgressUpdated.remove();
+  // }
   // eventProgressUpdated = TrackPlayer.addEventListener(
   //   Event.PlaybackProgressUpdated,
   //   async (event) => {
