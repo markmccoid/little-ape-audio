@@ -1058,7 +1058,7 @@ const mountTrackPlayerListeners = () => {
       } else {
         // If chapters then we need to clear the index.  keeps the track list from jumping to chapter 0
         // when initial move to the track is made i.e. before seek of the time.
-        usePlaybackStore.setState({ currentChapterIndex: undefined });
+        // usePlaybackStore.setState({ currentChapterIndex: undefined });
       }
       playlist.positionHistory = [
         { trackIndex: nextTrackIndex, position: nextTrackPosition },

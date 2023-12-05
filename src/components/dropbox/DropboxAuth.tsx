@@ -113,11 +113,11 @@ const DropboxAuthContainer = () => {
       {!validToken && !isCheckingToken && (
         <View className="flex-col justify-center items-center">
           <View className="flex-col justify-center items-center px-2">
-            <Text className="text-lg text-center">
+            <Text className="text-lg text-center" allowFontScaling={false}>
               Press the Authorize Dropbox button and you will be asked to log into your Dropbox
               account.
             </Text>
-            <Text className="text-lg text-center">
+            <Text className="text-lg text-center" allowFontScaling={false}>
               Once logged in, you will be be asked to give Little Ape Audio access to your Dropbox
               folders and files!
             </Text>
@@ -133,13 +133,17 @@ const DropboxAuthContainer = () => {
       {validToken && !isCheckingToken && (
         <View className="flex-col justify-center items-center w-full">
           <View className="flex-row items-center justify-start">
-            <Link href="/audio" asChild className="mr-20">
+            <Link href="/audio/" asChild className="mr-20">
               <TouchableOpacity className="rounded-md p-2 ml-4 border border-black bg-amber-300">
-                <Text className="text-amber-950">Home</Text>
+                <Text className="text-amber-950" allowFontScaling={false}>
+                  Home
+                </Text>
               </TouchableOpacity>
             </Link>
             <TouchableOpacity style={styles.revokeButton} onPress={onRevoke}>
-              <Text style={{ color: "white" }}>Revoke Dropbox Authorization</Text>
+              <Text style={{ color: "white" }} allowFontScaling={false}>
+                Revoke Dropbox Authorization
+              </Text>
             </TouchableOpacity>
           </View>
           <View className="flex-row justify-center">

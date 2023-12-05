@@ -14,6 +14,7 @@ import ShowFavoritedBooks from "@components/dropbox/ShowFavoritedBooks";
 import { AnimatedPressable } from "@components/common/buttons/Pressables";
 import { AnimatePresence, MotiView } from "moti";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useDropboxStore } from "@store/store-dropbox";
 const { width, height } = Dimensions.get("window");
 
 export type AudioSourceType = "dropbox" | "google";
@@ -26,6 +27,7 @@ export type AudioSourceLinkParams = {
 const DropboxScreens = () => {
   const [currTab, setCurrTab] = useState<"folders" | "books">("folders");
   const insets = useSafeAreaInsets();
+  const folderMetadata = useDropboxStore((state) => state.folderMetadata);
 
   return (
     <View
@@ -83,25 +85,27 @@ const DropboxScreens = () => {
           </Link>
         </View>
         {/* BOOK META SEARCH */}
-        <View
-          className="rounded-xl bg-white mt-2"
-          style={{
-            borderWidth: StyleSheet.hairlineWidth,
-            borderColor: colors.amber900,
-          }}
-        >
-          <Link
-            href={{
-              pathname: "audio/dropbox/searchBooks",
-              params: { fullPath: "", backTitle: "Back" },
+        {Object.keys(folderMetadata).length > 0 && (
+          <View
+            className="rounded-xl bg-white mt-2"
+            style={{
+              borderWidth: StyleSheet.hairlineWidth,
+              borderColor: colors.amber900,
             }}
           >
-            <View className="flex-row px-2 py-3 items-center">
-              <SearchIcon color={colors.dropboxBlue} />
-              <Text className="ml-3 text">Search Books</Text>
-            </View>
-          </Link>
-        </View>
+            <Link
+              href={{
+                pathname: "audio/dropbox/searchBooks",
+                params: { fullPath: "", backTitle: "Back" },
+              }}
+            >
+              <View className="flex-row px-2 py-3 items-center">
+                <SearchIcon color={colors.dropboxBlue} />
+                <Text className="ml-3 text">Search Books</Text>
+              </View>
+            </Link>
+          </View>
+        )}
       </View>
       <View className="h-2" />
 

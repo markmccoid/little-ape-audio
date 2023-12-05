@@ -50,6 +50,12 @@ const TrackList = ({ isExpanded }) => {
   });
 
   //!
+  useEffect(() => {
+    setCurrLocation({
+      trackIndex: currentTrackIndex,
+      chapterIndex: currChapterIndex,
+    });
+  }, [isExpanded]);
 
   // Track List Colors
   const trackActiveColor = playlistColors.bg;
@@ -180,8 +186,10 @@ const TrackList = ({ isExpanded }) => {
     //! NOTE: we can't just use "isCurrChapter" as it is incex based
     //!  and each section has many of same indexes
     //! USE: isCurrentSection
+    // const isCurrChapter = index === currChapterIndex;
+    // const isCurrentTrack = currentTrackIndex === section?.queuePos;
     const isCurrChapter = index === currLocation.chapterIndex; // currChapterIndex;
-    const isCurrentTrack = currentTrackIndex === section?.queuePos;
+    const isCurrentTrack = currLocation.trackIndex === section?.queuePos; //currentTrackIndex === section?.queuePos;
     const isCurrentSection = isCurrChapter && isCurrentTrack;
 
     return (
@@ -202,13 +210,14 @@ const TrackList = ({ isExpanded }) => {
                 chapters: queue[section.queuePos]?.chapters,
                 position: item?.startSeconds,
               });
-            setCurrLocation({ trackIndex: section.queuePos, chapterIndex });
             if (!isCurrentTrack) {
               await TrackPlayer.skip(section.queuePos);
               await new Promise((resolve) => setTimeout(resolve, 100));
               // await playbackActions.goToTrack(section.queuePos);
             }
+            setCurrLocation({ trackIndex: section.queuePos, chapterIndex });
             await playbackActions.seekTo(item?.startSeconds);
+            await new Promise((resolve) => setTimeout(resolve, 100));
             // await TrackPlayer.seekTo(item?.startSeconds);
             // setIsCurrChapter(true);
           }}
@@ -287,13 +296,13 @@ const ChapterRow = ({
   progress,
 }) => {
   const [isCurrChapter, setIsCurrChapter] = useState(
-    progress <= chapt.endSeconds && progress >= chapt.startSeconds
+    progress <= chapt.endSeconds && progress >= chapt?.startSeconds
   );
   // const isCurrChapter = progress <= chapt.endSeconds && progress >= chapt.startSeconds;
   // console.log("chapter test", chapt.startSeconds, chapt.endSeconds, progress, isCurrChapter);
   // For each chapter, check every second where we are at in the chapter.
   useEffect(() => {
-    setIsCurrChapter(progress <= chapt.endSeconds && progress >= chapt.startSeconds);
+    setIsCurrChapter(progress <= chapt.endSeconds && progress >= chapt?.startSeconds);
   }, [progress]);
 
   return (
@@ -307,7 +316,7 @@ const ChapterRow = ({
           if (!isCurrentTrack) {
             await playbackActions.goToTrack(trackIndex);
           }
-          await playbackActions.seekTo(chapt.startSeconds);
+          await playbackActions.seekTo(chapt?.startSeconds || 0);
           setIsCurrChapter(true);
         }}
       >
@@ -325,7 +334,7 @@ const ChapterRow = ({
           {chapt.title}
         </Text>
         <View className="flex-row justify-start ">
-          <Text className="text-xs">{formatSeconds(chapt.startSeconds)} - </Text>
+          <Text className="text-xs">{formatSeconds(chapt?.startSeconds || 0)} - </Text>
           <Text className="text-xs">{formatSeconds(chapt.endSeconds)}</Text>
         </View>
       </View>

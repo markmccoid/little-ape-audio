@@ -49,7 +49,7 @@ const TrackPlayerProgressBar = () => {
   }
 
   if (currChapterInfo?.startSeconds === undefined) return null;
-
+  const chapterPosition = currPos - chapterProgressOffset < 0 ? 0 : currPos - chapterProgressOffset;
   return (
     <View className="flex-col justify-center items-center mt-3 mb-4">
       {/* POP UP Seeking View Absolute positions */}
@@ -120,11 +120,11 @@ const TrackPlayerProgressBar = () => {
           width: width - 20,
         }}
         minimumValue={0}
-        maximumValue={currChapterInfo.endSeconds - currChapterInfo.startSeconds}
+        maximumValue={currChapterInfo.endSeconds - currChapterInfo?.startSeconds || 0}
         minimumTrackTintColor={colors.amber700}
         maximumTrackTintColor={colors.amber400}
         thumbTintColor={colors.amber600}
-        value={currPos - chapterProgressOffset} // {seeking ? seeking : Math.floor(position)}
+        value={chapterPosition} // {seeking ? seeking : Math.floor(position)}
         onValueChange={(val) => {
           setIsSeeking(true);
           setSeeking(val[0] + chapterProgressOffset);
@@ -135,7 +135,7 @@ const TrackPlayerProgressBar = () => {
 
       <View className="flex-row w-full px-1 justify-between mt-[-5]">
         <Text className="font-semibold " style={{ color: textColor }}>
-          {formatSeconds(currPos - chapterProgressOffset)}
+          {formatSeconds(chapterPosition)}
         </Text>
         {/* <Text className="font-semibold text-xs" style={{ color: textColor }}>
           {formatSeconds(Math.floor(position))}
@@ -157,7 +157,7 @@ const TrackPlayerProgressBar = () => {
           )}
         </TouchableOpacity>
         <Text className="font-semibold" style={{ color: textColor }}>
-          {formatSeconds(Math.floor(currChapterInfo.endSeconds - currChapterInfo.startSeconds))}
+          {formatSeconds(Math.floor(currChapterInfo.endSeconds - currChapterInfo?.startSeconds))}
         </Text>
       </View>
     </View>
