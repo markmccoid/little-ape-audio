@@ -98,7 +98,7 @@ const TrackPlayerProgressBar = () => {
           numberOfLines={1}
           ellipsizeMode="tail"
         >
-          {`${currTrack.trackNum || ""} ${currTrack.title}`}
+          {`${currTrack?.trackNum || ""} ${currTrack.title}`}
         </Text>
         {currChapterInfo?.title && (
           <View className="flex-row justify-center w-full">

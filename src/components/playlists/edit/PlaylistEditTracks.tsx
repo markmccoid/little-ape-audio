@@ -2,22 +2,21 @@ import { View, Text, TouchableOpacity, StyleSheet, Pressable, Alert } from "reac
 import React, { useEffect, useRef, useState } from "react";
 
 import { usePlaybackStore, useTrackActions } from "../../../store/store";
-import { ApeTrack } from "../../../store/types";
-import { colors } from "../../../constants/Colors";
+import { ApeTrack, AudioTrack } from "@store/types";
 import DraggableFlatList, { OpacityDecorator } from "react-native-draggable-flatlist";
 
 import { RectButton, Swipeable } from "react-native-gesture-handler";
-import TrackPlayerSettingsTracksRow from "./TrackPlayerSettingsTracksRow";
+import TrackPlayerSettingsTracksRow from "../../trackPlayer/settings/TrackPlayerSettingsTracksRow";
 import usePlaylistColors from "hooks/usePlaylistColors";
 import { useRouter } from "expo-router";
 
-function buildList(queue: ApeTrack[]) {
-  if (!queue) return [];
-  return queue.map((el, index) => {
+function buildList(trackList: AudioTrack[]) {
+  if (!trackList) return [];
+  return trackList.map((el, index) => {
     return {
       id: el.filename,
-      name: el.title,
-      trackNum: el?.trackNum,
+      name: el.metadata?.title,
+      trackNum: el.metadata?.trackNum || "",
       pos: index,
     };
   });
@@ -25,29 +24,27 @@ function buildList(queue: ApeTrack[]) {
 
 export type BuildList = ReturnType<typeof buildList>;
 
-const TrackPlayerSettingsTracks = () => {
-  const queue = usePlaybackStore((state) => state.trackPlayerQueue);
-  const playlistId = usePlaybackStore((state) => state.currentPlaylistId);
+const PlaylistEditTracks = ({ playlistId }: { playlistId: string }) => {
   const playlistColors = usePlaylistColors();
-  const actions = usePlaybackStore((state) => state.actions);
   const trackActions = useTrackActions();
   const [items, setItems] = useState<BuildList>([]);
   const [tracksMetaSorted, setTracksMetaSorted] = useState([]);
+  const playlistTracks = trackActions.getPlaylistTracks(playlistId);
   const router = useRouter();
 
   useEffect(() => {
-    setItems(buildList(queue));
+    setItems(buildList(playlistTracks));
     // Get the playlist tracks so that we can pull their metadata.trackNum
     // field and sort by that field.
-    const tracks = trackActions.getPlaylistTracks(playlistId);
-    const sortedTracks = tracks.map((track) => ({
+    // const tracks = trackActions.getPlaylistTracks(playlistId);
+    const sortedTracks = playlistTracks.map((track) => ({
       trackId: track.id,
       trackNum: parseInt(track?.metadata?.trackNum) || 0,
     }));
     sortedTracks.sort((a, b) => a.trackNum - b.trackNum);
 
     setTracksMetaSorted(sortedTracks);
-  }, [queue]);
+  }, [playlistTracks.length]);
 
   let prevOpenedRow = undefined;
   let renderRowRefs: Swipeable[] = [];
@@ -74,23 +71,62 @@ const TrackPlayerSettingsTracks = () => {
   }) => {
     const index = getIndex();
     return (
-      <TrackPlayerSettingsTracksRow
-        item={item}
-        drag={drag}
-        isActive={isActive}
-        index={index}
-        renderRowRefs={renderRowRefs}
-        closeRow={closeRow}
-      />
+      <TouchableOpacity onLongPress={() => alertMoveTrack(playlistId, item.id)}>
+        <TrackPlayerSettingsTracksRow
+          item={item}
+          drag={drag}
+          isActive={isActive}
+          index={index}
+          renderRowRefs={renderRowRefs}
+          closeRow={closeRow}
+        />
+      </TouchableOpacity>
     );
   };
 
   const onDragEnd = async (data) => {
-    await actions.updatePlaylistTracks(
+    // await actions.updatePlaylistTracks(
+    //   playlistId,
+    //   data.map((el) => el.id)
+    // );
+    await trackActions.updatePlaylistTracks(
       playlistId,
       data.map((el) => el.id)
     );
   };
+
+  const alertMoveTrack = (playlistId: string, trackId: string) =>
+    Alert.alert("Move or Copy a Track", "", [
+      {
+        text: "Move/Copy to New Playlist",
+        onPress: () =>
+          router.push({
+            pathname: "/audio/trackmove",
+            params: {
+              moveType: "new",
+              fromPlaylistId: playlistId,
+              trackId,
+            },
+          }),
+      },
+      {
+        text: "Move/Copy to Existing Playlist",
+        onPress: () =>
+          router.push({
+            pathname: "/audio/trackmove",
+            params: {
+              moveType: "existing",
+              fromPlaylistId: playlistId,
+              trackId,
+            },
+          }),
+      },
+      {
+        text: "Cancel",
+        onPress: () => console.log("Cancel Pressed"),
+        style: "cancel",
+      },
+    ]);
 
   return (
     <View
@@ -105,9 +141,13 @@ const TrackPlayerSettingsTracks = () => {
         <TouchableOpacity
           className="border border-amber-900 bg-amber-500 p-1 rounded-md"
           onPress={async () => {
-            await actions.updatePlaylistTracks(
+            // await actions.updatePlaylistTracks(
+            //   playlistId,
+            //   tracksMetaSorted.map((el) => el.trackId)
+            // );
+            await trackActions.updatePlaylistTracks(
               playlistId,
-              tracksMetaSorted.map((el) => el.trackId)
+              tracksMetaSorted.map((el) => el.id)
             );
           }}
         >
@@ -126,7 +166,6 @@ const TrackPlayerSettingsTracks = () => {
             ></View>
           )}
           onDragEnd={({ data }) => onDragEnd(data)}
-          // onDragEnd={({ data }) => actions.updateFavFolderArray(data)}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
         />
@@ -135,4 +174,4 @@ const TrackPlayerSettingsTracks = () => {
   );
 };
 
-export default TrackPlayerSettingsTracks;
+export default PlaylistEditTracks;

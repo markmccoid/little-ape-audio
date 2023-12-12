@@ -195,7 +195,9 @@ export type AudioState = {
     updatePlaylistRate: (playlistId: string, newRate: number) => void;
     updatePlaylistFields: (playlistId: string, updateObj: PlaylistUpdateObj) => Promise<void>;
     updatePlaylistTracks: (playlistId: string, newTracksArray: string[]) => Promise<void>;
-    deleteTrackFromPlaylist: (playlistId: string, trackToDeleteId: string) => Promise<void>;
+    // shouldRemoveFile = true will delete from phone default is true
+    // will return playlistId if playlist still exists else undefined
+    deleteTrackFromPlaylist: (playlistId: string, trackToDeleteId: string, shouldRemoveFile?: boolean) => Promise<string>;
     updatePlaylistPostionHistory: (playlistId: string, position: number, trackIndex: number) => Promise<void>;
     addBookmarkToPlaylist: (
       bookmarkName: string,

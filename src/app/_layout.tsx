@@ -18,7 +18,7 @@ import { useSettingStore } from "../store/store-settings";
 import { deactivateKeepAwake } from "expo-keep-awake";
 import { Orientation, lockPlatformAsync } from "expo-screen-orientation";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-
+let isTPSetup = false;
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
@@ -46,9 +46,18 @@ export default function RootLayout() {
       await onInitialize();
       const jumpForwardSeconds = useSettingStore.getState().jumpForwardSeconds;
       const jumpBackwardSeconds = useSettingStore.getState().jumpBackwardSeconds;
-      await TrackPlayer.setupPlayer({
-        iosCategoryMode: IOSCategoryMode.SpokenAudio,
-      });
+
+      // Try and keep track player from being set up twise
+      try {
+        if (!isTPSetup) {
+          await TrackPlayer.setupPlayer({
+            iosCategoryMode: IOSCategoryMode.SpokenAudio,
+          });
+          isTPSetup = true;
+        }
+      } catch (e) {
+        console.log("Error setting up TrackPlayer");
+      }
       await TrackPlayer.updateOptions({
         alwaysPauseOnInterruption: true,
         progressUpdateEventInterval: 1,

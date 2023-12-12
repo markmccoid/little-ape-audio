@@ -203,6 +203,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       const playlists = { ...get().playlists, [playlistId]: playlist };
 
       set({ playlists });
+      // set({ playlists, playlistUpdated: new Date() });
       await saveToAsyncStorage("playlists", playlists);
     },
     //! If removeAllTracks = false, then need to only delete tracks that only
@@ -211,11 +212,20 @@ export const useTracksStore = create<AudioState>((set, get) => ({
     removePlaylist: async (playlistId, removeAllTracks = true) => {
       const playlistToDelete = get().playlists[playlistId];
 
-      // const playlistToDelete = get().playlists.find(
-      //   (el) => el.id === playlistId
-      // );
-      if (removeAllTracks && playlistToDelete?.trackIds) {
-        const x = await get().actions.removeTracks(playlistToDelete.trackIds);
+      // Check to see if tracks exist in other playlists
+      // if count > 1 then don't delete from the system
+      const trackCounts = trackCount(get().playlists);
+      const tracksToDelete = playlistToDelete.trackIds
+        .map((trackId) => {
+          if (trackCounts[trackId] <= 1) {
+            return trackId;
+          }
+        })
+        .filter((el) => el);
+
+      if (removeAllTracks && tracksToDelete) {
+        // const x = await get().actions.removeTracks(playlistToDelete.trackIds);
+        const x = await get().actions.removeTracks(tracksToDelete);
       }
       const updatedPlayList = get().playlists;
       delete updatedPlayList[playlistId];
@@ -301,19 +311,34 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         position: 0,
         trackIndex: 0,
       };
-      set({ playlists });
+      // set({ playlists });
+      set({ playlists, playlistUpdated: new Date() });
       await saveToAsyncStorage("playlists", playlists);
     },
-    deleteTrackFromPlaylist: async (playlistId, trackToDeleteId) => {
+    deleteTrackFromPlaylist: async (playlistId, trackToDeleteId, shouldRemoveFile = true) => {
       const playlists = { ...get().playlists };
       const updatedTracks = playlists[playlistId].trackIds.filter(
         (trackId) => trackId !== trackToDeleteId
       );
-      playlists[playlistId].trackIds = updatedTracks;
-      set({ playlists });
+
       // Remove track from device
-      await get().actions.removeTracks([trackToDeleteId]);
-      await saveToAsyncStorage("playlists", playlists);
+      if (shouldRemoveFile) {
+        await get().actions.removeTracks([trackToDeleteId]);
+      }
+
+      // If we have removed the final track from a playlist, delete it?
+      if (updatedTracks.length > 0) {
+        playlists[playlistId].trackIds = updatedTracks;
+        // set({ playlists });
+        set({ playlists, playlistUpdated: new Date() });
+        await saveToAsyncStorage("playlists", playlists);
+        return playlistId;
+      } else {
+        // remove the playlist, but DON'T remove the track from the device
+        await get().actions.removePlaylist(playlistId, false);
+        // await usePlaybackStore().actions.resetPlaybackStore();
+        return undefined;
+      }
     },
     getPlaylistTracks: (playlistId) => {
       const playlist = get().actions.getPlaylist(playlistId);
@@ -417,7 +442,7 @@ type PlaybackState = {
   didUpdate: string;
   actions: {
     // New playlist being loaded
-    setCurrentPlaylist: (playlistId: string) => Promise<void>;
+    setCurrentPlaylist: (playlistId: string, forceReload?: boolean) => Promise<void>;
     resetPlaybackStore: () => Promise<void>;
     getCurrentPlaylist: () => Playlist;
     play: () => Promise<void>;
@@ -477,13 +502,13 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       unmountTrackListeners();
       TrackPlayer.reset();
     },
-    setCurrentPlaylist: async (playlistId) => {
+    setCurrentPlaylist: async (playlistId, forceReload = false) => {
       set({ playlistLoaded: false });
 
       await useTracksStore.getState().actions.updatePlaylistFields(playlistId, {
         lastPlayedDateTime: Date.now(),
       });
-      if (get().currentPlaylistId === playlistId) {
+      if (get().currentPlaylistId === playlistId && !forceReload) {
         set({ playlistLoaded: true });
         return;
       }
@@ -502,7 +527,6 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       const currPlaylist = useTracksStore.getState().actions.getPlaylist(playlistId);
 
       //!
-      // console.log("CURR Playlist", currPlaylist.name, currPlaylist.currentPosition);
       const queue = buildTrackPlayerQueue(currPlaylist.trackIds);
 
       set({
@@ -582,7 +606,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       set({ playlistLoaded: false });
 
       // 1. Update Track Store's playlist with new track ids/order
-      useTracksStore.getState().actions.updatePlaylistTracks(playlistId, trackIdArray);
+      await useTracksStore.getState().actions.updatePlaylistTracks(playlistId, trackIdArray);
 
       // 2. Rebuild current playlistId queue and update playback Object
       const queue = buildTrackPlayerQueue(trackIdArray);
@@ -595,7 +619,6 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       updatePlayerObj.currentTrack = queue[0];
       updatePlayerObj.currentTrackPosition = 0;
       updatePlayerObj.currentQueuePosition = 0;
-
       //Update PlaybackStore
       set({
         ...updatePlayerObj,
@@ -604,14 +627,18 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       // When tracks are reordered the currentQueue pos will be messed up.
       // This is the total of all
       // track durations in queue UP TO, but NOT including the current track
+
       const prevTracksDuration = usePlaybackStore.getState().actions.getPrevTrackDuration();
-      // usePlaybackStore.setState({ currentQueuePosition: prevTracksDuration });
-      set({ currentQueuePosition: prevTracksDuration });
+      // NOT sure why, but when I didn't merge state it cleared the other state values
+      usePlaybackStore.setState((state) => ({
+        ...state,
+        currentQueuePosition: prevTracksDuration,
+      }));
 
       // - Make sure current track is loaded and set to proper position
       await TrackPlayer.reset();
       await TrackPlayer.add(queue);
-
+      console.log("skip num", get().currentTrackIndex);
       await TrackPlayer.skip(get().currentTrackIndex);
       await TrackPlayer.seekTo(get().currentTrackPosition);
       await TrackPlayer.setRate(getCurrentPlaylist().currentRate);
@@ -851,9 +878,13 @@ export const useGetQueue = () => {
 const buildTrackPlayerQueue = (trackIds: string[]): ApeTrack[] => {
   const trackActions = useTracksStore.getState().actions;
   let queue = [];
-
   for (const trackId of trackIds) {
     const trackInfo = trackActions.getTrack(trackId);
+    // Make sure we found a track
+    if (!trackInfo?.id) {
+      alert(`Could Not find Track ${trackInfo.id}...skipping`);
+      continue;
+    }
     const trackPlayerTrack = {
       id: trackInfo.id,
       filename: trackInfo.filename,
@@ -1165,40 +1196,17 @@ function clearAutoSaveInterval(intervalId: number) {
   intervalId = undefined;
 }
 
-//----------------------------
-//-- TRY at my own useProgress to
-//-- help with duration bug.
-// export const useMyProgress = () => {
-//   const queue = usePlaybackStore().trackPlayerQueue;
-//   const [returnVal, setReturnVal] = useState({ position: 0, duration: 0 });
-//   const [myPos, setMyPos] = useState(0);
+//~~ -----------------------------------------
+//~~ Counts how many playlists a track exists in
+//~~ -----------------------------------------
+function trackCount(playlists: Record<string, Playlist>) {
+  const allTracks = Object.keys(playlists)
+    .map((key) => {
+      return playlists[key].trackIds;
+    })
+    .flatMap((el) => el);
 
-//   useEffect(() => {
-//     const progressListener = TrackPlayer.addEventListener(
-//       Event.PlaybackProgressUpdated,
-//       async (event) => {
-//         const duration = queue[event.track]?.duration;
-//         let pos = await TrackPlayer.getPosition();
-//         // |- - - - - - - - ! - - - - |
-//         //    e.p           e.d       duration
-//         let position = event.position;
-//         console.log("EVENT POS", Math.floor(pos), Math.floor(event.position));
-
-//         if (Math.floor(duration) !== Math.floor(event.duration)) {
-//           if (Math.floor(event.position) === Math.floor(event.duration)) {
-//             pos = myPos + 1;
-//             setMyPos((prev) => prev + 1);
-//           } else {
-//             setMyPos(Math.floor(event.position));
-//           }
-//         }
-//         setReturnVal({ position: pos, duration });
-//       }
-//     );
-//     return () => {
-//       console.log("Remove Progress Listener");
-//       progressListener.remove();
-//     };
-//   }, []);
-//   return returnVal;
-// };
+  return allTracks.reduce((final, el) => {
+    return { ...final, [el]: final?.[el] ? final?.[el] + 1 : 1 };
+  }, {});
+}

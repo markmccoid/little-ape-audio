@@ -102,6 +102,14 @@ const AudioLayout = () => {
         }}
       />
       <Stack.Screen
+        name="trackmove"
+        options={{
+          title: "Move Track",
+          presentation: "modal",
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
         name="externalLink"
         options={{
           title: "overwrite",

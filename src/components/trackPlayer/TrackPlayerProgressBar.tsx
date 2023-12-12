@@ -93,7 +93,7 @@ const TrackPlayerProgressBar = () => {
           numberOfLines={1}
           ellipsizeMode="tail"
         >
-          {`${currTrack.trackNum || ""} ${currTrack.title}`}
+          {`${currTrack?.trackNum || ""} ${currTrack.title}`}
         </Text>
       </View>
       {/* NEED something to indicate what is seeking so */}

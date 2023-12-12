@@ -32,6 +32,7 @@ export const getImageFromWeb = async (searchString: string) => {
       imageColors,
     };
   }
+  return undefined;
 };
 
 //~-=======================================
