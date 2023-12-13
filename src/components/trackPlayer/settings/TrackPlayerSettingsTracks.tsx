@@ -75,6 +75,7 @@ const TrackPlayerSettingsTracks = () => {
     const index = getIndex();
     return (
       <TrackPlayerSettingsTracksRow
+        currPlaylistId={playlistId}
         item={item}
         drag={drag}
         isActive={isActive}

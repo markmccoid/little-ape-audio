@@ -8,6 +8,7 @@ import uuid from "react-native-uuid";
 import MoveToNew from "@components/playlists/edit/MoveToNew";
 import MoveToExisting from "@components/playlists/edit/MoveToExisting";
 import { create } from "lodash";
+import TrackPlayer from "react-native-track-player";
 
 const trackmove = () => {
   const { moveType, createNewPlaylist, fromPlaylistId, trackId } = useLocalSearchParams();
@@ -16,6 +17,7 @@ const trackmove = () => {
   const [isMoving, toggleIsMoving] = useReducer((state) => !state, true);
   const [selectedId, setSelectedId] = useState("");
   const trackActions = useTrackActions();
+  const playbackActions = usePlaybackStore((state) => state.actions);
 
   /*
   NEW
@@ -35,10 +37,16 @@ const trackmove = () => {
    
   */
 
+  //~~ ------------------------------------------
+  //~~ Move or Copy a track from one playlist to another
+  //~~ If the 'selectedId' is undefined, then we create a new playlist
+  //~~ as a target for the track
+  //~~ ------------------------------------------
   const moveTrackToPlaylist = async (
     fromPlaylistId: string,
     trackId: string,
     playlistName?: string,
+    //if undefined, then we create a new playlist as a target for the track
     selectedId?: string
   ) => {
     const newPlaylistId = selectedId ? selectedId : uuid.v4().toString();
@@ -59,7 +67,8 @@ const trackmove = () => {
         router.back();
       }
     }
-
+    await playbackActions.resetPlaybackStore();
+    // TrackPlayer.reset();
     router.back();
     // If playlist deleted go back to main screen
   };

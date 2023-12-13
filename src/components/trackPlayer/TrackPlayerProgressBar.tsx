@@ -1,7 +1,7 @@
 import { View, Text, Dimensions } from "react-native";
 import React, { useEffect, useMemo, useState } from "react";
 import TrackPlayer, { useProgress } from "react-native-track-player";
-import { getCurrentPlaylist, usePlaybackStore } from "../../store/store";
+import { getCurrentPlaylist, usePlaybackStore, useTracksStore } from "../../store/store";
 import { formatSeconds } from "../../utils/formatUtils";
 import { colors } from "../../constants/Colors";
 import { AnimatePresence, MotiView } from "moti";
@@ -23,7 +23,7 @@ const TrackPlayerProgressBar = () => {
   const [currPos, setCurrPos] = useState(position);
   const currTrack = usePlaybackStore((state) => state.currentTrack);
   const currChapterInfo = usePlaybackStore((state) => state.currentChapterInfo);
-
+  const playlistUpdated = useTracksStore((state) => state.playlistUpdated);
   // const playlist = getCurrentPlaylist();
   const playlistColors = usePlaylistColors();
   const textColor = getTextColor(playlistColors.background.colorLuminance); //"black";
@@ -93,7 +93,7 @@ const TrackPlayerProgressBar = () => {
           numberOfLines={1}
           ellipsizeMode="tail"
         >
-          {`${currTrack?.trackNum || ""} ${currTrack.title}`}
+          {`${currTrack?.trackNum || ""} ${currTrack?.title}`}
         </Text>
       </View>
       {/* NEED something to indicate what is seeking so */}

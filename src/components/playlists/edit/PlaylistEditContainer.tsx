@@ -6,8 +6,6 @@ import { Playlist } from "@store/types";
 import { getImageFromWeb } from "@utils/otherUtils";
 import { AnimatedPressable } from "@components/common/buttons/Pressables";
 import TPImagePicker from "@components/trackPlayer/settings/TPImagePicker";
-import PlaylistDetails from "../PlaylistDetails";
-import TrackPlayerSettingsTracks from "@components/trackPlayer/settings/TrackPlayerSettingsTracks";
 import PlaylistEditTracks from "./PlaylistEditTracks";
 
 const PlaylistEditContainer = () => {
@@ -95,7 +93,7 @@ const PlaylistEditContainer = () => {
         </AnimatedPressable>
       </View>
       {/* <PlaylistDetails playlistId={playlist.id} /> */}
-      <View className="mx-2">
+      <View className="mx-2 flex-1 mb-[80]">
         <PlaylistEditTracks playlistId={playlist.id} />
       </View>
     </View>

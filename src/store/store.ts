@@ -85,7 +85,17 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       // loop and delete each file from the system and return an array
       // of promises to remove from async storage
       let newTracks = get().tracks;
-      const deletePromises = ids.map(async (id) => {
+      // Check to see if tracks exist in other playlists
+      // if count > 1 then don't delete from the system
+      const trackCounts = trackCount(get().playlists);
+      const tracksToDelete = ids
+        .map((trackId) => {
+          if (trackCounts[trackId] <= 1) {
+            return trackId;
+          }
+        })
+        .filter((el) => el);
+      const deletePromises = tracksToDelete.map(async (id) => {
         // store trackToDelete's info
         const trackToDelete = get().tracks.find((el) => el.id === id);
         // Delete from store
@@ -330,6 +340,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       if (updatedTracks.length > 0) {
         playlists[playlistId].trackIds = updatedTracks;
         // set({ playlists });
+        // console.log("track removed from", playlists[playlistId].id);
         set({ playlists, playlistUpdated: new Date() });
         await saveToAsyncStorage("playlists", playlists);
         return playlistId;
@@ -456,7 +467,11 @@ type PlaybackState = {
     // Updates the speed (rate) of the audio
     updatePlaybackRate: (newRate: number) => Promise<void>;
     updatePlaylistTracks: (playlistId: string, trackIdArray: string[]) => Promise<void>;
-    removePlaylistTrack: (playlistId: string, trackIdToDelete: string) => Promise<void>;
+    removePlaylistTrack: (
+      playlistId: string,
+      trackIdToDelete: string,
+      trackIndex: number
+    ) => Promise<void>;
     getPrevTrackDuration: () => number;
     setCurrentTrackPosition: (positionSeconds: number) => void;
     getCurrentTrackPosition: () => number;
@@ -485,6 +500,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
   didUpdate: "init",
   actions: {
     resetPlaybackStore: async () => {
+      unmountTrackListeners();
       set({
         currentPlaylistId: undefined,
         // currentPlaylist: undefined,
@@ -499,8 +515,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
         playerState: undefined,
         playlistLoaded: false,
       });
-      unmountTrackListeners();
-      TrackPlayer.reset();
+      await TrackPlayer.reset();
     },
     setCurrentPlaylist: async (playlistId, forceReload = false) => {
       set({ playlistLoaded: false });
@@ -604,7 +619,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       // Since we have controls mounted, we need to make sure those
       // components don't try to load anything till we are done.
       set({ playlistLoaded: false });
-
+      unmountTrackListeners();
       // 1. Update Track Store's playlist with new track ids/order
       await useTracksStore.getState().actions.updatePlaylistTracks(playlistId, trackIdArray);
 
@@ -638,17 +653,26 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       // - Make sure current track is loaded and set to proper position
       await TrackPlayer.reset();
       await TrackPlayer.add(queue);
-      console.log("skip num", get().currentTrackIndex);
-      await TrackPlayer.skip(get().currentTrackIndex);
+      // console.log("skip num");
+      await TrackPlayer.skip(0);
       await TrackPlayer.seekTo(get().currentTrackPosition);
       await TrackPlayer.setRate(getCurrentPlaylist().currentRate);
       mountTrackPlayerListeners();
 
       set({ playlistLoaded: true });
     },
-    removePlaylistTrack: async (playlistId, trackIdToDelete) => {
+    removePlaylistTrack: async (playlistId, trackIdToDelete, trackIndex) => {
+      // This lets us know if we are deleting a track from within a loaded playlist (false)
+      // or if we are in edit mode (true)
+      // we also need to check if the passed playlistId == currPlaylistId
+      let noPlaylistLoaded = true;
+      if (get().playlistLoaded && playlistId === get().currentPlaylistId) {
+        noPlaylistLoaded = false;
+      }
+
       set({ playlistLoaded: false });
       const playlistTrackIds = useTracksStore.getState().playlists[playlistId].trackIds;
+      // console.log("Track Index", trackIndex, trackIdToDelete, playlistTrackIds[trackIndex]);
 
       // ~~ Function to be called from Alert if One track left and playlist is to be deleted
       const deletePlaylistRoute = async () => {
@@ -656,7 +680,10 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
         // console.log("NAV TO ROUTE");
         router.replace("/audio");
         await useTracksStore.getState().actions.removePlaylist(playlistId);
-        get().actions.resetPlaybackStore();
+        // only reset if we deleted from the current playlist in the playbackStore
+        if (!noPlaylistLoaded) {
+          get().actions.resetPlaybackStore();
+        }
       };
       // Check if only one track in playlist, if so, we are deleting
       // the last track.  Delete the whole playlist
@@ -671,7 +698,9 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
         await useTracksStore
           .getState()
           .actions.deleteTrackFromPlaylist(playlistId, trackIdToDelete);
-        await get().actions.updatePlaylistTracks(playlistId, newTrackIds);
+        if (!noPlaylistLoaded) {
+          await get().actions.updatePlaylistTracks(playlistId, newTrackIds);
+        }
       }
       set({ playlistLoaded: true });
     },

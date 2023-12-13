@@ -15,6 +15,7 @@ type Props = {
   drag: any;
   isActive: boolean;
   index: number;
+  currPlaylistId: string;
   renderRowRefs: Swipeable[];
   closeRow: (index: number) => void;
 };
@@ -23,6 +24,7 @@ function TrackPlayerSettingsTracksRow({
   drag,
   isActive,
   index,
+  currPlaylistId,
   renderRowRefs,
   closeRow,
 }: Props) {
@@ -33,7 +35,15 @@ function TrackPlayerSettingsTracksRow({
       ref={(ref) => (renderRowRefs[index] = ref)}
       onSwipeableOpen={() => closeRow(index)}
       renderRightActions={(progress, dragX) => {
-        return <RenderRight item={item} progress={progress} dragX={dragX} />;
+        return (
+          <RenderRight
+            currPlaylistId={currPlaylistId}
+            index={index}
+            item={item}
+            progress={progress}
+            dragX={dragX}
+          />
+        );
       }}
       rightThreshold={45}
       leftThreshold={10}
@@ -80,16 +90,20 @@ function TrackPlayerSettingsTracksRow({
 export default TrackPlayerSettingsTracksRow;
 
 const RenderRight = ({
+  currPlaylistId,
+  index,
   item,
   progress,
   dragX,
 }: {
+  currPlaylistId: string;
+  index: number;
   item;
   progress: RNAnimated.AnimatedInterpolation<string | number>;
   dragX: RNAnimated.AnimatedInterpolation<string | number>;
 }) => {
   const playbackActions = usePlaybackStore((state) => state.actions);
-  const currPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
+  const currPlaylistId2 = usePlaybackStore((state) => state.currentPlaylistId);
 
   const iconScale = progress.interpolate({
     inputRange: [0, 1],
@@ -114,7 +128,7 @@ const RenderRight = ({
     >
       <Pressable
         onPress={() => {
-          playbackActions.removePlaylistTrack(currPlaylistId, item.id);
+          playbackActions.removePlaylistTrack(currPlaylistId, item.id, index);
         }}
         className="h-full justify-center bg-amber-400 border-r border-l border-amber-600"
       >

@@ -79,6 +79,7 @@ const PlaylistEditTracks = ({ playlistId }: { playlistId: string }) => {
           index={index}
           renderRowRefs={renderRowRefs}
           closeRow={closeRow}
+          currPlaylistId={playlistId}
         />
       </TouchableOpacity>
     );
@@ -130,7 +131,7 @@ const PlaylistEditTracks = ({ playlistId }: { playlistId: string }) => {
 
   return (
     <View
-      className="w-full mb-10 "
+      className="w-full flex-1 "
       style={{
         borderBottomColor: "black",
         borderBottomWidth: StyleSheet.hairlineWidth,
@@ -155,7 +156,7 @@ const PlaylistEditTracks = ({ playlistId }: { playlistId: string }) => {
         </TouchableOpacity>
       </View>
 
-      <View className="border border-amber-800 mb-[30]">
+      <View className="border border-amber-800">
         <DraggableFlatList
           data={items}
           containerStyle={{ backgroundColor: playlistColors?.bg || "white" }}

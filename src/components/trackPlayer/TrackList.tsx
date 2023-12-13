@@ -43,6 +43,7 @@ const TrackList = ({ isExpanded }) => {
   const currChapterIndex = usePlaybackStore((state) => state.currentChapterIndex);
   const playlistColors = usePlaylistColors();
 
+  // console.log("PL LOADED", isPlaylistLoaded, sectionList);
   //! Store "curr" track and chapter
   const [currLocation, setCurrLocation] = useState({
     trackIndex: currentTrackIndex,
@@ -69,12 +70,11 @@ const TrackList = ({ isExpanded }) => {
   const chaptBorder = playlistColors.btnBorder;
   const chaptBtnBgInactive = lightenColor(playlistColors.bg, 75);
   const chaptBtnBgActive = playlistColors.btnBg;
+  const scrollViewRef = useRef<SectionList>(null);
 
   //! ==== get current queue position
-  const currentQueueId = queue.find((el) => el.id === currentTrack.id).id;
+  // const currentQueueId = queue.find((el) => el.id === currentTrack.id).id;
   //! ====
-
-  const scrollViewRef = useRef<SectionList>(null);
 
   // Scroll to the active track
   const scrollToRow = (sectionIndex: number, chapterIndex: number) => {
@@ -137,11 +137,11 @@ const TrackList = ({ isExpanded }) => {
 
   //~ RENDER HEADER
   const renderSectionHeader = ({ section }) => {
-    // console.log("SECTION", section);
-    const isCurrentTrack = section.id === currentTrack.id;
+    // console.log("SECTION", section?.id);
+    const isCurrentTrack = section?.id === currentTrack?.id;
     return (
       <TouchableOpacity
-        key={section.id}
+        key={section?.id}
         onPress={async () => {
           if (!isCurrentTrack) {
             await playbackActions.goToTrack(section?.queuePos);
