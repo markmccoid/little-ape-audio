@@ -30,6 +30,7 @@ const PlaylistEditTracks = ({ playlistId }: { playlistId: string }) => {
   const [items, setItems] = useState<BuildList>([]);
   const [tracksMetaSorted, setTracksMetaSorted] = useState([]);
   const playlistTracks = trackActions.getPlaylistTracks(playlistId);
+  const playlistLoaded = usePlaybackStore((state) => state.playlistLoaded);
   const router = useRouter();
 
   useEffect(() => {
@@ -94,6 +95,8 @@ const PlaylistEditTracks = ({ playlistId }: { playlistId: string }) => {
       playlistId,
       data.map((el) => el.id)
     );
+    const playlistTracks = trackActions.getPlaylistTracks(playlistId);
+    setItems(buildList(playlistTracks));
   };
 
   const alertMoveTrack = (playlistId: string, trackId: string) =>

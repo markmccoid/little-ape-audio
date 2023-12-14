@@ -1,5 +1,5 @@
 import { View, Text, Pressable, StatusBar } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useRouter } from "expo-router";
 import { getCurrentPlaylist, useTrackActions } from "../../store/store";
 import { SettingsIcon } from "@components/common/svg/Icons";

@@ -87,7 +87,6 @@ export const PlaybackService = async () => {
     // - currentTrackPosition
     // - chapterInfo -> undefined if no chapters
     // - chapterIndex -> -1 if no chapters
-
     const position = Math.floor(event.position);
     const queue = usePlaybackStore.getState().trackPlayerQueue;
     const trackIndex = await TrackPlayer.getActiveTrackIndex();

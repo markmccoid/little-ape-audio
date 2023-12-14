@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Dimensions,
   StyleSheet,
+  Pressable,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { usePlaybackStore, useTrackActions } from "../../store/store";
@@ -19,6 +20,8 @@ import usePlaylistColors from "hooks/usePlaylistColors";
 import { darkenColor, lightenColor } from "@utils/otherUtils";
 import { play } from "react-native-track-player/lib/trackPlayer";
 import { pl } from "date-fns/locale";
+import { EnterKeyIcon } from "@components/common/svg/Icons";
+import { MotiView } from "moti";
 
 const { width, height } = Dimensions.get("window");
 
@@ -72,6 +75,7 @@ const TrackList = ({ isExpanded }) => {
   const chaptBtnBgActive = playlistColors.btnBg;
   const scrollViewRef = useRef<SectionList>(null);
 
+  const [viewSectionChapters, setViewSectionChapters] = useState([]);
   //! ==== get current queue position
   // const currentQueueId = queue.find((el) => el.id === currentTrack.id).id;
   //! ====
@@ -129,6 +133,18 @@ const TrackList = ({ isExpanded }) => {
     }
   }, [queue]);
 
+  // Used to update array that will be checked and if section index included
+  // then chapter will be hidden.
+  function updateChaptView(sectionIndex: number) {
+    let updatedSections: number[];
+    if (viewSectionChapters.includes(sectionIndex)) {
+      updatedSections = viewSectionChapters.filter((el) => el !== sectionIndex);
+    } else {
+      updatedSections = [...viewSectionChapters, sectionIndex];
+    }
+    setViewSectionChapters(updatedSections);
+  }
+
   //~~ ========================================================
   //~~ Section RENDERERS
   const getItemLayout = sectionListGetItemLayout({
@@ -137,44 +153,78 @@ const TrackList = ({ isExpanded }) => {
 
   //~ RENDER HEADER
   const renderSectionHeader = ({ section }) => {
-    // console.log("SECTION", section?.id);
     const isCurrentTrack = section?.id === currentTrack?.id;
-    return (
-      <TouchableOpacity
-        key={section?.id}
-        onPress={async () => {
+
+    const hasChapters = section?.data?.[0]?.title !== "~NO CHAPTERS~";
+    const isOpen = viewSectionChapters.includes(section?.queuePos);
+    const numberPressFunction = hasChapters
+      ? () => updateChaptView(section?.queuePos)
+      : async () => {
           if (!isCurrentTrack) {
             await playbackActions.goToTrack(section?.queuePos);
           }
+        };
+    return (
+      <View
+        key={section?.id}
+        className={` items-center flex-row h-full`}
+        style={{
+          backgroundColor: isCurrentTrack ? trackActiveColor : trackInactiveColor,
+          borderWidth: StyleSheet.hairlineWidth,
+          borderColor: trackBorder,
+          height: 45,
         }}
-        className=""
       >
-        <View
-          className={`p-3 items-center flex-row`}
-          style={{
-            backgroundColor: isCurrentTrack ? trackActiveColor : trackInactiveColor,
-            borderWidth: StyleSheet.hairlineWidth,
-            borderColor: trackBorder,
-            height: 45,
-          }}
-        >
-          <View className={`flex-row items-center justify-between `}>
+        <View className={`flex-row items-center justify-between h-full w-full`}>
+          <Pressable
+            onPress={numberPressFunction}
+            className="flex-row h-full justify-center items-center px-3"
+          >
+            <Text
+              className={`text-sm  ${isCurrentTrack ? "font-semibold" : ""} `}
+              style={{ color: trackText }}
+            >{`${(section.queuePos + 1).toString().padStart(2, "0")}`}</Text>
+            {!hasChapters && <View className="w-[19]" />}
+            {hasChapters && (
+              <MotiView
+                from={{
+                  transform: [{ rotate: "-90deg" }, { translateX: -5 }],
+                }}
+                animate={{
+                  transform: [
+                    { rotate: !isOpen ? "-90deg" : "0deg" },
+                    { translateX: !isOpen ? -5 : 0 },
+                  ],
+                }}
+              >
+                <EnterKeyIcon size={15} style={{ paddingLeft: 4 }} />
+              </MotiView>
+            )}
+          </Pressable>
+          <Pressable
+            className="flex-row items-center justify-between flex-1 h-full"
+            onPress={async () => {
+              if (!isCurrentTrack) {
+                await playbackActions.goToTrack(section?.queuePos);
+              }
+            }}
+          >
             <Text
               className={`text-sm flex-1 flex-grow ${isCurrentTrack ? "font-semibold" : ""}`}
-              numberOfLines={2}
+              numberOfLines={1}
               ellipsizeMode="tail"
               style={{ color: trackText }}
-            >{`${(section.queuePos + 1).toString().padStart(2, "0")} - ${section.title}`}</Text>
-            <View style={{ width: 75 }} className="flex-row justify-end">
+            >{`${section.title}`}</Text>
+            <View style={{ width: 75 }} className="flex-row justify-end pr-3">
               <Text className="text-xs" style={{ color: trackText }}>
                 {isCurrentTrack
                   ? formatSeconds(section.duration - position)
                   : formatSeconds(section.duration)}
               </Text>
             </View>
-          </View>
+          </Pressable>
         </View>
-      </TouchableOpacity>
+      </View>
     );
   };
   //~ RENDER ITEM
@@ -191,6 +241,8 @@ const TrackList = ({ isExpanded }) => {
     const isCurrChapter = index === currLocation.chapterIndex; // currChapterIndex;
     const isCurrentTrack = currLocation.trackIndex === section?.queuePos; //currentTrackIndex === section?.queuePos;
     const isCurrentSection = isCurrChapter && isCurrentTrack;
+
+    if (viewSectionChapters.includes(section?.queuePos)) return null;
 
     return (
       <View

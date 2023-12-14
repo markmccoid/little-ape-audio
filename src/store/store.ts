@@ -88,13 +88,15 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       // Check to see if tracks exist in other playlists
       // if count > 1 then don't delete from the system
       const trackCounts = trackCount(get().playlists);
+
       const tracksToDelete = ids
         .map((trackId) => {
-          if (trackCounts[trackId] <= 1) {
+          if (trackCounts[trackId] || 0 <= 1) {
             return trackId;
           }
         })
         .filter((el) => el);
+
       const deletePromises = tracksToDelete.map(async (id) => {
         // store trackToDelete's info
         const trackToDelete = get().tracks.find((el) => el.id === id);
@@ -176,7 +178,8 @@ export const useTracksStore = create<AudioState>((set, get) => ({
 
       // Take the tracks being added and merge them with existing tracks
       // in playlist.  Get rid of dups.
-      const uniqueTracksPlaylist = [...new Set([...tracks, ...(playlist.trackIds || [])])];
+      const uniqueTracksPlaylist = [...new Set([...(playlist.trackIds || []), ...tracks])];
+      // const uniqueTracksPlaylist = [...new Set([...tracks, ...(playlist.trackIds || [])])];
 
       const { images, genres, totalDuration } = analyzePlaylistTracks(
         storedTracks,
@@ -347,12 +350,15 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       } else {
         // remove the playlist, but DON'T remove the track from the device
         await get().actions.removePlaylist(playlistId, false);
-        // await usePlaybackStore().actions.resetPlaybackStore();
+        // await usePlaybackStore.getState().actions.resetPlaybackStore();
         return undefined;
       }
     },
     getPlaylistTracks: (playlistId) => {
       const playlist = get().actions.getPlaylist(playlistId);
+      // Guard, if no playlist return empty array
+      if (!playlist) return [];
+
       const trackIds = [...playlist.trackIds];
       let trackArray = [];
       for (const trackId of trackIds) {
