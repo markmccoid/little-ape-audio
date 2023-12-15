@@ -1,7 +1,7 @@
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, Touchable, TouchableOpacity } from "react-native";
 import React, { useEffect } from "react";
 import { useLocalSearchParams, useSearchParams } from "expo-router";
-import { useTracksStore } from "@store/store";
+import { useTrackActions, useTracksStore } from "@store/store";
 import { AudioTrack } from "@store/types";
 import * as FileSystem from "expo-file-system";
 
@@ -9,6 +9,7 @@ const managetracksmodal = () => {
   const params = useLocalSearchParams();
   const tracks = useTracksStore((state) => state.tracks);
   const [currTrack, setCurrTrack] = React.useState<AudioTrack>();
+  const trackActions = useTrackActions();
 
   //!! NEED TO MAKE clear the difference in docs between
   //!! track.id, track.filename and track.fileURI (This is the actual "ID" used in the playlist.)
@@ -46,7 +47,14 @@ const managetracksmodal = () => {
 
       <ScrollView className="mb-4 p-1 border-b border-b-amber-800">
         {currTrack.metadata?.chapters && (
-          <Text className="font-semibold text-amber-700">Chapters</Text>
+          <View>
+            <Text className="font-semibold text-amber-700">Chapters</Text>
+            <TouchableOpacity
+              onPress={async () => await trackActions.clearChapterMetadata(currTrack.id)}
+            >
+              <Text>Clear Chapters</Text>
+            </TouchableOpacity>
+          </View>
         )}
         {currTrack.metadata?.chapters &&
           currTrack.metadata?.chapters.map((el, index) => {

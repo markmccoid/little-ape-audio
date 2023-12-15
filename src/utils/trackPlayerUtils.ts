@@ -1,4 +1,3 @@
-import { AudioMetadata } from "./../store/types";
 import TrackPlayer, { Event } from "react-native-track-player";
 import { usePlaybackStore, useTracksStore } from "../store/store";
 import { getCurrentChapter } from "./chapterUtils";
@@ -82,7 +81,7 @@ export const PlaybackService = async () => {
   //------------------------------------------
   TrackPlayer.addEventListener(Event.PlaybackProgressUpdated, async (event) => {
     // Progress Updates {"buffered": 127.512, "duration": 127.512, "position": 17.216, "track": 0}
-
+    // console.log("PROGRESS UPDATE");
     // Update the playback store with the current info:
     // - currentTrackPosition
     // - chapterInfo -> undefined if no chapters
@@ -122,17 +121,12 @@ export const PlaybackService = async () => {
   TrackPlayer.addEventListener(Event.MetadataChapterReceived, async (event) => {
     let metaChapters: Chapter[] = [];
     const currTrack = (await TrackPlayer.getActiveTrack()) as ApeTrack;
-    // console.log(
-    //   "METADATA 1 - CurrTrack MetaLength",
-    //   event?.metadata?.length,
-    //   currTrack?.chapters?.length,
-    //   currTrack.id
-    // );
     // return;
 
     // If book has chapters don't do anything
-    if (currTrack?.chapters) return;
+    if (!!currTrack?.chapters || !event?.metadata?.length) return;
     // if we have metadata get chapter info
+
     if (event?.metadata) {
       // console.log("chapt Data rec", event.metadata);
       const reverseChapt = reverse(event.metadata);

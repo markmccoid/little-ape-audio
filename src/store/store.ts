@@ -74,6 +74,17 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       await saveToAsyncStorage("tracks", newTracks);
       set({ tracks: newTracks });
     },
+    clearChapterMetadata: async (trackId) => {
+      const tracks = [...get().tracks];
+      // Find the track to update
+      const trackToUpdate = tracks.find((track) => track.id === trackId);
+      trackToUpdate.metadata.chapters = undefined;
+      if (!trackToUpdate) return;
+      // Merge changes
+      const newTracks = [...tracks.filter((track) => track.id !== trackId), trackToUpdate];
+      await saveToAsyncStorage("tracks", newTracks);
+      set({ tracks: newTracks });
+    },
     removeTracks: async (ids) => {
       // Use passed id to do the following:
       // - lookup audioFile information in audioFiles array
@@ -88,10 +99,10 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       // Check to see if tracks exist in other playlists
       // if count > 1 then don't delete from the system
       const trackCounts = trackCount(get().playlists);
-
       const tracksToDelete = ids
         .map((trackId) => {
-          if (trackCounts[trackId] || 0 <= 1) {
+          if (!trackCounts?.[trackId]) return trackId;
+          if (trackCounts[trackId] <= 1) {
             return trackId;
           }
         })
@@ -178,7 +189,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
 
       // Take the tracks being added and merge them with existing tracks
       // in playlist.  Get rid of dups.
-      const uniqueTracksPlaylist = [...new Set([...(playlist.trackIds || []), ...tracks])];
+      const uniqueTracksPlaylist = [...new Set([...(playlist?.trackIds || []), ...tracks])];
       // const uniqueTracksPlaylist = [...new Set([...tracks, ...(playlist.trackIds || [])])];
 
       const { images, genres, totalDuration } = analyzePlaylistTracks(
@@ -586,6 +597,10 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       set({ playlistLoaded: true });
       // - Reset TrackPlayer and add the Queue
       await TrackPlayer.add(queue);
+      // This was added to allow the MetadataChapterReceived event to fire with the
+      // first queue entry.  Looks like if the first one had chapters it would fire but not
+      // run until our skip exectured. this gave metadata from track 0 to the skipped to track.
+      await new Promise((resolve) => setTimeout(resolve, 10));
       // - Make sure current track is loaded and set to proper position
       await TrackPlayer.skip(currTrackIndex);
       //!
@@ -913,12 +928,15 @@ export const useGetQueue = () => {
 const buildTrackPlayerQueue = (trackIds: string[]): ApeTrack[] => {
   const trackActions = useTracksStore.getState().actions;
   let queue = [];
+
   for (const trackId of trackIds) {
     const trackInfo = trackActions.getTrack(trackId);
+
     // Make sure we found a track
     if (!trackInfo?.id) {
-      alert(`Could Not find Track ${trackInfo.id}...skipping`);
-      continue;
+      alert(`Could Not find Track ${trackId}.  Please delete playlist are redownload tracks`);
+      router.replace("/audio/");
+      throw new Error("Problem with missing track");
     }
     const trackPlayerTrack = {
       id: trackInfo.id,

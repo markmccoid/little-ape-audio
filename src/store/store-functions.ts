@@ -58,7 +58,6 @@ export const addTrack =
     playlistId = undefined,
     directory = "",
   }) => {
-    // console.log("Add Trck ->", fileURI, filename, sourceLocation);
     // variable for final tags
     let finalTags: AudioMetadata;
     // Get metadata for passed audio file
@@ -179,7 +178,7 @@ export const addTrack =
     const plAuthor = newAudioFile.metadata?.artist || "Unknown";
     const finalPlaylistId = get().actions.addNewPlaylist(plName, plAuthor, playlistId);
     await get().actions.addTracksToPlaylist(finalPlaylistId, [newAudioFile.id]);
-
+    console.log("addTrack store-functions");
     await saveToAsyncStorage("tracks", newAudioFileList);
   };
 
@@ -254,7 +253,22 @@ const createLAABMeta = (laabData) => {
 function verifyChapterData(chapterData: Chapter[]) {
   let prevEndSeconds = undefined;
   if (!chapterData) return undefined;
+  // Check to see if start or end times are null, if so do NOT send back any chapt data.
+  let chaptersMalformed = false;
+  chapterData.forEach((chapt) => {
+    if (
+      chapt.endSeconds === undefined ||
+      chapt.endSeconds === null ||
+      chapt.startSeconds === undefined
+    ) {
+      chaptersMalformed = true;
+    }
+  });
+  if (chaptersMalformed) return undefined;
+
   return chapterData.map((chapt) => {
+    // if ANY chapter start or end is NULL, just return undefined
+
     if (chapt.startSeconds === prevEndSeconds) {
       prevEndSeconds = chapt.endSeconds;
       return {

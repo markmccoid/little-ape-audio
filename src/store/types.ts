@@ -48,32 +48,7 @@ export type PlaylistImageColors = {
     }
   >
 >;
-// {
-//   background: string;
-//   backgroundColorType: "dark" | "light";
-//   // The color to use for text or items if background is the bg color.
-//   backgroundTintColor: string;
-//   primary: string;
-//   primaryColorType: "dark" | "light";
-//   // The color to use for text or items if primary is the bg color.
-//   primaryTintColor: string;
-//   secondary: string;
-//   secondaryColorType: "dark" | "light";
-//   // The color to use for text or items ifsecondary is the bg color.
-//   secondaryTintColor: string;
-//   detail: string;
-//   detailColorType: "dark" | "light";
-//   // The color to use for text or items if detail is the bg color.
-//   detailTintColor: string;
-//   platform: "ios";
-// };
-// export type Chapters = {
-//   id: string;
-//   description: string;
-//   startTime: number;
-//   endTime: number;
-//   duration: number;
-};
+
 //~ ================================
 //~ Playlist Type
 //~ ================================
@@ -112,7 +87,7 @@ export type Playlist = {
   currentRate: number;
   // position history stores the last 5 position
   // Helpful if your place in book gets reset accidentally.
-  positionHistory: {trackIndex: number; position: number}[];
+  positionHistory: { trackIndex: number; position: number }[];
 };
 
 export type Bookmark = {
@@ -173,10 +148,8 @@ export type AudioState = {
       playlistId?: string;
       directory?: string;
     }) => Promise<void>;
-    updateTrackMetadata: (
-      trackId: string,
-      trackMetadata: Partial<AudioMetadata>
-    ) => Promise<void>;
+    updateTrackMetadata: (trackId: string, trackMetadata: Partial<AudioMetadata>) => Promise<void>;
+    clearChapterMetadata: (trackId: string) => Promise<void>;
     // given passed id of audioFile, remove it from list AND Delete it from FileSystem storage
     //!! Need to make sure to remove from any playlist if we actually use this function anywhere
     removeTracks: (ids: string[]) => Promise<void>;
@@ -197,8 +170,16 @@ export type AudioState = {
     updatePlaylistTracks: (playlistId: string, newTracksArray: string[]) => Promise<void>;
     // shouldRemoveFile = true will delete from phone default is true
     // will return playlistId if playlist still exists else undefined
-    deleteTrackFromPlaylist: (playlistId: string, trackToDeleteId: string, shouldRemoveFile?: boolean) => Promise<string>;
-    updatePlaylistPostionHistory: (playlistId: string, position: number, trackIndex: number) => Promise<void>;
+    deleteTrackFromPlaylist: (
+      playlistId: string,
+      trackToDeleteId: string,
+      shouldRemoveFile?: boolean
+    ) => Promise<string>;
+    updatePlaylistPostionHistory: (
+      playlistId: string,
+      position: number,
+      trackIndex: number
+    ) => Promise<void>;
     addBookmarkToPlaylist: (
       bookmarkName: string,
       playlistId: string,

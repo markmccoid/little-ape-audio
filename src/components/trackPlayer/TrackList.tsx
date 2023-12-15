@@ -197,7 +197,7 @@ const TrackList = ({ isExpanded }) => {
                   ],
                 }}
               >
-                <EnterKeyIcon size={15} style={{ paddingLeft: 4 }} />
+                <EnterKeyIcon size={15} style={{ paddingLeft: 4 }} color={trackText} />
               </MotiView>
             )}
           </Pressable>
