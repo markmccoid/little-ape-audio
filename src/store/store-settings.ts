@@ -33,6 +33,8 @@ type SettingsState = {
     google?: boolean;
   };
   isUsingDynamicColors: boolean;
+  // Start playing playlist when playlist is selected
+  autoPlay: boolean;
   actions: {
     updateJumpForwardSeconds: (seconds: number) => Promise<void>;
     updateJumpBackwardSeconds: (seconds: number) => Promise<void>;
@@ -43,6 +45,7 @@ type SettingsState = {
     setBottomSheetRef: (BottomSheetRef: BottomSheetImpRef) => void;
     setCloudAuth: (service: "dropbox" | "google", authStatus: boolean) => Promise<void>;
     toggleDynamicColors: () => Promise<void>;
+    toggleAutoPlay: () => Promise<void>;
   };
 };
 export const useSettingStore = create<SettingsState>((set, get) => ({
@@ -64,9 +67,17 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
     google: false,
   },
   isUsingDynamicColors: true,
+  autoPlay: false,
   actions: {
     toggleDynamicColors: async () => {
       set({ isUsingDynamicColors: !get().isUsingDynamicColors });
+      const newSettingsData = { ...get() };
+      delete newSettingsData.actions;
+
+      await saveToAsyncStorage("settings", newSettingsData);
+    },
+    toggleAutoPlay: async () => {
+      set({ autoPlay: !get().autoPlay });
       const newSettingsData = { ...get() };
       delete newSettingsData.actions;
 

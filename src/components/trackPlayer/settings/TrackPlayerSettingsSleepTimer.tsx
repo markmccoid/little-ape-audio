@@ -42,7 +42,11 @@ const TrackPlayerSettingsSleepTimer = () => {
         }}
       >
         <View className="flex-row justify-center p-2">
-          <Text className="font-bold text-lg" style={{ color: playlistColors.bgText }}>
+          <Text
+            allowFontScaling={false}
+            className="font-bold text-lg"
+            style={{ color: playlistColors.bgText }}
+          >
             Sleep in {sleepTime} min
           </Text>
           {/* START and STOP Buttons */}

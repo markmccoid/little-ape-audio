@@ -91,6 +91,7 @@ const TrackPlayerProgressBar = () => {
       </AnimatePresence>
       <View className="w-full px-2 justify-center items-center ">
         <Text
+          allowFontScaling={false}
           className="text-base text-cente"
           style={{
             color: textColor,
@@ -104,6 +105,7 @@ const TrackPlayerProgressBar = () => {
           <View className="flex-row justify-center w-full">
             {/* <Text className="absolute left-0 font-semibold">Chapter</Text> */}
             <Text
+              allowFontScaling={false}
               className="text-sm text-center font-semibold"
               style={{ color: textColor }}
               numberOfLines={1}
@@ -134,7 +136,7 @@ const TrackPlayerProgressBar = () => {
       />
 
       <View className="flex-row w-full px-1 justify-between mt-[-5]">
-        <Text className="font-semibold " style={{ color: textColor }}>
+        <Text allowFontScaling={false} className="font-semibold " style={{ color: textColor }}>
           {formatSeconds(chapterPosition)}
         </Text>
         {/* <Text className="font-semibold text-xs" style={{ color: textColor }}>
@@ -151,12 +153,12 @@ const TrackPlayerProgressBar = () => {
             </Text>
           )}
           {showPercent && (
-            <Text className="font-semibold text-base">
+            <Text allowFontScaling={false} className="font-semibold text-base">
               {((Math.floor(position + queuePos) / Math.floor(queueDuration)) * 100).toFixed(0)}%
             </Text>
           )}
         </TouchableOpacity>
-        <Text className="font-semibold" style={{ color: textColor }}>
+        <Text allowFontScaling={false} className="font-semibold" style={{ color: textColor }}>
           {formatSeconds(Math.floor(currChapterInfo.endSeconds - currChapterInfo?.startSeconds))}
         </Text>
       </View>

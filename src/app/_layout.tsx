@@ -18,6 +18,8 @@ import { useSettingStore } from "../store/store-settings";
 import { deactivateKeepAwake } from "expo-keep-awake";
 import { Orientation, lockPlatformAsync } from "expo-screen-orientation";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
+
 let isTPSetup = false;
 export {
   // Catch any errors thrown by the Layout component.

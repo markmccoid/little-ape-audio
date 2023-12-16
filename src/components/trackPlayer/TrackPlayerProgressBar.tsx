@@ -88,6 +88,7 @@ const TrackPlayerProgressBar = () => {
       </AnimatePresence>
       <View>
         <Text
+          allowFontScaling={false}
           className="text-base text-center "
           style={{ width: width / 1.25, color: textColor }}
           numberOfLines={1}
@@ -153,14 +154,22 @@ const TrackPlayerProgressBar = () => {
         // onSlidingComplete={(val) => soundActions.updatePosition(val)}
       /> */}
       <View className="flex-row w-full px-1 justify-between mt-[-5]">
-        <Text className="font-semibold text-xs" style={{ color: textColor }}>
+        <Text
+          allowFontScaling={false}
+          className="font-semibold text-xs"
+          style={{ color: textColor }}
+        >
           {formatSeconds(Math.floor(position))}
         </Text>
-        <Text className="font-semibold text-xs" style={{ color: textColor }}>
+        <Text
+          allowFontScaling={false}
+          className="font-semibold text-xs"
+          style={{ color: textColor }}
+        >
           {formatSeconds(Math.floor(position + queuePos))} of{" "}
           {formatSeconds(Math.floor(queueDuration))}
         </Text>
-        <Text className="font-semibold" style={{ color: textColor }}>
+        <Text allowFontScaling={false} className="font-semibold" style={{ color: textColor }}>
           {formatSeconds(Math.floor(duration))}
         </Text>
       </View>

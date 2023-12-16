@@ -15,7 +15,9 @@ const SleepButton = ({ onPress, buttonTime, style = {} }: Props) => {
   return (
     <AnimatedPressable onPress={onPress}>
       <View className="py-1 border border-amber-950 rounded-md bg-amber-200 w-[35]" style={[style]}>
-        <Text className="font-semibold text-center">{buttonTime}</Text>
+        <Text allowFontScaling={false} className="font-semibold text-center">
+          {buttonTime}
+        </Text>
       </View>
     </AnimatedPressable>
   );

@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, Appearance } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Link, Stack } from "expo-router";
 import AddBook from "../../components/common/svg/AddBook";
@@ -8,30 +8,13 @@ import { useSettingStore } from "@store/store-settings";
 
 const AudioLayout = () => {
   const countdownActive = useSettingStore((state) => state.countdownActive);
-  // const playlist = useCurrentPlaylist();
-  // const [bgColors, setBGColors] = useState({
-  //   bg: colors.amber200,
-  //   bgTimerActive: "#feb9b9",
-  //   tint: colors.amber950,
-  // });
-
-  // useEffect(() => {
-  //   console.log("IN USEEFFECT", playlist?.imageColors);
-  //   if (playlist?.imageColors) {
-  //     const textColor = chooseTextColor(playlist.imageColors.secondary);
-  //     setBGColors({
-  //       bg: playlist.imageColors.secondary,
-  //       bgTimerActive: "#feb9b9",
-  //       tint: textColor === "white" ? "white" : colors.amber950,
-  //     });
-  //   }
-  // }, [playlist]);
-
+  const colorScheme = Appearance.getColorScheme();
+  const isDark = colorScheme === "dark";
   return (
     <Stack
       screenOptions={{
         headerStyle: {
-          backgroundColor: countdownActive ? "#feb9b9" : colors.amber200,
+          backgroundColor: countdownActive ? "#feb9b9" : isDark ? colors.amber500 : colors.amber200,
         },
       }}
     >
@@ -45,7 +28,11 @@ const AudioLayout = () => {
             return (
               <Link href="/audio/dropbox/" asChild>
                 <Pressable className="p-[10] mr-[-10]">
-                  <AddBook size={25} />
+                  <AddBook
+                    size={25}
+                    headphoneColor={isDark ? "black" : colors.amber900}
+                    plusBGColor={isDark ? colors.amber900 : colors.amber700}
+                  />
                 </Pressable>
               </Link>
             );
@@ -54,7 +41,7 @@ const AudioLayout = () => {
             return (
               <Link href="/settings/" asChild replace>
                 <Pressable className="p-[10] ml-[-10]">
-                  <Monkey size={25} />
+                  <Monkey size={25} color={isDark ? "black" : colors.amber900} />
                 </Pressable>
               </Link>
             );

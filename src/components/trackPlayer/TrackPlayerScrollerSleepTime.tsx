@@ -8,14 +8,14 @@ const TrackPlayerScrollerSleepTime = () => {
   const countdownActive = useSettingStore((state) => state.countdownActive);
   const sleepTime = useSettingStore((state) => state.sleepTimeMinutes);
 
-  const { startSleepTimer, stopSleepTimer } = useSettingStore(
-    (state) => state.actions
-  );
+  const { startSleepTimer, stopSleepTimer } = useSettingStore((state) => state.actions);
 
   return (
     <View className="flex-col flex-grow bg-white border border-amber-900 rounded-lg">
       <View className="flex-row justify-center p-2">
-        <Text className="font-bold text-lg">Sleep in {sleepTime} min</Text>
+        <Text allowFontScaling={false} className="font-bold text-lg">
+          Sleep in {sleepTime} min
+        </Text>
         {/* START and STOP Buttons */}
         <View className="absolute right-1 px-2 h-full top-2">
           {!countdownActive && sleepTime > 0 && (
@@ -25,7 +25,7 @@ const TrackPlayerScrollerSleepTime = () => {
                 startSleepTimer();
               }}
             >
-              <Text className="text-base font-semibold text-green-900">
+              <Text allowFontScaling={false} className="text-base font-semibold text-green-900">
                 Start
               </Text>
             </TouchableOpacity>
@@ -36,7 +36,9 @@ const TrackPlayerScrollerSleepTime = () => {
                 stopSleepTimer();
               }}
             >
-              <Text className="text-base font-semibold text-red-900">Stop</Text>
+              <Text allowFontScaling={false} className="text-base font-semibold text-red-900">
+                Stop
+              </Text>
             </TouchableOpacity>
           )}
         </View>

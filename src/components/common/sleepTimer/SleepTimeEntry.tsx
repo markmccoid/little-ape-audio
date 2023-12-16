@@ -40,12 +40,11 @@ const SleepTimeEntry = () => {
         >
           <SleepButton buttonTime="-5" onPress={() => handleSetSleepTime(-5)} />
           <View className="px-2 w-[50]">
-            <Text className="text-base text-center">{sleepTime}</Text>
+            <Text allowFontScaling={false} className="text-base text-center">
+              {sleepTime}
+            </Text>
           </View>
-          <SleepButton
-            buttonTime="+10"
-            onPress={() => handleSetSleepTime(10)}
-          />
+          <SleepButton buttonTime="+10" onPress={() => handleSetSleepTime(10)} />
         </MotiView>
       )}
     </View>

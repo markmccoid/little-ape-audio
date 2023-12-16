@@ -13,6 +13,8 @@ const SettingsContainer = () => {
   const forwardSecs = useSettingStore((state) => state.jumpForwardSeconds);
   const backwardSecs = useSettingStore((state) => state.jumpBackwardSeconds);
   const dynamicColors = useSettingStore((state) => state.isUsingDynamicColors);
+  const autoPlay = useSettingStore((state) => state.autoPlay);
+
   const handleUpdateSeek = async (type: "forward" | "backward") => {
     Alert.prompt("Enter Seek Seconds", `Enter ${type} seek seconds (Integer only!)`, [
       {
@@ -83,6 +85,21 @@ const SettingsContainer = () => {
             ios_backgroundColor="#3e3e3e"
             onValueChange={async () => await actions.toggleDynamicColors()}
             value={dynamicColors}
+          />
+        </View>
+        {/* Auto Play */}
+        <View className="px-2 " style={[styles.borderBottom]}>
+          <Pressable onPress={() => handleUpdateSeek("backward")} className="flex-grow py-3">
+            <Text className="text-sm">AutoPlay on Playlist Select</Text>
+          </Pressable>
+
+          <Switch
+            style={{ marginRight: -10, transform: [{ scaleY: 0.7 }, { scaleX: 0.7 }] }}
+            trackColor={{ false: "#767577", true: "#4caf50" }}
+            thumbColor={autoPlay ? "#8bc34a" : "#ddd"}
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={async () => await actions.toggleAutoPlay()}
+            value={autoPlay}
           />
         </View>
         <View className="px-2 py-3" style={[styles.borderBottom]}>

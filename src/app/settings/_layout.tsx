@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Appearance } from "react-native";
 import React from "react";
 import { Link, Stack } from "expo-router";
 import { colors } from "../../constants/Colors";
@@ -11,14 +11,25 @@ const SettingsLayout = () => {
   const metadataProcessingFlag = useDropboxStore(
     (state) => state.folderMetadataProcessingInfo.metadataProcessingFlag
   );
+  const colorScheme = Appearance.getColorScheme();
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: colorScheme === "dark" ? colors.amber500 : colors.amber200,
+        },
+      }}
+    >
       <Stack.Screen
         name="index"
         options={{
           title: "Settings",
           headerStyle: {
-            backgroundColor: metadataProcessingFlag ? colors.deleteRed : colors.amber200,
+            backgroundColor: metadataProcessingFlag
+              ? colors.deleteRed
+              : colorScheme === "dark"
+              ? colors.amber500
+              : colors.amber200,
           },
           headerTintColor: colors.amber900,
           headerLeft: () => (
@@ -32,7 +43,7 @@ const SettingsLayout = () => {
         name="authroute"
         options={{
           title: "Cloud Authorizations",
-          headerStyle: { backgroundColor: colors.amber200 },
+          // headerStyle: { backgroundColor: colors.amber200 },
           headerTintColor: colors.amber900,
         }}
       />
@@ -40,7 +51,7 @@ const SettingsLayout = () => {
         name="managetracksroute"
         options={{
           title: "Manage Tracks",
-          headerStyle: { backgroundColor: colors.amber200 },
+          // headerStyle: { backgroundColor: colors.amber200 },
           headerTintColor: colors.amber900,
         }}
       />
@@ -48,7 +59,7 @@ const SettingsLayout = () => {
         name="managetracksmodal"
         options={{
           title: "Manage Tracks Modal",
-          headerStyle: { backgroundColor: colors.amber200 },
+          // headerStyle: { backgroundColor: colors.amber200 },
           headerTintColor: colors.amber900,
           presentation: "modal",
           // headerShown: false,
@@ -58,7 +69,7 @@ const SettingsLayout = () => {
         name="foldermetadataroute"
         options={{
           title: "Folder Metadata Storage",
-          headerStyle: { backgroundColor: colors.amber200 },
+          // headerStyle: { backgroundColor: colors.amber200 },
           headerTintColor: colors.amber900,
           headerBackTitle: "Back",
         }}

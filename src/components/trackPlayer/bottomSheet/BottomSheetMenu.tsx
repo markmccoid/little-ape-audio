@@ -49,7 +49,6 @@ const BottomSheetMenu = ({ isExpanded, setPage, expand, snapToIndex }: Props) =>
         }}
       >
         <ListIcon />
-        <Text className="text-white">H</Text>
       </TouchableOpacity>
       <TouchableOpacity
         onPress={() => {
@@ -60,8 +59,12 @@ const BottomSheetMenu = ({ isExpanded, setPage, expand, snapToIndex }: Props) =>
         <View className="flex-col items-center justify-center">
           <SpeedIcon />
           <View className="flex-row items-center">
-            <Text className="text-sm">{currRate}</Text>
-            <Text className="text-xs">x</Text>
+            <Text allowFontScaling={false} className="text-sm">
+              {currRate}
+            </Text>
+            <Text allowFontScaling={false} className="text-xs">
+              x
+            </Text>
           </View>
         </View>
       </TouchableOpacity>

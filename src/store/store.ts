@@ -1,12 +1,4 @@
-import {
-  Playlist,
-  AudioState,
-  ApeTrack,
-  Bookmark,
-  TrackAttributes,
-  AudioTrack,
-  PlaylistImageColors,
-} from "./types";
+import { Playlist, AudioState, ApeTrack, Bookmark, PlaylistImageColors } from "./types";
 import { create } from "zustand";
 import { Alert, Image } from "react-native";
 import uuid from "react-native-uuid";
@@ -542,6 +534,12 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       });
       if (get().currentPlaylistId === playlistId && !forceReload) {
         set({ playlistLoaded: true });
+        if (useSettingStore.getState().autoPlay) {
+          const playerState = await TrackPlayer.getPlaybackState();
+          if (playerState.state !== State.Playing) {
+            await TrackPlayer.play();
+          }
+        }
         return;
       }
 
@@ -615,6 +613,9 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       }
       mountTrackPlayerListeners();
       set({ playlistLoaded: true });
+      if (useSettingStore.getState().autoPlay) {
+        await TrackPlayer.play();
+      }
     },
     getCurrentPlaylist: () => {
       const plId = get().currentPlaylistId;

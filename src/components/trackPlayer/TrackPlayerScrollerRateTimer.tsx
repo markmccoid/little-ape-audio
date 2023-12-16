@@ -56,7 +56,10 @@ const TrackPlayerScrollerRateTimer = () => {
                 borderWidth: 1,
               }}
             >
-              <Text style={{ color: el === rate ? playlistColors.btnBg : playlistColors.btnText }}>
+              <Text
+                allowFontScaling={false}
+                style={{ color: el === rate ? playlistColors.btnBg : playlistColors.btnText }}
+              >
                 {el.toFixed(2)}
               </Text>
             </TouchableOpacity>
