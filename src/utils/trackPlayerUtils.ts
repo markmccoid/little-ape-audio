@@ -81,21 +81,24 @@ export const PlaybackService = async () => {
   //------------------------------------------
   TrackPlayer.addEventListener(Event.PlaybackProgressUpdated, async (event) => {
     // Progress Updates {"buffered": 127.512, "duration": 127.512, "position": 17.216, "track": 0}
-    // console.log("PROGRESS UPDATE");
+    // console.log("PROGRESS UPDATE", event);
     // Update the playback store with the current info:
     // - currentTrackPosition
     // - chapterInfo -> undefined if no chapters
     // - chapterIndex -> -1 if no chapters
     const position = Math.floor(event.position);
-    const queue = usePlaybackStore.getState().trackPlayerQueue;
-    const trackIndex = await TrackPlayer.getActiveTrackIndex();
+    const queue = usePlaybackStore.getState()?.trackPlayerQueue;
+    const trackIndex = await TrackPlayer?.getActiveTrackIndex();
+
+    // If listener is called, but no active track, then bail
+    if (trackIndex === undefined || !queue?.length) return;
 
     const { chapterInfo, chapterIndex, chapterProgressOffset, nextChapterExists } =
       getCurrentChapter({
         chapters: queue[trackIndex]?.chapters,
         position: position,
       });
-    // console.log("chapter index", chapterIndex, position, chapterInfo);
+
     // Set Data
     usePlaybackStore.getState().actions.setCurrentTrackPosition(position);
     usePlaybackStore.setState({
@@ -121,12 +124,13 @@ export const PlaybackService = async () => {
   TrackPlayer.addEventListener(Event.MetadataChapterReceived, async (event) => {
     let metaChapters: Chapter[] = [];
     const currTrack = (await TrackPlayer.getActiveTrack()) as ApeTrack;
+    const currPlaylist = usePlaybackStore.getState().currentPlaylistId;
     // return;
 
     // If book has chapters don't do anything
     if (!!currTrack?.chapters || !event?.metadata?.length) return;
     // if we have metadata get chapter info
-
+    // console.log("MetadataChaptRec", event);
     if (event?.metadata) {
       // console.log("chapt Data rec", event.metadata);
       const reverseChapt = reverse(event.metadata);

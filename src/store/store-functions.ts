@@ -12,7 +12,8 @@ import { GDrive } from "@robinbobin/react-native-google-drive-api-wrapper";
 import { PlaylistImageColors } from "@store/types";
 import { getImageColors } from "@utils/otherUtils";
 import TrackPlayer from "react-native-track-player";
-
+import { usePlaybackStore } from "./store";
+let isCriticalSectionLocked = false;
 const gdrive = new GDrive();
 
 type AddTrack = AudioState["actions"]["addNewTrack"];
@@ -137,49 +138,62 @@ export const addTrack =
     // Add the new track to current track list
     const newAudioFileList = [...filteredList, newAudioFile];
     set({ tracks: newAudioFileList });
-    //! ----- ----- ----- ----- ----- ----- -----
-    //! This code is to only here to make the
-    //! AudioCommonMetadataReceived event fire
-    //! It will cause the chapter event to emit and then
-    //! we can grab any chapter data found in the mp3 file
-    //~ ONE Caveat, I am resetting the TrackPlayer, which means if
-    //~ playlist is active it will be cleared.  Oh well.
-    //~ We could probably use this techinique for the other metadata
-    //~ but for now above works.
-    //! ----- ----- ----- ----- ----- ----- -----
-    const trackPlayerTrack = {
-      id: `${filename}`,
-      filename: `${filename}`,
-      url: `${FileSystem.documentDirectory}${fileURI}`,
-      duration: tags.durationSeconds,
-    };
 
-    await TrackPlayer.reset();
-    await TrackPlayer.add([trackPlayerTrack]);
-    await TrackPlayer.skip(0);
-    // await TrackPlayer.seekTo(0);
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    //!!!!!!!
+    //!! ----------
+    // Check if the critical section is locked; if it is, wait and try again later
+    // If global var is true, we will loop on this until it is not true, then continue.
+    while (isCriticalSectionLocked) {
+      await new Promise((resolve) => setTimeout(resolve, 100)); // Adjust the timeout as needed
+    }
 
-    //! -- When a new track is added, we need to get the title and author
-    //!    information.  This will be our Playlist name
-    /**
-     * PLAYLIST
-     *  - id - uuid
-     *  - title
-     *  - author
-     *  - tracks: []
-     *  - currentTrack - trackId
-     */
-    // If no playlist ID passed, then assume single download and create new playlist
-    // and add track
-    const plName =
-      newAudioFile.metadata?.album || newAudioFile.metadata?.title || newAudioFile.filename;
-    const plAuthor = newAudioFile.metadata?.artist || "Unknown";
-    const finalPlaylistId = get().actions.addNewPlaylist(plName, plAuthor, playlistId);
-    await get().actions.addTracksToPlaylist(finalPlaylistId, [newAudioFile.id]);
-    console.log("addTrack store-functions");
-    await saveToAsyncStorage("tracks", newAudioFileList);
+    // Lock the critical section
+    isCriticalSectionLocked = true;
+
+    try {
+      //! ----- ----- ----- ----- ----- ----- -----
+      //! This code is to only here to make the
+      //! AudioCommonMetadataReceived event fire
+      //! It will cause the chapter event to emit and then
+      //! we can grab any chapter data found in the mp3 file
+      //~ ONE Caveat, I am resetting the TrackPlayer, which means if
+      //~ playlist is active it will be cleared.  Oh well.
+      //~ We could probably use this techinique for the other metadata
+      //~ but for now above works.
+      //! ----- ----- ----- ----- ----- ----- -----
+      const trackPlayerTrack = {
+        id: `${filename}`,
+        filename: `${filename}`,
+        url: `${FileSystem.documentDirectory}${fileURI}`,
+        duration: tags.durationSeconds,
+      };
+
+      await TrackPlayer.reset();
+      await TrackPlayer.add([trackPlayerTrack]);
+      await TrackPlayer.skip(0);
+      /**
+       * PLAYLIST
+       *  - id - uuid
+       *  - title
+       *  - author
+       *  - tracks: []
+       *  - currentTrack - trackId
+       */
+      // If no playlist ID passed, then assume single download and create new playlist
+      // and add track
+      const plName =
+        newAudioFile.metadata?.album || newAudioFile.metadata?.title || newAudioFile.filename;
+      const plAuthor = newAudioFile.metadata?.artist || "Unknown";
+      const finalPlaylistId = get().actions.addNewPlaylist(plName, plAuthor, playlistId);
+      try {
+        await get().actions.addTracksToPlaylist(finalPlaylistId, [newAudioFile.id]);
+        await saveToAsyncStorage("tracks", newAudioFileList);
+      } catch (e) {
+        console.log("Error in addTrack (store-function) adding track to playlist", playlistId);
+      }
+      // console.log("addTrack store-functions", newAudioFile?.filename, finalPlaylistId);
+    } finally {
+      isCriticalSectionLocked = false;
+    }
   };
 
 //~~ -------------------------------------

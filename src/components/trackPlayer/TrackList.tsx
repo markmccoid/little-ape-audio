@@ -9,7 +9,7 @@ import {
   Pressable,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
-import { usePlaybackStore, useTrackActions } from "../../store/store";
+import { usePlaybackStore, useTrackActions, useTracksStore } from "../../store/store";
 import { formatSeconds } from "../../utils/formatUtils";
 import TrackPlayer, { useProgress } from "react-native-track-player";
 import { colors } from "../../constants/Colors";
@@ -45,6 +45,7 @@ const TrackList = ({ isExpanded }) => {
   const [sectionList, setSectionList] = useState<SectionListData[]>([]);
   const currChapterIndex = usePlaybackStore((state) => state.currentChapterIndex);
   const playlistColors = usePlaylistColors();
+  const plDate = useTracksStore((state) => state.playlistUpdated);
 
   // console.log("PL LOADED", isPlaylistLoaded, sectionList);
   //! Store "curr" track and chapter
@@ -264,12 +265,12 @@ const TrackList = ({ isExpanded }) => {
               });
             if (!isCurrentTrack) {
               await TrackPlayer.skip(section.queuePos);
-              await new Promise((resolve) => setTimeout(resolve, 100));
+              await new Promise((resolve) => setTimeout(resolve, 10));
               // await playbackActions.goToTrack(section.queuePos);
             }
             setCurrLocation({ trackIndex: section.queuePos, chapterIndex });
             await playbackActions.seekTo(item?.startSeconds);
-            await new Promise((resolve) => setTimeout(resolve, 100));
+            await new Promise((resolve) => setTimeout(resolve, 10));
             // await TrackPlayer.seekTo(item?.startSeconds);
             // setIsCurrChapter(true);
           }}
@@ -339,57 +340,57 @@ const TrackList = ({ isExpanded }) => {
 
 export default TrackList;
 
-const ChapterRow = ({
-  isCurrentTrack,
-  playbackActions,
-  chapt,
-  trackIndex,
-  chapterIndex,
-  progress,
-}) => {
-  const [isCurrChapter, setIsCurrChapter] = useState(
-    progress <= chapt.endSeconds && progress >= chapt?.startSeconds
-  );
-  // const isCurrChapter = progress <= chapt.endSeconds && progress >= chapt.startSeconds;
-  // console.log("chapter test", chapt.startSeconds, chapt.endSeconds, progress, isCurrChapter);
-  // For each chapter, check every second where we are at in the chapter.
-  useEffect(() => {
-    setIsCurrChapter(progress <= chapt.endSeconds && progress >= chapt?.startSeconds);
-  }, [progress]);
+// const ChapterRow = ({
+//   isCurrentTrack,
+//   playbackActions,
+//   chapt,
+//   trackIndex,
+//   chapterIndex,
+//   progress,
+// }) => {
+//   const [isCurrChapter, setIsCurrChapter] = useState(
+//     progress <= chapt.endSeconds && progress >= chapt?.startSeconds
+//   );
+//   // const isCurrChapter = progress <= chapt.endSeconds && progress >= chapt.startSeconds;
+//   // console.log("chapter test", chapt.startSeconds, chapt.endSeconds, progress, isCurrChapter);
+//   // For each chapter, check every second where we are at in the chapter.
+//   useEffect(() => {
+//     setIsCurrChapter(progress <= chapt.endSeconds && progress >= chapt?.startSeconds);
+//   }, [progress]);
 
-  return (
-    <View
-      className={`flex-row ml-4 border-b border-l border-amber-600 ${
-        isCurrChapter ? "bg-amber-500" : "bg-amber-100"
-      }`}
-    >
-      <TouchableOpacity
-        onPress={async () => {
-          if (!isCurrentTrack) {
-            await playbackActions.goToTrack(trackIndex);
-          }
-          await playbackActions.seekTo(chapt?.startSeconds || 0);
-          setIsCurrChapter(true);
-        }}
-      >
-        <View className="w-[40] flex-row justify-center items-center border-r border-amber-600 bg-[#FFE194] flex-grow">
-          {/* <ToTopIcon /> */}
-          <Text className="text-base font-bold">{chapterIndex + 1}</Text>
-        </View>
-      </TouchableOpacity>
-      <View className="flex-row justify-between p-2 pr-3 flex-grow">
-        <Text
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          className={`${isCurrChapter ? "font-semibold text-sm" : ""} flex-1`}
-        >
-          {chapt.title}
-        </Text>
-        <View className="flex-row justify-start ">
-          <Text className="text-xs">{formatSeconds(chapt?.startSeconds || 0)} - </Text>
-          <Text className="text-xs">{formatSeconds(chapt.endSeconds)}</Text>
-        </View>
-      </View>
-    </View>
-  );
-};
+//   return (
+//     <View
+//       className={`flex-row ml-4 border-b border-l border-amber-600 ${
+//         isCurrChapter ? "bg-amber-500" : "bg-amber-100"
+//       }`}
+//     >
+//       <TouchableOpacity
+//         onPress={async () => {
+//           if (!isCurrentTrack) {
+//             await playbackActions.goToTrack(trackIndex);
+//           }
+//           await playbackActions.seekTo(chapt?.startSeconds || 0);
+//           setIsCurrChapter(true);
+//         }}
+//       >
+//         <View className="w-[40] flex-row justify-center items-center border-r border-amber-600 bg-[#FFE194] flex-grow">
+//           {/* <ToTopIcon /> */}
+//           <Text className="text-base font-bold">{chapterIndex + 1}</Text>
+//         </View>
+//       </TouchableOpacity>
+//       <View className="flex-row justify-between p-2 pr-3 flex-grow">
+//         <Text
+//           numberOfLines={1}
+//           ellipsizeMode="tail"
+//           className={`${isCurrChapter ? "font-semibold text-sm" : ""} flex-1`}
+//         >
+//           {chapt.title}
+//         </Text>
+//         <View className="flex-row justify-start ">
+//           <Text className="text-xs">{formatSeconds(chapt?.startSeconds || 0)} - </Text>
+//           <Text className="text-xs">{formatSeconds(chapt.endSeconds)}</Text>
+//         </View>
+//       </View>
+//     </View>
+//   );
+// };

@@ -88,7 +88,7 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
 
   const renderItem = useCallback(
     ({ item, index }) => {
-      // console.log("ITEM", item);
+      // console.log("ITEM", item, index);
       if (!item.path_lower) return;
       if (item[".tag"] === "folder") {
         const { pathToFolderKey, pathToBookFolderKey } = extractMetadataKeys(item.path_lower);

@@ -147,13 +147,13 @@ const TrackPlayerProgressBar = () => {
           className="flex-grow justify-center flex-row mx-1"
         >
           {!showPercent && (
-            <Text className="font-semibold text-xs" style={{ color: textColor }}>
+            <Text className="font-semibold text-base" style={{ color: textColor }}>
               {formatSeconds(Math.floor(position + queuePos))} of{" "}
               {formatSeconds(Math.floor(queueDuration))}
             </Text>
           )}
           {showPercent && (
-            <Text allowFontScaling={false} className="font-semibold text-base">
+            <Text allowFontScaling={false} className="font-semibold text-lg">
               {((Math.floor(position + queuePos) / Math.floor(queueDuration)) * 100).toFixed(0)}%
             </Text>
           )}

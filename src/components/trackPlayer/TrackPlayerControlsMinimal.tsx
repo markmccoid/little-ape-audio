@@ -67,6 +67,7 @@ const TrackPlayerControlsMinimal = ({ style }: Props) => {
             }}
           />
           <Text
+            allowFontScaling={false}
             style={{
               position: "absolute",
               bottom: 4,
@@ -99,6 +100,7 @@ const TrackPlayerControlsMinimal = ({ style }: Props) => {
             style={{ transform: [{ rotateZ: "45deg" }, { scale: 1.1 }] }}
           />
           <Text
+            allowFontScaling={false}
             style={{
               position: "absolute",
               bottom: 4,

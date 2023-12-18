@@ -97,8 +97,8 @@ const TrackPlayerSettingsTracks = () => {
     <View
       className="w-full mb-10 "
       style={{
-        borderBottomColor: "black",
-        borderBottomWidth: StyleSheet.hairlineWidth,
+        // borderBottomColor: "black",
+        // borderBottomWidth: StyleSheet.hairlineWidth,
         marginLeft: 2,
       }}
     >

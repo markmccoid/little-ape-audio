@@ -42,6 +42,7 @@ let saveIntervalId = undefined;
 //-- ==================================
 //-- TRACK STORE
 //-- ==================================
+
 export const useTracksStore = create<AudioState>((set, get) => ({
   tracks: [],
   playlists: {},
@@ -178,7 +179,6 @@ export const useTracksStore = create<AudioState>((set, get) => ({
     addTracksToPlaylist: async (playlistId, tracks) => {
       const storedTracks = [...get().tracks];
       const playlist = get().playlists[playlistId];
-
       // Take the tracks being added and merge them with existing tracks
       // in playlist.  Get rid of dups.
       const uniqueTracksPlaylist = [...new Set([...(playlist?.trackIds || []), ...tracks])];
@@ -345,6 +345,12 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       // If we have removed the final track from a playlist, delete it?
       if (updatedTracks.length > 0) {
         playlists[playlistId].trackIds = updatedTracks;
+        //Get and set the new duration time.
+        const { images, genres, totalDuration } = analyzePlaylistTracks(
+          get().tracks,
+          updatedTracks
+        );
+        playlists[playlistId].totalDurationSeconds = totalDuration;
         // set({ playlists });
         // console.log("track removed from", playlists[playlistId].id);
         set({ playlists, playlistUpdated: new Date() });

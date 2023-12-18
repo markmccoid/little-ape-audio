@@ -72,12 +72,12 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
 
       {
         <MotiView
-          // key={1}
-          // from={{ height: 200, opacity: 1 }}
+          key={playlist.id}
+          // from={{ height: isDeleted && 200, opacity: 1 }}
           // animate={{ height: isDeleted && 0, opacity: isDeleted && 0 }}
           // transition={{ type: "timing", duration: 2000 }}
-          exit={{ opacity: 0 }}
-          exitTransition={{ type: "timing", duration: 200 }}
+          // exit={{ scale: 0, opacity: 0 }}
+          // exitTransition={{ type: "timing", duration: 2000 }}
         >
           <Swipeable
             ref={(ref) => (renderRowRefs[index] = ref)}

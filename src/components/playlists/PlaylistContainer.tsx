@@ -108,7 +108,7 @@ const PlaylistContainer = () => {
         animate={{ opacity: 1 }}
         transition={{
           type: "timing",
-          duration: 500,
+          duration: 300,
           delay: 25 * index,
         }}
         style={{

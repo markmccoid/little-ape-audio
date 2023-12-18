@@ -5,7 +5,7 @@ import { AsteriskIcon, CloseIcon, CloudDownloadIcon } from "../common/svg/Icons"
 import { formatBytes } from "../../utils/formatUtils";
 import { colors } from "../../constants/Colors";
 import { DownloadProgress, downloadFileWProgress } from "../../store/data/fileSystemAccess";
-import { useTrackActions } from "../../store/store";
+import { usePlaybackStore, useTrackActions } from "../../store/store";
 import * as Progress from "react-native-progress";
 import { AudioSourceType } from "@app/audio/dropbox";
 import { DownloadProgressCallbackResult } from "react-native-fs";
@@ -22,6 +22,8 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn }: Props) => {
   const isDropbox = !!(audioSource === "dropbox");
   const isGoogle = !!(audioSource === "google");
   const trackActions = useTrackActions();
+  const playlistLoaded = usePlaybackStore((state) => state.playlistLoaded);
+  const resetPlaybackStore = usePlaybackStore((state) => state.actions.resetPlaybackStore);
   const [progress, setProgress] = useState<DownloadProgress>();
 
   const [isDownloading, setIsDownloading] = useState(false);
@@ -59,8 +61,12 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn }: Props) => {
   //~ --- downloadFile function to download file while setting progress state --------------
   const downloadFile = async (file: FileEntry) => {
     setIsDownloading(true);
+    // If playlist is loaded, reset store.  Needed because of how we pull chapter info
+    // from the metadataChapterReceived event.
+    if (playlistLoaded) {
+      await resetPlaybackStore();
+    }
     // Progress callback
-
     const onHandleProgress = (progressData: DownloadProgressCallbackResult) => {
       setProgress({
         downloadProgress: progressData.bytesWritten / progressData.contentLength,
@@ -90,20 +96,24 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn }: Props) => {
       }
     }
 
+    try {
+      // Add new Track to store
+      await trackActions.addNewTrack({
+        fileURI: cleanFileName,
+        filename: file.name,
+        sourceLocation: file.path_lower,
+        playlistId: playlistId,
+        pathIn,
+        audioSource,
+      });
+    } catch (e) {
+      console.log(`Error trackActions.addNewTrack for ${cleanFileName} `, e);
+    }
     // Reset Progress and download flags
     setProgress({ downloadProgress: 0, bytesExpected: 0, bytesWritten: 0 });
     setIsDownloaded(true);
     setIsDownloading(false);
     stopDownloadRef.current = undefined;
-    // Add new Track to store
-    await trackActions.addNewTrack({
-      fileURI: cleanFileName,
-      filename: file.name,
-      sourceLocation: file.path_lower,
-      playlistId: playlistId,
-      pathIn,
-      audioSource,
-    });
   };
 
   return (

@@ -34,6 +34,10 @@ export const loadFromAsyncStorage = async (key: StorageKeys) => {
 // -- SAVE data with passed key to Local Storage
 // --------------------------------------------
 export const saveToAsyncStorage = async (key: StorageKeys, data: Data) => {
+  if (!data) {
+    console.log("ERROR: Data is undefined or null");
+    return;
+  }
   try {
     await AsyncStorage.setItem(key, JSON.stringify(data));
   } catch (error) {

@@ -70,8 +70,16 @@ const PlaylistEditContainer = () => {
         <TPImagePicker currPlaylistId={playlist.id} />
       </View>
       <View className="items-center justify-end flex-row w-full ">
-        <View className="flex-row justify-start item-center ml-2 flex-1">
-          <Text className="mr-2 mt-1">Override Track Images?</Text>
+        <View className="flex-row justify-start item-center ml-2 flex-1 pb-2">
+          <AnimatedPressable
+            onPress={() => handleGetImageFromWeb(playlist?.name)}
+            buttonStyle="default"
+          >
+            <Text>Find New Image</Text>
+          </AnimatedPressable>
+          <Text allowFontScaling={false} className="ml-3 mt-1">
+            Override Track Images?
+          </Text>
           <Switch
             style={{ marginRight: 20, transform: [{ scaleY: 0.7 }, { scaleX: 0.7 }] }}
             trackColor={{ false: "#767577", true: "#4caf50" }}
@@ -85,15 +93,10 @@ const PlaylistEditContainer = () => {
             value={playlist?.overrideTrackImage}
           />
         </View>
-        <AnimatedPressable
-          onPress={() => handleGetImageFromWeb(playlist?.name)}
-          buttonStyle="default"
-        >
-          <Text>Find New Image</Text>
-        </AnimatedPressable>
       </View>
+      <View className="w-full bg-black" style={{ height: StyleSheet.hairlineWidth }} />
       {/* <PlaylistDetails playlistId={playlist.id} /> */}
-      <View className="mx-2 flex-1 mb-[80]">
+      <View className="mx-2 flex-1 mb-[80] mt-2">
         <PlaylistEditTracks playlistId={playlist.id} />
       </View>
     </View>

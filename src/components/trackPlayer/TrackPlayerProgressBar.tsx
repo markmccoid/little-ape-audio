@@ -163,7 +163,7 @@ const TrackPlayerProgressBar = () => {
         </Text>
         <Text
           allowFontScaling={false}
-          className="font-semibold text-xs"
+          className="font-semibold text-base"
           style={{ color: textColor }}
         >
           {formatSeconds(Math.floor(position + queuePos))} of{" "}

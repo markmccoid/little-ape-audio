@@ -136,8 +136,8 @@ const PlaylistEditTracks = ({ playlistId }: { playlistId: string }) => {
     <View
       className="w-full flex-1 "
       style={{
-        borderBottomColor: "black",
-        borderBottomWidth: StyleSheet.hairlineWidth,
+        // borderBottomColor: "black",
+        // borderBottomWidth: StyleSheet.hairlineWidth,
         marginLeft: 2,
       }}
     >

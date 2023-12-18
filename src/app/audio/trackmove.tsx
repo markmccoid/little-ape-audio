@@ -55,7 +55,6 @@ const trackmove = () => {
     }
 
     await trackActions.addTracksToPlaylist(newPlaylistId, [trackId]);
-
     // set shouldRemoveFile=false so we don't delete from device
     if (isMoving) {
       const playlistExists = await trackActions.deleteTrackFromPlaylist(
