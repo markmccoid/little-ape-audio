@@ -1,4 +1,12 @@
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  Alert,
+  Pressable,
+} from "react-native";
 import React, { useRef, useState } from "react";
 import Constants from "expo-constants";
 import { makeRedirectUri } from "expo-auth-session";
@@ -106,9 +114,9 @@ const DropboxAuthContainer = () => {
       <Text>isMounted: {JSON.stringify(isCheckingToken)}</Text> */}
       {/* {!isMounted?.current && <ActivityIndicator size="large" />} */}
       {validToken && !isCheckingToken && (
-        <View>
+        <>
           <Text className="text-lg font-bold">Dropbox is Authorized</Text>
-        </View>
+        </>
       )}
       {!validToken && !isCheckingToken && (
         <View className="flex-col justify-center items-center">
@@ -133,13 +141,6 @@ const DropboxAuthContainer = () => {
       {validToken && !isCheckingToken && (
         <View className="flex-col justify-center items-center w-full">
           <View className="flex-row items-center justify-start">
-            <Link href="/audio/" asChild className="mr-20">
-              <TouchableOpacity className="rounded-md p-2 ml-4 border border-black bg-amber-300">
-                <Text className="text-amber-950" allowFontScaling={false}>
-                  Home
-                </Text>
-              </TouchableOpacity>
-            </Link>
             <TouchableOpacity style={styles.revokeButton} onPress={onRevoke}>
               <Text style={{ color: "white" }} allowFontScaling={false}>
                 Revoke Dropbox Authorization

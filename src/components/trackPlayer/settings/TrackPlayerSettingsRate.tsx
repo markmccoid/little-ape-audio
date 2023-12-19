@@ -14,23 +14,15 @@ const COMPONENT_PADDING = 10;
 
 const TrackPlayerSettingsRate = () => {
   const playbackActions = usePlaybackStore((state) => state.actions);
-  const [rate, setRate] = useState<number>(1);
+  const playlistRate = usePlaybackStore((state) => state.currentRate);
+  const didUpdate = usePlaybackStore((state) => state.didUpdate);
+  const [rate, setRate] = useState<number>(playlistRate);
   const [isSliding, setIsSliding] = useState(false);
   const playlistColors = usePlaylistColors();
 
-  // const bgTextColor = plColors.background.tintColor;
-  // const bgColor = plColors.background.color;
-  // const btnTextColor = plColors.secondary.tintColor;
-  // const btnbgColor = plColors.secondary.color;
-  // const trackRightColor = lightenColor(plColors.secondary.color, 75);
-
   useEffect(() => {
-    const getRate = async () => {
-      const rate = await TrackPlayer.getRate();
-      setRate(rate);
-    };
-    getRate();
-  }, []);
+    setRate(playlistRate);
+  }, [didUpdate]);
 
   const updateRate = async (newRate: number) => {
     setRate(newRate);
@@ -51,12 +43,17 @@ const TrackPlayerSettingsRate = () => {
             <TouchableOpacity
               key={el}
               onPress={() => updateRate(el)}
-              className={`px-2 py-1 rounded-md border border-amber-800 ${
-                el === rate ? "bg-amber-300" : "bg-white"
-              }`}
-              style={{ backgroundColor: playlistColors.btnBg }}
+              className={`px-2 py-1 rounded-md`}
+              style={{
+                backgroundColor: el === rate ? playlistColors.btnText : playlistColors.btnBg,
+                borderColor: playlistColors.btnBorder,
+                borderWidth: 1,
+              }}
             >
-              <Text allowFontScaling={false} style={{ color: playlistColors.btnText }}>
+              <Text
+                style={{ color: el === rate ? playlistColors.btnBg : playlistColors.btnText }}
+                allowFontScaling={false}
+              >
                 {el.toFixed(2)}
               </Text>
             </TouchableOpacity>

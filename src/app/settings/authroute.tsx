@@ -1,4 +1,4 @@
-import { View, Text, Dimensions } from "react-native";
+import { View, Text, Dimensions, Pressable } from "react-native";
 import React from "react";
 import DropboxAuth from "../../components/dropbox/DropboxAuth";
 import GoogleAuth from "../../components/dropbox/GoogleAuth";
@@ -19,6 +19,13 @@ const DropboxAuthScreen = () => {
           ),
         }}
       />
+      <View className="flex-row m-2">
+        <Link href="/audio/" asChild>
+          <Pressable className="flex-grow w-full border bg-amber-300 rounded-md px-2 py-1">
+            <Text className="text-lg text-center">Home</Text>
+          </Pressable>
+        </Link>
+      </View>
       <DropboxAuth />
       <GoogleAuth />
     </View>

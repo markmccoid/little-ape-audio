@@ -15,17 +15,16 @@ const COMPONENT_PADDING = 10;
 
 const TrackPlayerScrollerRateTimer = () => {
   const playbackActions = usePlaybackStore((state) => state.actions);
-  const [rate, setRate] = useState<number>(1);
+  const playlistRate = usePlaybackStore((state) => state.currentRate);
+  const didUpdate = usePlaybackStore((state) => state.didUpdate);
+  const [rate, setRate] = useState<number>(playlistRate);
   const [isSliding, setIsSliding] = useState(false);
   const playlistColors = usePlaylistColors();
 
   useEffect(() => {
-    const getRate = async () => {
-      const rate = await TrackPlayer.getRate();
-      setRate(rate);
-    };
-    getRate();
-  }, []);
+    setRate(playlistRate);
+  }, [didUpdate]);
+
   const updateRate = async (newRate: number) => {
     setRate(newRate);
     playbackActions.updatePlaybackRate(newRate);
@@ -49,9 +48,9 @@ const TrackPlayerScrollerRateTimer = () => {
             <TouchableOpacity
               key={el}
               onPress={() => updateRate(el)}
-              className={`px-2 py-1 rounded-md ${el === rate ? "bg-amber-300" : "bg-white"}`}
+              className={`px-2 py-1 rounded-md ${el == rate ? "bg-amber-300" : "bg-white"}`}
               style={{
-                backgroundColor: el === rate ? playlistColors.btnText : playlistColors.btnBg,
+                backgroundColor: el == rate ? playlistColors.btnText : playlistColors.btnBg,
                 borderColor: playlistColors.btnBorder,
                 borderWidth: 1,
               }}

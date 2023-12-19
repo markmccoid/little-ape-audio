@@ -53,9 +53,9 @@ const SettingsContainer = () => {
           <Text>Version</Text>
           <Text>{version}</Text>
         </View>
-        <View className="px-2 py-3" style={[styles.borderBottom]}>
+        <View style={[styles.borderBottom]}>
           <Link href="/settings/authroute" asChild>
-            <Pressable>
+            <Pressable className="px-2 py-3 w-full">
               <Text className="text-sm">Cloud Authorization</Text>
             </Pressable>
           </Link>
@@ -102,17 +102,17 @@ const SettingsContainer = () => {
             value={autoPlay}
           />
         </View>
-        <View className="px-2 py-3" style={[styles.borderBottom]}>
+        <View style={[styles.borderBottom]}>
           <Link href="/settings/managetracksroute" asChild>
-            <Pressable>
+            <Pressable className="px-2 py-3 w-full">
               <Text className="text-sm">Manage Tracks</Text>
             </Pressable>
           </Link>
         </View>
         {/* FOLDER METADATA */}
-        <View className="px-2 py-3" style={[styles.borderBottom]}>
+        <View style={[styles.borderBottom]}>
           <Link href="/settings/foldermetadataroute" asChild>
-            <Pressable>
+            <Pressable className="px-2 py-3 w-full">
               <Text className="text-sm">Manage Folder Metadata</Text>
             </Pressable>
           </Link>

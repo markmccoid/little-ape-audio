@@ -75,9 +75,7 @@ const GoogleAuthContainer = () => {
           <View className="flex-row justify-center">
             <Monkey size={100} color={colors.amber500} />
           </View>
-          <TouchableOpacity onPress={async () => await GoogleSignin.signInSilently()}>
-            <Text>Test Silent SignIn</Text>
-          </TouchableOpacity>
+
           <Text className="text-lg">Happy Listening</Text>
         </View>
       )}

@@ -14,17 +14,14 @@ const COMPONENT_PADDING = 10;
 
 const RateSelector = () => {
   const playbackActions = usePlaybackStore((state) => state.actions);
+  const playlistRate = usePlaybackStore((state) => state.currentRate);
   const didUpdate = usePlaybackStore((state) => state.didUpdate);
-  const [rate, setRate] = useState<number>(1);
+  const [rate, setRate] = useState<number>(playlistRate);
   const [isSliding, setIsSliding] = useState(false);
   const playlistColors = usePlaylistColors();
 
   useEffect(() => {
-    const getRate = async () => {
-      const rate = await TrackPlayer.getRate();
-      setRate(rate);
-    };
-    getRate();
+    setRate(playlistRate);
   }, [didUpdate]);
 
   const updateRate = async (newRate: number) => {

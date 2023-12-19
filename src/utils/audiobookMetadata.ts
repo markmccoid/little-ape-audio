@@ -47,31 +47,22 @@ export type BookJSONMetadata = {
   forceMongoUpdate?: boolean | undefined;
 };
 export type CleanBookMetadata = ReturnType<typeof cleanOneBook>;
-export function cleanOneBook(
-  book: BookJSONMetadata,
-  path_lower: string,
-  localImageName?: string
-) {
+export function cleanOneBook(book: BookJSONMetadata, path_lower: string, localImageName?: string) {
   if (!book) return undefined;
   // decide on data for fields that come from multiple sources
   // if infoFileData available use it for the following:
-  const googleAuthor = book?.googleAPIData?.authors
-    ? book.googleAPIData.authors[0]
-    : undefined;
-  const author =
-    book?.infoFileData?.author || book?.folderNameData?.author || googleAuthor;
+  const googleAuthor = book?.googleAPIData?.authors ? book.googleAPIData.authors[0] : undefined;
+  const author = book?.infoFileData?.author || book?.folderNameData?.author || googleAuthor;
 
   const title =
     book?.infoFileData?.title ||
     book?.folderNameData?.title ||
     `${book?.googleAPIData?.title}: ${book?.googleAPIData?.subTitle}`;
-  const description =
-    book?.infoFileData?.summary || book?.googleAPIData?.description;
+  const description = book?.infoFileData?.summary || book?.googleAPIData?.description;
   const publishedYear =
     parseInt(book?.folderNameData?.publishedYear) ||
     parseInt(book?.googleAPIData?.publishedDate?.slice(0, 4));
-  const releaseDate =
-    book?.infoFileData?.releaseDate || book?.googleAPIData?.publishedDate;
+  const releaseDate = book?.infoFileData?.releaseDate || book?.googleAPIData?.publishedDate;
   const imageURL = book?.googleAPIData?.imageURL; // || book.folderImages[0];
   // const imageURL = book?.googleAPIData?.imageURL || defaultImages.image01; // || book.folderImages[0];
   // Concate all categories together and filter out blanks (we remove dups when assigning to object)
@@ -101,12 +92,12 @@ export function cleanOneBook(
     pageCount: parseInt(book?.googleAPIData?.pageCount) || undefined,
     bookLength,
     imageURL: imageURL,
-    defaultImage: Image.resolveAssetSource(defaultImages[`image${randomNum}`])
-      .uri,
+    defaultImage: Image.resolveAssetSource(defaultImages[`image${randomNum}`]).uri,
     localImageName: localImageName,
     categories: Array.from(new Set(categories)),
     categoryOne,
     categoryTwo,
+    audioSource: "dropbox",
   };
 }
 

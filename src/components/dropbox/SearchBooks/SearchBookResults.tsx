@@ -47,6 +47,7 @@ const SearchBookResults = ({ resultData }: Props) => {
               params: {
                 fullPath: item.dropboxPathLower,
                 backTitle: "Back",
+                audioSource: item.audioSource || "dropbox",
               },
             })
           }
