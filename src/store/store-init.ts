@@ -26,10 +26,12 @@ export const onInitialize = async () => {
   useTracksStore.setState({ tracks: tracks || [], playlists: playlists || {} });
 
   // * patch favFolders
-  const patchedFavs = favFolders.map((folder) => ({
-    ...folder,
-    audioSource: folder?.audioSource ? folder.audioSource : "dropbox",
-  }));
+  const patchedFavs =
+    favFolders &&
+    favFolders.map((folder) => ({
+      ...folder,
+      audioSource: folder?.audioSource ? folder.audioSource : "dropbox",
+    }));
   saveToAsyncStorage("favfolders", patchedFavs);
   useDropboxStore.setState({ favoriteFolders: patchedFavs });
 

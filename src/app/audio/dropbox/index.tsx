@@ -60,7 +60,7 @@ const DropboxScreens = () => {
             </View>
           </Link>
         </View>
-        {/* GOOGLE -- INACTIVE FOR NOW UNTIL DOWNLOAD BINARY WORKING */}
+        {/* GOOGLE -- */}
         <View
           className="rounded-xl bg-white mt-2"
           style={{
@@ -85,7 +85,7 @@ const DropboxScreens = () => {
           </Link>
         </View>
         {/* BOOK META SEARCH */}
-        {Object.keys(folderMetadata).length > 0 && (
+        {folderMetadata && Object.keys(folderMetadata)?.length > 0 && (
           <View
             className="rounded-xl bg-white mt-2"
             style={{
