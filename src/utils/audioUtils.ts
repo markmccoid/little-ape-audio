@@ -6,12 +6,15 @@ const base64 = require("base-64");
 import { AVPlaybackStatusSuccess, Audio } from "expo-av";
 import { AudioMetadata, Chapters } from "../store/types";
 import { Image } from "react-native";
+import { getFileExtension } from "./otherUtils";
 
 //--=================================
 //-- getAudioFileTags
 //--=================================
 export const getAudioFileTags = async (fullFileURI: string) => {
+  const fileExt = getFileExtension(fullFileURI);
   let durationSeconds = await getAudioFileDuration(fullFileURI);
+
   // fullFileURI is the full path to the audio file
   // It is expected to be in the apps storage, with the "file:///" in front
   // Strip the "file:///"
@@ -24,6 +27,7 @@ export const getAudioFileTags = async (fullFileURI: string) => {
     const tag = (await jsMediaAsync(workingURI)) as TagType;
     // Get chapter information if any exists
     const chaptersInfo = processChapters(tag.tags?.CHAP as unknown as TagChapters[]);
+
     metadata = {
       title: tag.tags?.title,
       artist: tag.tags?.artist,
@@ -31,9 +35,9 @@ export const getAudioFileTags = async (fullFileURI: string) => {
       genre: tag.tags?.genre,
       trackRaw: tag.tags?.track,
       comment: tag.tags?.comment?.text,
-      // chapters: chaptersInfo?.chapterArray,
+      chapters: chaptersInfo?.chapterArray,
       year: isNaN(parseInt(tag.tags?.year)) ? undefined : parseInt(tag.tags?.year),
-      durationSeconds: chaptersInfo?.duration || durationSeconds,
+      durationSeconds: chaptersInfo?.duration || durationSeconds || 8000,
       pictureURI: undefined,
       pictureAspectRatio: undefined,
     };
@@ -98,8 +102,11 @@ const processChapters = (
   if (!chapters || chapters?.length === 0) return undefined;
   // Get duration from the last chapter and coverting to seconds
   const duration = chapters[chapters.length - 1].data.endTime / 1000;
+
+  // Bail if the endTime is not a number
+  if (isNaN(chapters[chapters.length - 1]?.data?.endTime)) return undefined;
+
   let chapterArray = [];
-  // console.log("CHAPTERS", chapters);
   for (const chapter of chapters) {
     const chapterStartTime = chapter.data?.startTime / 1000;
     //! Subtracting one because each new chapter's start time is the same as the previous chapters end time
@@ -108,11 +115,13 @@ const processChapters = (
     const chapterDescription = chapter.data?.subFrames?.TIT2?.data;
 
     chapterArray.push({
-      id: chapter.id,
-      description: chapterDescription,
-      startTime: chapterStartTime,
-      endTime: chapterEndTime,
-      duration: chapterDuration,
+      title: chapterDescription,
+      startSeconds: Math.floor(chapterStartTime),
+      startMilliSeconds: Math.floor(chapterStartTime) * 1000,
+      endSeconds: Math.floor(chapterEndTime),
+      endMilliSeconds: Math.floor(chapterEndTime) * 1000,
+      durationSeconds: Math.floor(chapterDuration),
+      lengthMilliSeconds: Math.floor(chapterDuration) * 1000,
     });
   }
   // console.log("chaparray", chapterArray);
@@ -128,9 +137,9 @@ const processChapters = (
 export const getAudioFileDuration = async (fileURI: string) => {
   const soundObj = new Audio.Sound();
 
-  const info = await FileSystem.getInfoAsync(fileURI);
-
+  let info;
   try {
+    info = await FileSystem.getInfoAsync(fileURI);
     await soundObj.loadAsync({ uri: `${fileURI}` });
     const metadata = (await soundObj.getStatusAsync()) as AVPlaybackStatusSuccess;
 

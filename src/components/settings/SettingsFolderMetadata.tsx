@@ -27,7 +27,7 @@ const SettingsFolderMetadata = () => {
 
   useEffect(() => {
     setDisplayFMD(
-      Object.keys(folderMetadata).map((key) => ({
+      Object.keys(folderMetadata || {}).map((key) => ({
         key,
         numberOfBooks: Object.keys(folderMetadata[key]).length,
       }))

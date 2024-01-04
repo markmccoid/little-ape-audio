@@ -108,7 +108,6 @@ const TrackList = ({ isExpanded }) => {
       const finalSectionList = queue.map((track, index) => {
         //! Here might be where we can offset the start/end seconds based on
         //! the position in the queue
-
         const chapters = track?.chapters?.map((chapt) => {
           // console.log(`chapt - ${chapt.title}-- ${chapt.endSeconds}`);
           return chapt;

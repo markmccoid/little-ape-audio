@@ -226,3 +226,17 @@ export const shareJsonStringAsFile = async (jsonString: string, filename: string
   // Share the temporary file using the Expo Sharing API.
   await Sharing.shareAsync(tempFileUri);
 };
+
+//~-=======================================
+//~ gets the file extension of the passed URI
+//~-=======================================
+export function getFileExtension(uri) {
+  // Remove query parameters or fragments
+  const cleanUri = uri.split("?")[0].split("#")[0];
+
+  // Find the last period in the URI
+  const lastDotIndex = cleanUri.lastIndexOf(".");
+
+  // Extract and return the extension
+  return lastDotIndex === -1 ? "" : cleanUri.substring(lastDotIndex + 1);
+}

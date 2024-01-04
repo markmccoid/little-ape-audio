@@ -166,7 +166,6 @@ export const addTrack =
         url: `${FileSystem.documentDirectory}${fileURI}`,
         duration: tags.durationSeconds,
       };
-
       await TrackPlayer.reset();
       await TrackPlayer.add([trackPlayerTrack]);
       await TrackPlayer.skip(0);

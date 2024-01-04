@@ -124,16 +124,21 @@ export const PlaybackService = async () => {
   TrackPlayer.addEventListener(Event.MetadataChapterReceived, async (event) => {
     let metaChapters: Chapter[] = [];
     const currTrack = (await TrackPlayer.getActiveTrack()) as ApeTrack;
-    const currPlaylist = usePlaybackStore.getState().currentPlaylistId;
-    // return;
-
+    // console.log("EVENT", event.metadata[0]?.raw);
+    // console.log("ISNAN", isNaN(event.metadata[0]?.raw[0]?.time), event.metadata[0]?.raw[0]?.time);
+    // console.log("event first time", !!(event?.metadata && !isNaN(event.metadata[0]?.raw[0]?.time)));
     // If book has chapters don't do anything
     if (!!currTrack?.chapters || !event?.metadata?.length) return;
-    // if we have metadata get chapter info
-    // console.log("MetadataChaptRec", event);
-    if (event?.metadata) {
-      // console.log("chapt Data rec", event.metadata);
+    // if book has unreadable chapter info don't do anything
+
+    // if we have metadata AND that metadata has a valid time entry
+    // get chapter info
+    // event format we are looking for is { metadata: [ {raw: [..., time: 0, ...], title: ""}, {} ]}
+    if (!!(event?.metadata && !isNaN(event.metadata[0]?.raw[0]?.time))) {
       const reverseChapt = reverse(event.metadata);
+      // We are getting the current track duration because we are working backwards through the track
+      // We have added some code so that when this is called the current track IS the same track we are
+      // defining chapters for, hence this has nothing to do with a playlist having multiple tracks with chapters in it.
       let lastEndTime = Math.floor(currTrack.duration);
       for (const chapt of reverseChapt) {
         const startSeconds = Math.floor(chapt?.raw[0].time);

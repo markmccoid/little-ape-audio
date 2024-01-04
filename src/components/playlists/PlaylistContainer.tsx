@@ -1,4 +1,12 @@
-import { View, FlatList, Dimensions, NativeScrollEvent, StyleSheet } from "react-native";
+import {
+  View,
+  FlatList,
+  Text,
+  Dimensions,
+  NativeScrollEvent,
+  StyleSheet,
+  Pressable,
+} from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { usePlaybackStore, usePlaylists, useTrackActions, useTracksStore } from "../../store/store";
 import { Link, useFocusEffect, useNavigation, useRouter } from "expo-router";
@@ -8,6 +16,8 @@ import { AnimatePresence, MotiImage, MotiView } from "moti";
 import PlaylistActionBar from "./PlaylistActionBar";
 import { colors } from "@constants/Colors";
 import { Playlist } from "@store/types";
+import Headphones from "@components/common/svg/Headphones";
+import AddBook from "@components/common/svg/AddBook";
 const { width, height: screenHeight } = Dimensions.get("window");
 
 const PlaylistContainer = () => {
@@ -24,6 +34,7 @@ const PlaylistContainer = () => {
 
   // Scroll to the active track
   const scrollToRow = () => {
+    if (playlists.length === 0) return;
     scrollRef.current.scrollToOffset({
       offset: 0,
       animated: true,
@@ -131,12 +142,28 @@ const PlaylistContainer = () => {
     );
   };
 
-  // if (update)
-  //   return (
-  //     <View>
-  //       <Text>{currPlaylistInfo?.name}</Text>
-  //     </View>
-  //   );
+  // If no playlist exist, show starter screen
+  if (playlists.length === 0) {
+    return (
+      <Link
+        href="/audio/dropbox/"
+        asChild
+        className="flex items-center justify-center flex-1 mb-[200]"
+      >
+        <Pressable className="p-[10] mr-[-10]">
+          <AddBook size={50} headphoneColor={colors.amber800} plusBGColor={colors.amber700} />
+          <View className="w-[80%] items-center">
+            <Text className="text-lg font-semibold">Press the headphones to add a book</Text>
+            <Text className="">
+              The headphones icon in the upper right will also take you to the "Add A Book" Screen
+            </Text>
+          </View>
+        </Pressable>
+      </Link>
+    );
+  }
+
+  // Show playlists
   return (
     <View className="w-full flex-1">
       <AnimatePresence>

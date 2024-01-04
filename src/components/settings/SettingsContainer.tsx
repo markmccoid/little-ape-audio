@@ -5,6 +5,8 @@ import { Link } from "expo-router";
 import { useSettingStore } from "../../store/store-settings";
 import { MotiView } from "moti";
 import Constants from "expo-constants";
+import { useDropboxStore } from "@store/store-dropbox";
+import { useTracksStore } from "@store/store";
 
 const SettingsContainer = () => {
   const version = Constants?.expoConfig?.version;
@@ -14,6 +16,8 @@ const SettingsContainer = () => {
   const backwardSecs = useSettingStore((state) => state.jumpBackwardSeconds);
   const dynamicColors = useSettingStore((state) => state.isUsingDynamicColors);
   const autoPlay = useSettingStore((state) => state.autoPlay);
+  const folderMetadata = useDropboxStore((state) => state.folderMetadata);
+  const trackCount = useTracksStore((state) => state.tracks?.length || 0);
 
   const handleUpdateSeek = async (type: "forward" | "backward") => {
     Alert.prompt("Enter Seek Seconds", `Enter ${type} seek seconds (Integer only!)`, [
@@ -102,21 +106,26 @@ const SettingsContainer = () => {
             value={autoPlay}
           />
         </View>
-        <View style={[styles.borderBottom]}>
-          <Link href="/settings/managetracksroute" asChild>
-            <Pressable className="px-2 py-3 w-full">
-              <Text className="text-sm">Manage Tracks</Text>
-            </Pressable>
-          </Link>
-        </View>
+        {/* MANAGE TRACKS */}
+        {trackCount > 0 && (
+          <View style={[styles.borderBottom]}>
+            <Link href="/settings/managetracksroute" asChild>
+              <Pressable className="px-2 py-3 w-full">
+                <Text className="text-sm">Manage Tracks</Text>
+              </Pressable>
+            </Link>
+          </View>
+        )}
         {/* FOLDER METADATA */}
-        <View style={[styles.borderBottom]}>
-          <Link href="/settings/foldermetadataroute" asChild>
-            <Pressable className="px-2 py-3 w-full">
-              <Text className="text-sm">Manage Folder Metadata</Text>
-            </Pressable>
-          </Link>
-        </View>
+        {folderMetadata && (
+          <View style={[styles.borderBottom]}>
+            <Link href="/settings/foldermetadataroute" asChild>
+              <Pressable className="px-2 py-3 w-full">
+                <Text className="text-sm">Manage Folder Metadata</Text>
+              </Pressable>
+            </Link>
+          </View>
+        )}
         {isDevelopmentMode && (
           <View className="px-2 py-3" style={[styles.borderBottom]}>
             <Link href="/settings/playarea" asChild>

@@ -9,7 +9,7 @@ const DropboxLayout = () => {
       <Stack.Screen
         name="index"
         options={{
-          title: "Audio Sources",
+          title: "Add Audio",
           presentation: "modal",
           headerBackTitleVisible: false,
           headerBackVisible: false,
