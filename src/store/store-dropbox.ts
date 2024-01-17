@@ -16,7 +16,8 @@ import { downloadToFileSystem } from "./data/fileSystemAccess";
 import { useTracksStore } from "./store";
 import { AudioSourceType } from "@app/audio/dropbox";
 import { AUDIO_FORMATS } from "@utils/constants";
-
+import { ProcessedBookData, ScannedFolder } from "./types";
+import { format } from "date-fns";
 //-- ==================================
 //-- DROPBOX STORE
 //-- ==================================
@@ -35,10 +36,10 @@ export type FavoriteFolders = {
 
 //! New Folder Metadata Types
 // The PathInKey is full path to the booksFolder run through the "sanitizeString" function
-type PathInKey = string;
+type PathInKey = string; //pathToFolderKey
 export type FolderMetadata = Record<PathInKey, FolderMetadataDetails>;
 // The PathInKey is full path to the book folder name run through the "sanitizeString" function
-type FolderNameKey = string;
+type FolderNameKey = string; // pathToBookFolderKey
 export type FolderMetadataDetails = Record<FolderNameKey, CleanBookMetadata>;
 
 //! NEW FolderAttributes (Favorite and Read)
@@ -121,7 +122,6 @@ type DropboxState = {
       type: "favPosition" | "readPosition",
       newInfo: FolderAttributeItem[]
     ) => Promise<void>;
-    getFolderMetadata: (path_lower: string) => FolderMetadataDetails;
     clearFolderMetadata: () => Promise<void>;
     // Remove one of the folders (key) from our metadata list
     removeFolderMetadataKey: (metadataKey: string) => Promise<void>;
@@ -305,10 +305,6 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       // set({ folderAttributes: copyFolderAttributes });
       // await saveToAsyncStorage("folderattributes", copyFolderAttributes);
     },
-    getFolderMetadata: (path_lower: string) => {
-      const key = createFolderMetadataKey(path_lower);
-      return get().folderMetadata?.[key];
-    },
     clearFolderMetadata: async () => {
       set({ folderMetadata: {} });
       await saveToAsyncStorage("foldermetadata", {});
@@ -391,17 +387,12 @@ export const folderFileReader = async (pathIn: string) => {
   try {
     const files = await listDropboxFiles(pathIn);
 
+    await checkForFolderMetadata(files, "dropbox");
     const filteredFoldersFiles = filterAudioFiles(files);
+    // Tag files/folders with Liked/Read attributes
     const finalFolderFileList = tagFilesAndFolders(filteredFoldersFiles);
-    // // tag tracks as being already downloaded
-    // const taggedFiles = trackActions.isTrackDownloaded(filteredFoldersFiles.files);
-    // // Tag folders as being favorited
-    // const taggedFolders = dropboxActions.isFolderFavorited(filteredFoldersFiles.folders);
-    // const finalFolderFileList: DropboxDir = {
-    //   folders: taggedFolders, //filteredFoldersFiles.folders,
-    //   files: taggedFiles,
-    // };
-    //- Success reading directory, return data
+    // look for the
+
     return finalFolderFileList;
   } catch (err) {
     console.log(err.message);
@@ -428,6 +419,107 @@ export const tagFilesAndFolders = (foldersAndFiles: {
   };
   return finalFolderFileList;
 };
+
+//~ Check for Folder Metadata
+//! New Folder Metadata Types
+// The PathInKey is full path to the booksFolder run through the "sanitizeString" function
+// type PathInKey = string; //pathToFolderKey
+//! export type FolderMetadata = Record<PathInKey, FolderMetadataDetails>;
+// // The PathInKey is full path to the book folder name run through the "sanitizeString" function
+// type FolderNameKey = string; // pathToBookFolderKey
+//! export type FolderMetadataDetails = Record<FolderNameKey, CleanBookMetadata>;
+
+export const checkForFolderMetadata = async (
+  foldersAndFiles: {
+    folders: FolderEntry[];
+    files: FileEntry[];
+  },
+  audioSource: "dropbox" | "google"
+) => {
+  for (const file of foldersAndFiles.files) {
+    const sanitizeFilename = sanitizeString(file.name);
+    if (sanitizeFilename.includes("LAABMetaAggr_")) {
+      console.log("FOUND META FILE", file);
+      if (audioSource === "dropbox") {
+        const metaAggr = (await downloadDropboxFile(file.path_lower)) as ScannedFolder[];
+        // const pathToFolder = file.path_lower.split("/").slice(0, -1).join("/");
+        // const pathToBook = file.name
+        // We can only get the pathToFolderKey (pathInKey) since we are not in a specifics books folder
+        const { pathToFolderKey } = extractMetadataKeys(file.path_lower);
+        // convert the "ScannedFolder[]" data to ProcessBookData
+        const processedBookData = processFolderAggrMetadata(metaAggr, file.path_lower);
+
+        // console.log("metaAGGR", processedBookData);
+        await useDropboxStore
+          .getState()
+          .actions.mergeFoldersMetadata(pathToFolderKey, processedBookData);
+        // console.log("MD", useDropboxStore.getState().folderMetadata);
+        // Once we have found ONE LAABMetaAggr_ file stop looking!!
+        break;
+      }
+      if (audioSource === "google") {
+        //Do something with google drive
+        // Once we have found ONE LAABMetaAggr_ file stop looking!!
+        break;
+      }
+    }
+  }
+};
+
+function processFolderAggrMetadata(selectedFoldersBooks: ScannedFolder[], pathLower) {
+  let bookData: FolderMetadataDetails;
+  for (const book of selectedFoldersBooks) {
+    const cleanBook = cleanOneBook(book, pathLower);
+    const folderNameKey = sanitizeString(book.folderName).toLowerCase();
+    bookData = { ...bookData, [folderNameKey]: cleanBook };
+  }
+
+  return bookData;
+}
+// let processedBooks: ProcessedBookData[] = [];
+
+// for (const book of selectedFoldersBooks) {
+//   let tempBook: ProcessedBookData = {
+//     id: book.id,
+//     fullPath: book.fullPath,
+//     folderName: book.folderName,
+//     title: book.folderNameData?.title,
+//     subTitle: book.googleAPIData?.subTitle,
+//     author: book.folderNameData?.author,
+//     publishedYear: "",
+//     category: book.category,
+//     subCategory: book.subCategory,
+//     folderImages: book.folderImages,
+//     description: "Test",
+//     pageCount: book.googleAPIData?.pageCount,
+//     narratedBy: book.bookInfo?.narratedBy,
+//     bookLength: book.bookInfo?.length,
+//     imageURL: book.googleAPIData?.imageURL,
+//     googleBookLink: book.googleAPIData?.bookDetailsURL,
+//     googleQuery: book.googleAPIData?.query,
+//     googleQueryDate: book.googleAPIData?.queryDateString,
+//   };
+
+//   // Determine what year to use
+
+//   if (book.folderNameData.year && book.folderNameData.year.toString().length === 4) {
+//     tempBook.publishedYear = book.folderNameData.year;
+//   } else {
+//     tempBook.publishedYear = book.googleAPIData?.publishedDate
+//       ? format(new Date(book.googleAPIData.publishedDate), "yyyy")
+//       : "";
+//   }
+
+//   // Determine Description to use
+//   if (book.bookInfo?.summary) {
+//     tempBook.description = book.bookInfo.summary.toString();
+//   } else {
+//     tempBook.description = book.googleAPIData?.description ? book.googleAPIData.description : "";
+//   }
+//   processedBooks.push(tempBook);
+// }
+// return processedBooks;
+// }
 //------------------------------------------------------
 //------------------------------------------------------
 //~ ===================================
@@ -796,10 +888,21 @@ export function createFolderMetadataKey(pathIn: string) {
   return finalKey.reverse().join("_");
 }
 
-function sanitizeString(stringToKey: string) {
+function sanitizeStringOld(stringToKey: string) {
   return stringToKey.replace(/[^/^\w.]+/g, "_").replace(/_$/, "");
 }
 
+export function sanitizeString(title: string) {
+  // In little ape audio this function is called "getCleanFileName"
+  return title
+    .replace(/^\s+|\s+$/g, "") // Remove leading and trailing spaces
+    .replace(/\s+/g, "~") // Replace spaces with '~'
+    .replace(/[^\w.~]+/g, "_") // Replace non-alphanumeric, non-period, non-underscore, non-tilde characters with '_'
+    .replace(/_$/, "") // Get rid of trailing _
+    .replace(/^_/, ""); // get rid of leading _
+  // Old is below
+  // return title.replace(/[^\w.]+/g, "_").replace(/_$/, "");
+}
 //~ -------------------------
 //~ extractMetadataKeys
 //~ Takes a full path to a book folder '/mark/myAudiobooks/fiction/BookTitle
@@ -811,6 +914,7 @@ export function extractMetadataKeys(pathIn: string) {
   const pathToFolderKey = sanitizeString(fullPath.slice(0, fullPath.lastIndexOf("/")));
   const pathToBookFolderKey = sanitizeString(fullPath.slice(fullPath.lastIndexOf("/") + 1));
   const bookFolderName = fullPath.slice(fullPath.lastIndexOf("/") + 1);
+  // console.log(pathToFolderKey, pathToBookFolderKey, bookFolderName);
   return {
     pathToFolderKey,
     pathToBookFolderKey,

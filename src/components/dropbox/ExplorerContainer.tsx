@@ -55,6 +55,7 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
   const [displayMetadata, toggeleDisplayMetadata] = React.useReducer((prev) => !prev, false);
   const allFoldersMetadata = useDropboxStore((state) => state.folderMetadata || {});
   const { pathToFolderKey, pathToBookFolderKey } = extractMetadataKeys(pathIn);
+
   const hasMetadata = !!Object.keys(allFoldersMetadata).find(
     (key) => key === `${pathToFolderKey}/${pathToBookFolderKey}`
   );

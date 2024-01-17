@@ -57,9 +57,11 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
   const [displayMetadata, toggeleDisplayMetadata] = React.useReducer((prev) => !prev, false);
   const allFoldersMetadata = useDropboxStore((state) => state.folderMetadata || {});
   const { pathToFolderKey, pathToBookFolderKey } = extractMetadataKeys(pathIn);
+
   const hasMetadata = !!Object.keys(allFoldersMetadata).find(
-    (key) => key === `${pathToFolderKey}/${pathToBookFolderKey}`
+    (key) => key === `${pathToFolderKey}_${pathToBookFolderKey}`
   );
+
   const { backTitle } = useLocalSearchParams();
   const cloudAuth = useSettingStore((state) => state.cloudAuth);
   const route = useRouter();
@@ -148,6 +150,7 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
     const getFilesFromDropbox = async () => {
       try {
         // Read next list of folders and files
+        console.log("Reading folder", pathIn);
         const finalFolderFileList = await folderFileReader(pathIn);
         setFilesFolderObj(finalFolderFileList);
         setFlatlistData([...finalFolderFileList.folders, ...finalFolderFileList.files]);

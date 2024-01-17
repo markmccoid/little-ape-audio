@@ -191,3 +191,84 @@ export type AudioState = {
     clearAll: () => Promise<void>;
   };
 };
+
+//~ ---------------------------------------------
+
+export type BookInfo = {
+  summary?: string;
+  length?: string;
+  title?: string;
+  author?: string;
+  narratedBy?: string;
+  releaseDate?: string;
+  otherCategories?: string[];
+  stopFlag?: boolean;
+};
+
+export type FolderNameData = {
+  title: string;
+  year: string;
+  author: string;
+  category: string;
+};
+export type GoogleData = {
+  id?: string;
+  title?: string;
+  subTitle?: string;
+  authors?: string[];
+  description?: string;
+  publisher?: string;
+  publishedDate?: string;
+  pageCount?: string;
+  categories?: string[];
+  imageURL?: string;
+  bookDetailsURL?: string;
+  isbn?: { type: string; identifier: string }[];
+  googleISBNS?: Record<string, string> | undefined;
+  query?: string;
+  queryDateString?: string;
+};
+
+//-- - - - - - - - - - - - - - -
+//-- Scanned Folder
+//-- - - - - - - - - - - - - - -
+export type ScannedFolder = {
+  id: string;
+  folderId: string;
+  fullPath: string;
+  folderName: string;
+  folderNameData: FolderNameData;
+  parentDir: string;
+  audioFileCount: number;
+  isBookFolder: boolean;
+  metadataFileExists: boolean;
+  metadataGoogleDataExists: boolean;
+  googleAPIData: GoogleData;
+  // The image filename is stored in the array
+  folderImages: string[];
+  bookInfoTextPath: string;
+  bookInfo?: BookInfo;
+  category?: string;
+  subCategory?: string;
+};
+
+export type ProcessedBookData = {
+  id: string;
+  fullPath: string;
+  folderName: string;
+  title: string;
+  subTitle: string | undefined;
+  author: string;
+  publishedYear: string;
+  category: string | undefined;
+  subCategory: string | undefined;
+  folderImages: string[];
+  description: string;
+  pageCount: string | undefined;
+  narratedBy: string | undefined;
+  bookLength: string | undefined;
+  imageURL: string | undefined;
+  googleBookLink: string | undefined;
+  googleQuery: string | undefined;
+  googleQueryDate: string | undefined;
+};

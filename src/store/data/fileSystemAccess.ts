@@ -41,10 +41,10 @@ export const deleteFromFileSystem = async (path?: string, includesDocDirectory =
 };
 
 //--============================================================
-//-- downloadToFileSystem - Downloads the file to the dir apth specificed
+//-- downloadToFileSystem - Downloads the file to the dir path specificed
 //-- starting dir is FileSystem.documentDirectory
 //--============================================================
-
+// This function is used primarily for downloading images from Dropbox
 export const downloadToFileSystem = async (
   downloadLink: string,
   filename: string,
@@ -108,85 +108,6 @@ export const downloadFileWProgress = async (
   } catch (err) {
     console.log("downloadDropboxFile ERR --> ", err.code);
   }
-};
-/**
- * USAGE: calling this function will return two async function
- * - startDownload - calling this returned function will start the download, updating the
- *      Progress by using the setProgress function that was passed as a parameter.
- *      return { fileURI: returnURI, cleanFileName }
- * - pauseDownload - Calling will pause the download, but note that the startDownload function will continue
- *      and rest of the code that happens after startDownload was called will finish. This means
- *      that in the application using these functions, you will need a "isStopped" variable or state
- *      to know when a download has been paused.
- *      currently, pause menas STOP as resume is not implemented yet.
- */
-
-export const downloadWithProgress = (
-  downloadLink: string,
-  filename: string,
-  setProgress: (progress: DownloadProgress) => void,
-  dirName = ""
-) => {
-  let pauseData: FileSystem.DownloadPauseState;
-  //~ INITIAL Setup of downloadResumable var
-
-  const progressCallback = (downloadProgress: FileSystem.DownloadProgressData) => {
-    const progress =
-      downloadProgress.totalBytesWritten / downloadProgress.totalBytesExpectedToWrite;
-    setProgress({
-      downloadProgress: progress,
-      bytesWritten: downloadProgress.totalBytesWritten,
-      bytesExpected: downloadProgress.totalBytesExpectedToWrite,
-    });
-  };
-  // Clean filename for storage in system
-  const cleanFileName = getCleanFileName(filename);
-  // Create the downloadResumable object
-  const downloadResumable = FileSystem.createDownloadResumable(
-    downloadLink,
-    FileSystem.documentDirectory + cleanFileName,
-    {},
-    progressCallback
-  );
-
-  //~ -- START DOWNLOAD Function--
-  const startDownload = async () => {
-    let returnURI = undefined;
-    try {
-      const returnData = await downloadResumable.downloadAsync();
-      returnURI = returnData?.uri;
-    } catch (e) {
-      console.error(e);
-    }
-    return { fileURI: returnURI, cleanFileName };
-  };
-
-  //~ -- PAUSE / STOP DOWNLOAD  Function --
-  const pauseDownload = async () => {
-    pauseData = await downloadResumable.pauseAsync();
-    return pauseData;
-  };
-  //~ -- RESUME Data not need so not implemented
-  // const resumeDownload = async () => {
-  //   if (!pauseData) {
-  //     console.log("No pause data found");
-  //     return;
-  //   }
-  //   downloadResumable = new FileSystem.DownloadResumable(
-  //     url,
-  //     fileUri,
-  //     {},
-  //     pauseData.resumeData
-  //   );
-  //   downloadResumable
-  //     .downloadAsync()
-  //     .then(() => console.log("Download complete"));
-  // };
-
-  return {
-    startDownload,
-    pauseDownload,
-  };
 };
 
 //! -------------------------------------------------

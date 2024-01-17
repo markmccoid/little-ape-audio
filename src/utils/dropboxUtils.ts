@@ -323,6 +323,7 @@ export const listDropboxFiles = async (path: string = ""): Promise<DropboxDir> =
   }
   folders = sortBy(folders, [(o) => o.name.toLowerCase()]);
   files = sortBy(files, [(o) => o.name.toLowerCase()]);
+
   return {
     folders,
     files,
