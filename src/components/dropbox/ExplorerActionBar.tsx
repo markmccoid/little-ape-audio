@@ -19,6 +19,7 @@ type Props = {
   folderCount: number;
   // showMetadata: "on" | "off" | "loading";
   displayMetadata: boolean;
+  hasMetadata: boolean;
   handleDownloadAll: () => Promise<void>;
   handleDownloadMetadata: () => Promise<void>;
   handleDisplayMetadata: () => void;
@@ -31,6 +32,7 @@ const ExplorerActionBar = ({
   folderCount,
   // showMetadata,
   displayMetadata,
+  hasMetadata,
   handleDownloadAll,
   handleDownloadMetadata,
   handleDisplayMetadata,
@@ -48,7 +50,8 @@ const ExplorerActionBar = ({
       {folderCount > 0 ? (
         <View
           className="flex flex-row justify-between items-center flex-1"
-          style={{ display: audioSource === "google" ? "none" : "flex" }}
+          // style={{ display: "flex" }}
+          style={{ display: hasMetadata ? "flex" : "none" }}
         >
           <TouchableOpacity onPress={handleDisplayMetadata} className="mx-2 ">
             {displayMetadata ? <EyeOutlineIcon /> : <EyeOffOutlineIcon />}
@@ -60,7 +63,7 @@ const ExplorerActionBar = ({
               </Text>
             )}
           </View>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={async () => await handleDownloadMetadata()}
             className="mx-2"
             disabled={metadataProcessingFlag}
@@ -80,7 +83,7 @@ const ExplorerActionBar = ({
                 color={metadataProcessingFlag ? colors.amber600 : colors.amber900}
               />
             </MotiView>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       ) : (
         // This is a placeholder so the justify between keeps icons in correct place

@@ -1,10 +1,9 @@
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { GDrive, MimeTypes } from "@robinbobin/react-native-google-drive-api-wrapper";
+import { ScannedFolder } from "@store/types";
 import { AUDIO_FORMATS } from "@utils/constants";
 import axios from "axios";
-// import { getCleanFileName } from "@store/data/fileSystemAccess";
 const gdrive = new GDrive();
-
 import sortBy from "lodash/sortBy";
 
 export const getAccessToken = async () => {
@@ -54,6 +53,11 @@ export const getJsonData = async ({
   }
   return undefined;
 };
+export const getJsonDataByFileID = async ({ fileId }: { fileId: string }) => {
+  gdrive.accessToken = await getAccessToken();
+  const jsonData = gdrive.files.getJson(fileId);
+  return jsonData;
+};
 
 export type FilesAndFolders = ReturnType<typeof separateFilesFolders>;
 //~ ============================================
@@ -76,7 +80,11 @@ export const listGoogleDriveFiles = async (
     },
   });
   // Separate folders and Files
-  const filteredFoldersFiles = separateFilesFolders(resp.data.files, includeAllFiles);
+  const filteredFoldersFiles = await separateFilesFolders(
+    resp.data.files,
+    includeAllFiles,
+    folderId
+  );
 
   //- Success reading directory, return data
   return filteredFoldersFiles;
@@ -85,12 +93,19 @@ export const listGoogleDriveFiles = async (
 //~ -------------------------------------
 //~ separateFilesFolders
 //~ -------------------------------------
-const separateFilesFolders = (list, includeAllFiles: boolean) => {
+const separateFilesFolders = async (list, includeAllFiles: boolean, parentFolderId: string) => {
   let files = [] as FileEntry[];
   let folders = [] as FolderEntry[];
+  let metaAggr: { laabJSON: ScannedFolder[]; parentFolderId: string };
   for (const file of list) {
     if (file.mimeType === MimeTypes.FOLDER) {
-      folders.push({ [".tag"]: "folder", path_lower: file.id, id: file.id, name: file.name });
+      folders.push({
+        [".tag"]: "folder",
+        path_lower: file.id,
+        path_display: parentFolderId,
+        id: file.id,
+        name: file.name,
+      });
     } else if (
       // push if includeAllFiles OR it is audio.
       includeAllFiles ||
@@ -100,50 +115,21 @@ const separateFilesFolders = (list, includeAllFiles: boolean) => {
         [".tag"]: "file",
         name: file.name,
         path_lower: file.id,
-        path_display: file.id,
+        path_display: parentFolderId,
+        // path_display: file.id,
         id: file.id,
         size: file.size,
         webContentLink: file.webContentLink,
       });
+    } else if (file.name.includes("LAABMetaAggr_")) {
+      const laabJSON = await getJsonDataByFileID({ fileId: file.id });
+      metaAggr = { laabJSON, parentFolderId };
     }
   }
   folders = sortBy(folders, [(o) => o.name.toLowerCase()]);
   files = sortBy(files, [(o) => o.name.toLowerCase()]);
-  return { files, folders };
+  return { files, folders, metaAggr };
 };
-//~ ---------------------------------------------------
-//~ downloadGoogleFiles
-//~ downloads the fileId file saves to document dir
-//~ with filename (includes extension)
-//~ ---------------------------------------------------
-// export const downloadGoogleFile = async (
-//   fileId: string,
-//   filename: string,
-//   progress: (res: DownloadProgressCallbackResult) => void
-// ) => {
-//   const accessToken = await getAccessToken();
-// //  IF YOU USE THIS HERE you will get "require cycles"
-//   const cleanFileName = getCleanFileName(filename);
-//   const fileUri = `${FileSystem.documentDirectory}${cleanFileName}`;
-
-//   try {
-//     const res = rnfs.downloadFile({
-//       fromUrl: `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
-//       toFile: fileUri,
-//       headers: { Authorization: `Bearer ${accessToken}` },
-//       begin: (dl) => {},
-//       progress: progress,
-//       progressInterval: 100,
-//     });
-
-//     const stopDownload = () => rnfs.stopDownload(res.jobId);
-//     const startDownload = async () => await res.promise;
-//     return { cleanFileName, stopDownload, startDownload };
-//   } catch (err) {
-//     console.log("downloadGoogleFile ERR --> ", err.code);
-//   }
-// };
-//~ ------------------------------------------------------------------------------------
 
 //!! DROPBOX TYPES
 type FolderEntry = {

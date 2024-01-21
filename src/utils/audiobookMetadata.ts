@@ -43,11 +43,18 @@ export type BookJSONMetadata = {
     category: string;
   };
   googleAPIData: GoogleData;
-  mongoDBId: string | undefined;
+  category?: string;
+  subCategory?: string;
+  mongoDBId?: string | undefined;
   forceMongoUpdate?: boolean | undefined;
 };
 export type CleanBookMetadata = ReturnType<typeof cleanOneBook>;
-export function cleanOneBook(book: BookJSONMetadata, path_lower: string, localImageName?: string) {
+export function cleanOneBook(
+  book: BookJSONMetadata,
+  path_lower: string,
+  audioSource: "dropbox" | "google",
+  localImageName?: string
+) {
   if (!book) return undefined;
   // decide on data for fields that come from multiple sources
   // if infoFileData available use it for the following:
@@ -74,11 +81,31 @@ export function cleanOneBook(book: BookJSONMetadata, path_lower: string, localIm
 
   const bookLength = book?.infoFileData?.length;
   const randomNum = getRandomNumber();
-  const [categoryOne, categoryTwo] = getCategoriesFromPath(path_lower);
-
+  let categoryOne = "";
+  let categoryTwo = "";
+  if (audioSource === "dropbox") {
+    const [categoryOneIn, categoryTwoIn] = getCategoriesFromPath(path_lower);
+    categoryOne = categoryOneIn;
+    categoryTwo = categoryTwoIn;
+  } else {
+    categoryOne = book?.category;
+    categoryTwo = book?.subCategory;
+  }
+  // console.log(
+  //   "cleanOneBook: ",
+  //   book.folderName,
+  //   `${path_lower.split("/").slice(1, -1).join("/")}/${book.folderName}`,
+  //   path_lower,
+  //   audioSource
+  // );
+  //! NOTE: for google drive the path_lower IS the file id for the LAAB MetaAggr file. so is not usable
+  //!  Need to get the fileId for the file.name folder for the book
   return {
     id: book.id,
-    dropboxPathLower: path_lower,
+    dropboxPathLower:
+      audioSource === "dropbox"
+        ? `/${path_lower.split("/").slice(1, -1).join("/")}/${book.folderName}`
+        : path_lower,
     fullPath: book.fullPath,
     audioFileCount: book.audioFileCount,
     title,
@@ -97,7 +124,7 @@ export function cleanOneBook(book: BookJSONMetadata, path_lower: string, localIm
     categories: Array.from(new Set(categories)),
     categoryOne,
     categoryTwo,
-    audioSource: "dropbox",
+    audioSource,
   };
 }
 

@@ -18,6 +18,8 @@ import { AudioSourceType } from "@app/audio/dropbox";
 import { AUDIO_FORMATS } from "@utils/constants";
 import { ProcessedBookData, ScannedFolder } from "./types";
 import { format } from "date-fns";
+import { getJsonDataByFileID } from "@utils/googleUtils";
+
 //-- ==================================
 //-- DROPBOX STORE
 //-- ==================================
@@ -371,6 +373,9 @@ const updateFMDProcessingInfo = ({
 //-- FOLDER FILE READER FUNCTIONS
 //------------------------------------------------------
 
+//~~=================================
+//~~ Only keep files that match our AUDIO_FORMATS constant
+//~~=================================
 function filterAudioFiles(filesAndFolders: DropboxDir) {
   const files = filesAndFolders.files;
   const newFiles = files.filter((file) =>
@@ -381,13 +386,13 @@ function filterAudioFiles(filesAndFolders: DropboxDir) {
 
 //~~=================================
 //~~ Read folders and file from Dropbox or other service
-//~~ focused on dropbox only now.
+//~~ focused on DROPBOX only now.
 //~~=================================
 export const folderFileReader = async (pathIn: string) => {
   try {
     const files = await listDropboxFiles(pathIn);
-
-    await checkForFolderMetadata(files, "dropbox");
+    // Check for and download/store the 'LAAB_MetaAggr....json' file if it exists
+    await checkForFolderMetadata(files.files, "dropbox");
     const filteredFoldersFiles = filterAudioFiles(files);
     // Tag files/folders with Liked/Read attributes
     const finalFolderFileList = tagFilesAndFolders(filteredFoldersFiles);
@@ -403,6 +408,12 @@ export const folderFileReader = async (pathIn: string) => {
   }
 };
 
+//~ -------------------------------
+//~ Tag Files/Folders
+//~ This will mark a Folder as a Favorite (green star)
+//~ and mark a File as being downloaded (green asterisk)
+//~ NOTE: this is DIFFERENT from marking a book folder as read or favorited
+//~ -------------------------------
 export const tagFilesAndFolders = (foldersAndFiles: {
   folders: FolderEntry[];
   files: FileEntry[];
@@ -419,63 +430,65 @@ export const tagFilesAndFolders = (foldersAndFiles: {
   };
   return finalFolderFileList;
 };
-
+//~ -------------------------------
 //~ Check for Folder Metadata
-//! New Folder Metadata Types
-// The PathInKey is full path to the booksFolder run through the "sanitizeString" function
-// type PathInKey = string; //pathToFolderKey
-//! export type FolderMetadata = Record<PathInKey, FolderMetadataDetails>;
-// // The PathInKey is full path to the book folder name run through the "sanitizeString" function
-// type FolderNameKey = string; // pathToBookFolderKey
-//! export type FolderMetadataDetails = Record<FolderNameKey, CleanBookMetadata>;
-
+//~ -------------------------------
 export const checkForFolderMetadata = async (
-  foldersAndFiles: {
-    folders: FolderEntry[];
-    files: FileEntry[];
-  },
-  audioSource: "dropbox" | "google"
+  files: FileEntry[],
+  audioSource: "dropbox" | "google",
+  laabJSON?: ScannedFolder[]
 ) => {
-  for (const file of foldersAndFiles.files) {
-    const sanitizeFilename = sanitizeString(file.name);
-    if (sanitizeFilename.includes("LAABMetaAggr_")) {
-      console.log("FOUND META FILE", file);
+  for (const file of files) {
+    if (file.name.includes("LAABMetaAggr_") || file.name.includes("LAABMetaAggr_".toLowerCase())) {
+      //-- DROPBOX
       if (audioSource === "dropbox") {
         const metaAggr = (await downloadDropboxFile(file.path_lower)) as ScannedFolder[];
-        // const pathToFolder = file.path_lower.split("/").slice(0, -1).join("/");
-        // const pathToBook = file.name
         // We can only get the pathToFolderKey (pathInKey) since we are not in a specifics books folder
         const { pathToFolderKey } = extractMetadataKeys(file.path_lower);
         // convert the "ScannedFolder[]" data to ProcessBookData
-        const processedBookData = processFolderAggrMetadata(metaAggr, file.path_lower);
+        const processedBookData = processFolderAggrMetadata(metaAggr, audioSource, file.path_lower);
 
         // console.log("metaAGGR", processedBookData);
         await useDropboxStore
           .getState()
           .actions.mergeFoldersMetadata(pathToFolderKey, processedBookData);
-        // console.log("MD", useDropboxStore.getState().folderMetadata);
         // Once we have found ONE LAABMetaAggr_ file stop looking!!
         break;
       }
-      if (audioSource === "google") {
-        //Do something with google drive
-        // Once we have found ONE LAABMetaAggr_ file stop looking!!
-        break;
-      }
+      // //-- GOOGLE
+      // if (audioSource === "google") {
+      //   // file.path_display will have the PARENT folder ID
+      //   const pathToFolderKey = file.path_display;
+      //   console.log("google PathToFolderKey", file.path_display, file.path_lower);
+      //   if (laabJSON) {
+      //     const processedBookData = processFolderAggrMetadata(
+      //       laabJSON,
+      //       audioSource,
+      //       file.path_lower
+      //     );
+      //     await useDropboxStore
+      //       .getState()
+      //       .actions.mergeFoldersMetadata(pathToFolderKey, processedBookData);
+      //   }
+      //   break;
+      // }
     }
   }
 };
 
-function processFolderAggrMetadata(selectedFoldersBooks: ScannedFolder[], pathLower) {
+export const processFolderAggrMetadata = (
+  selectedFoldersBooks: ScannedFolder[],
+  audioSource: "dropbox" | "google",
+  pathLower: string
+) => {
   let bookData: FolderMetadataDetails;
   for (const book of selectedFoldersBooks) {
-    const cleanBook = cleanOneBook(book, pathLower);
+    const cleanBook = cleanOneBook(book, pathLower, audioSource);
     const folderNameKey = sanitizeString(book.folderName).toLowerCase();
     bookData = { ...bookData, [folderNameKey]: cleanBook };
   }
-
   return bookData;
-}
+};
 // let processedBooks: ProcessedBookData[] = [];
 
 // for (const book of selectedFoldersBooks) {
@@ -742,7 +755,7 @@ export const getSingleFolderMetadata = async (folder) => {
       if (!metadata?.googleAPIData?.imageURL && localImage) {
         finalCleanImageName = await getLocalImage(localImage, folder.name);
       }
-      convertedMeta = cleanOneBook(metadata, folder.path_lower, finalCleanImageName);
+      convertedMeta = cleanOneBook(metadata, folder.path_lower, "dropbox", finalCleanImageName);
       // if there are no audio files in the directory do not return and metadata
       // This can happen if a metadata.json file is found but no audio file exist in dir
       // if (!convertedMeta.audioFileCount && !localAudioExists) {

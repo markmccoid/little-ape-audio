@@ -27,10 +27,12 @@ import { times } from "lodash";
 import { Skeleton } from "moti/skeleton";
 import { FolderClosedIcon } from "../common/svg/Icons";
 import {
+  checkForFolderMetadata,
   downloadFolderMetadata,
   extractMetadataKeys,
   folderFileReader,
   recurseFolderMetadata,
+  sanitizeString,
   tagFilesAndFolders,
   useDropboxStore,
 } from "../../store/store-dropbox";
@@ -38,6 +40,8 @@ import FileMetadataView from "./FileMetadataView";
 import { AudioSourceType } from "@app/audio/dropbox";
 import { listGoogleDriveFiles } from "@utils/googleUtils";
 import { useSettingStore } from "@store/store-settings";
+
+import { checkForFolderMetadataGoogle } from "@utils/commonCloudUtils";
 // import { startDownloadAll } from "@store/data/fileSystemAccess";
 
 type Props = {
@@ -56,10 +60,17 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
 
   const [displayMetadata, toggeleDisplayMetadata] = React.useReducer((prev) => !prev, false);
   const allFoldersMetadata = useDropboxStore((state) => state.folderMetadata || {});
-  const { pathToFolderKey, pathToBookFolderKey } = extractMetadataKeys(pathIn);
+  const { pathToFolderKey, pathToBookFolderKey } =
+    audioSource === "dropbox"
+      ? extractMetadataKeys(pathIn)
+      : { pathToFolderKey: pathIn, pathToBookFolderKey: "" };
+
+  const metaCheckKey =
+    audioSource === "dropbox" ? `${pathToFolderKey}_${pathToBookFolderKey}` : pathToFolderKey;
 
   const hasMetadata = !!Object.keys(allFoldersMetadata).find(
-    (key) => key === `${pathToFolderKey}_${pathToBookFolderKey}`
+    (key) => key === `${metaCheckKey}`
+    // (key) => key === `${pathToFolderKey}_${pathToBookFolderKey}`
   );
 
   const { backTitle } = useLocalSearchParams();
@@ -92,9 +103,18 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
     ({ item, index }) => {
       // console.log("ITEM", item, index);
       if (!item.path_lower) return;
+      // console.log("ITEM", item.path_lower);
       if (item[".tag"] === "folder") {
-        const { pathToFolderKey, pathToBookFolderKey } = extractMetadataKeys(item.path_lower);
+        // const { pathToFolderKey, pathToBookFolderKey } = extractMetadataKeys(item.path_lower);
+        const { pathToFolderKey, pathToBookFolderKey } =
+          audioSource === "dropbox"
+            ? extractMetadataKeys(item.path_lower)
+            : {
+                pathToFolderKey: item.path_display,
+                pathToBookFolderKey: sanitizeString(item.name).toLowerCase(),
+              };
         // console.log("pathtobookRENDER", pathToFolderKey, pathToBookFolderKey);
+        // console.log("METADATA", allFoldersMetadata?.[pathToFolderKey]?.[pathToBookFolderKey]);
         return (
           <ExplorerFolder
             key={item.id}
@@ -138,8 +158,14 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
       setIsLoading(true);
       if (audioSource === "google") {
         const filesFolders = await listGoogleDriveFiles(pathIn);
+
         // tag tracks as being already downloaded and marked as a Starred folder
-        const finalFolderFileList = tagFilesAndFolders(filesFolders);
+        await checkForFolderMetadataGoogle(filesFolders.folders, filesFolders?.metaAggr);
+        // await checkForFolderMetadataGoogle(filesFolders.folders, filesFolders?.metaAggr);
+        const finalFolderFileList = tagFilesAndFolders({
+          folders: filesFolders.folders,
+          files: filesFolders.files,
+        });
         setFilesFolderObj(finalFolderFileList);
         setFlatlistData([...finalFolderFileList.folders, ...finalFolderFileList.files]);
       } else if (audioSource === "dropbox") {
@@ -150,7 +176,7 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
     const getFilesFromDropbox = async () => {
       try {
         // Read next list of folders and files
-        console.log("Reading folder", pathIn);
+        // console.log("Reading folder", pathIn);
         const finalFolderFileList = await folderFileReader(pathIn);
         setFilesFolderObj(finalFolderFileList);
         setFlatlistData([...finalFolderFileList.folders, ...finalFolderFileList.files]);
@@ -285,6 +311,7 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
           folderCount={filesFolderObj?.folders?.length || 0}
           // showMetadata={showMetadata}
           displayMetadata={displayMetadata}
+          hasMetadata={hasMetadata}
           handleDownloadAll={onDownloadAll}
           handleDownloadMetadata={onDownloadMetadata}
           handleDisplayMetadata={toggeleDisplayMetadata}
