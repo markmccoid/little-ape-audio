@@ -1,7 +1,6 @@
 import { View, Text, SafeAreaView } from "react-native";
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import { Link, Stack, useRouter, useLocalSearchParams } from "expo-router";
-import ExplorerContainer from "../../../components/dropbox/ExplorerContainer";
 import { useNavigation } from "expo-router";
 import CustomHeader from "../../../components/dropbox/CustomHeader";
 import { useDropboxStore } from "@store/store-dropbox";
@@ -12,14 +11,13 @@ const NewDirectory = () => {
   const actions = useDropboxStore((state) => state.actions);
   const router = useRouter();
   const navigation = useNavigation();
-  const { newdir, fullPath, backTitle, audioSource, yOffset } =
+  const { newdir, fullPath, backTitle, audioSource, yOffset, parentFolderId } =
     useLocalSearchParams<AudioSourceLinkParams>();
 
   const [prevDir, setPrevDir] = useState("");
   const audioSourceIn = audioSource as AudioSourceType;
 
   useEffect(() => {
-    // console.log("PREV DIR", prevDir, newdir);
     if (prevDir !== newdir) {
       actions.pushFolderNavigation({
         fullPath: fullPath || "/",
@@ -45,6 +43,7 @@ const NewDirectory = () => {
         fullPath: newPath,
         backTitle: folderName,
         audioSource: audioSourceIn || "dropbox",
+        parentFolderId: fullPath,
       } as AudioSourceLinkParams,
     });
   };
@@ -77,6 +76,7 @@ const NewDirectory = () => {
         onPathChange={onPathChange}
         audioSource={audioSourceIn}
         yOffset={yOffset ? parseFloat(yOffset) : 0}
+        parentFolderId={parentFolderId}
       />
       {/* )} */}
     </SafeAreaView>

@@ -16,7 +16,12 @@ export const checkForFolderMetadataGoogle = async (
     // parentFolderId will be key into list of books folders in folder will have the PARENT folder ID
     // It is the "FolderNameKey"
     const pathToFolderKey = metaAggr.parentFolderId;
-    const processedBookData = processFolderAggrMetadata(metaAggr.laabJSON, "google", folders);
+    const processedBookData = processFolderAggrMetadata(
+      metaAggr.laabJSON,
+      "google",
+      folders,
+      pathToFolderKey
+    );
 
     await useDropboxStore
       .getState()
@@ -38,14 +43,15 @@ export const checkForFolderMetadataGoogle = async (
 const processFolderAggrMetadata = (
   selectedFoldersBooks: ScannedFolder[],
   audioSource: "dropbox" | "google",
-  files: FolderEntry[]
+  files: FolderEntry[],
+  parentFolderId: string
 ) => {
   let bookData: FolderMetadataDetails;
   for (const book of selectedFoldersBooks) {
     const pathLower = getGoogleFileId(files, book.folderName);
     const cleanBook = cleanOneBook(book, pathLower, audioSource);
-    const folderNameKey = sanitizeString(book.folderName).toLowerCase();
-    bookData = { ...bookData, [folderNameKey]: cleanBook };
+    const folderNameKey = pathLower; //sanitizeString(book.folderName).toLowerCase();
+    bookData = { ...bookData, [folderNameKey]: { ...cleanBook, parentFolderId } };
   }
   return bookData;
 };

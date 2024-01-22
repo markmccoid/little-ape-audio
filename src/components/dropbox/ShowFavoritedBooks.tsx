@@ -4,10 +4,7 @@ import { FolderAttributeItem, useDropboxStore } from "@store/store-dropbox";
 import { ScrollView } from "react-native-gesture-handler";
 import { Link, useRouter } from "expo-router";
 import { colors } from "@constants/Colors";
-import DraggableFlatList, {
-  OpacityDecorator,
-  ScaleDecorator,
-} from "react-native-draggable-flatlist";
+import DraggableFlatList from "react-native-draggable-flatlist";
 import * as FileSystem from "expo-file-system";
 
 const ShowFavoritedBooks = () => {
@@ -70,6 +67,7 @@ const ShowFavoritedBooks = () => {
                 fullPath: item?.pathToFolder,
                 backTitle: "Back",
                 audioSource: item.audioSource,
+                parentFolderId: item?.parentFolder,
               },
             })
           }

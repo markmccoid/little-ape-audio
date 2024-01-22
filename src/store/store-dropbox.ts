@@ -46,8 +46,16 @@ export type FolderMetadataDetails = Record<FolderNameKey, CleanBookMetadata>;
 
 //! NEW FolderAttributes (Favorite and Read)
 export type FolderAttributeItem = {
+  // For Google this will be the book folder Id BUT sanitized. So DO NOT use it to go to the folder
+  //   instead make sure to use the pathToFolder
+  // For Dropbox this will be the sanitized book folder name
   id: string;
+  // For Google this will be the book folder Id
+  // for dropbox this will be the full path to the folder
   pathToFolder: string;
+  // For Google this will be the parent Folder ID
+  // For Dropbox this will be the path to the parent folder
+  parentFolder: string;
   isFavorite?: boolean;
   isRead?: boolean;
   favPosition?: number;
@@ -108,7 +116,8 @@ type DropboxState = {
       type: "isFavorite" | "isRead",
       action: "add" | "remove",
       folderNameIn: string,
-      audioSource: AudioSourceType
+      audioSource: AudioSourceType,
+      parentFolderId?: string
     ) => Promise<void>;
     addFavorite: (favPath: string, name: string, audioSource: AudioSourceType) => Promise<void>;
     removeFavorite: (favPath: string) => Promise<void>;
@@ -165,7 +174,14 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
     clearFolderNavigation: () => {
       set({ folderNavigation: [] });
     },
-    updateFolderAttribute: async (pathIn, type, action, folderNameIn, audioSource) => {
+    updateFolderAttribute: async (
+      pathIn,
+      type,
+      action,
+      folderNameIn,
+      audioSource,
+      parentFolderId
+    ) => {
       const id = createFolderMetadataKey(pathIn);
       const attributes = [...get().folderAttributes];
       let currAttribute = attributes?.find((el) => el.id === id);
@@ -173,7 +189,10 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
         // If currAttrtibute doesn't exist, means we are creating it
         // so must grab the image from folderMetadata.
         const { pathToFolderKey, pathToBookFolderKey } = extractMetadataKeys(pathIn);
-        const bookMetadata = get().folderMetadata?.[pathToFolderKey]?.[pathToBookFolderKey];
+        const bookMetadata =
+          audioSource === "dropbox"
+            ? get().folderMetadata?.[pathToFolderKey]?.[pathToBookFolderKey]
+            : get().folderMetadata?.[parentFolderId]?.[pathIn];
         if (!bookMetadata) {
           let folderName = "";
           if (audioSource === "google") {
@@ -185,6 +204,7 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
           attributes.push({
             id,
             pathToFolder: pathIn,
+            parentFolder: parentFolderId,
             imageURL: undefined,
             defaultImage: Image.resolveAssetSource(defaultImages[`image${getRandomNumber()}`]).uri,
             localImageName: undefined,
@@ -199,6 +219,7 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
           attributes.push({
             id,
             pathToFolder: pathIn,
+            parentFolder: parentFolderId,
             imageURL: bookMetadata?.imageURL,
             defaultImage: bookMetadata?.defaultImage,
             localImageName: bookMetadata?.localImageName,

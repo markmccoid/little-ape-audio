@@ -17,6 +17,7 @@ const MainFavFolders = () => {
   const actions = useDropboxStore((state) => state.actions);
   const [extra, setExtra] = useState(false);
   const flatRef = useRef();
+
   const renderItem = ({
     item,
     drag,

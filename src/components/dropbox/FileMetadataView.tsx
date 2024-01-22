@@ -44,13 +44,15 @@ const FileMetadataView = ({ metadata, path_lower, audioSource, folderName }: Pro
   const [showDescription, setShowDescription] = useState(false);
   const dropboxActions = useDropboxStore((state) => state.actions);
   const folderAttributes = useDropboxStore((state) => state.folderAttributes);
+  // Check for attributes on the folder (is it hearted or read).
   const currFolderAttributes = useMemo(() => {
+    // NOTE: this DOES change the google folder id but that is how it is also stored
     const id = createFolderMetadataKey(path_lower);
     return folderAttributes?.find((el) => el.id === id);
   }, [folderAttributes]);
 
   // if (!metadata) return null;
-
+  // console.log("FileMetadataView: metadata", metadata, path_lower, folderName);
   //!!! Create LINKING URL Example
 
   // console.log(
@@ -93,7 +95,8 @@ const FileMetadataView = ({ metadata, path_lower, audioSource, folderName }: Pro
       "isFavorite",
       action,
       folderName,
-      audioSource
+      audioSource,
+      metadata?.parentFolderId
     );
   };
 
@@ -104,7 +107,8 @@ const FileMetadataView = ({ metadata, path_lower, audioSource, folderName }: Pro
       "isRead",
       action,
       folderName,
-      audioSource
+      audioSource,
+      metadata?.parentFolderId
     );
   };
 

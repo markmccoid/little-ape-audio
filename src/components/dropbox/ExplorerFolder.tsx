@@ -50,13 +50,15 @@ const ExplorerFolder = ({
   const actions = useDropboxStore((state) => state.actions);
   const folderAttributes = useDropboxStore((state) => state.folderAttributes);
 
+  // console.log("Folder ATTR", folderAttributes);
+
   const currFolderAttributes = useMemo(() => {
     const id = createFolderMetadataKey(folder?.path_lower);
     return folderAttributes?.find((el) => el.id === id);
   }, [folderAttributes]);
   const [metadataInfo, setMetadataInfo] = useState(folderMetadata);
   // const [folderAttributes, setFolderAttributes] = useState(folderAttributes);
-  const [folderMetaState, setFolderMetaState] = useState<"on" | "off" | "loading">("off");
+  // const [folderMetaState, setFolderMetaState] = useState<"on" | "off" | "loading">("off");
 
   // Using local state for passed in show flag and metadata
   // because we allow reload of metadata from a single row with
@@ -79,21 +81,21 @@ const ExplorerFolder = ({
   //~ ----------------------------
   //~ Download Function
   //~ ----------------------------
-  const downloadFolderMetadata = async () => {
-    // Start download and parse
-    setFolderMetaState("loading");
-    const convertedMetadata = await getSingleFolderMetadata(folder);
+  // const downloadFolderMetadata = async () => {
+  //   // Start download and parse
+  //   setFolderMetaState("loading");
+  //   const convertedMetadata = await getSingleFolderMetadata(folder);
 
-    // Create the needed keys and store the data in the dropbox store
-    const { pathToBookFolderKey, pathToFolderKey } = extractMetadataKeys(folder.path_lower);
-    actions.mergeFoldersMetadata(pathToFolderKey, {
-      [pathToBookFolderKey]: convertedMetadata,
-    });
+  //   // Create the needed keys and store the data in the dropbox store
+  //   const { pathToBookFolderKey, pathToFolderKey } = extractMetadataKeys(folder.path_lower);
+  //   actions.mergeFoldersMetadata(pathToFolderKey, {
+  //     [pathToBookFolderKey]: convertedMetadata,
+  //   });
 
-    // set local metadata
-    setMetadataInfo(convertedMetadata);
-    setFolderMetaState("on");
-  };
+  //   // set local metadata
+  //   setMetadataInfo(convertedMetadata);
+  //   setFolderMetaState("on");
+  // };
 
   // isFav and isRead -> red
   // isRead only -> green
@@ -125,7 +127,7 @@ const ExplorerFolder = ({
     >
       <TouchableOpacity
         onPress={() => onNavigateForward(folder.path_lower, folder.name)}
-        onLongPress={async () => await onDownloadMetadata([folder])}
+        // onLongPress={async () => await onDownloadMetadata([folder])}
         key={folder.id}
       >
         <MotiView

@@ -125,6 +125,9 @@ export function cleanOneBook(
     categoryOne,
     categoryTwo,
     audioSource,
+    // Dropbox will be blank
+    // google will add the proper parent in calling function from commonCloudUtils.ts
+    parentFolderId: "",
   };
 }
 

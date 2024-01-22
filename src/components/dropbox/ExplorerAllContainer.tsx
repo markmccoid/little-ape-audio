@@ -1,18 +1,4 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-  StyleSheet,
-  Pressable,
-  Dimensions,
-  FlatList,
-  RefreshControl,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
-  Alert,
-} from "react-native";
+import { View, Text, FlatList, NativeSyntheticEvent, NativeScrollEvent, Alert } from "react-native";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import uuid from "react-native-uuid";
 import { Link, router, useLocalSearchParams, useRouter } from "expo-router";
@@ -21,14 +7,9 @@ import ExplorerActionBar from "./ExplorerActionBar";
 // import { useTrackActions } from "../../store/store";
 import ExplorerFile from "./ExplorerFile";
 import ExplorerFolder from "./ExplorerFolder";
-import { useTrackActions } from "../../store/store";
 import { MotiView } from "moti";
-import { times } from "lodash";
-import { Skeleton } from "moti/skeleton";
 import { FolderClosedIcon } from "../common/svg/Icons";
 import {
-  checkForFolderMetadata,
-  downloadFolderMetadata,
   extractMetadataKeys,
   folderFileReader,
   recurseFolderMetadata,
@@ -42,28 +23,48 @@ import { listGoogleDriveFiles } from "@utils/googleUtils";
 import { useSettingStore } from "@store/store-settings";
 
 import { checkForFolderMetadataGoogle } from "@utils/commonCloudUtils";
-// import { startDownloadAll } from "@store/data/fileSystemAccess";
 
 type Props = {
   pathIn: string;
   audioSource: AudioSourceType;
   onPathChange: (newPath: string, folderName: string) => void;
   yOffset?: number;
+  parentFolderId?: string;
 };
 
-const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefined }: Props) => {
+const ExplorerContainer = ({
+  pathIn,
+  audioSource,
+  onPathChange,
+  yOffset = undefined,
+  parentFolderId,
+}: Props) => {
   const [filesFolderObj, setFilesFolderObj] = React.useState<DropboxDir>();
   const [flatlistData, setFlatlistData] = React.useState<(FileEntry | FolderEntry)[]>([]);
   const [downloadAllId, setDownloadAllId] = React.useState<string>();
   const [isLoading, setIsLoading] = React.useState(false);
   const [isError, setIsError] = React.useState(undefined);
-
   const [displayMetadata, toggeleDisplayMetadata] = React.useReducer((prev) => !prev, false);
   const allFoldersMetadata = useDropboxStore((state) => state.folderMetadata || {});
+
+  const folderNavigation = useDropboxStore((state) => state.folderNavigation);
+
+  // pathIn for dropbox will be "/some/dirs" and we can use extractMetadataKeys() to get the pathToFolderKey and pathToBookFolderKey to metadata
+  // with Google, the pathIn will be a folderId.
   const { pathToFolderKey, pathToBookFolderKey } =
     audioSource === "dropbox"
       ? extractMetadataKeys(pathIn)
-      : { pathToFolderKey: pathIn, pathToBookFolderKey: "" };
+      : { pathToFolderKey: pathIn, pathToBookFolderKey: sanitizeString(pathIn) };
+
+  // REMEMEBER pathIn will be a google folderID, we need the folderName to sanitize
+  // ONE Solution would be to store the fileID instead of the folder name???
+  // Need to make sure lookup in Search as well as Pass to FOlderView was in sync
+  // console.log(
+  //   "PathIN",
+  //   pathIn,
+  //   pathToBookFolderKey,
+  //   folderNavigation[folderNavigation.length - 2]?.fullPath
+  // );
 
   const metaCheckKey =
     audioSource === "dropbox" ? `${pathToFolderKey}_${pathToBookFolderKey}` : pathToFolderKey;
@@ -103,7 +104,11 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
     ({ item, index }) => {
       // console.log("ITEM", item, index);
       if (!item.path_lower) return;
-      // console.log("ITEM", item.path_lower);
+      // console.log(
+      //   "ITEM",
+      //   folderNavigation[folderNavigation.length - 2]?.fullPath,
+      //   item.path_display
+      // );
       if (item[".tag"] === "folder") {
         // const { pathToFolderKey, pathToBookFolderKey } = extractMetadataKeys(item.path_lower);
         const { pathToFolderKey, pathToBookFolderKey } =
@@ -111,9 +116,8 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
             ? extractMetadataKeys(item.path_lower)
             : {
                 pathToFolderKey: item.path_display,
-                pathToBookFolderKey: sanitizeString(item.name).toLowerCase(),
+                pathToBookFolderKey: item.id,
               };
-        // console.log("pathtobookRENDER", pathToFolderKey, pathToBookFolderKey);
         // console.log("METADATA", allFoldersMetadata?.[pathToFolderKey]?.[pathToBookFolderKey]);
         return (
           <ExplorerFolder
@@ -321,7 +325,12 @@ const ExplorerContainer = ({ pathIn, audioSource, onPathChange, yOffset = undefi
       {filesFolderObj?.files?.length > 0 && (
         <>
           <FileMetadataView
-            metadata={allFoldersMetadata?.[pathToFolderKey]?.[pathToBookFolderKey]}
+            metadata={
+              audioSource === "dropbox"
+                ? allFoldersMetadata?.[pathToFolderKey]?.[pathToBookFolderKey]
+                : allFoldersMetadata?.[parentFolderId]?.[pathIn]
+              // : allFoldersMetadata?.[folderNavigation[folderNavigation.length - 2]?.fullPath]?.[pathIn]
+            }
             path_lower={pathIn}
             folderName={backTitle}
             audioSource={audioSource}

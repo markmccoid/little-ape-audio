@@ -6,9 +6,11 @@ import * as FileSystem from "expo-file-system";
 import { colors } from "@constants/Colors";
 
 type Props = { resultData: FlatFolderMetadata };
+type Unpacked<T> = T extends (infer U)[] ? U : T;
+
 const SearchBookResults = ({ resultData }: Props) => {
   const router = useRouter();
-  const renderItem = ({ item }) => {
+  const renderItem = ({ item }: { item: Unpacked<typeof resultData> }) => {
     const imageURL = item?.imageURL
       ? item.imageURL
       : item?.localImageName
@@ -48,13 +50,18 @@ const SearchBookResults = ({ resultData }: Props) => {
                 fullPath: item.dropboxPathLower,
                 backTitle: "Back",
                 audioSource: item.audioSource || "dropbox",
+                parentFolderId: item?.parentFolderId,
               },
             })
           }
         >
           <View className="flex-row justify-start flex-grow mb-1 rounded-r-lg">
             <View className="flex-col justify-start flex-grow rounded-r-lg">
-              <View className="bg-amber-500 rounded-t-lg rounded-l-none flex-grow">
+              <View
+                className={`${
+                  item.audioSource === "google" ? "bg-amber-500" : "bg-blue-400"
+                } rounded-t-lg rounded-l-none flex-grow`}
+              >
                 <Text className="font-semibold text-sm pl-3">
                   {item.categoryOne} - {item.categoryTwo}
                 </Text>
