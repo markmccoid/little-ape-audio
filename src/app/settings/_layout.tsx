@@ -33,7 +33,7 @@ const SettingsLayout = () => {
           },
           headerTintColor: colors.amber900,
           headerLeft: () => (
-            <Link href="/audio" className="p-[10] ml-[-10]">
+            <Link href="/audio/" className="p-[10] ml-[-10]">
               <HomeIcon />
             </Link>
           ),
@@ -78,6 +78,16 @@ const SettingsLayout = () => {
         name="foldermetadatamodal"
         options={{
           title: "Folder Metadata Details",
+          headerStyle: { backgroundColor: colors.amber200 },
+          headerTintColor: colors.amber900,
+          presentation: "card",
+          headerBackTitle: "Back",
+        }}
+      />
+      <Stack.Screen
+        name="folderattributesroute"
+        options={{
+          title: "Folder Attributes",
           headerStyle: { backgroundColor: colors.amber200 },
           headerTintColor: colors.amber900,
           presentation: "card",

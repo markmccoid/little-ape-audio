@@ -17,6 +17,7 @@ const SettingsContainer = () => {
   const dynamicColors = useSettingStore((state) => state.isUsingDynamicColors);
   const autoPlay = useSettingStore((state) => state.autoPlay);
   const folderMetadata = useDropboxStore((state) => state.folderMetadata);
+  const folderAttributes = useDropboxStore((state) => state.folderAttributes);
   const trackCount = useTracksStore((state) => state.tracks?.length || 0);
 
   const handleUpdateSeek = async (type: "forward" | "backward") => {
@@ -122,6 +123,16 @@ const SettingsContainer = () => {
             <Link href="/settings/foldermetadataroute" asChild>
               <Pressable className="px-2 py-3 w-full">
                 <Text className="text-sm">Manage Folder Metadata</Text>
+              </Pressable>
+            </Link>
+          </View>
+        )}
+        {/* FOLDER ATTRIBUTES */}
+        {folderAttributes.length > 0 && (
+          <View style={[styles.borderBottom]}>
+            <Link href="/settings/folderattributesroute" asChild>
+              <Pressable className="px-2 py-3 w-full">
+                <Text className="text-sm">Manage Folder Attributes</Text>
               </Pressable>
             </Link>
           </View>
