@@ -413,7 +413,9 @@ export const folderFileReader = async (pathIn: string) => {
   try {
     const files = await listDropboxFiles(pathIn);
     // Check for and download/store the 'LAAB_MetaAggr....json' file if it exists
-    await checkForFolderMetadata(files.files, "dropbox");
+    // call in setTimeout allows lines after this to run before running this call.  Don't
+    // want to delay display of files while checking for metadata.
+    setTimeout(async () => await checkForFolderMetadata(files.files, "dropbox"), 10);
     const filteredFoldersFiles = filterAudioFiles(files);
     // Tag files/folders with Liked/Read attributes
     const finalFolderFileList = tagFilesAndFolders(filteredFoldersFiles);

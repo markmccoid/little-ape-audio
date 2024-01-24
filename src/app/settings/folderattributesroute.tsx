@@ -1,75 +1,65 @@
 import { View, Text, ScrollView, Pressable, TouchableOpacity, Image } from "react-native";
-import React from "react";
-import { useDropboxStore } from "@store/store-dropbox";
+import React, { useEffect, useState } from "react";
+import { FolderAttributeItem, useDropboxStore } from "@store/store-dropbox";
 import { BookIcon, EmptyMDHeartIcon, MDHeartIcon, ReadIcon } from "@components/common/svg/Icons";
+import SettingsFolderAttributeItem from "@components/settings/SettingsFolderAttributeItem";
 
+type SortedAttributes = {
+  fiction: FolderAttributeItem[];
+  nonFiction: FolderAttributeItem[];
+  other: FolderAttributeItem[];
+};
 const folderattributesroute = () => {
   const folderAttributes = useDropboxStore((state) => state.folderAttributes);
-  const { updateFolderAttribute } = useDropboxStore((state) => state.actions);
+  const [sortedAttributes, setSortedAttributes] = useState<SortedAttributes>({
+    fiction: [],
+    nonFiction: [],
+    other: [],
+  });
+
+  const buildAttributeLists = () => {
+    const fiction = [];
+    const nonFiction = [];
+    const other = [];
+    for (const attribute of folderAttributes) {
+      if (attribute.categoryOne === "Fiction") {
+        fiction.push(attribute);
+      } else if (attribute.categoryOne === "Nonfiction") {
+        nonFiction.push(attribute);
+      } else {
+        other.push(attribute);
+      }
+    }
+    setSortedAttributes({ fiction, nonFiction, other });
+  };
+
+  useEffect(() => {
+    buildAttributeLists();
+  }, [folderAttributes]);
 
   return (
-    <View>
-      <ScrollView style={{ margin: 10 }}>
+    <View className="flex-1">
+      <ScrollView style={{ margin: 10, marginBottom: 30 }}>
         <View>
-          {folderAttributes?.map((attribute) => {
-            return (
-              <View
-                key={attribute.id}
-                className={`border p-2 mb-2 flex flex-row justify-start ${
-                  attribute.audioSource === "google" ? "bg-amber-400" : "bg-blue-400"
-                }`}
-              >
-                <Image
-                  source={{ uri: attribute.imageURL || attribute.defaultImage }}
-                  style={{ width: 100, height: 120 }}
-                  className="rounded-lg mr-3"
-                />
-                <View className="flex flex-col flex-grow">
-                  <Text>{attribute.title}</Text>
-                  <Text>{attribute.author}</Text>
-                </View>
+          {sortedAttributes?.fiction?.length > 0 && (
+            <Text className="ml-2 text-lg font-semibold">Fiction</Text>
+          )}
+          {sortedAttributes?.fiction?.map((attribute) => (
+            <SettingsFolderAttributeItem key={attribute.id} attribute={attribute} />
+          ))}
 
-                <View className="flex flex-col items-center justify-between">
-                  {attribute?.isFavorite && (
-                    <TouchableOpacity
-                      onPress={() =>
-                        updateFolderAttribute(
-                          attribute.id,
-                          "isFavorite",
-                          "remove",
-                          attribute.pathToFolder,
-                          attribute.audioSource,
-                          attribute?.parentFolder
-                        )
-                      }
-                    >
-                      <MDHeartIcon color="red" size={30} />
-                    </TouchableOpacity>
-                  )}
-                  {attribute?.isRead && (
-                    <TouchableOpacity
-                      className=""
-                      onPress={() =>
-                        updateFolderAttribute(
-                          attribute.id,
-                          "isRead",
-                          "remove",
-                          attribute.pathToFolder,
-                          attribute.audioSource,
-                          attribute?.parentFolder
-                        )
-                      }
-                    >
-                      <View>
-                        <BookIcon color="green" size={30} />
-                        <ReadIcon style={{ position: "absolute", top: 2, left: 5 }} size={20} />
-                      </View>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </View>
-            );
-          })}
+          {sortedAttributes?.nonFiction?.length > 0 && (
+            <Text className="ml-2 text-lg font-semibold">Nonfiction</Text>
+          )}
+          {sortedAttributes?.nonFiction?.map((attribute) => (
+            <SettingsFolderAttributeItem key={attribute.id} attribute={attribute} />
+          ))}
+          {sortedAttributes?.other?.length > 0 && (
+            <Text className="ml-2 text-lg font-semibold">Other</Text>
+          )}
+          {sortedAttributes?.other?.map((attribute) => (
+            <SettingsFolderAttributeItem key={attribute.id} attribute={attribute} />
+          ))}
         </View>
       </ScrollView>
     </View>

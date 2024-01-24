@@ -15,7 +15,6 @@ function CustomHeader({ title, backText, sessionAudioSource }) {
   // Use folderNavigation info stored in dropbox store to navigate back
   const onNavigateBack = () => {
     const newPathInfo = actions.popFolderNavigation();
-    // console.log("HEADER", newPathInfo);
     if (!newPathInfo) {
       navigation.goBack();
       return;

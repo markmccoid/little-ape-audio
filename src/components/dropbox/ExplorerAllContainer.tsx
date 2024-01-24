@@ -164,7 +164,11 @@ const ExplorerContainer = ({
         const filesFolders = await listGoogleDriveFiles(pathIn);
 
         // tag tracks as being already downloaded and marked as a Starred folder
-        await checkForFolderMetadataGoogle(filesFolders.folders, filesFolders?.metaAggr);
+        setTimeout(
+          async () =>
+            await checkForFolderMetadataGoogle(filesFolders.folders, filesFolders?.metaAggr),
+          10
+        );
         // await checkForFolderMetadataGoogle(filesFolders.folders, filesFolders?.metaAggr);
         const finalFolderFileList = tagFilesAndFolders({
           folders: filesFolders.folders,
@@ -172,6 +176,7 @@ const ExplorerContainer = ({
         });
         setFilesFolderObj(finalFolderFileList);
         setFlatlistData([...finalFolderFileList.folders, ...finalFolderFileList.files]);
+        /** DROPBOX ROUTE */
       } else if (audioSource === "dropbox") {
         await getFilesFromDropbox();
       }

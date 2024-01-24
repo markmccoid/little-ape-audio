@@ -36,7 +36,6 @@ const NewDirectory = () => {
   });
 
   const onPathChange = (newPath: string, folderName: string) => {
-    // const trailingPath = newPath.slice(newPath.lastIndexOf("/") + 1);
     router.push({
       pathname: `/audio/dropbox/${folderName}`,
       params: {
