@@ -25,10 +25,11 @@ const CollectionSelect = ({ playlistId }: Props) => {
   const playlist = actions.getPlaylist(playlistId);
   const collections = useTracksStore((state) => state.collections);
   const textColor = getTextColor(getColorLuminance(playlist.collection?.color).colorLuminance);
-  const [isActive, setIsActive] = React.useState<boolean[]>([]);
+
   const possibleCollections = collections
     .filter((collection) => collection.id !== playlist.collection?.id)
     .sort();
+
   return (
     <View className="flex flex-col">
       <View className="mb-2 pb-2 flex flex-row justify-start">

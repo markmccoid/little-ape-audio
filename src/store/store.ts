@@ -454,7 +454,7 @@ export const usePlaylists = () => {
   // console.log("playlists", playlists);
   const filter = collectionId; //This will be a key from tracksStore
   const filtered = playlists.filter((playlist) =>
-    filter === "all" ? playlist : playlist.collection.id === filter
+    filter === "all" ? playlist : playlist.collection?.id === filter
   );
   const finalOrdered = orderBy(filtered, ["lastPlayedDateTime"], ["desc"]);
   return finalOrdered;
