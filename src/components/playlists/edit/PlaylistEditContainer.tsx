@@ -1,12 +1,14 @@
-import { View, Text, Alert, StyleSheet, Switch } from "react-native";
+import { View, Text, Alert, StyleSheet, Switch, TextInput, Pressable } from "react-native";
 import React, { useState } from "react";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Link, Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { usePlaybackStore, useTrackActions, useTracksStore } from "@store/store";
 import { Playlist } from "@store/types";
 import { getImageFromWeb } from "@utils/otherUtils";
 import { AnimatedPressable } from "@components/common/buttons/Pressables";
 import TPImagePicker from "@components/trackPlayer/settings/TPImagePicker";
 import PlaylistEditTracks from "./PlaylistEditTracks";
+import PlaylistCollectionSetup from "./PlaylistCollectionSetup";
+import CollectionSelect from "./CollectionSelect";
 
 const PlaylistEditContainer = () => {
   const { playlistId } = useLocalSearchParams() as { playlistId: string };
@@ -15,6 +17,7 @@ const PlaylistEditContainer = () => {
   const [playlist, setPlaylist] = useState<Playlist>();
   const didUpdate = usePlaybackStore().didUpdate;
 
+  // console.log("PL", playlist?.collection);
   React.useEffect(() => {
     const playlist = trackActions.getPlaylist(playlistId);
     setPlaylist(playlist);
@@ -66,6 +69,7 @@ const PlaylistEditContainer = () => {
         </View>
       </View>
       <View className="w-full bg-black" style={{ height: StyleSheet.hairlineWidth }} />
+      {/* IMAGE PICKER */}
       <View className="mt-3 px-2">
         <TPImagePicker currPlaylistId={playlist.id} />
       </View>
@@ -96,6 +100,12 @@ const PlaylistEditContainer = () => {
       </View>
       <View className="w-full bg-black" style={{ height: StyleSheet.hairlineWidth }} />
       {/* <PlaylistDetails playlistId={playlist.id} /> */}
+      {/* PLAYLIST COLLECTIONS */}
+      <View className="px-2 py-3">
+        {/* <PlaylistCollectionSetup playlistId={playlist.id} /> */}
+        <CollectionSelect playlistId={playlist.id} />
+      </View>
+      <View className="w-full bg-black" style={{ height: StyleSheet.hairlineWidth }} />
       <View className="mx-2 flex-1 mb-[80] mt-2">
         <PlaylistEditTracks playlistId={playlist.id} />
       </View>

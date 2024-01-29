@@ -21,7 +21,6 @@ const ExplorerImage = ({ metadata, width, style }: Props) => {
   // const imgDims = metadata.imageURL?.uri
   //   ? { width, height: width * IMG_RATIO }
   //   : { width, height: width };
-
   React.useEffect(() => {
     const getImageDims = async () => {
       const finalImage = metadata?.imageURL

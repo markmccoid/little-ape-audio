@@ -58,6 +58,9 @@ const SettingsContainer = () => {
           <Text>Version</Text>
           <Text>{version}</Text>
         </View>
+        {/* ------------------ */}
+        {/* CLOUD AUTHORIZATION */}
+        {/* ------------------ */}
         <View style={[styles.borderBottom]}>
           <Link href="/settings/authroute" asChild>
             <Pressable className="px-2 py-3 w-full">
@@ -65,6 +68,9 @@ const SettingsContainer = () => {
             </Pressable>
           </Link>
         </View>
+        {/* ------------------ */}
+        {/* SEEK FORWARD/BACKWARD */}
+        {/* ------------------ */}
         <View className="px-2" style={[styles.borderBottom]}>
           <Pressable onPress={() => handleUpdateSeek("forward")} className="flex-grow py-3">
             <Text className="text-sm">Seek Forward</Text>
@@ -77,7 +83,9 @@ const SettingsContainer = () => {
           </Pressable>
           <Text>{backwardSecs}</Text>
         </View>
+        {/* ------------------ */}
         {/* Dynamic Colors */}
+        {/* ------------------ */}
         <View className="px-2 " style={[styles.borderBottom]}>
           <Pressable onPress={() => handleUpdateSeek("backward")} className="flex-grow py-3">
             <Text className="text-sm">Dynamic Colors</Text>
@@ -92,7 +100,9 @@ const SettingsContainer = () => {
             value={dynamicColors}
           />
         </View>
+        {/* ------------------ */}
         {/* Auto Play */}
+        {/* ------------------ */}
         <View className="px-2 " style={[styles.borderBottom]}>
           <Pressable onPress={() => handleUpdateSeek("backward")} className="flex-grow py-3">
             <Text className="text-sm">AutoPlay on Playlist Select</Text>
@@ -107,7 +117,19 @@ const SettingsContainer = () => {
             value={autoPlay}
           />
         </View>
+        {/* ------------------ */}
+        {/* MANAGE COLLECTIONS */}
+        {/* ------------------ */}
+        <View className="px-2" style={[styles.borderBottom]}>
+          <Link href="/settings/managecollections" asChild>
+            <Pressable className="py-3 w-full">
+              <Text>Manage Collections</Text>
+            </Pressable>
+          </Link>
+        </View>
+        {/* ------------------ */}
         {/* MANAGE TRACKS */}
+        {/* ------------------ */}
         {trackCount > 0 && (
           <View style={[styles.borderBottom]}>
             <Link href="/settings/managetracksroute" asChild>

@@ -1,4 +1,12 @@
-import { Playlist, AudioState, ApeTrack, Bookmark, PlaylistImageColors } from "./types";
+import {
+  Playlist,
+  AudioState,
+  ApeTrack,
+  Bookmark,
+  PlaylistImageColors,
+  CollectionItem,
+  defaultCollections,
+} from "./types";
 import { create } from "zustand";
 import { Alert, Image } from "react-native";
 import uuid from "react-native-uuid";
@@ -20,18 +28,11 @@ import { useSettingStore } from "./store-settings";
 import { defaultImages, getRandomNumber } from "./storeUtils";
 import * as FileSystem from "expo-file-system";
 import { getImageSize } from "@utils/audioUtils";
-
-import { shallow } from "zustand/shallow";
 import { router } from "expo-router";
-import { formatSeconds } from "@utils/formatUtils";
 import { getCurrentChapter } from "@utils/chapterUtils";
 import { debounce, reverse } from "lodash";
 import { getImageColors } from "@utils/otherUtils";
-// export function getRandomNumber() {
-
-//   const randomNumber = Math.floor(Math.random() * 13) + 1; // Generate random number between 1 and 13
-//   return randomNumber.toString().padStart(2, "0"); // Pad number with leading zero if less than 10
-// }
+import { colors } from "@constants/Colors";
 
 let eventPlayerTrackChange = undefined;
 let eventEndOfQueue = undefined;
@@ -39,14 +40,31 @@ let eventPlayerStateChange = undefined;
 let eventProgressUpdated = undefined;
 let eventMetadataChapterReceived = undefined;
 let saveIntervalId = undefined;
+
+//-- ==================================
+//-- TEMP STORE - Storage for globals
+//-- ==================================
+type TempStore = {
+  color: string;
+  actions: {
+    setColor: (color: string) => void;
+  };
+};
+export const useTempStore = create<TempStore>((set, get) => ({
+  color: "#000000",
+  actions: {
+    setColor: (color) => set({ color }),
+  },
+}));
+
 //-- ==================================
 //-- TRACK STORE
 //-- ==================================
-
 export const useTracksStore = create<AudioState>((set, get) => ({
   tracks: [],
   playlists: {},
   playlistUpdated: new Date(),
+  collections: defaultCollections,
   actions: {
     addNewTrack: addTrack(set, get),
     updateTrackMetadata: async (trackId, trackMetadata) => {
@@ -169,6 +187,9 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         totalDurationSeconds: 0,
         totalListenedToSeconds: 0,
         currentRate: 1,
+        collection: get().collections.find(
+          (el) => el.id === useSettingStore.getState().defaultCollectionId
+        ),
       };
 
       const newPlaylistObj = { ...get().playlists, [id]: newPlaylist };
@@ -278,6 +299,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         imageURI,
         imageAspectRatio,
         imageColors,
+        collection,
       } = updateObj;
 
       const playlists = { ...get().playlists };
@@ -293,7 +315,10 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       if (author) {
         playlists[playlistId].author = author;
       }
-
+      // Collection info update
+      if (collection) {
+        playlists[playlistId].collection = collection;
+      }
       // Image Processing
       let newPlaylists = {};
       if (imageURI) {
@@ -423,8 +448,18 @@ export const useTracksStore = create<AudioState>((set, get) => ({
 }));
 
 export const useTrackActions = () => useTracksStore((state) => state.actions);
-export const usePlaylists = () =>
-  useTracksStore((state) => orderBy(map(state.playlists), ["lastPlayedDateTime"], ["desc"]));
+export const usePlaylists = () => {
+  const collectionId = useSettingStore((state) => state.selectedCollection.id);
+  const playlists = useTracksStore((state) => map(state.playlists));
+  // console.log("playlists", playlists);
+  const filter = collectionId; //This will be a key from tracksStore
+  const filtered = playlists.filter((playlist) =>
+    filter === "all" ? playlist : playlist.collection.id === filter
+  );
+  const finalOrdered = orderBy(filtered, ["lastPlayedDateTime"], ["desc"]);
+  return finalOrdered;
+};
+// useTracksStore((state) => orderBy(map(state.playlists), ["lastPlayedDateTime"], ["desc"]));
 //!! NEED TO Make sure to update playlistUpdated whenever a change is made to
 //!! playlist that we want to track state changes.
 export const useCurrentPlaylist = () => {

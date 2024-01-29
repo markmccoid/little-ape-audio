@@ -28,6 +28,7 @@
     "expo-clipboard": "~4.3.1",
     "expo-constants": "~14.4.2",
     "expo-dev-client": "~2.4.6",
+    "expo-haptics": "~12.4.0",
     "expo-keep-awake": "~12.3.0",
     "expo-linear-gradient": "~12.3.0",
     "expo-linking": "~5.0.2",
@@ -63,9 +64,9 @@
     "react-native-track-player": "^4.0",
     "react-native-uuid": "^2.0.1",
     "react-native-web": "~0.19.6",
+    "reanimated-color-picker": "^3.0.0",
     "typescript": "^5.1.3",
-    "zustand": "^4.3.8",
-    "expo-haptics": "~12.4.0"
+    "zustand": "^4.3.8"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",

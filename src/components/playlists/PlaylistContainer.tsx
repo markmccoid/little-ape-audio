@@ -6,8 +6,9 @@ import {
   NativeScrollEvent,
   StyleSheet,
   Pressable,
+  TouchableOpacity,
 } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { usePlaybackStore, usePlaylists, useTrackActions, useTracksStore } from "../../store/store";
 import { Link, useFocusEffect, useNavigation, useRouter } from "expo-router";
 import PlaylistRow from "./PlaylistRow";
@@ -18,6 +19,8 @@ import { colors } from "@constants/Colors";
 import { Playlist } from "@store/types";
 import Headphones from "@components/common/svg/Headphones";
 import AddBook from "@components/common/svg/AddBook";
+import ModalPopup from "@components/common/ModalPopup";
+import { useSettingStore } from "@store/store-settings";
 const { width, height: screenHeight } = Dimensions.get("window");
 
 const PlaylistContainer = () => {
@@ -31,6 +34,26 @@ const PlaylistContainer = () => {
   const prevPlaylistId = useRef(undefined);
   const scrollRef = useRef<FlatList>(null);
   const setCurrPlaylist = usePlaybackStore((state) => state.actions.setCurrentPlaylist);
+  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const selectedCollection = useSettingStore((state) => state.selectedCollection);
+  const navigation = useNavigation();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => (
+        <TouchableOpacity
+          onPress={() => {
+            // This will open the ModalPopup.tsx
+            setIsDropdownOpen(true);
+          }}
+        >
+          <Text className="text-base font-semibold text-amber-950">
+            {selectedCollection.headerTitle}
+          </Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, selectedCollection]);
 
   // Scroll to the active track
   const scrollToRow = () => {
@@ -145,27 +168,33 @@ const PlaylistContainer = () => {
   // If no playlist exist, show starter screen
   if (playlists.length === 0) {
     return (
-      <Link
-        href="/audio/dropbox/"
-        asChild
-        className="flex items-center justify-center flex-1 mb-[200]"
-      >
-        <Pressable className="p-[10] mr-[-10]">
-          <AddBook size={50} headphoneColor={colors.amber800} plusBGColor={colors.amber700} />
-          <View className="w-[80%] items-center">
-            <Text className="text-lg font-semibold">Press the headphones to add a book</Text>
-            <Text className="">
-              The headphones icon in the upper right will also take you to the "Add A Book" Screen
-            </Text>
-          </View>
-        </Pressable>
-      </Link>
+      <>
+        <ModalPopup isDropdownOpen={isDropdownOpen} setIsDropdownOpen={setIsDropdownOpen} />
+
+        <Link
+          href="/audio/dropbox/"
+          asChild
+          className="flex items-center justify-center flex-1 mb-[200]"
+        >
+          <Pressable className="p-[10] mr-[-10]">
+            <AddBook size={50} headphoneColor={colors.amber800} plusBGColor={colors.amber700} />
+            <View className="w-[80%] items-center">
+              <Text className="text-lg font-semibold">Press the headphones to add a book</Text>
+              <Text className="">
+                The headphones icon in the upper right will also take you to the "Add A Book" Screen
+              </Text>
+            </View>
+          </Pressable>
+        </Link>
+      </>
     );
   }
 
   // Show playlists
   return (
     <View className="w-full flex-1">
+      <ModalPopup isDropdownOpen={isDropdownOpen} setIsDropdownOpen={setIsDropdownOpen} />
+
       <AnimatePresence>
         {onShow && (
           <MotiView

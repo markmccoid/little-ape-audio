@@ -4,7 +4,8 @@ import { saveToAsyncStorage } from "./data/asyncStorage";
 import TrackPlayer from "react-native-track-player";
 import { formatSeconds, timeBetween } from "@utils/formatUtils";
 import { BottomSheetImpRef } from "@components/trackPlayer/bottomSheet/BottomSheetContainer";
-
+import { CollectionItem } from "./types";
+import { defaultCollections } from "./types";
 //-- ==================================
 //-- SETTINGS STORE
 //-- ==================================
@@ -35,6 +36,10 @@ type SettingsState = {
   isUsingDynamicColors: boolean;
   // Start playing playlist when playlist is selected
   autoPlay: boolean;
+  // Id of the default collection
+  defaultCollectionId: string;
+  // Current collection being used for filter
+  selectedCollection: CollectionItem;
   actions: {
     updateJumpForwardSeconds: (seconds: number) => Promise<void>;
     updateJumpBackwardSeconds: (seconds: number) => Promise<void>;
@@ -46,6 +51,8 @@ type SettingsState = {
     setCloudAuth: (service: "dropbox" | "google", authStatus: boolean) => Promise<void>;
     toggleDynamicColors: () => Promise<void>;
     toggleAutoPlay: () => Promise<void>;
+    setDefaultCollectionId: (collectionId: string) => Promise<void>;
+    setSelectedCollection: (collection: CollectionItem) => Promise<void>;
   };
 };
 export const useSettingStore = create<SettingsState>((set, get) => ({
@@ -68,6 +75,8 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
   },
   isUsingDynamicColors: true,
   autoPlay: false,
+  defaultCollectionId: "audiobooks",
+  selectedCollection: defaultCollections[0],
   actions: {
     toggleDynamicColors: async () => {
       set({ isUsingDynamicColors: !get().isUsingDynamicColors });
@@ -211,6 +220,16 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
           });
         },
       });
+    },
+    setDefaultCollectionId: async (collectionId) => {
+      set({ defaultCollectionId: collectionId });
+      const newSettingsData = { ...get() };
+      delete newSettingsData.actions;
+    },
+    setSelectedCollection: async (collection) => {
+      set({ selectedCollection: collection });
+      const newSettingsData = { ...get() };
+      delete newSettingsData.actions;
     },
   },
 }));

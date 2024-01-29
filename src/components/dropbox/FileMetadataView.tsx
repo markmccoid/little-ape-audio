@@ -73,9 +73,13 @@ const FileMetadataView = ({ metadata, path_lower, audioSource, folderName }: Pro
     // Create the needed keys and store the data in the dropbox store ONLY if
     // convertedMetadata has data
     if (convertedMetadata) {
-      dropboxActions.mergeFoldersMetadata(pathToFolderKey, {
-        [pathToBookFolderKey]: convertedMetadata,
-      });
+      dropboxActions.mergeFoldersMetadata(
+        pathToFolderKey,
+        {
+          [pathToBookFolderKey]: convertedMetadata,
+        },
+        false
+      );
     }
   };
 

@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Appearance } from "react-native";
+import { View, Text, Pressable, Appearance, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Link, Stack } from "expo-router";
 import AddBook from "../../components/common/svg/AddBook";
@@ -88,6 +88,7 @@ const AudioLayout = () => {
           headerShown: true,
         }}
       />
+
       <Stack.Screen
         name="trackmove"
         options={{

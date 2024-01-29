@@ -127,7 +127,10 @@ type DropboxState = {
     // merge new bookFolders detail object into the passed folderKey
     mergeFoldersMetadata: (
       folderKey: string,
-      newBookFoldersObj: FolderMetadataDetails
+      newBookFoldersObj: FolderMetadataDetails,
+      // Defaults to true, if set to false the newBookFoldersObj will be merged into the existing
+      // set to false if only updating part of the metadata.  Most of the time we won't use this.
+      overwrite?: boolean
     ) => Promise<void>;
     updateFoldersAttributePosition: (
       type: "favPosition" | "readPosition",
@@ -291,17 +294,25 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       return taggedFolders as FolderEntry[];
     },
     //! NEW FolderMetada-NEW
-    mergeFoldersMetadata: async (folderKey, newBookFoldersObj) => {
+    mergeFoldersMetadata: async (folderKey, newBookFoldersObj, overwrite = true) => {
       const folderMetadata = { ...get().folderMetadata };
       // The newBookFoldersObj is empty or undefined, bail on function
       // we don't want to save empty keys
       if (!newBookFoldersObj || Object.keys(newBookFoldersObj || {}).length === 0) {
         return;
       }
-      folderMetadata[folderKey] = {
-        ...folderMetadata[folderKey],
-        ...newBookFoldersObj,
-      };
+      if (overwrite) {
+        // Overwrite whole key with new data
+        folderMetadata[folderKey] = {
+          ...newBookFoldersObj,
+        };
+      } else {
+        // Merge new data into existing key
+        folderMetadata[folderKey] = {
+          ...folderMetadata[folderKey],
+          ...newBookFoldersObj,
+        };
+      }
       set((state) => ({
         folderMetadata,
       }));
@@ -412,13 +423,16 @@ function filterAudioFiles(filesAndFolders: DropboxDir) {
 export const folderFileReader = async (pathIn: string) => {
   try {
     const files = await listDropboxFiles(pathIn);
+    // console.log("Files", files);
     // Check for and download/store the 'LAAB_MetaAggr....json' file if it exists
     // call in setTimeout allows lines after this to run before running this call.  Don't
     // want to delay display of files while checking for metadata.
     setTimeout(async () => await checkForFolderMetadata(files.files, "dropbox"), 10);
     const filteredFoldersFiles = filterAudioFiles(files);
+    console.log("After Filter");
     // Tag files/folders with Liked/Read attributes
     const finalFolderFileList = tagFilesAndFolders(filteredFoldersFiles);
+    console.log("After tag");
     // look for the
 
     return finalFolderFileList;

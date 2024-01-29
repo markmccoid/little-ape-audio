@@ -284,6 +284,7 @@ export const listDropboxFiles = async (path: string = ""): Promise<DropboxDir> =
   // console.log("TOKEN", token);
   const finalPath = path === "/" ? "" : path;
   const data = { path: finalPath };
+
   let resp;
   // console.log("PATH/", data, token);
   try {
@@ -321,6 +322,7 @@ export const listDropboxFiles = async (path: string = ""): Promise<DropboxDir> =
       files.push(item);
     }
   }
+
   folders = sortBy(folders, [(o) => o.name.toLowerCase()]);
   files = sortBy(files, [(o) => o.name.toLowerCase()]);
 

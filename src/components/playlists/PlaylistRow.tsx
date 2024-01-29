@@ -22,9 +22,6 @@ import { colors } from "@constants/Colors";
 import usePlaylistColors from "hooks/usePlaylistColors";
 import { LinearGradient } from "expo-linear-gradient";
 import { AnimatePresence, MotiView } from "moti";
-// import * as WebBrowser from "expo-web-browser";
-// import * as Clipboard from "expo-clipboard";
-// import { getImageSize } from "@utils/audioUtils";
 
 type Props = {
   playlist: Playlist;
@@ -107,14 +104,14 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
               locations={isActive ? [0.4, 0.7, 1] : [0.001, 0.002, 1]}
             >
               <View
-                className={`flex-row flex-1 pt-2 pb-3 px-2 border-r border-r-amber-800 ${
+                className={`flex-row flex-1  border-r border-r-amber-800 ${
                   // isActive ? "bg-amber-300" : "bg-amber-50"
                   isActive
                 }`}
                 // style={{ backgroundColor: isActive ? playlistColors.gradientTop : "" }}
               >
                 <Pressable
-                  className="flex-1 flex-row"
+                  className="flex-1 flex-row pt-2 pb-3 px-2"
                   onPress={async () => await onPlaylistSelect(playlist.id)}
                 >
                   {/* IMAGE */}
@@ -147,6 +144,7 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
                     </Text>
                   </View>
                 </Pressable>
+                <View className="w-3" style={{ backgroundColor: playlist?.collection?.color }} />
               </View>
             </LinearGradient>
           </Swipeable>

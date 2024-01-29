@@ -3,7 +3,7 @@ import React, { useEffect, useLayoutEffect, useState } from "react";
 import { Link, Stack, useRouter, useLocalSearchParams } from "expo-router";
 import { useNavigation } from "expo-router";
 import CustomHeader from "../../../components/dropbox/CustomHeader";
-import { useDropboxStore } from "@store/store-dropbox";
+import { sanitizeString, useDropboxStore } from "@store/store-dropbox";
 import { AudioSourceLinkParams, AudioSourceType } from "./index";
 import ExplorerAllContainer from "@components/dropbox/ExplorerAllContainer";
 
@@ -46,7 +46,7 @@ const NewDirectory = () => {
       } as AudioSourceLinkParams,
     });
   };
-  // console.log("NEWDIR Path", fullPath);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Stack.Screen

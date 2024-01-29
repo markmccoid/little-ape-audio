@@ -1,13 +1,6 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
-import {
-  Slot,
-  SplashScreen,
-  useRouter,
-  useRootNavigationState,
-  Redirect,
-  useNavigation,
-} from "expo-router";
+import { Slot, SplashScreen, useRouter, useRootNavigationState } from "expo-router";
 import { useEffect, useState } from "react";
 import { View, useColorScheme } from "react-native";
 import { Lato_100Thin, Lato_400Regular, Lato_700Bold } from "@expo-google-fonts/lato";

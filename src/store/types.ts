@@ -2,6 +2,7 @@ import { Track } from "react-native-track-player";
 import { FileEntry } from "../utils/dropboxUtils";
 import { Chapter } from "./store-functions";
 import { AudioSourceType } from "@app/audio/dropbox";
+import { colors } from "@constants/Colors";
 
 //~ ================================
 //~ AudioTrack Type
@@ -64,6 +65,15 @@ export type TrackAttributes = {
 };
 type TrackId = string;
 
+type CollectionTypes = "music" | "podcast" | "audiobook";
+export type CollectionItem = {
+  id: string;
+  name: string;
+  color: string;
+  type: CollectionTypes;
+  headerTitle: string;
+};
+
 export type PlaylistId = string;
 export type Playlist = {
   id: string;
@@ -85,6 +95,8 @@ export type Playlist = {
   bookmarks?: Bookmark[];
   currentPosition?: { trackIndex: number; position: number };
   currentRate: number;
+  // collection id linking to collection
+  collection: CollectionItem;
   // position history stores the last 5 position
   // Helpful if your place in book gets reset accidentally.
   positionHistory: { trackIndex: number; position: number }[];
@@ -105,6 +117,7 @@ type PlaylistUpdateObj = {
   imageAspectRatio?: number;
   imageType?: "uri" | "imported" | "url";
   imageColors?: PlaylistImageColors;
+  collection?: CollectionItem;
   //~ Current Position is updated separately
   // currentPosition?: { trackIndex: number; position: number };
   //~ Current Rate has its own update function
@@ -121,6 +134,7 @@ export type AudioState = {
   tracks: AudioTrack[];
   playlists: Record<PlaylistId, Playlist>;
   playlistUpdated: Date;
+  collections: CollectionItem[];
   actions: {
     // given the audio file location in storage, look up metadata and create
     // record in AudioState.audioFiles store array
@@ -272,3 +286,41 @@ export type ProcessedBookData = {
   googleQuery: string | undefined;
   googleQueryDate: string | undefined;
 };
+
+export const defaultCollections: CollectionItem[] = [
+  {
+    id: "all",
+    name: "All",
+    color: colors.amber300,
+    type: "audiobook",
+    headerTitle: "Audiobooks",
+  },
+  {
+    id: "fiction",
+    name: "Fiction",
+    color: "#03a9f4",
+    type: "audiobook",
+    headerTitle: "Fiction",
+  },
+  {
+    id: "nonfiction",
+    name: "Nonfiction",
+    color: "#3f51b5",
+    type: "audiobook",
+    headerTitle: "Nonfiction",
+  },
+  {
+    id: "music",
+    name: "Music",
+    color: "#4caf50",
+    type: "audiobook",
+    headerTitle: "Music",
+  },
+  {
+    id: "youtube videos",
+    name: "Youtube Videos",
+    color: "#607d8b",
+    type: "audiobook",
+    headerTitle: "Vide",
+  },
+];

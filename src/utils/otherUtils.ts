@@ -151,7 +151,7 @@ function hexToRgb(hexColor: string) {
 //~-=======================================
 export const getTextColor = (bgLuminance: number) => {
   const whiteTextcontrast = (255 - bgLuminance) / 255;
-  if (whiteTextcontrast >= 0.7) return "white";
+  if (whiteTextcontrast >= 0.6) return "white";
   return "black";
 };
 //~- Get contrast between two color

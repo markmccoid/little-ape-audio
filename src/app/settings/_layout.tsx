@@ -107,6 +107,14 @@ const SettingsLayout = () => {
         }}
       />
       <Stack.Screen
+        name="managecollections"
+        options={{
+          title: "Manage Collections",
+          presentation: "card",
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
         name="playarea"
         options={{
           title: "Play Area",
