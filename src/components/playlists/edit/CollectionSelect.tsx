@@ -24,10 +24,11 @@ const CollectionSelect = ({ playlistId }: Props) => {
   const actions = useTrackActions();
   const playlist = actions.getPlaylist(playlistId);
   const collections = useTracksStore((state) => state.collections);
+  if (!playlist) return null;
   const textColor = getTextColor(getColorLuminance(playlist.collection?.color).colorLuminance);
 
   const possibleCollections = collections
-    .filter((collection) => collection.id !== playlist.collection?.id)
+    .filter((collection) => collection?.id !== playlist.collection?.id)
     .sort();
 
   return (

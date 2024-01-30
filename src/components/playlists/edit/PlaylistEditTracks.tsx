@@ -141,7 +141,7 @@ const PlaylistEditTracks = ({ playlistId }: { playlistId: string }) => {
         marginLeft: 2,
       }}
     >
-      <View className="flex-row justify-end mb-2 w-full ">
+      {/* <View className="flex-row justify-end mb-2 w-full ">
         <TouchableOpacity
           className="border border-amber-900 bg-amber-500 p-1 rounded-md"
           onPress={async () => {
@@ -157,7 +157,7 @@ const PlaylistEditTracks = ({ playlistId }: { playlistId: string }) => {
         >
           <Text>Sort by Metdata</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
 
       <View className="border border-amber-800">
         <DraggableFlatList

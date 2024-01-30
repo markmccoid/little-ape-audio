@@ -15,6 +15,7 @@ const SettingsContainer = () => {
   const forwardSecs = useSettingStore((state) => state.jumpForwardSeconds);
   const backwardSecs = useSettingStore((state) => state.jumpBackwardSeconds);
   const dynamicColors = useSettingStore((state) => state.isUsingDynamicColors);
+  const showCollectionColorStrip = useSettingStore((state) => state.showCollectionColorStrip);
   const autoPlay = useSettingStore((state) => state.autoPlay);
   const folderMetadata = useDropboxStore((state) => state.folderMetadata);
   const folderAttributes = useDropboxStore((state) => state.folderAttributes);
@@ -86,10 +87,8 @@ const SettingsContainer = () => {
         {/* ------------------ */}
         {/* Dynamic Colors */}
         {/* ------------------ */}
-        <View className="px-2 " style={[styles.borderBottom]}>
-          <Pressable onPress={() => handleUpdateSeek("backward")} className="flex-grow py-3">
-            <Text className="text-sm">Dynamic Colors</Text>
-          </Pressable>
+        <View className="px-2 py-2" style={[styles.borderBottom]}>
+          <Text className="text-sm">Dynamic Colors</Text>
 
           <Switch
             style={{ marginRight: -10, transform: [{ scaleY: 0.7 }, { scaleX: 0.7 }] }}
@@ -103,10 +102,8 @@ const SettingsContainer = () => {
         {/* ------------------ */}
         {/* Auto Play */}
         {/* ------------------ */}
-        <View className="px-2 " style={[styles.borderBottom]}>
-          <Pressable onPress={() => handleUpdateSeek("backward")} className="flex-grow py-3">
-            <Text className="text-sm">AutoPlay on Playlist Select</Text>
-          </Pressable>
+        <View className="px-2 py-2" style={[styles.borderBottom]}>
+          <Text className="text-sm">AutoPlay on Playlist Select</Text>
 
           <Switch
             style={{ marginRight: -10, transform: [{ scaleY: 0.7 }, { scaleX: 0.7 }] }}
@@ -115,6 +112,21 @@ const SettingsContainer = () => {
             ios_backgroundColor="#3e3e3e"
             onValueChange={async () => await actions.toggleAutoPlay()}
             value={autoPlay}
+          />
+        </View>
+        {/* ------------------ */}
+        {/* On/Off Collection Color Strip */}
+        {/* ------------------ */}
+        <View className="px-2 py-2" style={[styles.borderBottom]}>
+          <Text className="text-sm">Collection Color String</Text>
+
+          <Switch
+            style={{ marginRight: -10, transform: [{ scaleY: 0.7 }, { scaleX: 0.7 }] }}
+            trackColor={{ false: "#767577", true: "#4caf50" }}
+            thumbColor={showCollectionColorStrip ? "#8bc34a" : "#ddd"}
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={async () => await actions.toggleCollectionColorStrip()}
+            value={showCollectionColorStrip}
           />
         </View>
         {/* ------------------ */}

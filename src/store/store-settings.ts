@@ -34,6 +34,7 @@ type SettingsState = {
     google?: boolean;
   };
   isUsingDynamicColors: boolean;
+  showCollectionColorStrip: boolean;
   // Start playing playlist when playlist is selected
   autoPlay: boolean;
   // Id of the default collection
@@ -51,6 +52,7 @@ type SettingsState = {
     setCloudAuth: (service: "dropbox" | "google", authStatus: boolean) => Promise<void>;
     toggleDynamicColors: () => Promise<void>;
     toggleAutoPlay: () => Promise<void>;
+    toggleCollectionColorStrip: () => Promise<void>;
     setDefaultCollectionId: (collectionId: string) => Promise<void>;
     setSelectedCollection: (collection: CollectionItem) => Promise<void>;
   };
@@ -74,12 +76,20 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
     google: false,
   },
   isUsingDynamicColors: true,
+  showCollectionColorStrip: true,
   autoPlay: false,
   defaultCollectionId: "audiobooks",
   selectedCollection: defaultCollections[0],
   actions: {
     toggleDynamicColors: async () => {
       set({ isUsingDynamicColors: !get().isUsingDynamicColors });
+      const newSettingsData = { ...get() };
+      delete newSettingsData.actions;
+
+      await saveToAsyncStorage("settings", newSettingsData);
+    },
+    toggleCollectionColorStrip: async () => {
+      set({ showCollectionColorStrip: !get().showCollectionColorStrip });
       const newSettingsData = { ...get() };
       delete newSettingsData.actions;
 

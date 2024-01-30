@@ -22,6 +22,7 @@ import { colors } from "@constants/Colors";
 import usePlaylistColors from "hooks/usePlaylistColors";
 import { LinearGradient } from "expo-linear-gradient";
 import { AnimatePresence, MotiView } from "moti";
+import { useSettingStore } from "@store/store-settings";
 
 type Props = {
   playlist: Playlist;
@@ -34,7 +35,7 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
   const trackActions = useTrackActions();
   const playbackActions = usePlaybackStore((state) => state.actions);
   const currentPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
-
+  const showCollectionColorStrip = useSettingStore((state) => state.showCollectionColorStrip);
   const isActive = useMemo(() => currentPlaylistId === playlist.id, [currentPlaylistId]);
   const playlistColors = usePlaylistColors(playlist.id);
 
@@ -144,7 +145,10 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
                     </Text>
                   </View>
                 </Pressable>
-                <View className="w-3" style={{ backgroundColor: playlist?.collection?.color }} />
+                {/* TURN OFF COLLECTION COLOR */}
+                {showCollectionColorStrip && (
+                  <View className="w-3" style={{ backgroundColor: playlist?.collection?.color }} />
+                )}
               </View>
             </LinearGradient>
           </Swipeable>

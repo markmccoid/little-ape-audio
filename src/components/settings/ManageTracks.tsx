@@ -25,6 +25,7 @@ const getOutliers = (playlists: Record<PlaylistId, Playlist>, tracks: AudioTrack
     playlistTracks.push(playlists[key].trackIds);
   });
   playlistTracks = playlistTracks.flatMap((el) => el);
+
   // console.log(playlistTracks);
   const tracksFileNames = tracks.map((el) => el.fileURI);
 
@@ -32,11 +33,13 @@ const getOutliers = (playlists: Record<PlaylistId, Playlist>, tracks: AudioTrack
     // Don't include the local images in this track list
     if (track.fileURI.includes("localimages_")) continue;
     const foundTrack = tracks.find((el) => el.fileURI === track.fileURI);
+    // console.log("FOUND TRACK", foundTrack.fileURI, !files.includes(track.fileURI));
 
     filesProcessed.push({
       id: track.id,
       filename: track.fileURI,
-      orphaned: !tracksFileNames.includes(track.fileURI),
+      orphaned: !files.includes(track.fileURI),
+      // orphaned: !tracksFileNames.includes(files.fileURI),
       playlistOrphan: !playlistTracks.includes(track.id),
       foundTrack,
     });

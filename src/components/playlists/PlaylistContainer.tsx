@@ -19,7 +19,7 @@ import { colors } from "@constants/Colors";
 import { Playlist } from "@store/types";
 import Headphones from "@components/common/svg/Headphones";
 import AddBook from "@components/common/svg/AddBook";
-import ModalPopup from "@components/common/ModalPopup";
+import CollectionSelectionPopup from "@components/common/CollectionSelectionPopup";
 import { useSettingStore } from "@store/store-settings";
 const { width, height: screenHeight } = Dimensions.get("window");
 
@@ -169,7 +169,10 @@ const PlaylistContainer = () => {
   if (playlists.length === 0) {
     return (
       <>
-        <ModalPopup isDropdownOpen={isDropdownOpen} setIsDropdownOpen={setIsDropdownOpen} />
+        <CollectionSelectionPopup
+          isDropdownOpen={isDropdownOpen}
+          setIsDropdownOpen={setIsDropdownOpen}
+        />
 
         <Link
           href="/audio/dropbox/"
@@ -193,7 +196,10 @@ const PlaylistContainer = () => {
   // Show playlists
   return (
     <View className="w-full flex-1">
-      <ModalPopup isDropdownOpen={isDropdownOpen} setIsDropdownOpen={setIsDropdownOpen} />
+      <CollectionSelectionPopup
+        isDropdownOpen={isDropdownOpen}
+        setIsDropdownOpen={setIsDropdownOpen}
+      />
 
       <AnimatePresence>
         {onShow && (

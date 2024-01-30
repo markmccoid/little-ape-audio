@@ -429,11 +429,8 @@ export const folderFileReader = async (pathIn: string) => {
     // want to delay display of files while checking for metadata.
     setTimeout(async () => await checkForFolderMetadata(files.files, "dropbox"), 10);
     const filteredFoldersFiles = filterAudioFiles(files);
-    console.log("After Filter");
     // Tag files/folders with Liked/Read attributes
     const finalFolderFileList = tagFilesAndFolders(filteredFoldersFiles);
-    console.log("After tag");
-    // look for the
 
     return finalFolderFileList;
   } catch (err) {

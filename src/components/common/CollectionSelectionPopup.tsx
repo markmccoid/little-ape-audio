@@ -1,12 +1,4 @@
-import {
-  View,
-  Text,
-  Modal,
-  TouchableOpacity,
-  ScrollView,
-  Pressable,
-  StyleSheet,
-} from "react-native";
+import { View, Text, Modal, ScrollView, Pressable, StyleSheet } from "react-native";
 import React, { useEffect } from "react";
 import { MotiView } from "moti";
 import { useTempStore, useTracksStore } from "@store/store";
@@ -14,16 +6,24 @@ import { useSettingStore } from "@store/store-settings";
 import { exists } from "react-native-fs";
 import { getColorLuminance, getTextColor } from "@utils/otherUtils";
 
-const ModalPopup = ({ isDropdownOpen, setIsDropdownOpen }) => {
+const CollectionSelectionPopup = ({ isDropdownOpen, setIsDropdownOpen }) => {
   const [localOpen, setLocalOpen] = React.useState(isDropdownOpen);
   const collections = useTracksStore((state) => state.collections);
   const allPlaylists = useTracksStore((state) => state.playlists);
   const [collectionCount, setCollectionCount] = React.useState({});
+  const [shownCollections, setShownCollections] = React.useState([]);
+  const [popupHeight, setPopupHeight] = React.useState(0);
   const actions = useSettingStore((state) => state.actions);
-  const height = collections.length * 25.2;
 
+  //~ - - - - - -
+  //~ We only show the collections that have at least one playlist associated
+  //~ We use the number of collections to shown to calculate the height of the popup
+  //~ - - - - - -
   useEffect(() => {
-    calculateCollectionCount();
+    const updCollectionCount = calculateCollectionCount();
+    const updShowCollections = collections?.filter((el) => updCollectionCount[el.id] > 0);
+    setShownCollections(updShowCollections);
+    setPopupHeight(updShowCollections.length * 35.2);
     setLocalOpen(isDropdownOpen);
   }, [isDropdownOpen]);
 
@@ -38,6 +38,7 @@ const ModalPopup = ({ isDropdownOpen, setIsDropdownOpen }) => {
     }
     collectionIdCount["all"] = Object.keys(allPlaylists).length;
     setCollectionCount(collectionIdCount);
+    return collectionCount;
   };
 
   //~ - - - - - -
@@ -57,19 +58,19 @@ const ModalPopup = ({ isDropdownOpen, setIsDropdownOpen }) => {
     <Modal visible={isDropdownOpen} transparent animationType="none">
       <Pressable className="flex-1 justify-start items-center" onPress={exitModal}>
         <MotiView
-          className="w-[150]  mt-[100] border border-amber-800 justify-center items-center bg-amber-50"
+          className="rounded-lg mt-[85] border border-amber-800 justify-center items-center bg-amber-50"
           // from={{ opacity: 0, translateY: -200 }}
           // animate={{ opacity: localOpen ? 1 : 0, translateY: localOpen ? 0 : -200 }}
           from={{ opacity: 0, height: 0 }}
-          animate={{ opacity: localOpen ? 1 : 0.4, height: localOpen ? height : 0 }}
+          animate={{ opacity: localOpen ? 1 : 0.4, height: localOpen ? popupHeight : 0 }}
           // exit={{ opacity: 0, translateY: -200 }}
         >
           <ScrollView style={{ width: "100%" }}>
-            {collections?.map((collection) => {
-              const noBooks = !collectionCount[collection.id];
+            {shownCollections?.map((collection, index) => {
+              const isLastItem = index === shownCollections.length - 1;
+              const isFirstItem = index === 0;
               return (
                 <Pressable
-                  disabled={noBooks}
                   onPress={() => handleCollectionPress(collection.id)}
                   // Mute the color a bit so that black text will work on all colors
                   style={{
@@ -77,16 +78,30 @@ const ModalPopup = ({ isDropdownOpen, setIsDropdownOpen }) => {
                     borderBottomWidth: StyleSheet.hairlineWidth,
                   }}
                   key={collection.id}
-                  className="px-2 py-1 h-[25]"
+                  className={`h-[35] ${isLastItem ? "rounded-br-lg rounded-bl-lg" : ""}
+                  ${isFirstItem ? "rounded-tr-lg round-tl-lg" : ""}`}
                 >
-                  <View className="flex flex-row justify-between">
-                    <Text
-                      className={`${noBooks ? "text-gray-700" : "font-semibold"}`}
-                      // style={{color: getTextColor(getColorLuminance(collection.color).colorLuminance)}}
+                  <View className="flex flex-row justify-start items-center">
+                    <View className="px-2 py-1 flex-grow">
+                      <Text
+                        className={`font-semibold text-lg`}
+                        // style={{color: getTextColor(getColorLuminance(collection.color).colorLuminance)}}
+                      >
+                        {collection.name}
+                      </Text>
+                    </View>
+                    <View
+                      className={`flex flex-row justify-center items-center ml-4 bg-amber-100 h-full 
+                      ${isLastItem ? "rounded-br-lg" : ""} ${isFirstItem ? "rounded-tr-lg" : ""}`}
+                      style={{
+                        width: 20,
+                        // height: 20,
+                        // borderRadius: 20,
+                        borderLeftWidth: StyleSheet.hairlineWidth,
+                      }}
                     >
-                      {collection.name}
-                    </Text>
-                    <Text>{collectionCount[collection.id] || 0}</Text>
+                      <Text className={` text-sm `}>{collectionCount[collection.id] || 0}</Text>
+                    </View>
                   </View>
                 </Pressable>
               );
@@ -98,4 +113,4 @@ const ModalPopup = ({ isDropdownOpen, setIsDropdownOpen }) => {
   );
 };
 
-export default ModalPopup;
+export default CollectionSelectionPopup;
