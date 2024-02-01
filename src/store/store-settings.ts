@@ -78,7 +78,7 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
   isUsingDynamicColors: true,
   showCollectionColorStrip: true,
   autoPlay: false,
-  defaultCollectionId: "audiobooks",
+  defaultCollectionId: "all",
   selectedCollection: defaultCollections[0],
   actions: {
     toggleDynamicColors: async () => {
@@ -235,11 +235,15 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
       set({ defaultCollectionId: collectionId });
       const newSettingsData = { ...get() };
       delete newSettingsData.actions;
+      // Save to settings store
+      await saveToAsyncStorage("settings", newSettingsData);
     },
     setSelectedCollection: async (collection) => {
       set({ selectedCollection: collection });
       const newSettingsData = { ...get() };
       delete newSettingsData.actions;
+      // Save to settings store
+      await saveToAsyncStorage("settings", newSettingsData);
     },
   },
 }));

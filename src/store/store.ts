@@ -45,15 +45,15 @@ let saveIntervalId = undefined;
 //-- TEMP STORE - Storage for globals
 //-- ==================================
 type TempStore = {
-  color: string;
+  tmpCollectionColor: string;
   actions: {
     setColor: (color: string) => void;
   };
 };
 export const useTempStore = create<TempStore>((set, get) => ({
-  color: "#000000",
+  tmpCollectionColor: "#000000",
   actions: {
-    setColor: (color) => set({ color }),
+    setColor: (color) => set({ tmpCollectionColor: color }),
   },
 }));
 
@@ -171,6 +171,9 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       // No existing playlist found, create a new one based either on
       // the passed in playlistId OR if not passed, create a new id
       const id = playlistId || (uuid.v4() as string);
+      const defaultCollectionId = useSettingStore.getState().defaultCollectionId;
+      const defaultCollection = get().collections.find((el) => el.id === defaultCollectionId);
+      console.log("defaultCollection: ", defaultCollection, defaultCollectionId);
       const newPlaylist: Playlist = {
         id,
         name,
@@ -187,11 +190,9 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         totalDurationSeconds: 0,
         totalListenedToSeconds: 0,
         currentRate: 1,
-        collection: get().collections.find(
-          (el) => el.id === useSettingStore.getState().defaultCollectionId
-        ),
+        collection: defaultCollection,
       };
-
+      console.log("New Playlist: ", newPlaylist?.collection);
       const newPlaylistObj = { ...get().playlists, [id]: newPlaylist };
       set({ playlists: newPlaylistObj });
       // await saveToAsyncStorage("playlists", newPlaylistObj);
@@ -444,12 +445,74 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       const playlist = get().actions.getPlaylist(playlistId);
       return playlist?.bookmarks;
     },
+    addOrUpdateCollection: async (collection) => {
+      const id = collection.id;
+      let currCollections = [...get().collections];
+      // Monitor if collection was updated or is a new one
+      let wasUpdated = false;
+      for (const [index, currCollection] of Object.entries(currCollections)) {
+        if (collection.id === currCollection.id) {
+          currCollections[index] = collection;
+          wasUpdated = true;
+          break;
+        }
+      }
+
+      // If updated then we need to go through all of the playlist and update the collections on the playlists
+      // because we store the whole collection object on each playlist.
+      let playlists = get().playlists;
+      if (wasUpdated) {
+        for (const key of Object.keys(get().playlists)) {
+          if (playlists[key].collection.id === collection.id) {
+            playlists[key].collection = collection;
+          }
+        }
+      }
+      // If not updated add the new collection to our list
+      if (!wasUpdated) {
+        currCollections = [...currCollections, collection];
+      }
+
+      // Set the collections
+      set({ collections: currCollections });
+      // Save to storage
+      await saveToAsyncStorage("collections", currCollections);
+      await saveToAsyncStorage("playlists", playlists);
+    },
+    deleteCollection: async (collectionId) => {
+      const defaultCollectionId = useSettingStore.getState().defaultCollectionId;
+      // Remove the collection from our list
+      const newCollections = get().collections.filter((el) => el.id !== collectionId);
+      // If we are deletoing the default then assign another.
+      // We shouldn't show delete in interface for user to click if collection is set as default
+      if (collectionId === defaultCollectionId) {
+        useSettingStore.getState().actions.setDefaultCollectionId(newCollections[0].id);
+      }
+      // Get the default collection
+      const defaultCollection = newCollections.find(
+        (el) => el.id === useSettingStore.getState().defaultCollectionId
+      );
+      // Look through all playlists and if any of them have the deleted collection,
+      // replace with the default collection
+      let playlists = get().playlists;
+      for (const key of Object.keys(get().playlists)) {
+        if (playlists[key].collection.id === collectionId) {
+          playlists[key].collection = defaultCollection;
+        }
+      }
+      //-- --------------
+      // Set the collections
+      set({ collections: newCollections });
+      // Save to storage
+      await saveToAsyncStorage("collections", newCollections);
+      await saveToAsyncStorage("playlists", playlists);
+    },
   },
 }));
 
 export const useTrackActions = () => useTracksStore((state) => state.actions);
 export const usePlaylists = () => {
-  const collectionId = useSettingStore((state) => state.selectedCollection.id);
+  const collectionId = useSettingStore((state) => state.selectedCollection?.id);
   const playlists = useTracksStore((state) => map(state.playlists));
   // console.log("playlists", playlists);
   const filter = collectionId; //This will be a key from tracksStore

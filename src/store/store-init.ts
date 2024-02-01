@@ -2,7 +2,7 @@ import { loadFromAsyncStorage, saveToAsyncStorage } from "./data/asyncStorage";
 import { useTracksStore } from "./store";
 import { useDropboxStore } from "./store-dropbox";
 import { useSettingStore } from "./store-settings";
-import { Playlist } from "./types";
+import { Playlist, defaultCollections } from "./types";
 
 //~ ----------------------------------
 //~ ON INITIALIZE
@@ -21,10 +21,14 @@ export const onInitialize = async () => {
   const folderMetadata = await loadFromAsyncStorage("foldermetadata");
   const folderAttributes = await loadFromAsyncStorage("folderattributes");
   const folderMetadataErrors = await loadFromAsyncStorage("foldermetadataerrors");
-
+  const collections = await loadFromAsyncStorage("collections");
   const settings = await loadFromAsyncStorage("settings");
 
-  useTracksStore.setState({ tracks: tracks || [], playlists: playlists || {} });
+  useTracksStore.setState({
+    tracks: tracks || [],
+    playlists: playlists || {},
+    collections: collections || defaultCollections,
+  });
 
   // * patch favFolders
   const patchedFavs =

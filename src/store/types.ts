@@ -65,7 +65,7 @@ export type TrackAttributes = {
 };
 type TrackId = string;
 
-type CollectionTypes = "music" | "podcast" | "audiobook";
+type CollectionTypes = "music" | "podcast" | "audiobook" | "protected";
 export type CollectionItem = {
   id: string;
   name: string;
@@ -202,6 +202,8 @@ export type AudioState = {
     ) => Promise<void>;
     getBookmarksForPlaylist: (playlistId) => Bookmark[];
     deleteBookmarkFromPlaylist: (playlistId: string, bookmarkId: string) => Promise<void>;
+    addOrUpdateCollection: (collection: CollectionItem) => Promise<void>;
+    deleteCollection: (collectionId: string) => Promise<void>;
     clearAll: () => Promise<void>;
   };
 };
@@ -291,6 +293,13 @@ export const defaultCollections: CollectionItem[] = [
   {
     id: "all",
     name: "All",
+    headerTitle: "All",
+    color: "white",
+    type: "protected",
+  },
+  {
+    id: "audiobooks",
+    name: "Audiobooks",
     color: colors.amber300,
     type: "audiobook",
     headerTitle: "Audiobooks",
@@ -321,6 +330,6 @@ export const defaultCollections: CollectionItem[] = [
     name: "Youtube Videos",
     color: "#607d8b",
     type: "audiobook",
-    headerTitle: "Vide",
+    headerTitle: "Youtube Videos",
   },
 ];

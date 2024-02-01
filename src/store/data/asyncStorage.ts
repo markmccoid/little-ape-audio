@@ -9,7 +9,8 @@ type StorageKeys =
   | "settings"
   | "foldermetadata"
   | "folderattributes"
-  | "foldermetadataerrors";
+  | "foldermetadataerrors"
+  | "collections";
 
 // --------------------------------------------
 // -- LOAD passed key from Local Storage

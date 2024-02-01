@@ -7,7 +7,7 @@ import { getImageFromWeb } from "@utils/otherUtils";
 import { AnimatedPressable } from "@components/common/buttons/Pressables";
 import TPImagePicker from "@components/trackPlayer/settings/TPImagePicker";
 import PlaylistEditTracks from "./PlaylistEditTracks";
-import PlaylistCollectionSetup from "./PlaylistCollectionSetup";
+import PlaylistCollectionSetup from "./ManageCollectionsContainer";
 import CollectionSelect from "./CollectionSelect";
 
 const PlaylistEditContainer = () => {

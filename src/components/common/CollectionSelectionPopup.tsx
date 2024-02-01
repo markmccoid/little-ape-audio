@@ -1,10 +1,21 @@
-import { View, Text, Modal, ScrollView, Pressable, StyleSheet } from "react-native";
+import { View, Text, Modal, Dimensions, ScrollView, Pressable, StyleSheet } from "react-native";
 import React, { useEffect } from "react";
 import { MotiView } from "moti";
 import { useTempStore, useTracksStore } from "@store/store";
 import { useSettingStore } from "@store/store-settings";
 import { exists } from "react-native-fs";
 import { getColorLuminance, getTextColor } from "@utils/otherUtils";
+import { CollectionItem } from "@store/types";
+
+const { width, height } = Dimensions.get("window");
+const POPUP_WIDTH = width * 0.6;
+const allCollectionItem: CollectionItem = {
+  id: "all",
+  name: "All Audio",
+  headerTitle: "All Audio",
+  color: "white",
+  type: "protected",
+};
 
 const CollectionSelectionPopup = ({ isDropdownOpen, setIsDropdownOpen }) => {
   const [localOpen, setLocalOpen] = React.useState(isDropdownOpen);
@@ -22,8 +33,11 @@ const CollectionSelectionPopup = ({ isDropdownOpen, setIsDropdownOpen }) => {
   useEffect(() => {
     const updCollectionCount = calculateCollectionCount();
     const updShowCollections = collections?.filter((el) => updCollectionCount[el.id] > 0);
-    setShownCollections(updShowCollections);
-    setPopupHeight(updShowCollections.length * 35.2);
+    // manually add in the "all" collection so it will show as an option
+    // NOTE: handleCollectionPress() in the component must do special processing
+    //       to handle the "all" collection.
+    setShownCollections([allCollectionItem, ...updShowCollections]);
+    setPopupHeight(updShowCollections.length * 45.2);
     setLocalOpen(isDropdownOpen);
   }, [isDropdownOpen]);
 
@@ -44,7 +58,11 @@ const CollectionSelectionPopup = ({ isDropdownOpen, setIsDropdownOpen }) => {
   //~ - - - - - -
   //~ Set the selected collection
   const handleCollectionPress = (collectionId: string) => {
-    actions.setSelectedCollection(collections.find((el) => el.id === collectionId));
+    if (collectionId === "all") {
+      actions.setSelectedCollection(allCollectionItem);
+    } else {
+      actions.setSelectedCollection(collections.find((el) => el.id === collectionId));
+    }
     exitModal();
   };
   //~ - - - - - -
@@ -58,7 +76,8 @@ const CollectionSelectionPopup = ({ isDropdownOpen, setIsDropdownOpen }) => {
     <Modal visible={isDropdownOpen} transparent animationType="none">
       <Pressable className="flex-1 justify-start items-center" onPress={exitModal}>
         <MotiView
-          className="rounded-lg mt-[85] border border-amber-800 justify-center items-center bg-amber-50"
+          className="rounded-lg mt-[85] border border-amber-800 justify-center items-center bg-amber-50 overflow-hidden"
+          style={{ width: POPUP_WIDTH }}
           // from={{ opacity: 0, translateY: -200 }}
           // animate={{ opacity: localOpen ? 1 : 0, translateY: localOpen ? 0 : -200 }}
           from={{ opacity: 0, height: 0 }}
@@ -66,46 +85,47 @@ const CollectionSelectionPopup = ({ isDropdownOpen, setIsDropdownOpen }) => {
           // exit={{ opacity: 0, translateY: -200 }}
         >
           <ScrollView style={{ width: "100%" }}>
-            {shownCollections?.map((collection, index) => {
-              const isLastItem = index === shownCollections.length - 1;
-              const isFirstItem = index === 0;
-              return (
-                <Pressable
-                  onPress={() => handleCollectionPress(collection.id)}
-                  // Mute the color a bit so that black text will work on all colors
-                  style={{
-                    backgroundColor: `${collection?.color}aa` || "white",
-                    borderBottomWidth: StyleSheet.hairlineWidth,
-                  }}
-                  key={collection.id}
-                  className={`h-[35] ${isLastItem ? "rounded-br-lg rounded-bl-lg" : ""}
-                  ${isFirstItem ? "rounded-tr-lg round-tl-lg" : ""}`}
-                >
-                  <View className="flex flex-row justify-start items-center">
-                    <View className="px-2 py-1 flex-grow">
-                      <Text
-                        className={`font-semibold text-lg`}
-                        // style={{color: getTextColor(getColorLuminance(collection.color).colorLuminance)}}
+            <>
+              {shownCollections?.map((collection, index) => {
+                const isLastItem = index === shownCollections.length - 1;
+                const isFirstItem = index === 0;
+                return (
+                  <Pressable
+                    onPress={() => handleCollectionPress(collection.id)}
+                    // Mute the color a bit so that black text will work on all colors
+                    style={{
+                      backgroundColor: `${collection?.color}aa` || "white",
+                      borderBottomWidth: StyleSheet.hairlineWidth,
+                      borderTopWidth: isFirstItem ? StyleSheet.hairlineWidth : "",
+                    }}
+                    key={collection.id}
+                    className={`h-[45] w-full `}
+                  >
+                    <View className="flex flex-row h-full justify-start items-center">
+                      <View className="px-4 flex-grow">
+                        <Text
+                          className={`font-semibold text-lg`}
+                          // style={{color: getTextColor(getColorLuminance(collection.color).colorLuminance)}}
+                        >
+                          {collection.name}
+                        </Text>
+                      </View>
+                      <View
+                        className={`flex flex-row justify-center items-center ml-4 bg-amber-100 h-full`}
+                        style={{
+                          width: 20,
+                          // height: 20,
+                          // borderRadius: 20,
+                          borderLeftWidth: StyleSheet.hairlineWidth,
+                        }}
                       >
-                        {collection.name}
-                      </Text>
+                        <Text className={` text-sm `}>{collectionCount[collection.id] || 0}</Text>
+                      </View>
                     </View>
-                    <View
-                      className={`flex flex-row justify-center items-center ml-4 bg-amber-100 h-full 
-                      ${isLastItem ? "rounded-br-lg" : ""} ${isFirstItem ? "rounded-tr-lg" : ""}`}
-                      style={{
-                        width: 20,
-                        // height: 20,
-                        // borderRadius: 20,
-                        borderLeftWidth: StyleSheet.hairlineWidth,
-                      }}
-                    >
-                      <Text className={` text-sm `}>{collectionCount[collection.id] || 0}</Text>
-                    </View>
-                  </View>
-                </Pressable>
-              );
-            })}
+                  </Pressable>
+                );
+              })}
+            </>
           </ScrollView>
         </MotiView>
       </Pressable>

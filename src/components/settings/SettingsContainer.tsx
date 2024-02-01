@@ -118,7 +118,7 @@ const SettingsContainer = () => {
         {/* On/Off Collection Color Strip */}
         {/* ------------------ */}
         <View className="px-2 py-2" style={[styles.borderBottom]}>
-          <Text className="text-sm">Collection Color String</Text>
+          <Text className="text-sm">Show Collection Color</Text>
 
           <Switch
             style={{ marginRight: -10, transform: [{ scaleY: 0.7 }, { scaleX: 0.7 }] }}

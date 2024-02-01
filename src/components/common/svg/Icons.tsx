@@ -20,8 +20,17 @@ type Props = {
 export const ImageIcon = ({ size = 25, color, style }: Props) => {
   return <Entypo name="image" size={size} color={color} style={style} />;
 };
+export const EmptyCircleIcon = ({ size = 25, color, style }: Props) => {
+  return <Entypo name="circle" size={size} color={color} style={style} />;
+};
+export const CheckCircleIcon = ({ size = 25, color, style }: Props) => {
+  return <Feather name="check-circle" size={size} color={color} style={style} />;
+};
 export const SearchIcon = ({ size = 25, color, style }: Props) => {
   return <MaterialIcons name="search" size={size} color={color} style={style} />;
+};
+export const AddToListIcon = ({ size = 25, color, style }: Props) => {
+  return <Entypo name="add-to-list" size={size} color={color} style={style} />;
 };
 export const EyeOutlineIcon = ({ size = 25, color, style }: Props) => {
   return <MaterialCommunityIcons name="eye-outline" size={size} color={color} style={style} />;

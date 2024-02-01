@@ -22,6 +22,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { FilesAndFolders, listGoogleDriveFiles, listGoogleFiles } from "@utils/googleUtils";
 import { MimeTypes } from "@robinbobin/react-native-google-drive-api-wrapper";
+import LAABColorPicker from "@components/common/LAABColorPicker";
 
 //!! How to determine current chapter without looking at each chapter
 //!!
@@ -44,7 +45,8 @@ const playarea = () => {
 
   return (
     <View>
-      <Text>GDrive Testing</Text>
+      <LAABColorPicker initColor="red" updateCollectionColor={(color) => console.log(color)} />
+      {/* <Text>GDrive Testing</Text>
       {filesAndFolder?.folders.map((folder) => {
         return (
           <TouchableOpacity onPress={() => getFiles(folder.id)} key={folder.id}>
@@ -62,7 +64,7 @@ const playarea = () => {
             <Text>{file.name}</Text>
           </View>
         );
-      })}
+      })} */}
     </View>
   );
 };
