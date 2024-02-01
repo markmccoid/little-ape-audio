@@ -37,7 +37,7 @@ const CollectionSelectionPopup = ({ isDropdownOpen, setIsDropdownOpen }) => {
     // NOTE: handleCollectionPress() in the component must do special processing
     //       to handle the "all" collection.
     setShownCollections([allCollectionItem, ...updShowCollections]);
-    setPopupHeight(updShowCollections.length * 45.2);
+    setPopupHeight([allCollectionItem, ...updShowCollections].length * 45.2);
     setLocalOpen(isDropdownOpen);
   }, [isDropdownOpen]);
 
@@ -84,7 +84,7 @@ const CollectionSelectionPopup = ({ isDropdownOpen, setIsDropdownOpen }) => {
           animate={{ opacity: localOpen ? 1 : 0.4, height: localOpen ? popupHeight : 0 }}
           // exit={{ opacity: 0, translateY: -200 }}
         >
-          <ScrollView style={{ width: "100%" }}>
+          <ScrollView style={{ width: "100%" }} showsVerticalScrollIndicator={false}>
             <>
               {shownCollections?.map((collection, index) => {
                 const isLastItem = index === shownCollections.length - 1;
@@ -96,7 +96,7 @@ const CollectionSelectionPopup = ({ isDropdownOpen, setIsDropdownOpen }) => {
                     style={{
                       backgroundColor: `${collection?.color}aa` || "white",
                       borderBottomWidth: StyleSheet.hairlineWidth,
-                      borderTopWidth: isFirstItem ? StyleSheet.hairlineWidth : "",
+                      borderTopWidth: isFirstItem ? StyleSheet.hairlineWidth : 0,
                     }}
                     key={collection.id}
                     className={`h-[45] w-full `}

@@ -35,6 +35,9 @@ const managecollections = () => {
     <View className="flex-1">
       <Stack.Screen
         options={{
+          headerShown: true,
+          // headerStyle: { backgroundColor: "#03a9f4" },
+          headerTintColor: "black",
           headerRight: () => {
             return (
               <View>

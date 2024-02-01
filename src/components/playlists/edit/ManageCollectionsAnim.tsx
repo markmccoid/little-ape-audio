@@ -9,18 +9,26 @@ import {
   Dimensions,
   FlatList,
   SafeAreaView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import { useTracksStore } from "@store/store";
+import { useTempStore, useTracksStore } from "@store/store";
 import { useSettingStore } from "@store/store-settings";
 import { AnimatedPressable } from "@components/common/buttons/Pressables";
 import LAABColorPicker from "@components/common/LAABColorPicker";
 import { CollectionItem } from "@store/types";
-import { CheckCircleIcon, DeleteIcon, EmptyCircleIcon } from "@components/common/svg/Icons";
+import {
+  AddToListIcon,
+  CheckCircleIcon,
+  DeleteIcon,
+  EmptyCircleIcon,
+} from "@components/common/svg/Icons";
 import { getColorLuminance, getTextColor } from "@utils/otherUtils";
+import { colors } from "@constants/Colors";
+import IOSBack from "@components/common/svg/IOSBack";
 
 const { width, height } = Dimensions.get("screen");
 
@@ -38,6 +46,7 @@ export default function Wallpapers() {
   const collections = useTracksStore((state) => state.collections);
   const [data, setData] = React.useState(collections);
   const actions = useTracksStore((state) => state.actions);
+  const setTempColor = useTempStore((state) => state.actions.setColor);
 
   const handleChangeCollectionName = async (collectionId) => {
     const collection = collections.find((col) => col.id === collectionId);
@@ -90,6 +99,31 @@ export default function Wallpapers() {
       ]
     );
   };
+  // ~ -----------------
+  const handleAddNewCollection = async () => {
+    Alert.prompt(
+      "Add Collection",
+      "Enter a new Collection Name",
+      [
+        {
+          text: "OK",
+          onPress: (text) =>
+            trackActions.addOrUpdateCollection({
+              id: text.toLowerCase(),
+              name: text,
+              headerTitle: text,
+              color: "#00bb00",
+              type: "audiobook",
+            }),
+        },
+
+        { text: "Cancel", onPress: () => {} },
+      ],
+      "plain-text"
+    );
+  };
+
+  // ~ -----------------
   return (
     <View style={{ flex: 1, backgroundColor: "#000", justifyContent: "flex-end" }}>
       {/* <StatusBar barStyle="light-content" /> */}
@@ -142,7 +176,6 @@ export default function Wallpapers() {
           return (
             <SafeAreaView key={`bg-item-${item.id}`} style={[StyleSheet.absoluteFillObject]}>
               <Animated.View
-                pointerEvents="box-none"
                 style={[StyleSheet.absoluteFillObject, { opacity, backgroundColor: item.color }]}
               />
               <View
@@ -258,6 +291,11 @@ export default function Wallpapers() {
             outputRange: [1.5, 1, 1.5],
             extrapolate: "clamp",
           });
+          const opacity = animated.interpolate({
+            inputRange,
+            outputRange: [0, 1, 0],
+            extrapolate: "clamp",
+          });
           return (
             <Animated.View
               style={{
@@ -280,6 +318,7 @@ export default function Wallpapers() {
                   height: IMAGE_HEIGHT,
                   backgroundColor: item.color,
                   transform: [{ scale }],
+                  opacity,
                 }}
               >
                 <View className="flex flex-col w-full">

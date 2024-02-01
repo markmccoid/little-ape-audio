@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
 import React from "react";
 import { useTrackActions, useTracksStore } from "@store/store";
 import { getColorLuminance, getTextColor } from "@utils/otherUtils";
@@ -49,7 +49,7 @@ const CollectionSelect = ({ playlistId }: Props) => {
           </Text>
         </Animated.View>
       </View>
-      <Animated.ScrollView horizontal showHorizontalScrollIndicator={false}>
+      <Animated.ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {possibleCollections.map((collection, index) => {
           let activeCollection = playlist.collection?.id === collection.id;
 
