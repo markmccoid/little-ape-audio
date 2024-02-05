@@ -22,7 +22,7 @@ const SearchBooksSearch = ({ setResultData }) => {
   const [searchData, setSearchData] = useState<FlatFolderMetadata>();
   const [searchText, setSearchText] = useState("");
   const fuse = useRef<Fuse<FlatFolderMetadata>>();
-
+  // console.log("FOLDERMETA", folderMetadata["mark_myaudiobooks_fiction_horror"]);
   // Format folderMetadata into a searchable array
   //! FUTURE may store this array structure in store
   // Also initialize fuse search object

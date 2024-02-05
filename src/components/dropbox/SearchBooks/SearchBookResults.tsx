@@ -56,7 +56,7 @@ const SearchBookResults = ({ resultData }: Props) => {
           }
         >
           <View className="flex-row justify-start flex-grow mb-1 rounded-r-lg">
-            <View className="flex-col justify-start flex-grow rounded-r-lg">
+            <View className="flex-col justify-start flex-grow rounded-r-lg flex-1">
               <View
                 className={`${
                   item.audioSource === "google" ? "bg-amber-500" : "bg-blue-400"
@@ -66,7 +66,12 @@ const SearchBookResults = ({ resultData }: Props) => {
                   {item.categoryOne} - {item.categoryTwo}
                 </Text>
               </View>
-              <Text className="text-base font-bold px-2" style={{}}>
+              <Text
+                className="text-base font-bold px-2"
+                style={{ flex: 1 }}
+                lineBreakMode="tail"
+                numberOfLines={1}
+              >
                 {item.title}
               </Text>
               <Text className="text-base px-2" style={{}}>

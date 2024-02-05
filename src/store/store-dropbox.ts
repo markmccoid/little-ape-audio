@@ -203,7 +203,7 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
           } else {
             folderName = pathIn.slice(pathIn.lastIndexOf("/") + 1);
           }
-          console.log("Data", id, folderName);
+          // console.log("Data", id, folderName);
           attributes.push({
             id,
             pathToFolder: pathIn,
@@ -489,23 +489,7 @@ export const checkForFolderMetadata = async (
         // Once we have found ONE LAABMetaAggr_ file stop looking!!
         break;
       }
-      // //-- GOOGLE
-      // if (audioSource === "google") {
-      //   // file.path_display will have the PARENT folder ID
-      //   const pathToFolderKey = file.path_display;
-      //   console.log("google PathToFolderKey", file.path_display, file.path_lower);
-      //   if (laabJSON) {
-      //     const processedBookData = processFolderAggrMetadata(
-      //       laabJSON,
-      //       audioSource,
-      //       file.path_lower
-      //     );
-      //     await useDropboxStore
-      //       .getState()
-      //       .actions.mergeFoldersMetadata(pathToFolderKey, processedBookData);
-      //   }
-      //   break;
-      // }
+      //-- GOOGLE is done in commonCloudUtils.ts
     }
   }
 };
@@ -523,50 +507,6 @@ export const processFolderAggrMetadata = (
   }
   return bookData;
 };
-// let processedBooks: ProcessedBookData[] = [];
-
-// for (const book of selectedFoldersBooks) {
-//   let tempBook: ProcessedBookData = {
-//     id: book.id,
-//     fullPath: book.fullPath,
-//     folderName: book.folderName,
-//     title: book.folderNameData?.title,
-//     subTitle: book.googleAPIData?.subTitle,
-//     author: book.folderNameData?.author,
-//     publishedYear: "",
-//     category: book.category,
-//     subCategory: book.subCategory,
-//     folderImages: book.folderImages,
-//     description: "Test",
-//     pageCount: book.googleAPIData?.pageCount,
-//     narratedBy: book.bookInfo?.narratedBy,
-//     bookLength: book.bookInfo?.length,
-//     imageURL: book.googleAPIData?.imageURL,
-//     googleBookLink: book.googleAPIData?.bookDetailsURL,
-//     googleQuery: book.googleAPIData?.query,
-//     googleQueryDate: book.googleAPIData?.queryDateString,
-//   };
-
-//   // Determine what year to use
-
-//   if (book.folderNameData.year && book.folderNameData.year.toString().length === 4) {
-//     tempBook.publishedYear = book.folderNameData.year;
-//   } else {
-//     tempBook.publishedYear = book.googleAPIData?.publishedDate
-//       ? format(new Date(book.googleAPIData.publishedDate), "yyyy")
-//       : "";
-//   }
-
-//   // Determine Description to use
-//   if (book.bookInfo?.summary) {
-//     tempBook.description = book.bookInfo.summary.toString();
-//   } else {
-//     tempBook.description = book.googleAPIData?.description ? book.googleAPIData.description : "";
-//   }
-//   processedBooks.push(tempBook);
-// }
-// return processedBooks;
-// }
 //------------------------------------------------------
 //------------------------------------------------------
 //~ ===================================

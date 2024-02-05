@@ -6,6 +6,8 @@ import { useSettingStore } from "@store/store-settings";
 import { exists } from "react-native-fs";
 import { getColorLuminance, getTextColor } from "@utils/otherUtils";
 import { CollectionItem } from "@store/types";
+import { colors } from "@constants/Colors";
+import { LinearGradient } from "expo-linear-gradient";
 
 const { width, height } = Dimensions.get("window");
 const POPUP_WIDTH = width * 0.6;
@@ -39,7 +41,7 @@ const CollectionSelectionPopup = ({ isDropdownOpen, setIsDropdownOpen }) => {
     setShownCollections([allCollectionItem, ...updShowCollections]);
     setPopupHeight([allCollectionItem, ...updShowCollections].length * 45.2);
     setLocalOpen(isDropdownOpen);
-  }, [isDropdownOpen]);
+  }, [isDropdownOpen, allPlaylists, collections]);
 
   //~ - - - - - -
   //~ Create a map of the number of books in each collection
@@ -90,39 +92,57 @@ const CollectionSelectionPopup = ({ isDropdownOpen, setIsDropdownOpen }) => {
                 const isLastItem = index === shownCollections.length - 1;
                 const isFirstItem = index === 0;
                 return (
-                  <Pressable
-                    onPress={() => handleCollectionPress(collection.id)}
-                    // Mute the color a bit so that black text will work on all colors
-                    style={{
-                      backgroundColor: `${collection?.color}aa` || "white",
-                      borderBottomWidth: StyleSheet.hairlineWidth,
-                      borderTopWidth: isFirstItem ? StyleSheet.hairlineWidth : 0,
-                    }}
+                  <LinearGradient
                     key={collection.id}
-                    className={`h-[45] w-full `}
+                    colors={["white", collection?.color, collection?.color]}
+                    start={{ x: 0, y: 0.5 }}
+                    end={{ x: 1, y: 0.5 }}
                   >
-                    <View className="flex flex-row h-full justify-start items-center">
-                      <View className="px-4 flex-grow">
-                        <Text
-                          className={`font-semibold text-lg`}
-                          // style={{color: getTextColor(getColorLuminance(collection.color).colorLuminance)}}
+                    <Pressable
+                      onPress={() => handleCollectionPress(collection.id)}
+                      // Mute the color a bit so that black text will work on all colors
+                      style={{
+                        // backgroundColor: colors.amber100,
+                        borderBottomWidth: StyleSheet.hairlineWidth,
+                        borderTopWidth: isFirstItem ? StyleSheet.hairlineWidth : 0,
+                      }}
+                      key={collection.id}
+                      className={`h-[45] w-full `}
+                    >
+                      {/* <View
+                      className="h-full w-10 absolute right-0"
+                      style={{
+                        backgroundColor: collection?.color,
+                      }}
+                    /> */}
+                      <View className="flex flex-row h-full justify-start items-center">
+                        <View className="px-4 flex-grow">
+                          <Text
+                            className={`font-semibold text-lg`}
+                            style={{
+                              textShadowColor: "white",
+                              textShadowOffset: { width: 3, height: 0 },
+                              textShadowRadius: 10,
+                            }}
+                            // style={{color: getTextColor(getColorLuminance(collection.color).colorLuminance)}}
+                          >
+                            {collection.name}
+                          </Text>
+                        </View>
+                        <View
+                          className={`flex flex-row justify-center items-center ml-4 bg-amber-100 h-full`}
+                          style={{
+                            width: 20,
+                            // height: 20,
+                            // borderRadius: 20,
+                            borderLeftWidth: StyleSheet.hairlineWidth,
+                          }}
                         >
-                          {collection.name}
-                        </Text>
+                          <Text className={` text-sm `}>{collectionCount[collection.id] || 0}</Text>
+                        </View>
                       </View>
-                      <View
-                        className={`flex flex-row justify-center items-center ml-4 bg-amber-100 h-full`}
-                        style={{
-                          width: 20,
-                          // height: 20,
-                          // borderRadius: 20,
-                          borderLeftWidth: StyleSheet.hairlineWidth,
-                        }}
-                      >
-                        <Text className={` text-sm `}>{collectionCount[collection.id] || 0}</Text>
-                      </View>
-                    </View>
-                  </Pressable>
+                    </Pressable>
+                  </LinearGradient>
                 );
               })}
             </>

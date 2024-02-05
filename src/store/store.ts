@@ -173,7 +173,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       const id = playlistId || (uuid.v4() as string);
       const defaultCollectionId = useSettingStore.getState().defaultCollectionId;
       const defaultCollection = get().collections.find((el) => el.id === defaultCollectionId);
-      console.log("defaultCollection: ", defaultCollection, defaultCollectionId);
+
       const newPlaylist: Playlist = {
         id,
         name,
@@ -192,7 +192,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         currentRate: 1,
         collection: defaultCollection,
       };
-      console.log("New Playlist: ", newPlaylist?.collection);
+
       const newPlaylistObj = { ...get().playlists, [id]: newPlaylist };
       set({ playlists: newPlaylistObj });
       // await saveToAsyncStorage("playlists", newPlaylistObj);

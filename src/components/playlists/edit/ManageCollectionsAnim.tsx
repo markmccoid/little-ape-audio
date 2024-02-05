@@ -26,9 +26,8 @@ import {
   DeleteIcon,
   EmptyCircleIcon,
 } from "@components/common/svg/Icons";
-import { getColorLuminance, getTextColor } from "@utils/otherUtils";
+import { darkenColor, getColorLuminance, getTextColor } from "@utils/otherUtils";
 import { colors } from "@constants/Colors";
-import IOSBack from "@components/common/svg/IOSBack";
 
 const { width, height } = Dimensions.get("screen");
 
@@ -37,7 +36,6 @@ const IMAGE_HEIGHT = height * 0.75;
 const SPACING = 10;
 
 export default function Wallpapers() {
-  const memoData = React.useRef(null);
   const flatListRef = React.useRef<FlatList>(null);
   const scrollX = React.useRef(new Animated.Value(0)).current;
   const settingsActions = useSettingStore((state) => state.actions);
@@ -46,7 +44,6 @@ export default function Wallpapers() {
   const collections = useTracksStore((state) => state.collections);
   const [data, setData] = React.useState(collections);
   const actions = useTracksStore((state) => state.actions);
-  const setTempColor = useTempStore((state) => state.actions.setColor);
 
   const handleChangeCollectionName = async (collectionId) => {
     const collection = collections.find((col) => col.id === collectionId);
@@ -100,30 +97,7 @@ export default function Wallpapers() {
     );
   };
   // ~ -----------------
-  const handleAddNewCollection = async () => {
-    Alert.prompt(
-      "Add Collection",
-      "Enter a new Collection Name",
-      [
-        {
-          text: "OK",
-          onPress: (text) =>
-            trackActions.addOrUpdateCollection({
-              id: text.toLowerCase(),
-              name: text,
-              headerTitle: text,
-              color: "#00bb00",
-              type: "audiobook",
-            }),
-        },
 
-        { text: "Cancel", onPress: () => {} },
-      ],
-      "plain-text"
-    );
-  };
-
-  // ~ -----------------
   return (
     <View style={{ flex: 1, backgroundColor: "#000", justifyContent: "flex-end" }}>
       {/* <StatusBar barStyle="light-content" /> */}
@@ -151,17 +125,51 @@ export default function Wallpapers() {
           </MotiView>
         )}
       </AnimatePresence>
-      <View style={[StyleSheet.absoluteFillObject]}>
-        {data.map((item, index) => {
-          let isDefaultCollection = false;
-          if (item.id === defaultCollectionId) {
-            isDefaultCollection = true;
-          }
-          // doing it faster instead of halfway through
-          const inputRange = [index - 0.8, index, index + 0.8];
-          const animated = Animated.divide(scrollX, IMAGE_WIDTH + SPACING * 2);
 
+      <Animated.FlatList
+        data={data}
+        ref={flatListRef}
+        extraData={data}
+        keyExtractor={(item) => String(item.id)}
+        scrollEventThrottle={16}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={
+          {
+            // paddingHorizontal: (width - (IMAGE_WIDTH + SPACING * 2)) / 2,
+          }
+        }
+        style={{ backgroundColor: colors.amber200 }}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
+          useNativeDriver: true,
+        })}
+        // snapToInterval={IMAGE_WIDTH + SPACING * 2}
+        snapToInterval={width}
+        decelerationRate="fast"
+        renderItem={({ item, index }) => {
+          const inputRange = [index - 1, index, index + 1];
+          const animated = Animated.divide(scrollX, width);
+          // const animated = Animated.divide(scrollX, IMAGE_WIDTH + SPACING * 2);
+          const textColor = getTextColor(getColorLuminance(item.color).colorLuminance);
+          const translateY = animated.interpolate({
+            inputRange,
+            outputRange: [175, 40, 175],
+            extrapolate: "clamp",
+          });
+          const scale = animated.interpolate({
+            inputRange,
+            outputRange: [0.75, 1, 0.75],
+            extrapolate: "clamp",
+          });
           const opacity = animated.interpolate({
+            inputRange,
+            outputRange: [0, 1, 0],
+            extrapolate: "clamp",
+          });
+          // CONTAINTER Anim
+          // doing it faster instead of halfway through
+          // const containerInputRange = [index - 0.8, index, index + 0.8];
+          const containOpacity = animated.interpolate({
             inputRange,
             outputRange: [0, 0.4, 0],
           });
@@ -173,25 +181,41 @@ export default function Wallpapers() {
             inputRange,
             outputRange: [200, 0, -200],
           });
+
+          // Get colors
+          const color1 = data[index - 1]?.color || colors.amber400;
+          const color2 = data[index]?.color || colors.amber400;
+          const color3 = data[index + 1]?.color || colors.amber400;
+
+          // outputRange adds opacity to lighten color a bit
+          const bgColor = animated.interpolate({
+            inputRange: [index - 1, index, index + 1],
+            outputRange: [`${color1}ee`, `${color2}bb`, `${color3}ee`],
+          });
           return (
-            <SafeAreaView key={`bg-item-${item.id}`} style={[StyleSheet.absoluteFillObject]}>
-              <Animated.View
-                style={[StyleSheet.absoluteFillObject, { opacity, backgroundColor: item.color }]}
-              />
+            <Animated.View
+              key={`bg-item-${item.id}`}
+              style={{
+                width: width,
+                backgroundColor: bgColor,
+                // borderLeftWidth: StyleSheet.hairlineWidth,
+              }}
+              className="flex flex-col  items-center justify-center "
+            >
               <View
                 style={[
                   {
-                    flex: 0.25,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    zIndex: data.length + 1,
+                    // flex: 0.25,
+                    // alignItems: "center",
+                    // justifyContent: "center",
+                    // zIndex: data.length + 1,
                   },
                 ]}
               >
                 <Animated.View
                   style={{
                     opacity: textOpacity,
-                    transform: [{ translateX: textTranslate }],
+                    // transform: [{ translateX: textTranslate }],
                     marginBottom: SPACING * 2,
                     alignItems: "center",
                   }}
@@ -208,159 +232,82 @@ export default function Wallpapers() {
                     {item.headerTitle}
                   </Text>
                 </Animated.View>
-                {/* <Animated.View
-                  pointerEvents="box-none"
-                  style={{
-                    opacity: textOpacity,
-                    flexDirection: "row",
-                    alignItems: "center",
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: "#fff",
-                      fontSize: 13,
-                      fontWeight: "600",
-                      marginRight: SPACING,
-                    }}
-                  >
-                    Default
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => {
-                      console.log("PRESS");
-                      settingsActions.setDefaultCollectionId(item.id);
-                    }}
-                  >
-                    <View
-                      style={{
-                        backgroundColor: item.color,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        paddingVertical: SPACING / 2,
-                        paddingHorizontal: SPACING,
-                        borderRadius: 20,
-                        overflow: "hidden",
-                      }}
-                    >
-                      <Text
-                        style={{
-                          color: "#fff",
-                          fontSize: 12,
-                          fontWeight: "800",
-                        }}
-                      >
-                        {isDefaultCollection ? "X" : " "}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                </Animated.View> */}
               </View>
-            </SafeAreaView>
-          );
-        })}
-      </View>
-      <Animated.FlatList
-        data={data}
-        ref={flatListRef}
-        extraData={data}
-        keyExtractor={(item) => String(item.id)}
-        scrollEventThrottle={16}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingHorizontal: (width - (IMAGE_WIDTH + SPACING * 2)) / 2,
-        }}
-        style={{ flexGrow: 0, backgroundColor: "transparent" }}
-        onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
-          useNativeDriver: true,
-        })}
-        snapToInterval={IMAGE_WIDTH + SPACING * 2}
-        decelerationRate="fast"
-        renderItem={({ item, index }) => {
-          const inputRange = [index - 1, index, index + 1];
-          const animated = Animated.divide(scrollX, IMAGE_WIDTH + SPACING * 2);
-          const textColor = getTextColor(getColorLuminance(item.color).colorLuminance);
-          const translateY = animated.interpolate({
-            inputRange,
-            outputRange: [100, 40, 100],
-            extrapolate: "clamp",
-          });
-          const scale = animated.interpolate({
-            inputRange,
-            outputRange: [1.5, 1, 1.5],
-            extrapolate: "clamp",
-          });
-          const opacity = animated.interpolate({
-            inputRange,
-            outputRange: [0, 1, 0],
-            extrapolate: "clamp",
-          });
-          return (
-            <Animated.View
-              style={{
-                width: IMAGE_WIDTH,
-                height: IMAGE_HEIGHT,
-                transform: [
-                  {
-                    translateY,
-                  },
-                ],
-                margin: SPACING,
-                overflow: "hidden",
-                borderRadius: 30,
-              }}
-            >
+              {/* OLD START OF RENDER ITEM */}
               <Animated.View
                 style={{
-                  borderRadius: 20,
                   width: IMAGE_WIDTH,
                   height: IMAGE_HEIGHT,
+                  transform: [
+                    {
+                      translateY,
+                    },
+                    { scale },
+                  ],
+                  // margin: SPACING,
+                  overflow: "hidden",
+
                   backgroundColor: item.color,
-                  transform: [{ scale }],
-                  opacity,
+                  borderRadius: 30,
+                  borderWidth: 1,
+                  zIndex: 100,
                 }}
               >
-                <View className="flex flex-col w-full">
-                  <View className="flex flex-row justify-center mt-2 items-center">
-                    <Text className="font-semibold mr-2" style={{ color: textColor }}>
-                      Set as Default
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() => settingsActions.setDefaultCollectionId(item.id)}
-                    >
-                      {item.id === defaultCollectionId ? (
-                        <CheckCircleIcon color={textColor} />
-                      ) : (
-                        <EmptyCircleIcon color={textColor} />
-                      )}
-                    </TouchableOpacity>
-                  </View>
+                <Animated.View
+                  style={{
+                    borderRadius: 20,
+                    width: IMAGE_WIDTH,
+                    height: IMAGE_HEIGHT,
+                    backgroundColor: item.color,
+                    // transform: [{ scale }],
+                    opacity,
+                  }}
+                >
+                  <View className="flex flex-col w-full">
+                    <View className="flex flex-row justify-center mt-2 items-center">
+                      <Text className="font-semibold mr-2" style={{ color: textColor }}>
+                        Set as Default
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => settingsActions.setDefaultCollectionId(item.id)}
+                      >
+                        {item.id === defaultCollectionId ? (
+                          <CheckCircleIcon color={textColor} />
+                        ) : (
+                          <EmptyCircleIcon color={textColor} />
+                        )}
+                      </TouchableOpacity>
+                    </View>
 
-                  <View className="flex flex-row items-center justify-center mt-2">
-                    <Text className="text-base font-semibold" style={{ color: textColor }}>
-                      Name:{" "}
-                    </Text>
-                    <Text className="text-base" style={{ color: textColor }}>
-                      {item.name}
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() => handleChangeCollectionName(item.id)}
-                      className="ml-3 border p-1 rounded-md"
-                    >
-                      <Text>Change</Text>
-                    </TouchableOpacity>
+                    <View className="flex flex-row items-center justify-center mt-2">
+                      <Text className="text-base font-semibold" style={{ color: textColor }}>
+                        Name:{" "}
+                      </Text>
+                      <Text className="text-base" style={{ color: textColor }}>
+                        {item.name}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => handleChangeCollectionName(item.id)}
+                        className="ml-3 p-1 rounded-md "
+                        style={{
+                          borderColor: textColor,
+                          borderWidth: 2,
+                        }}
+                      >
+                        <Text style={{ color: textColor }}>Change</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <LAABColorPicker
+                      initColor={item.color}
+                      updateCollectionColor={updateCollectionColor(item)}
+                    />
+                    <View className="flex flex-row mt-10 justify-end mr-4">
+                      <TouchableOpacity onPress={() => handleDeleteCollection(item.id)}>
+                        <DeleteIcon size={40} />
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                  <LAABColorPicker
-                    initColor={item.color}
-                    updateCollectionColor={updateCollectionColor(item)}
-                  />
-                  <View className="flex flex-row mt-10 justify-end mr-4">
-                    <TouchableOpacity onPress={() => handleDeleteCollection(item.id)}>
-                      <DeleteIcon size={40} />
-                    </TouchableOpacity>
-                  </View>
-                </View>
+                </Animated.View>
               </Animated.View>
             </Animated.View>
           );

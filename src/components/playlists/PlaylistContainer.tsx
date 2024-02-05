@@ -196,6 +196,7 @@ const PlaylistContainer = () => {
   // Show playlists
   return (
     <View className="w-full flex-1">
+      {/* This is the header dropbown for the Collections menu */}
       <CollectionSelectionPopup
         isDropdownOpen={isDropdownOpen}
         setIsDropdownOpen={setIsDropdownOpen}
