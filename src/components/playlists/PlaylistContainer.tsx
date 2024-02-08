@@ -47,9 +47,7 @@ const PlaylistContainer = () => {
             setIsDropdownOpen(true);
           }}
         >
-          <Text className="text-base font-semibold text-amber-950">
-            {selectedCollection.headerTitle}
-          </Text>
+          <Text className="text-base font-semibold text-amber-950">{selectedCollection.name}</Text>
         </TouchableOpacity>
       ),
     });

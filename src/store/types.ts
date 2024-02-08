@@ -290,13 +290,13 @@ export type ProcessedBookData = {
 };
 
 export const defaultCollections: CollectionItem[] = [
-  {
-    id: "all",
-    name: "All",
-    headerTitle: "All",
-    color: "white",
-    type: "protected",
-  },
+  // {
+  //   id: "all",
+  //   name: "All",
+  //   headerTitle: "All",
+  //   color: "#ffffff",
+  //   type: "protected",
+  // },
   {
     id: "audiobooks",
     name: "Audiobooks",

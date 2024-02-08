@@ -69,8 +69,8 @@ const TrackPlayerBottomSheet = forwardRef<Ref, Props>((props, ref) => {
   );
 
   const snapPoints = ["85%"];
-  const { animatedHandleHeight, animatedSnapPoints, animatedContentHeight, handleContentLayout } =
-    useBottomSheetDynamicSnapPoints(snapPoints);
+  // const { animatedHandleHeight, animatedSnapPoints, animatedContentHeight, handleContentLayout } =
+  //   useBottomSheetDynamicSnapPoints(snapPoints);
   // console.log("animate", animatedContentHeight.value);
   const handlePageSelected = (e: PagerViewOnPageSelectedEvent) => {
     // console.log(e.nativeEvent.position);

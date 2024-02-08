@@ -1,4 +1,8 @@
-import { loadFromAsyncStorage, saveToAsyncStorage } from "./data/asyncStorage";
+import {
+  loadFromAsyncStorage,
+  removeFromAsyncStorage,
+  saveToAsyncStorage,
+} from "./data/asyncStorage";
 import { useTracksStore } from "./store";
 import { useDropboxStore } from "./store-dropbox";
 import { useSettingStore } from "./store-settings";
@@ -11,6 +15,7 @@ export const onInitialize = async () => {
   // await removeFromAsyncStorage("playlists");
   // await removeFromAsyncStorage("favfolders");
   // await removeFromAsyncStorage("foldermetadata");
+  // await removeFromAsyncStorage("settings");
   const tracks = await loadFromAsyncStorage("tracks");
   // const tracks = tracksx.map((el) => ({
   //   ...el,
@@ -30,19 +35,24 @@ export const onInitialize = async () => {
     collections: collections || defaultCollections,
   });
 
+  // ******************
   // * patch favFolders
-  const patchedFavs =
-    favFolders &&
-    favFolders.map((folder) => ({
-      ...folder,
-      audioSource: folder?.audioSource ? folder.audioSource : "dropbox",
-    }));
-  saveToAsyncStorage("favfolders", patchedFavs);
-  useDropboxStore.setState({ favoriteFolders: patchedFavs });
+  if (favFolders) {
+    const patchedFavs =
+      favFolders &&
+      favFolders.map((folder) => ({
+        ...folder,
+        audioSource: folder?.audioSource ? folder.audioSource : "dropbox",
+      }));
+    saveToAsyncStorage("favfolders", patchedFavs);
+    useDropboxStore.setState({ favoriteFolders: patchedFavs });
+  }
   // * Patch playlist collections
-  for (const key of Object.keys(playlists)) {
-    if (!playlists[key]?.collection) {
-      playlists[key].collection = {};
+  if (playlists) {
+    for (const key of Object.keys(playlists)) {
+      if (!playlists[key]?.collection) {
+        playlists[key].collection = {};
+      }
     }
   }
   // ******************

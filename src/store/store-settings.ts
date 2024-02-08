@@ -78,7 +78,7 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
   isUsingDynamicColors: true,
   showCollectionColorStrip: true,
   autoPlay: false,
-  defaultCollectionId: "all",
+  defaultCollectionId: defaultCollections[0].id,
   selectedCollection: defaultCollections[0],
   actions: {
     toggleDynamicColors: async () => {

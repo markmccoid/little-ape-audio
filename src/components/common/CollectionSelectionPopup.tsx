@@ -94,7 +94,7 @@ const CollectionSelectionPopup = ({ isDropdownOpen, setIsDropdownOpen }) => {
                 return (
                   <LinearGradient
                     key={collection.id}
-                    colors={["white", collection?.color, collection?.color]}
+                    colors={[colors.amber50, collection?.color, collection?.color]}
                     start={{ x: 0, y: 0.5 }}
                     end={{ x: 1, y: 0.5 }}
                   >

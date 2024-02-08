@@ -11,7 +11,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { usePlaybackStore, useTracksStore } from "../../store/store";
 import { PauseIcon, PlayIcon, RewindIcon } from "../common/svg/Icons";
-import { State } from "react-native-track-player";
+import TrackPlayer, { State } from "react-native-track-player";
 import { useSettingStore } from "../../store/store-settings";
 import { SpinnerForwardIcon } from "../common/svg/Icons";
 import { formatSeconds } from "../../utils/formatUtils";
@@ -33,12 +33,9 @@ const TrackPlayerControls = ({ style }: Props) => {
   const jumpSecondsBackward = useSettingStore((state) => state.jumpBackwardSeconds);
   const playbackActions = usePlaybackStore((state) => state.actions);
 
-  // const [playerState, setPlayerState] = useState(null);
   const playerState = usePlaybackStore((state) => state.playerState);
   const isPlaylistLoaded = usePlaybackStore((state) => state.playlistLoaded);
-  const pl = useTracksStore((state) => state.playlists);
-  // const currentTrack = usePlaybackStore((state) => state.currentTrack);
-  // const [bookmarkLength, setBookmarkLength] = useState<number>();
+  // set isPlaying boolean based on playerState stored in Playback Store
   const isPlaying = playerState === State.Playing;
 
   const playlistColors = usePlaylistColors();
@@ -50,13 +47,6 @@ const TrackPlayerControls = ({ style }: Props) => {
       : playlistColors?.secondary?.colorType === "dark"
       ? playlistColors.secondary?.color
       : "black";
-
-  // Set bookmark number once on load
-  // Then if bookmark added, it will update in handleAddBookmark
-  // useEffect(() => {
-  //   const bookmarks = playbackActions.getBookmarks();
-  //   setBookmarkLength(bookmarks?.length === 0 ? undefined : bookmarks?.length);
-  // }, [pl]);
 
   //~ --- ----
   const play = async () => {

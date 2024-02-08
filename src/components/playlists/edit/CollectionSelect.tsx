@@ -27,6 +27,7 @@ const CollectionSelect = ({ playlistId }: Props) => {
   if (!playlist) return null;
   const textColor = getTextColor(getColorLuminance(playlist.collection?.color).colorLuminance);
 
+  // Filter out the collection that is already assigned to passed Playlist Id
   const possibleCollections = collections
     .filter((collection) => collection?.id !== playlist.collection?.id)
     .sort();
