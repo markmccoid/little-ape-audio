@@ -12,6 +12,7 @@ import { deactivateKeepAwake } from "expo-keep-awake";
 import { Orientation, lockPlatformAsync } from "expo-screen-orientation";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 let isTPSetup = false;
 export {
@@ -97,9 +98,9 @@ export default function RootLayout() {
 function RootLayoutNav() {
   return (
     <SafeAreaProvider>
-      <View style={{ flex: 1 }}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
         <Slot />
-      </View>
+      </GestureHandlerRootView>
     </SafeAreaProvider>
   );
 }

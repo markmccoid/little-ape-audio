@@ -881,6 +881,7 @@ function sanitizeStringOld(stringToKey: string) {
 
 export function sanitizeString(title: string) {
   // In little ape audio this function is called "getCleanFileName"
+  if (!title) return;
   return title
     .replace(/^\s+|\s+$/g, "") // Remove leading and trailing spaces
     .replace(/\s+/g, "~") // Replace spaces with '~'
@@ -897,6 +898,7 @@ export function sanitizeString(title: string) {
 //~ folderMetadata[pathToFolderKey][pathToBookFolderKey]
 //~ -------------------------
 export function extractMetadataKeys(pathIn: string) {
+  if (!pathIn) return;
   const fullPath = pathIn.toLocaleLowerCase();
   const pathToFolderKey = sanitizeString(fullPath.slice(0, fullPath.lastIndexOf("/")));
   const pathToBookFolderKey = sanitizeString(fullPath.slice(fullPath.lastIndexOf("/") + 1));

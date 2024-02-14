@@ -14,20 +14,20 @@ function CustomHeader({ title, backText, sessionAudioSource }) {
 
   // Use folderNavigation info stored in dropbox store to navigate back
   const onNavigateBack = () => {
-    const newPathInfo = actions.popFolderNavigation();
-    if (!newPathInfo) {
-      navigation.goBack();
-      return;
-    }
-    router.push({
-      pathname: `/audio/dropbox/${newPathInfo.backTitle}`,
-      params: {
-        fullPath: newPathInfo.fullPath,
-        backTitle: newPathInfo.backTitle,
-        audioSource: newPathInfo.audioSource,
-        yOffset: newPathInfo?.yOffset || 0,
-      },
-    });
+    //const newPathInfo = actions.popFolderNavigation();
+    // if (!newPathInfo) {
+    navigation.goBack();
+    return;
+    //   }
+    // router.push({
+    //   pathname: `/audio/dropbox/${newPathInfo.backTitle}`,
+    //   params: {
+    //     fullPath: newPathInfo.fullPath,
+    //     backTitle: newPathInfo.backTitle,
+    //     audioSource: newPathInfo.audioSource,
+    //     yOffset: newPathInfo?.yOffset || 0,
+    //   },
+    // });
   };
 
   return (

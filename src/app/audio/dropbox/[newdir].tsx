@@ -6,6 +6,7 @@ import CustomHeader from "../../../components/dropbox/CustomHeader";
 import { sanitizeString, useDropboxStore } from "@store/store-dropbox";
 import { AudioSourceLinkParams, AudioSourceType } from "./index";
 import ExplorerAllContainer from "@components/dropbox/ExplorerAllContainer";
+import { customEncodeParens } from "@utils/otherUtils";
 
 const NewDirectory = () => {
   const actions = useDropboxStore((state) => state.actions);
@@ -37,12 +38,12 @@ const NewDirectory = () => {
 
   const onPathChange = (newPath: string, folderName: string) => {
     router.push({
-      pathname: `/audio/dropbox/${folderName}`,
+      pathname: `/audio/dropbox/${customEncodeParens(folderName)}`,
       params: {
-        fullPath: newPath,
-        backTitle: folderName,
+        fullPath: customEncodeParens(newPath),
+        backTitle: customEncodeParens(folderName),
         audioSource: audioSourceIn || "dropbox",
-        parentFolderId: fullPath,
+        parentFolderId: customEncodeParens(fullPath),
       } as AudioSourceLinkParams,
     });
   };

@@ -1,11 +1,12 @@
 import { View, Text, SafeAreaView } from "react-native";
 import React, { useEffect, useLayoutEffect } from "react";
 import { Link, Stack, useRouter, useLocalSearchParams } from "expo-router";
-import ExplorerContainer from "@components/dropbox/ExplorerContainer";
+import ExplorerAllContainer from "@components/dropbox/ExplorerAllContainer";
 import { useNavigation } from "expo-router";
 import CustomHeader from "@components/dropbox/CustomHeader";
 import { useDropboxStore } from "@store/store-dropbox";
 import { AudioSourceLinkParams, AudioSourceType } from "@app/audio/dropbox";
+import { customEncodeParens } from "@utils/otherUtils";
 
 type SearchParms = { fullPath: string; backTitle: string; yOffset: string };
 
@@ -32,8 +33,8 @@ const NewDirectory = () => {
     router.push({
       pathname: `/settings/${folderName}`,
       params: {
-        fullPath: newPath,
-        backTitle: folderName,
+        fullPath: customEncodeParens(newPath),
+        backTitle: customEncodeParens(folderName),
         audioSource: audioSourceIn,
       },
     });
@@ -49,10 +50,11 @@ const NewDirectory = () => {
         }}
       /> */}
 
-      <ExplorerContainer
+      <ExplorerAllContainer
         pathIn={fullPath}
         onPathChange={onPathChange}
         yOffset={yOffset ? parseFloat(yOffset) : 0}
+        audioSource={audioSourceIn}
       />
     </SafeAreaView>
   );

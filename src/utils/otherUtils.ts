@@ -240,3 +240,12 @@ export function getFileExtension(uri) {
   // Extract and return the extension
   return lastDotIndex === -1 ? "" : cleanUri.substring(lastDotIndex + 1);
 }
+
+//~-=======================================
+//~ Expo Router bug workaround - hopefull fixed soon
+//~-=======================================
+export const customEncodeParens = (sourceStr: string) => {
+  if (!sourceStr) return sourceStr;
+  // Manually encode parentheses
+  return sourceStr.replace(/\(/g, "%28").replace(/\)/g, "%29");
+};

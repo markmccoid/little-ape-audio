@@ -24,15 +24,16 @@ const ExplorerImage = ({ metadata, width, style }: Props) => {
   React.useEffect(() => {
     const getImageDims = async () => {
       const finalImage = metadata?.imageURL
-        ? metadata.imageURL
+        ? metadata.imageURL.replace(/^http:\/\//, "https://")
         : metadata?.localImageName
         ? `${FileSystem.documentDirectory}${metadata.localImageName}`
         : metadata.defaultImage;
-
       let imgDims = { width: 100, height: 100 };
       if (finalImage) {
         const { aspectRatio } = await getImageSize(finalImage);
-        imgDims = { width: 100, height: 100 / aspectRatio };
+        if (aspectRatio) {
+          imgDims = { width: 100, height: 100 / aspectRatio };
+        }
       }
       setImgDims({ ...imgDims, finalImage });
     };
