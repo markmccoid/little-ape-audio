@@ -19,10 +19,12 @@ const { width, height } = Dimensions.get("window");
 
 export type AudioSourceType = "dropbox" | "google";
 export type AudioSourceLinkParams = {
+  newdir: string;
   fullPath: string;
   backTitle: string;
   yOffset?: string;
   audioSource?: AudioSourceType;
+  parentFolderId: string;
 };
 const DropboxScreens = () => {
   const [currTab, setCurrTab] = useState<"folders" | "books">("folders");

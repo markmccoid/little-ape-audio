@@ -32,7 +32,7 @@ type Props = {
   parentFolderId?: string;
 };
 
-const ExplorerContainer = ({
+const ExplorerAllContainer = ({
   pathIn,
   audioSource,
   onPathChange,
@@ -56,16 +56,6 @@ const ExplorerContainer = ({
       ? extractMetadataKeys(pathIn)
       : { pathToFolderKey: pathIn, pathToBookFolderKey: sanitizeString(pathIn) };
 
-  // REMEMEBER pathIn will be a google folderID, we need the folderName to sanitize
-  // ONE Solution would be to store the fileID instead of the folder name???
-  // Need to make sure lookup in Search as well as Pass to FOlderView was in sync
-  // console.log(
-  //   "PathIN",
-  //   pathIn,
-  //   pathToBookFolderKey,
-  //   folderNavigation[folderNavigation.length - 2]?.fullPath
-  // );
-
   const metaCheckKey =
     audioSource === "dropbox" ? `${pathToFolderKey}_${pathToBookFolderKey}` : pathToFolderKey;
 
@@ -83,21 +73,21 @@ const ExplorerContainer = ({
 
   // ------------------------------------------------------------------------
   // -- HANDLE SCROLL and Save to Dropbox Store's FolderNavigation array
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const contentOffsetY = event.nativeEvent.contentOffset.y;
-    dropboxActions.updateFolderNavOffset(contentOffsetY);
-  };
+  // const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+  //   const contentOffsetY = event.nativeEvent.contentOffset.y;
+  //   dropboxActions.updateFolderNavOffset(contentOffsetY);
+  // };
 
   // SCROLL TO OFFSET
   // Need to wait until loading is finished before flatlistRef will
   // be available.  Then we can scroll
-  useEffect(() => {
-    if (flatlistRef.current && !isLoading && yOffset) {
-      flatlistRef.current.scrollToOffset({
-        offset: Math.floor(yOffset),
-      });
-    }
-  }, [flatlistRef.current, isLoading]);
+  // useEffect(() => {
+  //   if (flatlistRef.current && !isLoading && yOffset) {
+  //     flatlistRef.current.scrollToOffset({
+  //       offset: Math.floor(yOffset),
+  //     });
+  //   }
+  // }, [flatlistRef.current, isLoading]);
   // ------------------------------------------------------------------------
 
   const renderItem = useCallback(
@@ -356,7 +346,7 @@ const ExplorerContainer = ({
         maxToRenderPerBatch={30}
         windowSize={30}
         // scrollEventThrottle={16}
-        onScroll={handleScroll}
+        // onScroll={handleScroll}
         //! Need to update the length based on if it is open or not
         getItemLayout={(data, index) => {
           let offset = hasMetadata && displayMetadata ? 210 : 45;
@@ -371,7 +361,7 @@ const ExplorerContainer = ({
   );
 };
 
-export default ExplorerContainer;
+export default ExplorerAllContainer;
 
 function goBackInPath(path: string, delimiter: string = "/") {
   const lastSlash = path.lastIndexOf(delimiter);

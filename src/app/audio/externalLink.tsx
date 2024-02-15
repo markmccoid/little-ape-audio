@@ -6,20 +6,16 @@ import { useNavigation } from "expo-router";
 import CustomHeader from "../../components/dropbox/CustomHeader";
 import { useDropboxStore } from "@store/store-dropbox";
 import { ChevronBackIcon } from "@components/common/svg/Icons";
-
-type SearchParms = { fullPath: string; backTitle: string; yOffset: string };
+import { AudioSourceLinkParams } from "./dropbox";
 
 const ExternalLink = () => {
   const actions = useDropboxStore((state) => state.actions);
   const router = useRouter();
   const navigation = useNavigation();
-  const { newdir, fullPath, backTitle, yOffset, audioSource } = useLocalSearchParams<SearchParms>();
+  const { newdir, fullPath, backTitle, yOffset, audioSource, parentFolderId } =
+    useLocalSearchParams<AudioSourceLinkParams>();
   const [prevDir, setPrevDir] = useState("");
 
-  // console.log(
-  //   "NAV",
-  //   `${navigation.getId()}\n ${JSON.stringify(navigation.getParent())}\n ${navigation.getState()}`
-  // );
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Stack.Screen
@@ -35,9 +31,6 @@ const ExternalLink = () => {
               </TouchableOpacity>
             );
           },
-          // headerBackTitleVisible: false,
-          // headerBackVisible: false,
-          // header: () => <CustomHeader title={fullPath || "/"} backText={backTitle} />,
         }}
       />
 

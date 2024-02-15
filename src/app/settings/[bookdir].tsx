@@ -14,7 +14,7 @@ const NewDirectory = () => {
   const actions = useDropboxStore((state) => state.actions);
   const router = useRouter();
   const navigation = useNavigation();
-  const { newdir, fullPath, backTitle, audioSource, yOffset } =
+  const { newdir, fullPath, backTitle, audioSource, yOffset, parentFolderId } =
     useLocalSearchParams<AudioSourceLinkParams>();
 
   const audioSourceIn = audioSource as AudioSourceType;
@@ -31,11 +31,12 @@ const NewDirectory = () => {
   const onPathChange = (newPath: string, folderName: string) => {
     // const trailingPath = newPath.slice(newPath.lastIndexOf("/") + 1);
     router.push({
-      pathname: `/settings/${folderName}`,
+      pathname: `/settings/${customEncodeParens(folderName)}`,
       params: {
         fullPath: customEncodeParens(newPath),
         backTitle: customEncodeParens(folderName),
-        audioSource: audioSourceIn,
+        audioSource: audioSourceIn || "dropbox",
+        parentFolderId: customEncodeParens(fullPath),
       },
     });
   };
@@ -54,7 +55,8 @@ const NewDirectory = () => {
         pathIn={fullPath}
         onPathChange={onPathChange}
         yOffset={yOffset ? parseFloat(yOffset) : 0}
-        audioSource={audioSourceIn}
+        audioSource={audioSourceIn || "dropbox"}
+        parentFolderId={parentFolderId}
       />
     </SafeAreaView>
   );

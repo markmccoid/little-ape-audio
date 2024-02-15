@@ -4,6 +4,7 @@ import { FlatFolderMetadata } from "./SearchBooksSearch";
 import { useRouter } from "expo-router";
 import * as FileSystem from "expo-file-system";
 import { colors } from "@constants/Colors";
+import { customEncodeParens } from "@utils/otherUtils";
 
 type Props = { resultData: FlatFolderMetadata };
 type Unpacked<T> = T extends (infer U)[] ? U : T;
@@ -12,7 +13,7 @@ const SearchBookResults = ({ resultData }: Props) => {
   const router = useRouter();
   const renderItem = ({ item }: { item: Unpacked<typeof resultData> }) => {
     const imageURL = item?.imageURL
-      ? item.imageURL
+      ? item.imageURL.replace(/^http:\/\//, "https://")
       : item?.localImageName
       ? `${FileSystem.documentDirectory}${item.localImageName}`
       : item.defaultImage;
@@ -47,10 +48,10 @@ const SearchBookResults = ({ resultData }: Props) => {
             router.push({
               pathname: `/audio/dropbox/${item.title}`,
               params: {
-                fullPath: item.dropboxPathLower,
+                fullPath: customEncodeParens(item.dropboxPathLower),
                 backTitle: "Back",
                 audioSource: item.audioSource || "dropbox",
-                parentFolderId: item?.parentFolderId,
+                parentFolderId: customEncodeParens(item?.parentFolderId),
               },
             })
           }

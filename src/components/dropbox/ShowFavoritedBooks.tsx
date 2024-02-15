@@ -6,6 +6,7 @@ import { Link, useRouter } from "expo-router";
 import { colors } from "@constants/Colors";
 import DraggableFlatList from "react-native-draggable-flatlist";
 import * as FileSystem from "expo-file-system";
+import { customEncodeParens } from "@utils/otherUtils";
 
 const ShowFavoritedBooks = () => {
   const actions = useDropboxStore((state) => state.actions);
@@ -26,7 +27,7 @@ const ShowFavoritedBooks = () => {
     isActive: boolean;
   }) => {
     const imageURI = item?.imageURL
-      ? item.imageURL
+      ? item.imageURL.replace(/^http:\/\//, "https://")
       : item?.localImageName
       ? `${FileSystem.documentDirectory}${item.localImageName}`
       : item.defaultImage;
@@ -64,10 +65,10 @@ const ShowFavoritedBooks = () => {
             router.push({
               pathname: `/audio/dropbox/favBook`,
               params: {
-                fullPath: item?.pathToFolder,
+                fullPath: customEncodeParens(item?.pathToFolder),
                 backTitle: "Back",
                 audioSource: item.audioSource,
-                parentFolderId: item?.parentFolder,
+                parentFolderId: customEncodeParens(item?.parentFolder),
               },
             })
           }

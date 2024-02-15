@@ -100,7 +100,7 @@ const SettingsLayout = () => {
           title: "",
           headerStyle: { backgroundColor: colors.amber200 },
           headerTintColor: colors.amber900,
-          presentation: "card",
+          presentation: "modal",
           headerBackTitle: "Back",
           // headerBackTitleVisible: false,
           // headerBackVisible: false,

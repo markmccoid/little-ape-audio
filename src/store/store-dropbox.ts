@@ -898,7 +898,7 @@ export function sanitizeString(title: string) {
 //~ folderMetadata[pathToFolderKey][pathToBookFolderKey]
 //~ -------------------------
 export function extractMetadataKeys(pathIn: string) {
-  if (!pathIn) return;
+  if (!pathIn) pathIn = "";
   const fullPath = pathIn.toLocaleLowerCase();
   const pathToFolderKey = sanitizeString(fullPath.slice(0, fullPath.lastIndexOf("/")));
   const pathToBookFolderKey = sanitizeString(fullPath.slice(fullPath.lastIndexOf("/") + 1));

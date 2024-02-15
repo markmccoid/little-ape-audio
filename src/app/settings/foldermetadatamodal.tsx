@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useDropboxStore } from "@store/store-dropbox";
 import { CleanBookMetadata } from "@utils/audiobookMetadata";
 import { sortBy, debounce } from "lodash";
+import { customEncodeParens } from "@utils/otherUtils";
 
 const foldermetadatamodal = () => {
   const { pathInKey } = useLocalSearchParams();
@@ -68,8 +69,13 @@ const foldermetadatamodal = () => {
                 <TouchableOpacity
                   onPress={() => {
                     router.push({
-                      pathname: `/settings/${el.key}`,
-                      params: { fullPath: el.dropboxPathLower, backTitle: "Back" },
+                      pathname: `/settings/${customEncodeParens(el.key)}`,
+                      params: {
+                        fullPath: customEncodeParens(el.dropboxPathLower),
+                        backTitle: "Back",
+                        audioSource: el.audioSource,
+                        parentFolderId: el.parentFolderId,
+                      },
                     });
                   }}
                 >
