@@ -44,7 +44,7 @@ const TrackPlayerContainer = () => {
         locations={[0.3, 0.6, 1]}
       >
         {isLoaded ? (
-          <>
+          <View className="flex-1 flex-col">
             <TrackPlayerImage />
             <MotiView
               key={1}
@@ -55,7 +55,7 @@ const TrackPlayerContainer = () => {
               <TrackPlayerProgressBar />
               <TrackPlayerChaptProgressBar />
             </MotiView>
-          </>
+          </View>
         ) : null}
       </LinearGradient>
       <View className=" justify-end mb-[30] mt-[25]">

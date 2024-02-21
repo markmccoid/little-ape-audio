@@ -1,11 +1,6 @@
 import { View, Text, StyleSheet, Pressable, TouchableOpacity } from "react-native";
 import React from "react";
-import {
-  CloudDownloadIcon,
-  DatabaseDownloadIcon,
-  EyeOffOutlineIcon,
-  EyeOutlineIcon,
-} from "../common/svg/Icons";
+import { CloudDownloadIcon, EyeOffOutlineIcon, EyeOutlineIcon } from "../common/svg/Icons";
 import { MotiView } from "moti";
 import { colors } from "@constants/Colors";
 import { useDropboxStore } from "@store/store-dropbox";
@@ -63,27 +58,6 @@ const ExplorerActionBar = ({
               </Text>
             )}
           </View>
-          {/* <TouchableOpacity
-            onPress={async () => await handleDownloadMetadata()}
-            className="mx-2"
-            disabled={metadataProcessingFlag}
-          >
-            <MotiView
-              key={metadataProcessingFlag.toString()}
-              className=""
-              from={{ opacity: 0.3 }}
-              animate={{ opacity: 1 }}
-              transition={{
-                loop: metadataProcessingFlag ? true : false,
-                type: "timing",
-                duration: 500,
-              }}
-            >
-              <DatabaseDownloadIcon
-                color={metadataProcessingFlag ? colors.amber600 : colors.amber900}
-              />
-            </MotiView>
-          </TouchableOpacity> */}
         </View>
       ) : (
         // This is a placeholder so the justify between keeps icons in correct place

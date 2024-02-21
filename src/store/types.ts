@@ -3,6 +3,7 @@ import { FileEntry } from "../utils/dropboxUtils";
 import { Chapter } from "./store-functions";
 import { AudioSourceType } from "@app/audio/dropbox";
 import { colors } from "@constants/Colors";
+import { CleanBookMetadata } from "@utils/audiobookMetadata";
 
 //~ ================================
 //~ AudioTrack Type
@@ -16,6 +17,7 @@ export type AudioTrack = {
   directory: string;
   sourceLocation: string;
   metadata?: AudioMetadata;
+  externalMetadata?: ExternalMetadata;
 };
 export type AudioMetadata = {
   title?: string;
@@ -33,6 +35,10 @@ export type AudioMetadata = {
   pictureAspectRatio?: number;
   comment?: string;
   chapters?: Chapter[];
+};
+
+export type ExternalMetadata = CleanBookMetadata & {
+  dateDownloaded: string;
 };
 
 export type PlaylistImageColors = {

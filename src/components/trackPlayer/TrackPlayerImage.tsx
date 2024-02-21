@@ -1,11 +1,8 @@
 import { View, Dimensions, TouchableOpacity, Image } from "react-native";
 import React from "react";
-import PlaylistImage from "../common/PlaylistImage";
 import { BackIcon, NextIcon } from "../common/svg/Icons";
-import { colors } from "../../constants/Colors";
 import { useCurrentPlaylist, usePlaybackStore } from "../../store/store";
-import Animated from "react-native-reanimated";
-import TrackPlayerScoller from "./TrackPlayerScoller";
+import TrackPlayerScroller from "./TrackPlayerScroller";
 import { getColorLuminance } from "@utils/otherUtils";
 import usePlaylistColors from "hooks/usePlaylistColors";
 
@@ -34,7 +31,7 @@ const TrackPlayerImage = () => {
 
   return (
     <View
-      className="flex-row justify-between items-center"
+      className="flex-row justify-between items-center "
       style={{
         marginHorizontal: 5,
       }}
@@ -46,19 +43,8 @@ const TrackPlayerImage = () => {
       >
         <BackIcon size={35} color={playlistColors?.background?.tintColor} />
       </TouchableOpacity>
-      {/* <Image
-        source={{ uri: playlist?.imageURI }}
-        style={{
-          width: width / 1.35,
-          height: width / 1.35,
-          resizeMode: "stretch",
-          alignSelf: "center",
-        }}
-      /> */}
-
-      <View className="flex-1 ">
-        <TrackPlayerScoller />
-      </View>
+      {/* Scroller - History, Image, Settings, Description */}
+      <TrackPlayerScroller />
 
       <TouchableOpacity
         onPress={() => actions.next()}

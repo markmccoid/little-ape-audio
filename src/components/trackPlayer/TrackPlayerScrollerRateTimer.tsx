@@ -8,12 +8,19 @@ import { colors } from "@constants/Colors";
 import { usePlaybackStore } from "@store/store";
 import TrackPlayerScrollerSleepTime from "./TrackPlayerScrollerSleepTime";
 import usePlaylistColors from "hooks/usePlaylistColors";
+import { AudioTrack, Playlist } from "@store/types";
 
 const { width, height } = Dimensions.get("window");
 const COMPONENT_WIDTH = width - 90;
 const COMPONENT_PADDING = 10;
 
-const TrackPlayerScrollerRateTimer = () => {
+type Props = {
+  playlist: Playlist;
+  currentTrack: AudioTrack;
+  compHeight: number;
+};
+
+const TrackPlayerScrollerRateTimer = ({ playlist, currentTrack, compHeight }: Props) => {
   const playbackActions = usePlaybackStore((state) => state.actions);
   const playlistRate = usePlaybackStore((state) => state.currentRate);
   const didUpdate = usePlaybackStore((state) => state.didUpdate);

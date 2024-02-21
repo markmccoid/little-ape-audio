@@ -13,6 +13,7 @@ import { PlaylistImageColors } from "@store/types";
 import { getImageColors } from "@utils/otherUtils";
 import TrackPlayer from "react-native-track-player";
 import { usePlaybackStore } from "./store";
+import { BookJSONMetadata, CleanBookMetadata, cleanOneBook } from "@utils/audiobookMetadata";
 let isCriticalSectionLocked = false;
 const gdrive = new GDrive();
 
@@ -85,19 +86,39 @@ export const addTrack =
     }
 
     // ------------------------------------
-    // -- GET LAAB Metadata if it exists
+    // -- GET LAAB Metadata if it exists -- NO LONGER GETTING CHAPTER INFO FROM THIS FILE
+    // -- Getting it from the Event.MetadataChapterReceived event in trackPlayerUtils.ts
     let LAABMeta: LAABData = undefined;
+    // -- GET externalMetadata from the 'title...'-metadata.json file if it exists and
+    // -- store on track object in externalMetadata property.
+    let externalMetadata: CleanBookMetadata = undefined;
     if (audioSource === "dropbox") {
-      LAABMeta = await laabMetaDropbox(sourceLocation, filename);
+      // LAABMeta = await laabMetaDropbox(sourceLocation, filename);
+      externalMetadata = await getMetadataDropbox(sourceLocation, filename);
     } else if (audioSource === "google") {
-      //! Google LaabMeta check
-      const laabFileName = `${getCleanFileName(filename)}_laabmeta.json`;
-      const laabData = await getJsonData({ folderId: pathIn, filename: laabFileName });
-
+      //! Google LaabMeta check This is the file with the chapters (We now do it in TrackPlayer)
+      // const laabFileName = `${getCleanFileName(filename)}_laabmeta.json`;
+      const laabData = undefined; // await getJsonData({ folderId: pathIn, filename: laabFileName });
       if (laabData) {
         LAABMeta = createLAABMeta(laabData);
       } else {
         LAABMeta = undefined;
+      }
+
+      //! Google book metadata object
+      const metaFileName = `${sanitizeString(
+        filename.toLowerCase().substring(0, filename.lastIndexOf("."))
+      )}-metadata.json`;
+      // Download metadata json file
+      const metaData = (await getJsonData({
+        folderId: pathIn,
+        filename: metaFileName,
+      })) as BookJSONMetadata;
+      // If found, clean it and add it to the final track object
+      if (metaData) {
+        externalMetadata = cleanOneBook(metaData, pathIn, "dropbox");
+        externalMetadata.audioSource = "google";
+        externalMetadata.fullPath = `${pathIn}`;
       }
     }
 
@@ -118,7 +139,7 @@ export const addTrack =
       totalTracks,
     };
     const id = `${directory}${filename}`;
-    const newAudioFile = {
+    const newAudioFile: AudioTrack = {
       id,
       fileURI,
       directory,
@@ -130,6 +151,12 @@ export const addTrack =
     };
     // If title is blank then use filename
     newAudioFile.metadata.title = newAudioFile.metadata?.title || newAudioFile.filename;
+    if (externalMetadata) {
+      newAudioFile.externalMetadata = {
+        dateDownloaded: format(new Date(), "MM/dd/yyyy"),
+        ...externalMetadata,
+      };
+    }
     // Right now we do NOT allow any duplicate files (dir/filename)
     // remove the file ONLY FROM STORE if it exists.  By the time we are in the store
     // it has already been saved and that is fine.
@@ -213,15 +240,53 @@ function mergeObjects(source, target) {
   return target;
 }
 
+//~~ -------------------------------------
+//~~ metaDataDropbox - Get metadata from Dropbox
+//~~ -------------------------------------
+function sanitizeString(title: string) {
+  // In little ape audio this function is called "getCleanFileName"
+  return title
+    .replace(/^\s+|\s+$/g, "") // Remove leading and trailing spaces
+    .replace(/\s+/g, "~") // Replace spaces with '~'
+    .replace(/[^\w.~]+/g, "_") // Replace non-alphanumeric, non-period, non-underscore, non-tilde characters with '_'
+    .replace(/_$/, ""); // Get rid of trailing _
+  // return title.replace(/[^\w.]+/g, "_").replace(/_$/, "");
+}
+const getMetadataDropbox = async (sourceLocation: string, filename: string) => {
+  //~~ Check for metadata file
+  const laabPath = sourceLocation.slice(0, sourceLocation.lastIndexOf("/"));
+  const metadataFileName = `${sanitizeString(
+    filename.substring(0, filename.lastIndexOf("."))
+  )}-metadata.json`;
+  const metadataFileNameWithPath = `${laabPath}/${metadataFileName}`;
+  console.log("metadataFileNameWithPath", metadataFileNameWithPath);
+
+  // laab file contains chapter data sometimes
+  let convertedMeta: CleanBookMetadata = undefined;
+  try {
+    const metaData = (await downloadDropboxFile(`${metadataFileNameWithPath}`)) as BookJSONMetadata;
+    convertedMeta = cleanOneBook(metaData, laabPath, "dropbox");
+  } catch (err) {
+    convertedMeta = undefined;
+    console.log("Error in metaDataDropbox", err);
+    // Assume the laab meta file was not found
+    // console.log("Error in LAABMeta", err);
+  }
+  // console.log("convertedMeta", convertedMeta);
+  return convertedMeta;
+};
+
 const laabMetaDropbox = async (sourceLocation: string, filename: string) => {
   //~~ Check for LAAB Meta file
   const laabPath = sourceLocation.slice(0, sourceLocation.lastIndexOf("/"));
   const laabFileName = `${getCleanFileName(filename)}_laabmeta.json`;
   const laabFileNameWithPath = `${laabPath}/${laabFileName}`;
+
   // const laabFileNameWithPath = `${laabPath}/${getCleanFileName(filename)}_laabmeta.json`;
 
   let LAABMeta: LAABData;
   // laab file contains chapter data sometimes
+  let convertedMeta: CleanBookMetadata = undefined;
   try {
     const laabData = (await downloadDropboxFile(`${laabFileNameWithPath}`)) as LAABData;
     LAABMeta = createLAABMeta(laabData);

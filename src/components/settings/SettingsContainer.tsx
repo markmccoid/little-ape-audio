@@ -7,6 +7,7 @@ import { MotiView } from "moti";
 import Constants from "expo-constants";
 import { useDropboxStore } from "@store/store-dropbox";
 import { useTracksStore } from "@store/store";
+import { IOSArrowForwardIcon } from "@components/common/svg/Icons";
 
 const SettingsContainer = () => {
   const version = Constants?.expoConfig?.version;
@@ -62,10 +63,11 @@ const SettingsContainer = () => {
         {/* ------------------ */}
         {/* CLOUD AUTHORIZATION */}
         {/* ------------------ */}
-        <View style={[styles.borderBottom]}>
+        <View style={[styles.borderBottom, { paddingRight: 10 }]}>
           <Link href="/settings/authroute" asChild>
-            <Pressable className="px-2 py-3 w-full">
+            <Pressable className="pl-2 py-3 w-full flex-row justify-between">
               <Text className="text-sm">Cloud Authorization</Text>
+              <IOSArrowForwardIcon color="#36454F" size={20} />
             </Pressable>
           </Link>
         </View>
@@ -132,10 +134,11 @@ const SettingsContainer = () => {
         {/* ------------------ */}
         {/* MANAGE COLLECTIONS */}
         {/* ------------------ */}
-        <View className="px-2" style={[styles.borderBottom]}>
+        <View style={[styles.borderBottom, { paddingRight: 10 }]}>
           <Link href="/settings/managecollections" asChild>
-            <Pressable className="py-3 w-full">
+            <Pressable className="pl-2 py-3 w-full flex-row justify-between">
               <Text>Manage Collections</Text>
+              <IOSArrowForwardIcon color="#36454F" size={20} />
             </Pressable>
           </Link>
         </View>
@@ -143,30 +146,33 @@ const SettingsContainer = () => {
         {/* MANAGE TRACKS */}
         {/* ------------------ */}
         {trackCount > 0 && (
-          <View style={[styles.borderBottom]}>
+          <View style={[styles.borderBottom, { paddingRight: 10 }]}>
             <Link href="/settings/managetracksroute" asChild>
-              <Pressable className="px-2 py-3 w-full">
+              <Pressable className="pl-2 py-3 w-full flex-row justify-between">
                 <Text className="text-sm">Manage Tracks</Text>
+                <IOSArrowForwardIcon color="#36454F" size={20} />
               </Pressable>
             </Link>
           </View>
         )}
         {/* FOLDER METADATA */}
         {folderMetadata && (
-          <View style={[styles.borderBottom]}>
+          <View style={[styles.borderBottom, { paddingRight: 10 }]}>
             <Link href="/settings/foldermetadataroute" asChild>
-              <Pressable className="px-2 py-3 w-full">
+              <Pressable className="pl-2 py-3 w-full flex-row justify-between">
                 <Text className="text-sm">Manage Folder Metadata</Text>
+                <IOSArrowForwardIcon color="#36454F" size={20} />
               </Pressable>
             </Link>
           </View>
         )}
         {/* FOLDER ATTRIBUTES */}
         {folderAttributes.length > 0 && (
-          <View style={[styles.borderBottom]}>
+          <View style={[styles.borderBottom, { paddingRight: 10 }]}>
             <Link href="/settings/folderattributesroute" asChild>
-              <Pressable className="px-2 py-3 w-full">
+              <Pressable className="pl-2 py-3 w-full flex-row justify-between">
                 <Text className="text-sm">Manage Folder Attributes</Text>
+                <IOSArrowForwardIcon color="#36454F" size={20} />
               </Pressable>
             </Link>
           </View>

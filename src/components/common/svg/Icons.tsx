@@ -111,6 +111,10 @@ export const HardDriveIcon = ({ size = 25, color, style }: Props) => {
   return <Feather name="hard-drive" size={size} color={color} style={style} />;
 };
 
+export const IOSArrowForwardIcon = ({ size = 25, color, style }: Props) => {
+  return <MaterialIcons name="arrow-forward-ios" size={size} color={color} style={style} />;
+};
+
 //----------------------------------------------------------------
 //- Drawer Icons
 //----------------------------------------------------------------
@@ -238,11 +242,7 @@ export const InfoCircleIcon = ({ size = 25, color, style }: Props) => {
 export const InfoIcon = ({ size = 25, color, style }: Props) => {
   return <FontAwesome name="info" size={size} color={color} style={style} />;
 };
-export const DatabaseDownloadIcon = ({ size = 25, color, style }: Props) => {
-  return (
-    <MaterialCommunityIcons name="database-arrow-down" size={size} color={color} style={style} />
-  );
-};
+
 export const PowerIcon = ({ size = 25, color, style }: Props) => {
   return <MaterialCommunityIcons name="power" size={size} color={color} style={style} />;
 };
@@ -252,9 +252,7 @@ export const SpeedIcon = ({ size = 25, color, style }: Props) => {
 };
 
 export const TimerSandIcon = ({ size = 25, color, style }: Props) => {
-  return (
-    <MaterialCommunityIcons name="timer-sand-complete" size={size} color={color} style={style} />
-  );
+  return <MaterialCommunityIcons name="timer-sand" size={size} color={color} style={style} />;
 };
 
 // Bottom Menu

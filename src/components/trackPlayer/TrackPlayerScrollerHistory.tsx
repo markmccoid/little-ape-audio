@@ -9,19 +9,22 @@ import {
 import { formatSeconds } from "@utils/formatUtils";
 import { EnterKeyIcon } from "@components/common/svg/Icons";
 import usePlaylistColors from "hooks/usePlaylistColors";
+import { AudioTrack, Playlist } from "@store/types";
 
 const { width, height } = Dimensions.get("window");
 const COMPONENT_WIDTH = width - 80;
-
-const TrackPlayerScrollerComments = () => {
-  const actions = useTrackActions();
-  const playbackTrack = usePlaybackStore((state) => state.currentTrack);
+type Props = {
+  playlist: Playlist;
+  currentTrack: AudioTrack;
+  compHeight: number;
+};
+const TrackPlayerScrollerHistory = ({ playlist, currentTrack, compHeight }: Props) => {
   const currTrackIndex = usePlaybackStore((state) => state.currentTrackIndex);
-  const playlistId = usePlaybackStore((state) => state.currentPlaylistId);
   const playlists = useTracksStore((state) => state.playlists);
   const playbackActions = usePlaybackStore((state) => state.actions);
 
-  const positionHistory = playlists[playlistId]?.positionHistory;
+  const positionHistory = playlists[playlist.id]?.positionHistory;
+
   const plColors = usePlaylistColors();
 
   const textColor = plColors.background.tintColor;
@@ -32,13 +35,15 @@ const TrackPlayerScrollerComments = () => {
   return (
     <ScrollView
       style={{
-        width: COMPONENT_WIDTH,
-        height: COMPONENT_WIDTH,
+        // width: COMPONENT_WIDTH,
+        height: compHeight,
         // padding: 10,
         marginVertical: 10,
+        borderRadius: 10,
         backgroundColor: bgColor,
+        borderWidth: StyleSheet.hairlineWidth,
       }}
-      className=" border "
+      contentContainerStyle={{ height: compHeight }}
     >
       <View className="p-2 ">
         <Text className="font-semibold text-base mb-2" style={{ color: textColor }}>
@@ -77,4 +82,4 @@ const TrackPlayerScrollerComments = () => {
   );
 };
 
-export default TrackPlayerScrollerComments;
+export default TrackPlayerScrollerHistory;
