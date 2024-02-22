@@ -116,7 +116,7 @@ const ExplorerAllContainer = ({
             folder={item}
             onNavigateForward={onNavigateForward}
             displayFolderMetadata={displayMetadata}
-            onDownloadMetadata={onDownloadMetadata}
+            // onDownloadMetadata={onDownloadMetadata}
             // setShowMetadata={setShowMetadata}
             folderMetadata={allFoldersMetadata?.[pathToFolderKey]?.[pathToBookFolderKey]}
             hasMetadata={hasMetadata}
@@ -206,31 +206,6 @@ const ExplorerAllContainer = ({
     onPathChange(nextPath, folderName);
   };
 
-  //~ ====================
-  //~ == download Folder Metadata flag set==
-  //~ ====================
-  const onDownloadMetadata = async (startingFolder: FolderEntry[] = undefined) => {
-    // If we are showing metadata, then hide and return
-    // console.log("IN onDowloadMetadata", startingFolder);
-    // if (showMetadata !== "off") {
-    //   setShowMetadata("off");
-    //   return;
-    // }
-    // // console.log("Y", filesFolderObj.folders);
-    // // Call download function and set to show metadata
-    // setShowMetadata("loading");
-    // pathIn will be the full path to the current folder
-    // So filesFolderObj.folders will be ALL the folders IN the pathIn path.
-    // One of the keys of the folders object is the ".path_lower" property
-    // and it has the full path including the folder name so we can look from the
-    // ...metdata.json file in each folder
-    // await downloadFolderMetadata(filesFolderObj.folders);
-    const foldersToRecurse = startingFolder ? startingFolder : filesFolderObj.folders;
-    // console.log(foldersToRecurse.map((el) => el.path_display));
-    await recurseFolderMetadata(foldersToRecurse);
-    // AFter getting metadata, tell renderItem to show metadata info.
-    // setShowMetadata("on");
-  };
   //! ~ ====================
   //! ~ onDownloadAll
   //! ~ ====================
@@ -312,7 +287,6 @@ const ExplorerAllContainer = ({
           displayMetadata={displayMetadata}
           hasMetadata={hasMetadata}
           handleDownloadAll={onDownloadAll}
-          handleDownloadMetadata={onDownloadMetadata}
           handleDisplayMetadata={toggeleDisplayMetadata}
         />
       </View>

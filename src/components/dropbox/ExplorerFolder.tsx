@@ -29,7 +29,6 @@ type Props = {
   index: number;
   onNavigateForward: (path: string, folderName: string) => void;
   displayFolderMetadata: boolean;
-  onDownloadMetadata: (startingFolder: FolderEntry[]) => Promise<void>;
   hasMetadata: boolean;
   folderMetadata: CleanBookMetadata;
   audioSource: AudioSourceType;
@@ -40,9 +39,7 @@ const ExplorerFolder = ({
   index,
   onNavigateForward,
   displayFolderMetadata,
-  onDownloadMetadata,
   hasMetadata,
-  // setShowMetadata,
   folderMetadata,
   audioSource,
 }: Props) => {
@@ -134,27 +131,12 @@ const ExplorerFolder = ({
           key={`${displayFolderMetadata}-${metadataInfo?.id}`}
           from={{ opacity: 0.3 }}
           animate={{ opacity: 1 }}
-          transition={
-            {
-              // loop:
-              //   (displayFolderMetadata === "loading" && !metadataInfo) || folderMetaState === "loading"
-              //     ? true
-              //     : false,
-              // type: "timing",
-              // duration: 500,
-            }
-          }
           style={{
             flexDirection: "row",
             flexGrow: 1,
             alignItems: "center",
             paddingHorizontal: 8,
           }}
-          // className={`${
-          //   (showFolderMetadata === "loading" && !metadataInfo) || folderMetaState === "loading"
-          //     ? "bg-amber-600"
-          //     : ""
-          // }`}
         >
           {currFolderAttributes?.isFavorite ? (
             <MDHeartIcon color={textColor} />

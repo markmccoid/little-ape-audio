@@ -12,11 +12,9 @@ type Props = {
   audioSource: AudioSourceType;
   fileCount: number;
   folderCount: number;
-  // showMetadata: "on" | "off" | "loading";
   displayMetadata: boolean;
   hasMetadata: boolean;
   handleDownloadAll: () => Promise<void>;
-  handleDownloadMetadata: () => Promise<void>;
   handleDisplayMetadata: () => void;
 };
 
@@ -29,7 +27,6 @@ const ExplorerActionBar = ({
   displayMetadata,
   hasMetadata,
   handleDownloadAll,
-  handleDownloadMetadata,
   handleDisplayMetadata,
 }: Props) => {
   const metadataProcessingFlag = useDropboxStore(
