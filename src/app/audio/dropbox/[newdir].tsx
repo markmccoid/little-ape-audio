@@ -3,10 +3,10 @@ import React, { useEffect, useLayoutEffect, useState } from "react";
 import { Link, Stack, useRouter, useLocalSearchParams } from "expo-router";
 import { useNavigation } from "expo-router";
 import CustomHeader from "../../../components/dropbox/CustomHeader";
-import { sanitizeString, useDropboxStore } from "@store/store-dropbox";
+import { useDropboxStore } from "@store/store-dropbox";
 import { AudioSourceLinkParams, AudioSourceType } from "./index";
 import ExplorerAllContainer from "@components/dropbox/ExplorerAllContainer";
-import { customEncodeParens } from "@utils/otherUtils";
+import { sanitizeString, customEncodeParens } from "@utils/otherUtils";
 
 const NewDirectory = () => {
   const actions = useDropboxStore((state) => state.actions);

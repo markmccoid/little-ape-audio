@@ -249,3 +249,20 @@ export const customEncodeParens = (sourceStr: string) => {
   // Manually encode parentheses
   return sourceStr.replace(/\(/g, "%28").replace(/\)/g, "%29");
 };
+
+function sanitizeStringOld(stringToKey: string) {
+  return stringToKey.replace(/[^/^\w.]+/g, "_").replace(/_$/, "");
+}
+
+export function sanitizeString(title: string) {
+  // In little ape audio this function is called "getCleanFileName"
+  if (!title) return;
+  return title
+    .replace(/^\s+|\s+$/g, "") // Remove leading and trailing spaces
+    .replace(/\s+/g, "~") // Replace spaces with '~'
+    .replace(/[^\w.~]+/g, "_") // Replace non-alphanumeric, non-period, non-underscore, non-tilde characters with '_'
+    .replace(/_$/, "") // Get rid of trailing _
+    .replace(/^_/, ""); // get rid of leading _
+  // Old is below
+  // return title.replace(/[^\w.]+/g, "_").replace(/_$/, "");
+}

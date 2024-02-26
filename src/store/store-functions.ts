@@ -12,7 +12,6 @@ import { GDrive } from "@robinbobin/react-native-google-drive-api-wrapper";
 import { PlaylistImageColors } from "@store/types";
 import { getImageColors } from "@utils/otherUtils";
 import TrackPlayer from "react-native-track-player";
-import { usePlaybackStore } from "./store";
 import { BookJSONMetadata, CleanBookMetadata, cleanOneBook } from "@utils/audiobookMetadata";
 let isCriticalSectionLocked = false;
 const gdrive = new GDrive();
@@ -243,15 +242,16 @@ function mergeObjects(source, target) {
 //~~ -------------------------------------
 //~~ metaDataDropbox - Get metadata from Dropbox
 //~~ -------------------------------------
-function sanitizeString(title: string) {
-  // In little ape audio this function is called "getCleanFileName"
-  return title
-    .replace(/^\s+|\s+$/g, "") // Remove leading and trailing spaces
-    .replace(/\s+/g, "~") // Replace spaces with '~'
-    .replace(/[^\w.~]+/g, "_") // Replace non-alphanumeric, non-period, non-underscore, non-tilde characters with '_'
-    .replace(/_$/, ""); // Get rid of trailing _
-  // return title.replace(/[^\w.]+/g, "_").replace(/_$/, "");
-}
+// function sanitizeString(title: string) {
+//   // In little ape audio this function is called "getCleanFileName"
+//   return title
+//     .replace(/^\s+|\s+$/g, "") // Remove leading and trailing spaces
+//     .replace(/\s+/g, "~") // Replace spaces with '~'
+//     .replace(/[^\w.~]+/g, "_") // Replace non-alphanumeric, non-period, non-underscore, non-tilde characters with '_'
+//     .replace(/_$/, "") // Get rid of trailing _
+//     .replace(/^_/, ""); // get rid of leading _
+//   // return title.replace(/[^\w.]+/g, "_").replace(/_$/, "");
+// }
 const getMetadataDropbox = async (sourceLocation: string, filename: string) => {
   //~~ Check for metadata file
   const laabPath = sourceLocation.slice(0, sourceLocation.lastIndexOf("/"));

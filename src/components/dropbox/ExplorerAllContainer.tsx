@@ -13,7 +13,6 @@ import {
   extractMetadataKeys,
   folderFileReader,
   recurseFolderMetadata,
-  sanitizeString,
   tagFilesAndFolders,
   useDropboxStore,
 } from "../../store/store-dropbox";
@@ -23,6 +22,7 @@ import { listGoogleDriveFiles } from "@utils/googleUtils";
 import { useSettingStore } from "@store/store-settings";
 
 import { checkForFolderMetadataGoogle } from "@utils/commonCloudUtils";
+import { sanitizeString } from "@utils/otherUtils";
 
 type Props = {
   pathIn: string;
@@ -105,7 +105,9 @@ const ExplorerAllContainer = ({
           audioSource === "dropbox"
             ? extractMetadataKeys(item.path_lower)
             : {
+                // For Google path_display = Parent Folder ID
                 pathToFolderKey: item.path_display,
+                // item.id = folder id (path_lower also is folder id)
                 pathToBookFolderKey: item.id,
               };
         // console.log("METADATA", allFoldersMetadata?.[pathToFolderKey]?.[pathToBookFolderKey]);
@@ -116,8 +118,6 @@ const ExplorerAllContainer = ({
             folder={item}
             onNavigateForward={onNavigateForward}
             displayFolderMetadata={displayMetadata}
-            // onDownloadMetadata={onDownloadMetadata}
-            // setShowMetadata={setShowMetadata}
             folderMetadata={allFoldersMetadata?.[pathToFolderKey]?.[pathToBookFolderKey]}
             hasMetadata={hasMetadata}
             audioSource={audioSource}

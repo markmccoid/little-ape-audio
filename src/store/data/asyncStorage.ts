@@ -10,6 +10,7 @@ type StorageKeys =
   | "foldermetadata"
   | "folderattributes"
   | "foldermetadataerrors"
+  | "laabmetaaggrcontrols"
   | "collections";
 
 // --------------------------------------------

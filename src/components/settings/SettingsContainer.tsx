@@ -166,6 +166,17 @@ const SettingsContainer = () => {
             </Link>
           </View>
         )}
+        {/* FOLDER METADATA AGGR CONTROL */}
+        {folderMetadata && (
+          <View style={[styles.borderBottom, { paddingRight: 10 }]}>
+            <Link href="/settings/metaaggrcontrolroute" asChild>
+              <Pressable className="pl-2 py-3 w-full flex-row justify-between">
+                <Text className="text-sm">Auto Metadata Processing Setup</Text>
+                <IOSArrowForwardIcon color="#36454F" size={20} />
+              </Pressable>
+            </Link>
+          </View>
+        )}
         {/* FOLDER ATTRIBUTES */}
         {folderAttributes.length > 0 && (
           <View style={[styles.borderBottom, { paddingRight: 10 }]}>

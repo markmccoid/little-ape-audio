@@ -13,6 +13,11 @@ import { Orientation, lockPlatformAsync } from "expo-screen-orientation";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import {
+  laabMetaAggrRecurse,
+  laabMetaAggrRecurseBegin,
+  useDropboxStore,
+} from "@store/store-dropbox";
 
 let isTPSetup = false;
 export {
@@ -76,6 +81,11 @@ export default function RootLayout() {
       await deactivateKeepAwake();
       await lockPlatformAsync({ screenOrientationArrayIOS: [Orientation.PORTRAIT_UP] });
       setIsLoaded(true);
+      const metaAggrFolders = useDropboxStore.getState().laabMetaAggrControls.folders;
+      for (const metaFolder of metaAggrFolders) {
+        // console.log("RUNNING LAAB METADATA AGGR", metaFolder);
+        await laabMetaAggrRecurseBegin(metaFolder);
+      }
     };
     // Run your initialization code here
     // It can be async

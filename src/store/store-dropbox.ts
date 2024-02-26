@@ -17,8 +17,10 @@ import { useTracksStore } from "./store";
 import { AudioSourceType } from "@app/audio/dropbox";
 import { AUDIO_FORMATS } from "@utils/constants";
 import { ProcessedBookData, ScannedFolder } from "./types";
-import { format } from "date-fns";
+import { differenceInDays, format } from "date-fns";
 import { getJsonDataByFileID } from "@utils/googleUtils";
+import { sanitizeString } from "@utils/otherUtils";
+import { router } from "expo-router";
 
 //-- ==================================
 //-- DROPBOX STORE
@@ -86,6 +88,16 @@ type FolderNavigation = {
   audioSource: AudioSourceType;
 };
 
+//~~ -----------------------------
+//~~ Control data for automatically
+//~~ reading the folder LAABMetadataAGGR files
+//~~ -----------------------------
+type LAABMetaAggrControls = {
+  folders: string[];
+  // Stored as timestamp (unix )
+  lastExecutionDate: number;
+};
+
 type DropboxState = {
   // Array of objects that contain folders that were starred by user in app
   favoriteFolders: FavoriteFolders[];
@@ -97,6 +109,7 @@ type DropboxState = {
     metadataTasks: string[];
     currentTask: string;
   };
+  laabMetaAggrControls: LAABMetaAggrControls;
   folderMetadataErrors: MetadataErrorObj[];
   // Currently store the isFavorite and isRead flags
   folderAttributes: FolderAttributeItem[];
@@ -141,6 +154,13 @@ type DropboxState = {
     removeFolderMetadataKey: (metadataKey: string) => Promise<void>;
     addMetadataError: (error: MetadataErrorObj) => Promise<void>;
     clearMetadataError: () => Promise<void>;
+    // Add a folder to the list of folders to be processed by the laabMetaAggrRecurse() function
+    updateLAABMetaAggrControlFolder: (
+      folderPath: string,
+      action: "add" | "remove"
+    ) => Promise<void>;
+    // Update the lastExecutionDate in the laabMetaAggrControls object
+    updateLAABMetaAggrControlLastExecutionDate: () => Promise<void>;
   };
 };
 export const useDropboxStore = create<DropboxState>((set, get) => ({
@@ -152,6 +172,11 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
     currentTask: undefined,
   },
   folderMetadataErrors: [],
+  laabMetaAggrControls: {
+    folders: [],
+    // initialize with yesterday (hours in day * min in hour * sec in min * millisecond multiplier)
+    lastExecutionDate: Math.floor(new Date().getTime() - 24 * 60 * 60),
+  },
   folderAttributes: [],
   favoritedBooks: [],
   folderNavigation: [],
@@ -358,6 +383,38 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       set({ folderMetadataErrors: [] });
       await saveToAsyncStorage("foldermetadataerrors", []);
     },
+    updateLAABMetaAggrControlFolder: async (folder, action) => {
+      // Get current Aggr Control folders
+      const currAggrControlFolders = get().laabMetaAggrControls.folders || [];
+      // check action, if remove, then delete
+      let updatedAggrControlFolders = [];
+      if (action === "remove") {
+        updatedAggrControlFolders = currAggrControlFolders.filter((el) => el !== folder);
+      } else if (action === "add") {
+        // if add, check to see if folder already exists, if not add
+        const isFolderInAggrControl = currAggrControlFolders.includes(folder);
+        if (isFolderInAggrControl) return;
+        // Not in array, add passed folder and save to local storage
+        updatedAggrControlFolders = [...currAggrControlFolders, folder];
+      }
+      // update folders
+      set((state) => ({
+        laabMetaAggrControls: {
+          ...state.laabMetaAggrControls,
+          folders: updatedAggrControlFolders,
+        },
+      }));
+      await saveToAsyncStorage("laabmetaaggrcontrols", get().laabMetaAggrControls);
+    },
+    updateLAABMetaAggrControlLastExecutionDate: async () => {
+      set((state) => ({
+        laabMetaAggrControls: {
+          ...state.laabMetaAggrControls,
+          lastExecutionDate: new Date().getTime(),
+        },
+      }));
+      await saveToAsyncStorage("laabmetaaggrcontrols", get().laabMetaAggrControls);
+    },
   },
 }));
 
@@ -466,6 +523,8 @@ export const tagFilesAndFolders = (foldersAndFiles: {
 };
 //~ -------------------------------
 //~ Check for Folder Metadata
+//~ This will check for the LAAB_MetaAggr....json file which contains
+//~ metadata for each book folder in the parent folder.
 //~ -------------------------------
 export const checkForFolderMetadata = async (
   files: FileEntry[],
@@ -483,6 +542,7 @@ export const checkForFolderMetadata = async (
         const processedBookData = processFolderAggrMetadata(metaAggr, audioSource, file.path_lower);
 
         // console.log("metaAGGR", processedBookData);
+
         await useDropboxStore
           .getState()
           .actions.mergeFoldersMetadata(pathToFolderKey, processedBookData);
@@ -493,7 +553,12 @@ export const checkForFolderMetadata = async (
     }
   }
 };
-
+//~ -------------------------------
+//~ Take the LAAB_MetaAggr....json file and run it
+//~ through cleanOneBook() to get the book metadata
+//~ add metadata to object that is returned and will be added to
+//~ the folderMetadata key in useDropboxStore
+//~ -------------------------------
 export const processFolderAggrMetadata = (
   selectedFoldersBooks: ScannedFolder[],
   audioSource: "dropbox" | "google",
@@ -508,9 +573,87 @@ export const processFolderAggrMetadata = (
   return bookData;
 };
 //------------------------------------------------------
+//~ ===================================
+//~ LAABMetaAggr... RECURSE
+//~ ===================================
+export const laabMetaAggrRecurseBegin = async (
+  startingPath: string,
+  updateFunc?: (message: string) => void | undefined,
+  forceRun: boolean = false
+) => {
+  // // Check if it has been at least one day since the last refresh
+  if (!forceRun) {
+    const lastExecution = useDropboxStore.getState().laabMetaAggrControls.lastExecutionDate;
+    const daysDiff = differenceInDays(new Date().getTime(), lastExecution);
+    // console.log("daysDiff", daysDiff, lastExecution, new Date().getTime());
+    // return;
+    if (daysDiff < 1) {
+      return;
+    }
+  }
+  await laabMetaAggrRecurse(startingPath, updateFunc);
+  // Store time update
+  useDropboxStore.getState().actions.updateLAABMetaAggrControlLastExecutionDate();
+  // console.log("laabMetaAggrRecurseEnd", useDropboxStore.getState().laabMetaAggrControls);
+};
+// Give a starting folder, we will recurse through all subfolders looking
+// for a LAAB_MetaAggr...json file.  If found, we stop recursing that path
+// and process and merge the found LAAB_MetaAggr file.
+export const laabMetaAggrRecurse = async (
+  startingPath: string,
+  updateFunc?: (message: string) => void | undefined
+) => {
+  try {
+    //-- Get the starting folder contents
+    const dropboxFilesFolders = await listDropboxFiles(startingPath);
+    const dropboxFolders = dropboxFilesFolders.folders;
+    //-- Get the starting folder
+    const startingFolderFiles = dropboxFilesFolders.files;
+    //-- Loop through list of files in "startingPath" folder (recursive, so will be walking subfolders)
+    for (const file of startingFolderFiles) {
+      //-- Check for LAAB_MetaAggr...json file
+
+      if (file.name.toLowerCase().includes("LAABMetaAggr_".toLowerCase())) {
+        // console.log("ADDING LAABMetaAggr_ file to Metadata", file?.name);
+        // Only run update func if one passed
+        updateFunc && updateFunc(`ADDING ${file.name} to Metadata \n FROM ${startingPath}`);
+        const metaAggr = (await downloadDropboxFile(file.path_lower)) as ScannedFolder[];
+        // We can only get the pathToFolderKey (pathInKey) since we are not in a specifics books folder
+        const { pathToFolderKey } = extractMetadataKeys(file.path_lower);
+        // convert the "ScannedFolder[]" data to ProcessBookData
+        const processedBookData = processFolderAggrMetadata(metaAggr, "dropbox", file.path_lower);
+        await useDropboxStore
+          .getState()
+          .actions.mergeFoldersMetadata(pathToFolderKey, processedBookData);
+        // We don't want to stop all processing, but we won't dig deeper into this path
+        // IF we are at /fiction/action and find LAABMeta, we are done recursing that path
+        return;
+      }
+    }
+
+    // If we found audio files we return which will stop all processing on this path
+    // if we are at /fiction/action/book1 and find audio files
+    // we are done recursing that path.
+    const hasAudioFiles = dropboxFilesFolders.files.some((val) =>
+      audioFormats.some((ext) => val.name.includes(ext))
+    );
+    if (hasAudioFiles) return;
+    // console.log("RECurse-startingFolder", startingPath, hasAudioFiles);
+    for (const folder of dropboxFolders) {
+      // We want to skip any folder the is marked as "_ignore"
+      if (folder.path_lower.includes("_ignore")) continue;
+      await laabMetaAggrRecurse(folder.path_lower, updateFunc);
+    }
+  } catch (error) {
+    console.log("Error Downloading Metadata-laabMetaAggrRecurse", error);
+    // If there is an error, we can assume it is an auth issue?
+    // router.push("/settings/authroute");
+  }
+};
+
 //------------------------------------------------------
 //~ ===================================
-//~ RECURSE
+//~ OLD RECURSE
 //~ ===================================
 type FolderMetadataKey = string;
 type FoldersToProcess = Record<FolderMetadataKey, string[]>;
@@ -875,22 +1018,6 @@ export function createFolderMetadataKey(pathIn: string) {
   return finalKey.reverse().join("_");
 }
 
-function sanitizeStringOld(stringToKey: string) {
-  return stringToKey.replace(/[^/^\w.]+/g, "_").replace(/_$/, "");
-}
-
-export function sanitizeString(title: string) {
-  // In little ape audio this function is called "getCleanFileName"
-  if (!title) return;
-  return title
-    .replace(/^\s+|\s+$/g, "") // Remove leading and trailing spaces
-    .replace(/\s+/g, "~") // Replace spaces with '~'
-    .replace(/[^\w.~]+/g, "_") // Replace non-alphanumeric, non-period, non-underscore, non-tilde characters with '_'
-    .replace(/_$/, "") // Get rid of trailing _
-    .replace(/^_/, ""); // get rid of leading _
-  // Old is below
-  // return title.replace(/[^\w.]+/g, "_").replace(/_$/, "");
-}
 //~ -------------------------
 //~ extractMetadataKeys
 //~ Takes a full path to a book folder '/mark/myAudiobooks/fiction/BookTitle

@@ -26,6 +26,7 @@ export const onInitialize = async () => {
   const folderMetadata = await loadFromAsyncStorage("foldermetadata");
   const folderAttributes = await loadFromAsyncStorage("folderattributes");
   const folderMetadataErrors = await loadFromAsyncStorage("foldermetadataerrors");
+  const laabMetaAggrControls = await loadFromAsyncStorage("laabmetaaggrcontrols");
   const collections = await loadFromAsyncStorage("collections");
   const settings = await loadFromAsyncStorage("settings");
 
@@ -61,6 +62,7 @@ export const onInitialize = async () => {
     folderMetadata: folderMetadata,
     folderAttributes: folderAttributes || [],
     folderMetadataErrors,
+    laabMetaAggrControls,
   });
 
   useSettingStore.setState({

@@ -1,45 +1,10 @@
-import {
-  View,
-  Text,
-  // FlatList,
-  Dimensions,
-  TouchableOpacity,
-  SectionList,
-  Pressable,
-  ScrollView,
-  Alert,
-  StyleSheet,
-} from "react-native";
-import React, { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import Animated, {
-  interpolate,
-  runOnJS,
-  scrollTo,
-  useAnimatedRef,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useDerivedValue,
-  useSharedValue,
-  withSpring,
-  withTiming,
-} from "react-native-reanimated";
-import { FilesAndFolders, listGoogleDriveFiles, listGoogleFiles } from "@utils/googleUtils";
-import { MimeTypes } from "@robinbobin/react-native-google-drive-api-wrapper";
-import LAABColorPicker from "@components/common/LAABColorPicker";
-import {
-  laabMetaAggrRecurse,
-  laabMetaAggrRecurseBegin,
-  useDropboxStore,
-} from "@store/store-dropbox";
+import { View, Text, ScrollView, StyleSheet } from "react-native";
+import React, { useReducer, useState } from "react";
+
+import { laabMetaAggrRecurseBegin, useDropboxStore } from "@store/store-dropbox";
 import { AnimatedPressable } from "@components/common/buttons/Pressables";
 
-//!! How to determine current chapter without looking at each chapter
-//!!
-//!!
-//!!
-//!!
-//!!
-const playarea = () => {
+const MetaAggrControl = () => {
   const [status, setStatus] = useState<{ message: string }[]>([{}]);
   const [showingChildren, toggleShowChildren] = useReducer((show) => !show, false);
   const favFolders = useDropboxStore((state) => state.favoriteFolders);
@@ -80,7 +45,7 @@ const playarea = () => {
   };
 
   return (
-    <View className="flex-1">
+    <View className="">
       <View className="flex flex-row justify-between items-center m-2">
         <AnimatedPressable onPress={recurse} style={{ flexDirection: "row" }}>
           <View className="py-1 px-2 bg-amber-600 rounded-md">
@@ -94,7 +59,10 @@ const playarea = () => {
       </View>
       <ScrollView
         style={{ marginTop: 1 }}
-        contentContainerStyle={{ borderTopWidth: StyleSheet.hairlineWidth, borderColor: "black" }}
+        contentContainerStyle={{
+          borderTopWidth: StyleSheet.hairlineWidth,
+          borderColor: "black",
+        }}
       >
         {filteredFavFolders.map((folder) => {
           if (folder.audioSource === "google") return;
@@ -128,32 +96,13 @@ const playarea = () => {
           );
         })}
       </ScrollView>
-      <ScrollView style={{ flex: 1, marginBottom: 30 }}>
+      <ScrollView style={{ marginBottom: 30 }}>
         {status?.map((message, index) => {
           return <Text key={index}>{message?.message}</Text>;
         })}
       </ScrollView>
-      {/* <Text>GDrive Testing</Text>
-      {filesAndFolder?.folders.map((folder) => {
-        return (
-          <TouchableOpacity onPress={() => getFiles(folder.id)} key={folder.id}>
-            <Text className="font-semibold text-lg" key={folder.id}>
-              {folder.name}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-      {filesAndFolder?.files.map((file) => {
-        let classT = "font-medium text-base text-amber-800";
-
-        return (
-          <View key={file.id}>
-            <Text>{file.name}</Text>
-          </View>
-        );
-      })} */}
     </View>
   );
 };
 
-export default playarea;
+export default MetaAggrControl;

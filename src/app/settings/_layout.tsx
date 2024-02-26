@@ -115,6 +115,14 @@ const SettingsLayout = () => {
         }}
       />
       <Stack.Screen
+        name="metaaggrcontrolroute"
+        options={{
+          title: "Automatic Metadata Processing",
+          presentation: "card",
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
         name="playarea"
         options={{
           title: "Play Area",
