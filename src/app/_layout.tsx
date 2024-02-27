@@ -81,10 +81,13 @@ export default function RootLayout() {
       await deactivateKeepAwake();
       await lockPlatformAsync({ screenOrientationArrayIOS: [Orientation.PORTRAIT_UP] });
       setIsLoaded(true);
-      const metaAggrFolders = useDropboxStore.getState().laabMetaAggrControls.folders;
-      for (const metaFolder of metaAggrFolders) {
-        // console.log("RUNNING LAAB METADATA AGGR", metaFolder);
-        await laabMetaAggrRecurseBegin(metaFolder);
+      // Auto check and load the LAABMetaAggr....json files if enabled.
+      if (useDropboxStore.getState().laabMetaAggrControls.enabled) {
+        const metaAggrFolders = useDropboxStore.getState().laabMetaAggrControls.folders;
+        for (const metaFolder of metaAggrFolders) {
+          // console.log("RUNNING LAAB METADATA AGGR", metaFolder);
+          await laabMetaAggrRecurseBegin(metaFolder);
+        }
       }
     };
     // Run your initialization code here

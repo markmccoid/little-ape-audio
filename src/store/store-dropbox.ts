@@ -96,6 +96,8 @@ type LAABMetaAggrControls = {
   folders: string[];
   // Stored as timestamp (unix )
   lastExecutionDate: number;
+  // when true we will run the metadata aggr process on start up
+  enabled: boolean;
 };
 
 type DropboxState = {
@@ -161,6 +163,7 @@ type DropboxState = {
     ) => Promise<void>;
     // Update the lastExecutionDate in the laabMetaAggrControls object
     updateLAABMetaAggrControlLastExecutionDate: () => Promise<void>;
+    toggleLAABMetaAggrControlEnabled: () => Promise<void>;
   };
 };
 export const useDropboxStore = create<DropboxState>((set, get) => ({
@@ -174,6 +177,7 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
   folderMetadataErrors: [],
   laabMetaAggrControls: {
     folders: [],
+    enabled: false,
     // initialize with yesterday (hours in day * min in hour * sec in min * millisecond multiplier)
     lastExecutionDate: Math.floor(new Date().getTime() - 24 * 60 * 60),
   },
@@ -415,6 +419,15 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       }));
       await saveToAsyncStorage("laabmetaaggrcontrols", get().laabMetaAggrControls);
     },
+    toggleLAABMetaAggrControlEnabled: async () => {
+      set((state) => ({
+        laabMetaAggrControls: {
+          ...state.laabMetaAggrControls,
+          enabled: !state.laabMetaAggrControls.enabled,
+        },
+      }));
+      await saveToAsyncStorage("laabmetaaggrcontrols", get().laabMetaAggrControls);
+    },
   },
 }));
 
@@ -616,7 +629,8 @@ export const laabMetaAggrRecurse = async (
       if (file.name.toLowerCase().includes("LAABMetaAggr_".toLowerCase())) {
         // console.log("ADDING LAABMetaAggr_ file to Metadata", file?.name);
         // Only run update func if one passed
-        updateFunc && updateFunc(`ADDING ${file.name} to Metadata \n FROM ${startingPath}`);
+        updateFunc && updateFunc(`Adding ${file.name} to Metadata`);
+        // updateFunc && updateFunc(`Adding ${file.name} to Metadata \nfrom ${startingPath}`);
         const metaAggr = (await downloadDropboxFile(file.path_lower)) as ScannedFolder[];
         // We can only get the pathToFolderKey (pathInKey) since we are not in a specifics books folder
         const { pathToFolderKey } = extractMetadataKeys(file.path_lower);

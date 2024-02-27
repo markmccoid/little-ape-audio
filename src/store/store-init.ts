@@ -57,12 +57,16 @@ export const onInitialize = async () => {
     }
   }
   // ******************
-
+  const laabMetaDefault = {
+    folders: [],
+    lastExecutionDate: Math.floor(new Date().getTime() - 24 * 60 * 60),
+    enabled: false,
+  };
   useDropboxStore.setState({
     folderMetadata: folderMetadata,
     folderAttributes: folderAttributes || [],
     folderMetadataErrors,
-    laabMetaAggrControls,
+    laabMetaAggrControls: laabMetaAggrControls || laabMetaDefault,
   });
 
   useSettingStore.setState({
