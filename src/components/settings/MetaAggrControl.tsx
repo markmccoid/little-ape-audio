@@ -3,6 +3,7 @@ import React, { useReducer, useState } from "react";
 
 import { laabMetaAggrRecurseBegin, useDropboxStore } from "@store/store-dropbox";
 import { AnimatedPressable } from "@components/common/buttons/Pressables";
+import { format, fromUnixTime } from "date-fns";
 
 const MetaAggrControl = () => {
   const [status, setStatus] = useState<string>(undefined);
@@ -70,6 +71,15 @@ const MetaAggrControl = () => {
         />
       </View>
       <View className="h-[1] w-full bg-amber-800" />
+      <View className="flex flex-row justify-center items-center ml-2">
+        <Text className="text-base font-semibold">Last Run: </Text>
+        <Text className="text-base">
+          {format(
+            fromUnixTime(metaAggrControls.lastExecutionDate / 1000),
+            "MM-dd-yyyy hh:mm:ss aa"
+          )}
+        </Text>
+      </View>
       <View className="flex flex-row justify-between items-center m-2">
         <View className="flex flex-row items-center">
           <AnimatedPressable
@@ -93,7 +103,7 @@ const MetaAggrControl = () => {
         </View>
       )}
 
-      <View className="flex-1">
+      <View className="">
         <ScrollView
           style={{
             marginTop: 1,

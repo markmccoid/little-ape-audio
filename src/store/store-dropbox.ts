@@ -331,12 +331,14 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
         return;
       }
       if (overwrite) {
-        // Overwrite whole key with new data
+        // Overwrite whole key with new data. Needed if we want to be able to remove records.
+        // When reading data from the LAABMetaAggr json files, we want to overwrite.
         folderMetadata[folderKey] = {
           ...newBookFoldersObj,
         };
       } else {
         // Merge new data into existing key
+        // Useful for single record updates.
         folderMetadata[folderKey] = {
           ...folderMetadata[folderKey],
           ...newBookFoldersObj,
