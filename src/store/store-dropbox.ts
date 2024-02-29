@@ -634,6 +634,7 @@ export const laabMetaAggrRecurse = async (
         updateFunc && updateFunc(`Adding ${file.name} to Metadata`);
         // updateFunc && updateFunc(`Adding ${file.name} to Metadata \nfrom ${startingPath}`);
         const metaAggr = (await downloadDropboxFile(file.path_lower)) as ScannedFolder[];
+
         // We can only get the pathToFolderKey (pathInKey) since we are not in a specifics books folder
         const { pathToFolderKey } = extractMetadataKeys(file.path_lower);
         // convert the "ScannedFolder[]" data to ProcessBookData

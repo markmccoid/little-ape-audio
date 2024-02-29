@@ -4,6 +4,7 @@ import { usePlaybackStore } from "../../store/store";
 import PlaylistTrackControl from "../../components/playlists/PlaylistTrackControl";
 import { MotiView } from "moti";
 import usePlaylistColors from "hooks/usePlaylistColors";
+import { useEffect } from "react";
 
 // const track: Track = {
 //   id: "one",

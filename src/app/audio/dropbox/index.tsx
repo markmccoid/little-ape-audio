@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, Dimensions } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Href, Link } from "expo-router";
 import {
   DropboxIcon,
@@ -14,7 +14,8 @@ import ShowFavoritedBooks from "@components/dropbox/ShowFavoritedBooks";
 import { AnimatedPressable } from "@components/common/buttons/Pressables";
 import { AnimatePresence, MotiView } from "moti";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useDropboxStore } from "@store/store-dropbox";
+import { laabMetaAggrRecurseBegin, useDropboxStore } from "@store/store-dropbox";
+import * as Network from "expo-network";
 const { width, height } = Dimensions.get("window");
 
 export type AudioSourceType = "dropbox" | "google";
@@ -30,7 +31,29 @@ const DropboxScreens = () => {
   const [currTab, setCurrTab] = useState<"folders" | "books">("folders");
   const insets = useSafeAreaInsets();
   const folderMetadata = useDropboxStore((state) => state.folderMetadata);
+  const [networkActive, setNetworkActive] = useState(true);
 
+  // Check for network activity
+  useEffect(() => {
+    const checkForNetwork = async () => {
+      const { isInternetReachable } = await Network.getNetworkStateAsync();
+      setNetworkActive(isInternetReachable);
+    };
+    checkForNetwork();
+  }, []);
+
+  useEffect(() => {
+    const autoCheckForMetadata = async () => {
+      // Auto check and load the LAABMetaAggr....json files if enabled.
+      if (useDropboxStore.getState().laabMetaAggrControls.enabled) {
+        const metaAggrFolders = useDropboxStore.getState().laabMetaAggrControls.folders;
+        for (const metaFolder of metaAggrFolders) {
+          await laabMetaAggrRecurseBegin(metaFolder);
+        }
+      }
+    };
+    autoCheckForMetadata();
+  }, []);
   return (
     <View
       className="flex-1 flex-col bg-amber-50"
@@ -38,6 +61,11 @@ const DropboxScreens = () => {
     >
       {/* DROPBOX LINK  */}
       <View className="mx-4 my-2">
+        {!networkActive && (
+          <View className="flex-row justify-center items-center border-yellow-500 border-2 rounded-xl p-1 mb-1 bg-red-100">
+            <Text className="text-base font-semibold text-red-800">No Internet Detected</Text>
+          </View>
+        )}
         <Text className="text-amber-800 font-semibold mb-1 ml-2">Cloud</Text>
         <View
           className="rounded-xl bg-white"
@@ -46,21 +74,28 @@ const DropboxScreens = () => {
             borderColor: colors.amber900,
           }}
         >
-          <Link
-            href={{
-              pathname: "audio/dropbox/dropboxstart",
-              params: {
-                fullPath: "",
-                backTitle: "Back",
-                audioSource: "dropbox",
-              } as AudioSourceLinkParams,
-            }}
-          >
+          {networkActive ? (
+            <Link
+              href={{
+                pathname: "audio/dropbox/dropboxstart",
+                params: {
+                  fullPath: "",
+                  backTitle: "Back",
+                  audioSource: "dropbox",
+                } as AudioSourceLinkParams,
+              }}
+            >
+              <View className="flex-row px-2 py-3 items-center">
+                <DropboxIcon color={colors.dropboxBlue} />
+                <Text className="ml-3 text">Dropbox</Text>
+              </View>
+            </Link>
+          ) : (
             <View className="flex-row px-2 py-3 items-center">
-              <DropboxIcon color={colors.dropboxBlue} />
+              <DropboxIcon color={"gray"} />
               <Text className="ml-3 text">Dropbox</Text>
             </View>
-          </Link>
+          )}
         </View>
         {/* GOOGLE -- */}
         <View
@@ -70,21 +105,28 @@ const DropboxScreens = () => {
             borderColor: colors.amber900,
           }}
         >
-          <Link
-            href={{
-              pathname: "audio/dropbox/googlestart",
-              params: {
-                fullPath: "",
-                backTitle: "Back",
-                audioSource: "google",
-              } as AudioSourceLinkParams,
-            }}
-          >
+          {networkActive ? (
+            <Link
+              href={{
+                pathname: "audio/dropbox/googlestart",
+                params: {
+                  fullPath: "",
+                  backTitle: "Back",
+                  audioSource: "google",
+                } as AudioSourceLinkParams,
+              }}
+            >
+              <View className="flex-row px-2 py-3 items-center">
+                <GoogleDriveIcon color={colors.amber500} />
+                <Text className="ml-3 text">Google Drive</Text>
+              </View>
+            </Link>
+          ) : (
             <View className="flex-row px-2 py-3 items-center">
-              <GoogleDriveIcon color={colors.amber500} />
+              <GoogleDriveIcon color={"gray"} />
               <Text className="ml-3 text">Google Drive</Text>
             </View>
-          </Link>
+          )}
         </View>
         {/* BOOK META SEARCH */}
         {folderMetadata && Object.keys(folderMetadata)?.length > 0 && (
@@ -139,8 +181,16 @@ const DropboxScreens = () => {
             </Text>
           </AnimatedPressable>
         </View>
+        {/* NO NETWORK */}
+        {!networkActive && (
+          <View className="flex-row justify-center items-center border-yellow-500 border-2 rounded-xl p-1 mb-1 bg-red-100">
+            <Text className="text-base font-semibold text-red-800">
+              Some functionality has been disabled because no internet access was detected.
+            </Text>
+          </View>
+        )}
         <AnimatePresence>
-          {currTab === "folders" && (
+          {currTab === "folders" && networkActive && (
             <MotiView
               from={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -152,7 +202,7 @@ const DropboxScreens = () => {
           )}
         </AnimatePresence>
         <AnimatePresence>
-          {currTab === "books" && (
+          {currTab === "books" && networkActive && (
             <MotiView
               from={{ opacity: 0 }}
               animate={{ opacity: 1 }}

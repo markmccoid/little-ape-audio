@@ -153,6 +153,7 @@ const ExplorerAllContainer = ({
       if (audioSource === "google") {
         const filesFolders = await listGoogleDriveFiles(pathIn);
 
+        console.log("FILESFOLDERS", filesFolders);
         // tag tracks as being already downloaded and marked as a Starred folder
         setTimeout(
           async () =>
