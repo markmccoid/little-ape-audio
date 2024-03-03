@@ -153,6 +153,8 @@ export type AudioState = {
       sourceLocation,
       // folder path or folderId (google) of folder file lives in
       pathIn,
+      // actual text of folder where track is located
+      currFolderText,
       // google or dropbox
       audioSource,
       playlistId,
@@ -164,6 +166,7 @@ export type AudioState = {
       // file.path_lower
       sourceLocation: string;
       pathIn: string;
+      currFolderText: string;
       audioSource: AudioSourceType;
       playlistId?: string;
       directory?: string;

@@ -16,9 +16,11 @@ type Props = {
   // This will be the path or folderId (google) of the folder the file resides in
   // Google will need this to AddTrack can look for metadata files.
   pathIn: string;
+  // Text of current folder
+  currFolderText: string;
   playlistId?: string;
 };
-const ExplorerFile = ({ file, playlistId, audioSource, pathIn }: Props) => {
+const ExplorerFile = ({ file, playlistId, audioSource, pathIn, currFolderText }: Props) => {
   const isDropbox = !!(audioSource === "dropbox");
   const isGoogle = !!(audioSource === "google");
   const trackActions = useTrackActions();
@@ -54,7 +56,10 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn }: Props) => {
   // }, []);
   //~ --- stopDownload of file -----
   const stopDownload = () => {
+    console.log("IN StopDownload");
     setStopped(true);
+    setIsDownloaded(false);
+    setIsDownloading(false);
     // this ref has a function that will cancel the download
     stopDownloadRef?.current && stopDownloadRef.current();
   };
@@ -104,6 +109,7 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn }: Props) => {
         sourceLocation: file.path_lower,
         playlistId: playlistId,
         pathIn,
+        currFolderText,
         audioSource,
       });
     } catch (e) {

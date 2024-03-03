@@ -26,6 +26,8 @@ export const getAudioFileTags = async (fullFileURI: string) => {
   try {
     const tag = (await jsMediaAsync(workingURI)) as TagType;
     // Get chapter information if any exists
+    // NOTE: We are NOT using this chapter data.  We may fall back on the duration (we sum up all chapters)
+    //        but only if the getAudioFileDuration() function doesn't return data.
     const chaptersInfo = processChapters(tag.tags?.CHAP as unknown as TagChapters[]);
 
     metadata = {
@@ -35,9 +37,9 @@ export const getAudioFileTags = async (fullFileURI: string) => {
       genre: tag.tags?.genre,
       trackRaw: tag.tags?.track,
       comment: tag.tags?.comment?.text,
-      chapters: chaptersInfo?.chapterArray,
+      chapters: undefined,
       year: isNaN(parseInt(tag.tags?.year)) ? undefined : parseInt(tag.tags?.year),
-      durationSeconds: chaptersInfo?.duration || durationSeconds || 8000,
+      durationSeconds: durationSeconds || chaptersInfo?.duration || 8000,
       pictureURI: undefined,
       pictureAspectRatio: undefined,
     };

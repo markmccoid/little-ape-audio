@@ -26,6 +26,8 @@ import { sanitizeString } from "@utils/otherUtils";
 
 type Props = {
   pathIn: string;
+  // This will be the current folder Text.  USEFUL for google to know the actual text instead of ID of folder
+  currFolderText: string;
   audioSource: AudioSourceType;
   onPathChange: (newPath: string, folderName: string) => void;
   yOffset?: number;
@@ -34,6 +36,7 @@ type Props = {
 
 const ExplorerAllContainer = ({
   pathIn,
+  currFolderText,
   audioSource,
   onPathChange,
   yOffset = undefined,
@@ -130,6 +133,7 @@ const ExplorerAllContainer = ({
             file={item}
             playlistId={downloadAllId}
             pathIn={pathIn}
+            currFolderText={currFolderText}
             audioSource={audioSource}
           />
         );
@@ -153,7 +157,7 @@ const ExplorerAllContainer = ({
       if (audioSource === "google") {
         const filesFolders = await listGoogleDriveFiles(pathIn);
 
-        console.log("FILESFOLDERS", filesFolders);
+        // console.log("FILESFOLDERS", filesFolders);
         // tag tracks as being already downloaded and marked as a Starred folder
         setTimeout(
           async () =>

@@ -200,28 +200,20 @@ const PlaylistContainer = () => {
         setIsDropdownOpen={setIsDropdownOpen}
       />
 
-      <AnimatePresence>
-        {onShow && (
-          <MotiView
-            className="border border-red-900 h-[40]"
-            from={{ opacity: 0, height: 40 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{
-              type: "timing",
-              duration: 300,
-              opacity: { type: "timing", duration: 300 },
-            }}
-            exitTransition={{
-              type: "timing",
-              duration: 500,
-              opacity: { type: "timing", duration: 200 },
-            }}
-          >
-            <PlaylistActionBar closeActionBar={() => setOnShow(false)} barHeight={40} />
-          </MotiView>
-        )}
-      </AnimatePresence>
+      {onShow && (
+        <MotiView
+          className="border border-red-900 h-[40]"
+          from={{ opacity: 0, height: 40 }}
+          animate={{ opacity: 1 }}
+          transition={{
+            type: "timing",
+            duration: 300,
+            opacity: { type: "timing", duration: 300 },
+          }}
+        >
+          <PlaylistActionBar closeActionBar={() => setOnShow(false)} barHeight={40} />
+        </MotiView>
+      )}
 
       <AnimatePresence>
         {!isSelectingRow && (

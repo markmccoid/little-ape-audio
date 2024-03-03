@@ -10,7 +10,7 @@ import { format } from "date-fns";
 import { getJsonData } from "@utils/googleUtils";
 import { GDrive } from "@robinbobin/react-native-google-drive-api-wrapper";
 import { PlaylistImageColors } from "@store/types";
-import { getImageColors } from "@utils/otherUtils";
+import { getImageColors, sanitizeString } from "@utils/otherUtils";
 import TrackPlayer from "react-native-track-player";
 import { BookJSONMetadata, CleanBookMetadata, cleanOneBook } from "@utils/audiobookMetadata";
 let isCriticalSectionLocked = false;
@@ -55,6 +55,7 @@ export const addTrack =
     filename, // non cleaned filename including extension
     sourceLocation, // Either full path with filename or google fileId TO THE FILE
     pathIn, // This is the path or fileId to the **FOLDER** where the track was located.
+    currFolderText, // This is the name of the folder where the track was located. This will be the text and not an id if in google
     audioSource, // google or dropbox
     playlistId = undefined,
     directory = "",
@@ -65,6 +66,7 @@ export const addTrack =
     const tags = (await getAudioFileTags(
       `${FileSystem.documentDirectory}${fileURI}`
     )) as AudioMetadata;
+
     // process track number info
     // let trackNum = tags.trackRaw;
     let trackNum: number | string = "";
@@ -103,11 +105,11 @@ export const addTrack =
       } else {
         LAABMeta = undefined;
       }
-
       //! Google book metadata object
-      const metaFileName = `${sanitizeString(
-        filename.toLowerCase().substring(0, filename.lastIndexOf("."))
-      )}-metadata.json`;
+      //! ISSUE:  The metafilename is based on the book FOLDER Name not the
+      //!    filename.  Google uses IDs for the folder, need to have the metadata
+      //!  FIX: pass the folder name in as currFolderText
+      const metaFileName = `${sanitizeString(currFolderText.toLowerCase())}-metadata.json`;
       // Download metadata json file
       const metaData = (await getJsonData({
         folderId: pathIn,
@@ -255,13 +257,16 @@ function mergeObjects(source, target) {
 const getMetadataDropbox = async (sourceLocation: string, filename: string) => {
   //~~ Check for metadata file
   const laabPath = sourceLocation.slice(0, sourceLocation.lastIndexOf("/"));
+  // sourceLocation includes the full path plus the filename
+  // laabPath has the filename stripped and does NOT have a trailing "/"
+  // Now we need to get metadata filename, which will be the foldername sanitized, etc
+  // We pull the foldername below
   const metadataFileName = `${sanitizeString(
-    filename.substring(0, filename.lastIndexOf("."))
+    laabPath.substring(laabPath.lastIndexOf("/") + 1)
   )}-metadata.json`;
   const metadataFileNameWithPath = `${laabPath}/${metadataFileName}`;
-  console.log("metadataFileNameWithPath", metadataFileNameWithPath);
 
-  // laab file contains chapter data sometimes
+  // laab meta file info will be loaded for use in player scroller so user can see description of book
   let convertedMeta: CleanBookMetadata = undefined;
   try {
     const metaData = (await downloadDropboxFile(`${metadataFileNameWithPath}`)) as BookJSONMetadata;
@@ -333,11 +338,14 @@ function verifyChapterData(chapterData: Chapter[]) {
   if (!chapterData) return undefined;
   // Check to see if start or end times are null, if so do NOT send back any chapt data.
   let chaptersMalformed = false;
+
   chapterData.forEach((chapt) => {
+    console.log("chapt", chapt);
     if (
       chapt.endSeconds === undefined ||
       chapt.endSeconds === null ||
-      chapt.startSeconds === undefined
+      chapt.startSeconds === undefined ||
+      chapt.durationSeconds < 1
     ) {
       chaptersMalformed = true;
     }

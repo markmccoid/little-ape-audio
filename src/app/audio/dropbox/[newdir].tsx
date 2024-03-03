@@ -77,6 +77,7 @@ const NewDirectory = () => {
         audioSource={audioSourceIn}
         yOffset={yOffset ? parseFloat(yOffset) : 0}
         parentFolderId={parentFolderId}
+        currFolderText={backTitle}
       />
       {/* )} */}
     </SafeAreaView>

@@ -123,6 +123,7 @@ export const PlaybackService = async () => {
   // ------------------------------
   TrackPlayer.addEventListener(Event.MetadataChapterReceived, async (event) => {
     let metaChapters: Chapter[] = [];
+    // console.log("Chapters", event?.metadata);
     const currTrack = (await TrackPlayer.getActiveTrack()) as ApeTrack;
     // console.log("EVENT", event.metadata[0]?.raw);
     // console.log("ISNAN", isNaN(event.metadata[0]?.raw[0]?.time), event.metadata[0]?.raw[0]?.time);
