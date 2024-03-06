@@ -661,7 +661,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       const currPlaylist = useTracksStore.getState().actions.getPlaylist(playlistId);
 
       //!
-      const queue = buildTrackPlayerQueue(currPlaylist.trackIds);
+      const queue = await buildTrackPlayerQueue(currPlaylist.trackIds);
 
       set({
         currentPlaylistId: playlistId,
@@ -750,7 +750,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       await useTracksStore.getState().actions.updatePlaylistTracks(playlistId, trackIdArray);
 
       // 2. Rebuild current playlistId queue and update playback Object
-      const queue = buildTrackPlayerQueue(trackIdArray);
+      const queue = await buildTrackPlayerQueue(trackIdArray);
       // start object that will update PlaybackStore's keys
       let updatePlayerObj: Partial<Omit<PlaybackState, "actions">> = {
         trackPlayerQueue: queue,
@@ -1030,7 +1030,7 @@ export const useGetQueue = () => {
   return tracks;
 };
 
-const buildTrackPlayerQueue = (trackIds: string[]): ApeTrack[] => {
+const buildTrackPlayerQueue = async (trackIds: string[]): Promise<ApeTrack[]> => {
   const trackActions = useTracksStore.getState().actions;
   let queue = [];
 
@@ -1039,9 +1039,8 @@ const buildTrackPlayerQueue = (trackIds: string[]): ApeTrack[] => {
 
     // Make sure we found a track
     if (!trackInfo?.id) {
-      alert(`Could Not find Track ${trackId}.  Please delete playlist are redownload tracks`);
-      router.replace("/audio/");
-      throw new Error("Problem with missing track");
+      alert(`Could Not find Track ${trackId}.  It will be removed from the Playlist`);
+      await trackActions.removeTracks([trackId]);
     }
     const trackPlayerTrack = {
       id: trackInfo.id,
