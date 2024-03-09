@@ -43,7 +43,7 @@ const TrackPlayerScrollerHistory = ({ playlist, currentTrack, compHeight }: Prop
         backgroundColor: bgColor,
         borderWidth: StyleSheet.hairlineWidth,
       }}
-      contentContainerStyle={{ height: compHeight }}
+      // contentContainerStyle={{ height: compHeight }}
     >
       <View className="p-2 ">
         <Text className="font-semibold text-base mb-2" style={{ color: textColor }}>
