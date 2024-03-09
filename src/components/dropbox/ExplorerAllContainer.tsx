@@ -60,7 +60,9 @@ const ExplorerAllContainer = ({
       : { pathToFolderKey: pathIn, pathToBookFolderKey: sanitizeString(pathIn) };
 
   const metaCheckKey =
-    audioSource === "dropbox" ? `${pathToFolderKey}_${pathToBookFolderKey}` : pathToFolderKey;
+    audioSource === "dropbox"
+      ? `${pathToFolderKey ? pathToFolderKey + "_" : ""}${pathToBookFolderKey}`
+      : pathToFolderKey;
 
   const hasMetadata = !!Object.keys(allFoldersMetadata).find(
     (key) => key === `${metaCheckKey}`
