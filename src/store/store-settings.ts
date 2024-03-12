@@ -4,7 +4,7 @@ import { saveToAsyncStorage } from "./data/asyncStorage";
 import TrackPlayer from "react-native-track-player";
 import { formatSeconds, timeBetween } from "@utils/formatUtils";
 import { BottomSheetImpRef } from "@components/trackPlayer/bottomSheet/BottomSheetContainer";
-import { CollectionItem } from "./types";
+import { CollectionItem, initDefaultCollection } from "./types";
 import { defaultCollections } from "./types";
 //-- ==================================
 //-- SETTINGS STORE
@@ -79,7 +79,7 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
   showCollectionColorStrip: true,
   autoPlay: false,
   defaultCollectionId: defaultCollections[0].id,
-  selectedCollection: defaultCollections[0],
+  selectedCollection: initDefaultCollection,
   actions: {
     toggleDynamicColors: async () => {
       set({ isUsingDynamicColors: !get().isUsingDynamicColors });

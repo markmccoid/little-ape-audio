@@ -156,7 +156,7 @@ const SettingsContainer = () => {
           </View>
         )}
         {/* FOLDER METADATA */}
-        {folderMetadata && (
+        {Object.keys(folderMetadata).length > 0 && (
           <View style={[styles.borderBottom, { paddingRight: 10 }]}>
             <Link href="/settings/foldermetadataroute" asChild>
               <Pressable className="pl-2 py-3 w-full flex-row justify-between">
@@ -167,7 +167,7 @@ const SettingsContainer = () => {
           </View>
         )}
         {/* FOLDER METADATA AGGR CONTROL */}
-        {folderMetadata && (
+        {Object.keys(folderMetadata).length > 0 && (
           <View style={[styles.borderBottom, { paddingRight: 10 }]}>
             <Link href="/settings/metaaggrcontrolroute" asChild>
               <Pressable className="pl-2 py-3 w-full flex-row justify-between">
@@ -188,7 +188,8 @@ const SettingsContainer = () => {
             </Link>
           </View>
         )}
-        {isDevelopmentMode && (
+        {/* PLAY AREA */}
+        {/* {isDevelopmentMode && (
           <View className="px-2 py-3" style={[styles.borderBottom]}>
             <Link href="/settings/playarea" asChild>
               <Pressable>
@@ -196,7 +197,7 @@ const SettingsContainer = () => {
               </Pressable>
             </Link>
           </View>
-        )}
+        )} */}
       </MotiView>
     </ScrollView>
   );

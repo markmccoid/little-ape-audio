@@ -514,6 +514,7 @@ export const useTrackActions = () => useTracksStore((state) => state.actions);
 export const usePlaylists = () => {
   const collectionId = useSettingStore((state) => state.selectedCollection?.id);
   const playlists = useTracksStore((state) => map(state.playlists));
+
   // console.log("playlists", playlists);
   const filter = collectionId || "all"; //This will be a key from tracksStore
   const filtered = playlists.filter((playlist) =>

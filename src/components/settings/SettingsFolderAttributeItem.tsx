@@ -16,7 +16,9 @@ const SettingsFolderAttributeItem = ({ attribute }: Props) => {
     >
       <Image
         source={{
-          uri: attribute.imageURL.replace(/^http:\/\//, "https://") || attribute.defaultImage,
+          uri: attribute?.imageURL
+            ? attribute.imageURL.replace(/^http:\/\//, "https://")
+            : attribute.defaultImage,
         }}
         style={{
           width: 100,

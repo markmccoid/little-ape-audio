@@ -298,6 +298,13 @@ export type ProcessedBookData = {
   googleQueryDate: string | undefined;
 };
 
+export const initDefaultCollection: CollectionItem = {
+  id: "all",
+  name: "All Audio",
+  headerTitle: "All Audio",
+  color: "#ffffff",
+  type: "protected",
+};
 export const defaultCollections: CollectionItem[] = [
   // {
   //   id: "all",
