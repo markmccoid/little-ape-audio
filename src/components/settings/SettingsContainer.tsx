@@ -189,7 +189,7 @@ const SettingsContainer = () => {
           </View>
         )}
         {/* PLAY AREA */}
-        {/* {isDevelopmentMode && (
+        {isDevelopmentMode && (
           <View className="px-2 py-3" style={[styles.borderBottom]}>
             <Link href="/settings/playarea" asChild>
               <Pressable>
@@ -197,7 +197,7 @@ const SettingsContainer = () => {
               </Pressable>
             </Link>
           </View>
-        )} */}
+        )}
       </MotiView>
     </ScrollView>
   );

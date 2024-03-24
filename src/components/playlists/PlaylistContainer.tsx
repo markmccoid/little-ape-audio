@@ -21,6 +21,7 @@ import Headphones from "@components/common/svg/Headphones";
 import AddBook from "@components/common/svg/AddBook";
 import CollectionSelectionPopup from "@components/common/CollectionSelectionPopup";
 import { useSettingStore } from "@store/store-settings";
+import { ChevronDownIcon } from "@components/common/svg/Icons";
 const { width, height: screenHeight } = Dimensions.get("window");
 
 const PlaylistContainer = () => {
@@ -47,7 +48,16 @@ const PlaylistContainer = () => {
             setIsDropdownOpen(true);
           }}
         >
-          <Text className="text-base font-semibold text-amber-950">{selectedCollection.name}</Text>
+          <View className="flex flex-row items-center">
+            <Text className="text-base font-semibold text-amber-950">
+              {selectedCollection.name}
+            </Text>
+            <ChevronDownIcon
+              color={colors.amber950}
+              size={20}
+              style={{ marginTop: 2, marginLeft: 5 }}
+            />
+          </View>
         </TouchableOpacity>
       ),
     });

@@ -1,8 +1,9 @@
-import { View, Text, StyleSheet, Dimensions } from "react-native";
+import { View, Text, StyleSheet, Dimensions, Pressable } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Href, Link } from "expo-router";
 import {
   DropboxIcon,
+  FolderOpenIcon,
   GoogleDriveIcon,
   SearchIcon,
   StarFilledIcon,
@@ -17,8 +18,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { laabMetaAggrRecurseBegin, useDropboxStore } from "@store/store-dropbox";
 import * as Network from "expo-network";
 const { width, height } = Dimensions.get("window");
+import useLocalFiles from "../../../hooks/useLocalFiles";
+import * as Progress from "react-native-progress";
 
-export type AudioSourceType = "dropbox" | "google";
+export type AudioSourceType = "dropbox" | "google" | "local";
 export type AudioSourceLinkParams = {
   newdir: string;
   fullPath: string;
@@ -32,7 +35,7 @@ const DropboxScreens = () => {
   const insets = useSafeAreaInsets();
   const folderMetadata = useDropboxStore((state) => state.folderMetadata);
   const [networkActive, setNetworkActive] = useState(true);
-
+  const [isLoading, selectLocalFiles] = useLocalFiles();
   // Check for network activity
   useEffect(() => {
     const checkForNetwork = async () => {
@@ -126,6 +129,32 @@ const DropboxScreens = () => {
               <GoogleDriveIcon color={"gray"} />
               <Text className="ml-3 text">Google Drive</Text>
             </View>
+          )}
+        </View>
+        {/* -- Local Files -- */}
+        <View
+          className="rounded-xl bg-white mt-2 flex-row items-center justify-between pr-4"
+          style={{
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.amber900,
+          }}
+        >
+          <Pressable onPress={selectLocalFiles} className="flex-1">
+            <View className="flex-row px-2 py-3 items-center">
+              <FolderOpenIcon color={colors.amber700} />
+              <Text className="ml-3 text">Local Files</Text>
+            </View>
+          </Pressable>
+          {isLoading && (
+            <MotiView
+              from={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex-col justify-center items-center"
+            >
+              <Text>Loading Files...</Text>
+              <Progress.Bar indeterminate />
+            </MotiView>
           )}
         </View>
         {/* BOOK META SEARCH */}

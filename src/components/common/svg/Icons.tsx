@@ -92,6 +92,9 @@ export const FilterIcon = ({ size = 25, color, style }: Props) => {
 export const ChevronBackIcon = ({ size = 25, color, style }: Props) => {
   return <Ionicons name="chevron-back" size={size} color={color} style={style} />;
 };
+export const ChevronDownIcon = ({ size = 25, color, style }: Props) => {
+  return <Entypo name="chevron-down" size={size} color={color} style={style} />;
+};
 export const CloseIcon = ({ size = 25, color, style }: Props) => {
   return <AntDesign name="close" size={size} color={color} style={style} />;
 };
@@ -208,7 +211,7 @@ export const FolderClosedIcon = ({ size = 25, color, style }: Props) => {
   return <AntDesign name="folder1" size={size} color={color} style={style} />;
 };
 export const FolderOpenIcon = ({ size = 25, color, style }: Props) => {
-  return <AntDesign name="folder1" size={size} color={color} style={style} />;
+  return <AntDesign name="folderopen" size={size} color={color} style={style} />;
 };
 export const FileAudioIcon = ({ size = 25, color, style }: Props) => {
   return <FontAwesome5 name="file-audio" size={size} color={color} style={style} />;

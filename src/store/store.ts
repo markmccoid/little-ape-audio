@@ -277,6 +277,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       return get().playlists[playlistId];
     },
     getTrack: (trackId) => {
+      //NOTE: trackId is the "un" cleaned file name
       return get().tracks.find((el) => el.id === trackId);
     },
     clearAll: async () => {
@@ -1047,14 +1048,14 @@ const buildTrackPlayerQueue = async (trackIds: string[]): Promise<ApeTrack[]> =>
       id: trackInfo.id,
       filename: trackInfo.filename,
       url: `${FileSystem.documentDirectory}${trackInfo.fileURI}`,
-      title: trackInfo.metadata.title,
-      artist: trackInfo.metadata.artist,
-      album: trackInfo.metadata.album,
-      genre: trackInfo.metadata.album,
-      trackNum: trackInfo.metadata.trackNum,
-      artwork: trackInfo.metadata.pictureURI,
-      duration: trackInfo.metadata.durationSeconds,
-      chapters: trackInfo.metadata.chapters,
+      title: trackInfo.metadata?.title,
+      artist: trackInfo.metadata?.artist,
+      album: trackInfo.metadata?.album,
+      genre: trackInfo.metadata?.album,
+      trackNum: trackInfo.metadata?.trackNum,
+      artwork: trackInfo.metadata?.pictureURI,
+      duration: trackInfo.metadata?.durationSeconds,
+      chapters: trackInfo.metadata?.chapters,
       pitchAlgorithm: PitchAlgorithm.Voice,
     };
     queue.push(trackPlayerTrack);
