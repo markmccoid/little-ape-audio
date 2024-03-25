@@ -419,6 +419,7 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
           lastExecutionDate: new Date().getTime(),
         },
       }));
+
       await saveToAsyncStorage("laabmetaaggrcontrols", get().laabMetaAggrControls);
     },
     toggleLAABMetaAggrControlEnabled: async () => {

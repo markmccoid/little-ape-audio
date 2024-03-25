@@ -85,8 +85,8 @@ export default function RootLayout() {
       if (useDropboxStore.getState().laabMetaAggrControls.enabled) {
         const metaAggrFolders = useDropboxStore.getState().laabMetaAggrControls.folders;
         for (const metaFolder of metaAggrFolders) {
-          // console.log("RUNNING LAAB METADATA AGGR", metaFolder);
-          await laabMetaAggrRecurseBegin(metaFolder);
+          // Force to run on startup
+          await laabMetaAggrRecurseBegin(metaFolder, undefined, true);
         }
       }
     };

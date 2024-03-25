@@ -6,6 +6,7 @@ import { getCleanFileName } from "@store/data/fileSystemAccess";
 import { useTrackActions } from "@store/store";
 import uuid from "react-native-uuid";
 import { FileEntry } from "@utils/dropboxUtils";
+import { exists } from "react-native-fs";
 
 const useLocalFiles = () => {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -29,12 +30,24 @@ const useLocalFiles = () => {
         for (let file of result.assets) {
           const cleanFileName = getCleanFileName(file.name);
           const fileUri = `${FileSystem.documentDirectory}${cleanFileName}`;
-          const ExsistingTrack = trackActions.getTrack(file.name);
-          // If track Exists
-          if (Boolean(ExsistingTrack)) {
+          const exsistingTrack = trackActions.getTrack(file.name);
+          // If track Exists use existing track (location) for playlist
+          if (Boolean(exsistingTrack)) {
+            //!!! Playlist won't exist if this track was processed first
+            //!! Need to run-> tractActions.addNewPlaylist(plName, plAuthor, playlistId)
+            // sending in undefined for name and author so that we DON'T find any existing playlist and use
+            // the passed id.
+            const finalPlaylistId = trackActions.addNewPlaylist(undefined, undefined, playlistId);
+            // update the name and author.  Realize if multiple tracks are selected with different metadata,
+            // this will update for each and we are left with the last one. NOTE: undefined values don't update.
+            await trackActions.updatePlaylistFields(finalPlaylistId, {
+              name: exsistingTrack?.metadata?.album || exsistingTrack?.metadata?.title,
+              author: exsistingTrack?.metadata?.artist,
+            });
             // Add existing track to playlist
-            trackActions.addTracksToPlaylist(playlistId, [ExsistingTrack.id]);
+            trackActions.addTracksToPlaylist(finalPlaylistId, [exsistingTrack.id]);
           } else {
+            //! NEW TRACK
             // Copy file to local directory
             await FileSystem.copyAsync({ from: file.uri, to: fileUri });
             // Add new Track to store and playlist
