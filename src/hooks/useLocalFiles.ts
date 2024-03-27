@@ -5,8 +5,6 @@ import * as FileSystem from "expo-file-system";
 import { getCleanFileName } from "@store/data/fileSystemAccess";
 import { useTrackActions } from "@store/store";
 import uuid from "react-native-uuid";
-import { FileEntry } from "@utils/dropboxUtils";
-import { exists } from "react-native-fs";
 
 const useLocalFiles = () => {
   const [isLoading, setIsLoading] = React.useState(false);
