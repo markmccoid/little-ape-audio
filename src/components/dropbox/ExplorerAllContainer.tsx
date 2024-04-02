@@ -23,6 +23,7 @@ import { useSettingStore } from "@store/store-settings";
 
 import { checkForFolderMetadataGoogle } from "@utils/commonCloudUtils";
 import { sanitizeString } from "@utils/otherUtils";
+import { useDownloadQStore, DownloadQueueItem } from "@store/store-downloadq";
 
 type Props = {
   pathIn: string;
@@ -50,6 +51,8 @@ const ExplorerAllContainer = ({
   const [displayMetadata, toggeleDisplayMetadata] = React.useReducer((prev) => !prev, false);
   const allFoldersMetadata = useDropboxStore((state) => state.folderMetadata || {});
 
+  const qActions = useDownloadQStore((state) => state.actions);
+  // const qActions = useDownloadQStore((state) => state.actions);
   const folderNavigation = useDropboxStore((state) => state.folderNavigation);
 
   // pathIn for dropbox will be "/some/dirs" and we can use extractMetadataKeys() to get the pathToFolderKey and pathToBookFolderKey to metadata
@@ -75,6 +78,8 @@ const ExplorerAllContainer = ({
 
   const dropboxActions = useDropboxStore((state) => state.actions);
   const flatlistRef = useRef<FlatList>();
+
+  //!
 
   // ------------------------------------------------------------------------
   // -- HANDLE SCROLL and Save to Dropbox Store's FolderNavigation array
@@ -222,17 +227,37 @@ const ExplorerAllContainer = ({
     //-- useEffect used when "setFilesDone" updated which updated the
     //-- flatlistData so the file.isAlreadyDownloaded was set to true
     //-- Next step would have been to pass on the progress
-    // const files = flatlistData.filter((el) => el[".tag"] === "file");
-    // await startDownloadAll(files, setFilesDone, setProgress);
-    // return;
+    const files = flatlistData.filter((el) => el[".tag"] === "file" && !el.alreadyDownload);
+    // console.log(files);
+    const playlistId = uuid.v4() as string;
+    for (let file of files) {
+      console.log("ExplorerALL", file.name);
+      const downloadItem: DownloadQueueItem = {
+        fileId: file.id,
+        fileName: file.name,
+        filePathLower: file.path_lower,
+        audioSource: audioSource,
+        pathIn,
+        currFolderText,
+        playlistId: playlistId,
+      };
+      qActions.addToQueue(downloadItem);
+      // addToQueue(downloadItem.fileName);
+      //   qActions.addDownload(downloadItem);
+    }
+    // ctions.proce.processQueue);
+    // await qActions.processQueue();
+    // processQueue();
+    return;
     //--
     // path WILL equal currentPath and we can just assume
     // the current "files" state variable has the data we need
     // When this function is called, we will set a download state
     // variable, and upon rerender, pass that to each file, which will trigger
     // it to download.
-    const playlistId = uuid.v4() as string;
-    setDownloadAllId(playlistId);
+
+    // const playlistId = uuid.v4() as string;
+    // setDownloadAllId(playlistId);
   };
   //~ == ERROR JSX ===
   if (isError) {
@@ -290,6 +315,9 @@ const ExplorerAllContainer = ({
           audioSource={audioSource}
           fileCount={filesFolderObj?.files?.length || 0}
           folderCount={filesFolderObj?.folders?.length || 0}
+          filesDownloaded={
+            flatlistData.filter((el) => el[".tag"] === "file" && el.alreadyDownload).length
+          }
           // showMetadata={showMetadata}
           displayMetadata={displayMetadata}
           hasMetadata={hasMetadata}

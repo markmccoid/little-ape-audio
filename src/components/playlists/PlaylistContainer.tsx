@@ -22,10 +22,16 @@ import AddBook from "@components/common/svg/AddBook";
 import CollectionSelectionPopup from "@components/common/CollectionSelectionPopup";
 import { useSettingStore } from "@store/store-settings";
 import { ChevronDownIcon } from "@components/common/svg/Icons";
+import useDownloadQStore from "@store/store-downloadq";
 const { width, height: screenHeight } = Dimensions.get("window");
 
 const PlaylistContainer = () => {
   const route = useRouter();
+  //! downloadq
+  // const isDownloading = useDownloadQStore((state) => state.isDownloading);
+  // const downloadQueue = useDownloadQStore((state) => state.queue);
+  // const [activeDownload, setActiveDownload] = useState(false);
+  //!
   const [isSelectingRow, setIsSelectingRow] = useState(false);
   const [onShow, setOnShow] = useState(false);
   const [layoutHeight, setLayoutHeight] = useState(0);
@@ -62,6 +68,16 @@ const PlaylistContainer = () => {
       ),
     });
   }, [navigation, selectedCollection]);
+
+  //! Download indicator
+  // useEffect(() => {
+  //   const activeTask = activeDownloadTasks.find((task) => task.playlistId === currentPlaylistId);
+  //   if (activeTask) {
+  //     setActiveDownload(true);
+  //   } else {
+  //     setActiveDownload(false);
+  //   }
+  // }, [downloadQueue]);
 
   // Scroll to the active track
   const scrollToRow = () => {

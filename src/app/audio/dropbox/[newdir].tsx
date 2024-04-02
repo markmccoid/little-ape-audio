@@ -7,11 +7,13 @@ import { useDropboxStore } from "@store/store-dropbox";
 import { AudioSourceLinkParams, AudioSourceType } from "./index";
 import ExplorerAllContainer from "@components/dropbox/ExplorerAllContainer";
 import { sanitizeString, customEncodeParens } from "@utils/otherUtils";
+import useDownloadQStore from "@store/store-downloadq";
 
 const NewDirectory = () => {
   const actions = useDropboxStore((state) => state.actions);
   const router = useRouter();
   const navigation = useNavigation();
+
   const { newdir, fullPath, backTitle, audioSource, yOffset, parentFolderId } =
     useLocalSearchParams<AudioSourceLinkParams>();
 

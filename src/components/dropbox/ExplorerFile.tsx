@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet, Easing } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { FileEntry, getDropboxFileLink } from "../../utils/dropboxUtils";
 import { AsteriskIcon, CloseIcon, CloudDownloadIcon } from "../common/svg/Icons";
@@ -9,6 +9,8 @@ import { usePlaybackStore, useTrackActions } from "../../store/store";
 import * as Progress from "react-native-progress";
 import { AudioSourceType } from "@app/audio/dropbox";
 import { DownloadProgressCallbackResult } from "react-native-fs";
+import useDownloadQStore, { DownloadQueueItem } from "@store/store-downloadq";
+import { MotiView } from "moti";
 
 type Props = {
   file: FileEntry;
@@ -21,19 +23,35 @@ type Props = {
   playlistId?: string;
 };
 const ExplorerFile = ({ file, playlistId, audioSource, pathIn, currFolderText }: Props) => {
+  //! NEW
+  const activeTasks = useDownloadQStore((state) => state.activeTasks);
+  const completedDownloads = useDownloadQStore((state) => state.completedDownloads);
+  const qActions = useDownloadQStore((state) => state.actions);
+  //!
   const isDropbox = !!(audioSource === "dropbox");
   const isGoogle = !!(audioSource === "google");
   const trackActions = useTrackActions();
   const playlistLoaded = usePlaybackStore((state) => state.playlistLoaded);
   const resetPlaybackStore = usePlaybackStore((state) => state.actions.resetPlaybackStore);
-  const [progress, setProgress] = useState<DownloadProgress>();
+  const [progress2, setProgress] = useState<DownloadProgress>();
 
-  const [isDownloading, setIsDownloading] = useState(false);
+  const [isDownloading2, setIsDownloading] = useState(false);
   const [stopped, setStopped] = useState(false);
-  const [isDownloaded, setIsDownloaded] = useState(file.alreadyDownload);
+  const [isDownloaded2, setIsDownloaded] = useState(file.alreadyDownload);
 
   const stopDownloadRef = useRef<() => void>();
-
+  //! NEW
+  const activeTask = activeTasks.find((task) => task.fileId === file.id);
+  const isDownloading = activeTask?.processStatus === "downloading";
+  const isAdding = activeTask?.processStatus === "adding";
+  const isDownloaded = completedDownloads.includes(file.id) || file.alreadyDownload;
+  const progress = {
+    downloadProgress: activeTask?.downloadProgress,
+    bytesExpected: activeTask?.bytesExpected,
+    bytesWritten: activeTask?.bytesWritten,
+  };
+  //!
+  //!---------
   useEffect(() => {
     // Using the playlistId as the trigger to download a file
     // If the playlistId is populated, then start downloading this file
@@ -65,6 +83,19 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn, currFolderText }:
   };
   //~ --- downloadFile function to download file while setting progress state --------------
   const downloadFile = async (file: FileEntry) => {
+    //! NEW
+    const downloadItem: DownloadQueueItem = {
+      fileId: file.id,
+      fileName: file.name,
+      filePathLower: file.path_lower,
+      pathIn,
+      currFolderText,
+      playlistId: playlistId,
+      audioSource,
+    };
+    qActions.addToQueue(downloadItem);
+    return;
+    //!
     setIsDownloading(true);
     // If playlist is loaded, reset store.  Needed because of how we pull chapter info
     // from the metadataChapterReceived event.
@@ -154,15 +185,28 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn, currFolderText }:
         {isDownloaded && (
           <AsteriskIcon color="green" size={20} style={{ marginLeft: 2, marginRight: 2 }} />
         )}
-        {!isDownloading && !isDownloaded && (
+        {!isDownloading && !isDownloaded && !isAdding && (
           <Pressable onPress={async () => await downloadFile(file)} disabled={isDownloaded}>
             <CloudDownloadIcon />
           </Pressable>
         )}
         {isDownloading && (
-          <Pressable onPress={stopDownload}>
+          <Pressable onPress={activeTask?.stopDownload}>
             <CloseIcon />
           </Pressable>
+        )}
+        {isAdding && (
+          <MotiView
+            from={{ rotate: "0deg", opacity: 0.6 }}
+            animate={{ rotate: "360deg" }}
+            transition={{
+              type: "timing",
+              duration: 2000, // Duration of one rotation
+              loop: true, // Repeat the animation indefinitely
+            }}
+          >
+            <AsteriskIcon color="gray" size={20} style={{ marginLeft: 2, marginRight: 2 }} />
+          </MotiView>
         )}
       </View>
       {isDownloading && (

@@ -13,7 +13,7 @@ export default {
   scheme: "littleapeaudio",
   privacy: "unlisted",
   platforms: ["ios"],
-  version: "0.8.1",
+  version: "0.8.2",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "automatic",
@@ -33,10 +33,9 @@ export default {
     config: {
       usesNonExemptEncryption: false,
     },
-    usesIcloudStorage: true,
     supportsTablet: false,
     bundleIdentifier: "com.markmccoid.little-ape-audio",
-    buildNumber: "0.8.1",
+    buildNumber: "0.8.2",
     infoPlist: {
       RCTAsyncStorageExcludeFromBackup: false,
       NSMicrophoneUsageDescription:
@@ -53,7 +52,7 @@ export default {
   },
   plugins: [
     ["expo-router"],
-    ["expo-document-picker", { iCloudContainerEnvironment: "Production" }],
+    ["expo-document-picker"],
     [
       "expo-screen-orientation",
       {

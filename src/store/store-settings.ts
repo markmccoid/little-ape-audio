@@ -1,4 +1,3 @@
-import uuid from "react-native-uuid";
 import { create } from "zustand";
 import { saveToAsyncStorage } from "./data/asyncStorage";
 import TrackPlayer from "react-native-track-player";

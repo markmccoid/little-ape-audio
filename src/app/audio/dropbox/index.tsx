@@ -20,6 +20,7 @@ import * as Network from "expo-network";
 const { width, height } = Dimensions.get("window");
 import useLocalFiles from "../../../hooks/useLocalFiles";
 import * as Progress from "react-native-progress";
+import useDownloadQStore from "@store/store-downloadq";
 
 export type AudioSourceType = "dropbox" | "google" | "local";
 export type AudioSourceLinkParams = {
@@ -36,6 +37,7 @@ const DropboxScreens = () => {
   const folderMetadata = useDropboxStore((state) => state.folderMetadata);
   const [networkActive, setNetworkActive] = useState(true);
   const [isLoading, selectLocalFiles] = useLocalFiles();
+  const qActions = useDownloadQStore((state) => state.actions);
   // Check for network activity
   useEffect(() => {
     const checkForNetwork = async () => {
@@ -43,6 +45,10 @@ const DropboxScreens = () => {
       setNetworkActive(isInternetReachable);
     };
     checkForNetwork();
+    // When unmounting clear completed downloads
+    return () => {
+      qActions.clearCompletedDownloads();
+    };
   }, []);
 
   useEffect(() => {
