@@ -45,10 +45,10 @@ const DropboxScreens = () => {
       setNetworkActive(isInternetReachable);
     };
     checkForNetwork();
-    // When unmounting clear completed downloads
-    return () => {
-      qActions.clearCompletedDownloads();
-    };
+    // When mounting clear the completed downloads
+    // CANT do it on unmounting as items can download in the background
+    console.log("index.tsx: DropboxScreens: mounting");
+    qActions.clearCompletedDownloads();
   }, []);
 
   useEffect(() => {

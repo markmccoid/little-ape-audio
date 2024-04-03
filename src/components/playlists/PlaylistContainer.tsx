@@ -16,8 +16,6 @@ import { ScrollView, Swipeable } from "react-native-gesture-handler";
 import { AnimatePresence, MotiImage, MotiView } from "moti";
 import PlaylistActionBar from "./PlaylistActionBar";
 import { colors } from "@constants/Colors";
-import { Playlist } from "@store/types";
-import Headphones from "@components/common/svg/Headphones";
 import AddBook from "@components/common/svg/AddBook";
 import CollectionSelectionPopup from "@components/common/CollectionSelectionPopup";
 import { useSettingStore } from "@store/store-settings";
@@ -28,10 +26,14 @@ const { width, height: screenHeight } = Dimensions.get("window");
 const PlaylistContainer = () => {
   const route = useRouter();
   //! downloadq
-  // const isDownloading = useDownloadQStore((state) => state.isDownloading);
+  const isDownloading = useDownloadQStore((state) => state.isDownloading);
+  // const activeTaskPlaylistIds = useDownloadQStore((state) => [
+  //   ...new Set(state.activeTasks.map((task) => task.playlistId)),
+  // ]);
   // const downloadQueue = useDownloadQStore((state) => state.queue);
   // const [activeDownload, setActiveDownload] = useState(false);
   //!
+
   const [isSelectingRow, setIsSelectingRow] = useState(false);
   const [onShow, setOnShow] = useState(false);
   const [layoutHeight, setLayoutHeight] = useState(0);
@@ -240,7 +242,11 @@ const PlaylistContainer = () => {
           <PlaylistActionBar closeActionBar={() => setOnShow(false)} barHeight={40} />
         </MotiView>
       )}
-
+      {isDownloading && (
+        <View className="z-10 items-center justify-center bg-white">
+          <Text className="text-lg">DOWNLOADING</Text>
+        </View>
+      )}
       <AnimatePresence>
         {!isSelectingRow && (
           <MotiView

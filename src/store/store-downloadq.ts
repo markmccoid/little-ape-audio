@@ -51,14 +51,6 @@ type DownloadQState = {
   };
 };
 
-// Dummy processing function
-// const processDownload = async (url) => {
-//   console.log(`--Processing: ${url}`);
-//   // Simulate processing time
-//   await new Promise((resolve) => setTimeout(resolve, 3000));
-//   console.log(`--Finished processing: ${url}`);
-// };
-
 export const useDownloadQStore = create<DownloadQState>((set, get) => ({
   queue: [],
   activeTasks: [],
@@ -109,8 +101,6 @@ export const useDownloadQStore = create<DownloadQState>((set, get) => ({
           // Continue processing if there are more items in the queue
           if (get().queue.length > 0) {
             get().actions.processQueue();
-          } else if (get().activeTasks.length === 0) {
-            set({ isDownloading: false });
           }
           // Call the addItemFunc which will call the trackActions.AddNewTrack() function returned from downloadFile()
           await addItemFunc();
@@ -120,55 +110,22 @@ export const useDownloadQStore = create<DownloadQState>((set, get) => ({
             activeTasks: state.activeTasks.filter((task) => task.fileId !== queuedItem.fileId),
             completedDownloads: [...state.completedDownloads, queuedItem.fileId],
           }));
+          // If there are no more activeTasks, then we are done downloading and we can set isDownloading to false
+          if (get().activeTasks.length === 0) {
+            set({ isDownloading: false });
+          }
           // console.log("END Processing Queue", get().downloaded);
         } catch (err) {
           console.log("Error processing queue", err);
         }
-        // We are using .then because await would stop the processing until downloadFile is done.
-        // however, we need the code after the downloadFile call to run as it updates the store with needed info.
-        // .then will queue a callback function to run when downloadFile is finished.
-        // const task = downloadFile(queuedItem)
-        //   .then(() => {
-        //     // Continue processing if there are more items in the queue
-        //     set((state) => ({
-        //       activeTasks: state.activeTasks.filter((task) => task.fileId !== queuedItem.fileId),
-        //       completedDownloads: [...state.completedDownloads, queuedItem.fileId],
-        //     }));
-        //     console.log("Processed: Active", queuedItem.fileName, get().activeTasks.length);
-        //     // console.log("END Processing Queue", get().downloaded);
-        //     if (get().queue.length > 0) {
-        //       get().actions.processQueue();
-        //     } else if (get().activeTasks.length === 0) {
-        //       set({ isDownloading: false });
-        //     }
-        //   })
-        //   .catch((err) => {
-        //     console.log("Error processing queue", err);
-        //   });
-        // //!! -- downloadFile() then done
-
-        // set((state) => ({
-        //   activeTasks: [
-        //     ...state.activeTasks,
-        //     {
-        //       fileId: queuedItem.fileId,
-        //       playlistId: queuedItem.playlistId,
-        //       processStatus: "downloading",
-        //       stopDownload: () => {},
-        //     },
-        //   ],
-        // }));
       }
     },
     clearCompletedDownloads: () => {
       set({ completedDownloads: [], isDownloading: false });
     },
     stopAllDownloads: () => {
+      // Clear the queue.  This only stops future items from starting.
       set({ queue: [] });
-      // get().activeTasks.forEach((task) => {
-      //   task.stopDownload();
-      // });
-      // set({ activeTasks: [], isDownloading: false });
     },
   },
 }));

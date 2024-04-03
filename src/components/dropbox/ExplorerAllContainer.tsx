@@ -222,16 +222,12 @@ const ExplorerAllContainer = ({
   //! ~ onDownloadAll
   //! ~ ====================
   const onDownloadAll = async () => {
-    //-- This was an expirment to download outside of components and then
-    //-- update component as things finished.
-    //-- useEffect used when "setFilesDone" updated which updated the
-    //-- flatlistData so the file.isAlreadyDownloaded was set to true
-    //-- Next step would have been to pass on the progress
+    //-- Get a list of all files in the current folder that have not been downloaded
     const files = flatlistData.filter((el) => el[".tag"] === "file" && !el.alreadyDownload);
-    // console.log(files);
+    //-- Create a playlist ID
     const playlistId = uuid.v4() as string;
+    //-- Add the files to the download queue
     for (let file of files) {
-      console.log("ExplorerALL", file.name);
       const downloadItem: DownloadQueueItem = {
         fileId: file.id,
         fileName: file.name,
@@ -242,14 +238,9 @@ const ExplorerAllContainer = ({
         playlistId: playlistId,
       };
       qActions.addToQueue(downloadItem);
-      // addToQueue(downloadItem.fileName);
-      //   qActions.addDownload(downloadItem);
     }
-    // ctions.proce.processQueue);
-    // await qActions.processQueue();
-    // processQueue();
-    return;
-    //--
+
+    //-- OLD WAY -- downloading was in the ExplorerFile - hard to control # of downloads, etc
     // path WILL equal currentPath and we can just assume
     // the current "files" state variable has the data we need
     // When this function is called, we will set a download state

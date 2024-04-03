@@ -55,6 +55,7 @@ const ExplorerActionBar = ({
   const downloadedItemCount = useDownloadQStore((state) => state.completedDownloads.length);
   const finalDownloadedCount = (filesDownloaded || 0) + (downloadedItemCount || 0);
   const undownloadedFileCount = fileCount - (finalDownloadedCount || 0);
+
   //!
 
   // console.log("ActionBAr tasks", metadataCurrentTask, metadataProcessingFlag);
