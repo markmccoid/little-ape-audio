@@ -201,7 +201,7 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn, currFolderText }:
             animate={{ rotate: "360deg" }}
             transition={{
               type: "timing",
-              duration: 2000, // Duration of one rotation
+              duration: 1000, // Duration of one rotation
               loop: true, // Repeat the animation indefinitely
             }}
           >

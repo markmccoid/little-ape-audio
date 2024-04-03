@@ -13,7 +13,6 @@ const NewDirectory = () => {
   const actions = useDropboxStore((state) => state.actions);
   const router = useRouter();
   const navigation = useNavigation();
-
   const { newdir, fullPath, backTitle, audioSource, yOffset, parentFolderId } =
     useLocalSearchParams<AudioSourceLinkParams>();
 
