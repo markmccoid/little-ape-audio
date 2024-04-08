@@ -11,6 +11,7 @@ import { AudioSourceType } from "@app/audio/dropbox";
 import { DownloadProgressCallbackResult } from "react-native-fs";
 import useDownloadQStore, { DownloadQueueItem } from "@store/store-downloadq";
 import { MotiView } from "moti";
+import MemoAnimatedAsterisk from "@components/common/animations/AnimatedAsterisk";
 
 type Props = {
   file: FileEntry;
@@ -92,6 +93,7 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn, currFolderText }:
       currFolderText,
       playlistId: playlistId,
       audioSource,
+      calculateColor: true,
     };
     qActions.addToQueue(downloadItem);
     return;
@@ -195,19 +197,7 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn, currFolderText }:
             <CloseIcon />
           </Pressable>
         )}
-        {isAdding && (
-          <MotiView
-            from={{ rotate: "0deg", opacity: 0.6 }}
-            animate={{ rotate: "360deg" }}
-            transition={{
-              type: "timing",
-              duration: 1000, // Duration of one rotation
-              loop: true, // Repeat the animation indefinitely
-            }}
-          >
-            <AsteriskIcon color="gray" size={20} style={{ marginLeft: 2, marginRight: 2 }} />
-          </MotiView>
-        )}
+        {isAdding && <MemoAnimatedAsterisk />}
       </View>
       {isDownloading && (
         <View

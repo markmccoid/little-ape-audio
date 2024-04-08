@@ -13,7 +13,7 @@ import { usePlaybackStore, usePlaylists, useTrackActions, useTracksStore } from 
 import { Link, useFocusEffect, useNavigation, useRouter } from "expo-router";
 import PlaylistRow from "./PlaylistRow";
 import { ScrollView, Swipeable } from "react-native-gesture-handler";
-import { AnimatePresence, MotiImage, MotiView } from "moti";
+import { AnimatePresence, MotiImage, MotiText, MotiView, useAnimationState } from "moti";
 import PlaylistActionBar from "./PlaylistActionBar";
 import { colors } from "@constants/Colors";
 import AddBook from "@components/common/svg/AddBook";
@@ -21,16 +21,19 @@ import CollectionSelectionPopup from "@components/common/CollectionSelectionPopu
 import { useSettingStore } from "@store/store-settings";
 import { ChevronDownIcon } from "@components/common/svg/Icons";
 import useDownloadQStore from "@store/store-downloadq";
+import AnimatedDLText from "@components/common/animations/AnimatedDLText";
 const { width, height: screenHeight } = Dimensions.get("window");
 
 const PlaylistContainer = () => {
   const route = useRouter();
   //! downloadq
   const isDownloading = useDownloadQStore((state) => state.isDownloading);
+
   // const activeTaskPlaylistIds = useDownloadQStore((state) => [
   //   ...new Set(state.activeTasks.map((task) => task.playlistId)),
   // ]);
-  // const downloadQueue = useDownloadQStore((state) => state.queue);
+  const downloadQueue = useDownloadQStore((state) => state.queue)[0];
+  console.log("downloadQueue", downloadQueue?.currFolderText);
   // const [activeDownload, setActiveDownload] = useState(false);
   //!
 
@@ -71,20 +74,10 @@ const PlaylistContainer = () => {
     });
   }, [navigation, selectedCollection]);
 
-  //! Download indicator
-  // useEffect(() => {
-  //   const activeTask = activeDownloadTasks.find((task) => task.playlistId === currentPlaylistId);
-  //   if (activeTask) {
-  //     setActiveDownload(true);
-  //   } else {
-  //     setActiveDownload(false);
-  //   }
-  // }, [downloadQueue]);
-
   // Scroll to the active track
   const scrollToRow = () => {
     if (playlists.length === 0) return;
-    scrollRef.current.scrollToOffset({
+    scrollRef.current?.scrollToOffset({
       offset: 0,
       animated: true,
     });
@@ -160,7 +153,6 @@ const PlaylistContainer = () => {
   //~ --------------------------
 
   const renderItem = ({ item, index }) => {
-    // if (isSelectingRow) return;
     return (
       <MotiView
         from={{ opacity: 0 }}
@@ -227,7 +219,6 @@ const PlaylistContainer = () => {
         isDropdownOpen={isDropdownOpen}
         setIsDropdownOpen={setIsDropdownOpen}
       />
-
       {onShow && (
         <MotiView
           className="border border-red-900 h-[40]"
@@ -242,9 +233,10 @@ const PlaylistContainer = () => {
           <PlaylistActionBar closeActionBar={() => setOnShow(false)} barHeight={40} />
         </MotiView>
       )}
+
       {isDownloading && (
-        <View className="z-10 items-center justify-center bg-white">
-          <Text className="text-lg">DOWNLOADING</Text>
+        <View className="z-10 flex-row items-center bg-white h-[50]">
+          <AnimatedDLText displayText={downloadQueue?.fileName} />
         </View>
       )}
       <AnimatePresence>

@@ -227,6 +227,7 @@ const ExplorerAllContainer = ({
     //-- Create a playlist ID
     const playlistId = uuid.v4() as string;
     //-- Add the files to the download queue
+    let i = 0;
     for (let file of files) {
       const downloadItem: DownloadQueueItem = {
         fileId: file.id,
@@ -236,7 +237,9 @@ const ExplorerAllContainer = ({
         pathIn,
         currFolderText,
         playlistId: playlistId,
+        calculateColor: i === 0 ? true : false,
       };
+      i++;
       qActions.addToQueue(downloadItem);
     }
 

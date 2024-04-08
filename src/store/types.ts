@@ -158,6 +158,10 @@ export type AudioState = {
       // google or dropbox
       audioSource,
       playlistId,
+      // Determines if we should calculate the color of the tracks image.
+      // We do this for manual download of track, if process all tracks, then expect only first track
+      // but this is handled by the calling function
+      calculateColor,
       directory,
     }: {
       fileURI: string;
@@ -169,6 +173,7 @@ export type AudioState = {
       currFolderText: string;
       audioSource: AudioSourceType;
       playlistId?: string;
+      calculateColor?: boolean;
       directory?: string;
     }) => Promise<void>;
     updateTrackMetadata: (trackId: string, trackMetadata: Partial<AudioMetadata>) => Promise<void>;

@@ -1,16 +1,18 @@
 import { View as MView } from "moti";
 import * as React from "react";
-import { Dimensions, View } from "react-native";
+import { Dimensions, View, StyleSheet } from "react-native";
 
 const { width, height } = Dimensions.get("screen");
 
 export default function ProgressIndetermined({
   size = width * 0.8,
+  height = 20,
+  showBorder = true,
   thumbColor = "#122AFF",
   trackColor = "#00D5DC",
 }) {
   const INDICATOR_SIZE = size * 0.4;
-  const thumbHeight = 20;
+  const thumbHeight = height;
 
   return (
     <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
@@ -23,6 +25,7 @@ export default function ProgressIndetermined({
           alignItems: "center",
           justifyContent: "center",
           overflow: "hidden",
+          borderWidth: showBorder ? StyleSheet.hairlineWidth : 0,
         }}
       >
         <MView

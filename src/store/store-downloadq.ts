@@ -26,6 +26,7 @@ export type DownloadQueueItem = {
   pathIn: string;
   currFolderText: string;
   playlistId?: string;
+  calculateColor?: boolean;
 };
 
 type DownloadQState = {
@@ -43,6 +44,7 @@ type DownloadQState = {
       pathIn,
       currFolderText,
       playlistId,
+      calculateColor,
     }: DownloadQueueItem) => void;
     processQueue: () => Promise<void>;
     clearCompletedDownloads: () => void;
@@ -55,7 +57,7 @@ export const useDownloadQStore = create<DownloadQState>((set, get) => ({
   queue: [],
   activeTasks: [],
   completedDownloads: [],
-  maxActiveDownloads: 2,
+  maxActiveDownloads: 4,
   isDownloading: false,
   actions: {
     addToQueue: (downloadProps) => {
@@ -96,14 +98,18 @@ export const useDownloadQStore = create<DownloadQState>((set, get) => ({
           // downloadFile returns an Async function which calls the trackActions.AddNewTrac() function
           // We do this so that before calling this function and awaiting its return, we can run processQueue
           // again if needed.  This means we can start downloading the next file without waiting for AddNewTrack to finish.
+
           const addItemFunc = await downloadFile(queuedItem);
+
+          // // Call the addItemFunc which will call the trackActions.AddNewTrack() function returned from downloadFile()
+          console.log("BEFORE ADD ITEM", queuedItem.fileName, Date.now());
+          await addItemFunc();
+          console.log("AFTER ADD ITEM", queuedItem.fileName, Date.now());
 
           // Continue processing if there are more items in the queue
           if (get().queue.length > 0) {
             get().actions.processQueue();
           }
-          // Call the addItemFunc which will call the trackActions.AddNewTrack() function returned from downloadFile()
-          await addItemFunc();
 
           // We are done with this track, remove it from the activeTasks array and add it to the completedDownloads array
           set((state) => ({
@@ -134,8 +140,16 @@ export const useDownloadQStore = create<DownloadQState>((set, get) => ({
 //~ downloadFile
 //~ --------------------------------------
 const downloadFile = async (downloadProps: DownloadQueueItem) => {
-  const { filePathLower, fileName, fileId, audioSource, pathIn, currFolderText, playlistId } =
-    downloadProps;
+  const {
+    filePathLower,
+    fileName,
+    fileId,
+    audioSource,
+    pathIn,
+    currFolderText,
+    playlistId,
+    calculateColor,
+  } = downloadProps;
 
   const trackActions = useTracksStore.getState().actions;
   const playlistLoaded = usePlaybackStore.getState().playlistLoaded;
@@ -216,6 +230,7 @@ const downloadFile = async (downloadProps: DownloadQueueItem) => {
       pathIn,
       currFolderText,
       audioSource,
+      calculateColor,
     });
   try {
     // Add new Track to store

@@ -58,11 +58,25 @@ export const addTrack =
     currFolderText, // This is the name of the folder where the track was located. This will be the text and not an id if in google
     audioSource, // google or dropbox
     playlistId = undefined,
+    calculateColor = false,
     directory = "",
   }) => {
+    //!! ----------
+    // Check if the critical section is locked; if it is, wait and try again later
+    // If global var is true, we will loop on this until it is not true, then continue.
+    //!!
+    // console.log(`${filename}-ADD TRACK LOCK`, Date.now());
+    while (isCriticalSectionLocked) {
+      await new Promise((resolve) => setTimeout(resolve, 100)); // Adjust the timeout as needed
+    }
+    //!!
+    console.log(`${filename}-ADD TRACK START`, Date.now());
+    //~ -- If not locked - SET locked and move onto the function
+    isCriticalSectionLocked = true;
     // variable for final tags
     let finalTags: AudioMetadata;
     // Get metadata for passed audio file
+
     const tags = (await getAudioFileTags(
       `${FileSystem.documentDirectory}${fileURI}`
     )) as AudioMetadata;
@@ -81,7 +95,7 @@ export const addTrack =
     }
     // Track Raw End
     // Get picture colors if available
-    if (tags.pictureURI) {
+    if (tags.pictureURI && calculateColor) {
       const colors = (await getImageColors(tags.pictureURI)) as PlaylistImageColors;
       tags.pictureColors = colors;
     }
@@ -111,6 +125,7 @@ export const addTrack =
       //!  FIX: pass the folder name in as currFolderText
       const metaFileName = `${sanitizeString(currFolderText.toLowerCase())}-metadata.json`;
       // Download metadata json file
+      //!!
       const metaData = (await getJsonData({
         folderId: pathIn,
         filename: metaFileName,
@@ -167,15 +182,15 @@ export const addTrack =
     const newAudioFileList = [...filteredList, newAudioFile];
     set({ tracks: newAudioFileList });
 
-    //!! ----------
-    // Check if the critical section is locked; if it is, wait and try again later
-    // If global var is true, we will loop on this until it is not true, then continue.
-    while (isCriticalSectionLocked) {
-      await new Promise((resolve) => setTimeout(resolve, 100)); // Adjust the timeout as needed
-    }
+    // //!! ----------
+    // // Check if the critical section is locked; if it is, wait and try again later
+    // // If global var is true, we will loop on this until it is not true, then continue.
+    // while (isCriticalSectionLocked) {
+    //   await new Promise((resolve) => setTimeout(resolve, 100)); // Adjust the timeout as needed
+    // }
 
-    // Lock the critical section
-    isCriticalSectionLocked = true;
+    // // Lock the critical section
+    // isCriticalSectionLocked = true;
 
     try {
       //! ----- ----- ----- ----- ----- ----- -----
@@ -197,6 +212,7 @@ export const addTrack =
       await TrackPlayer.reset();
       await TrackPlayer.add([trackPlayerTrack]);
       await TrackPlayer.skip(0);
+
       /**
        * PLAYLIST
        *  - id - uuid
@@ -207,6 +223,7 @@ export const addTrack =
        */
       // If no playlist ID passed, then assume single download and create new playlist
       // and add track
+
       const plName =
         newAudioFile.metadata?.album || newAudioFile.metadata?.title || newAudioFile.filename;
       const plAuthor = newAudioFile.metadata?.artist || "Unknown";
@@ -221,6 +238,7 @@ export const addTrack =
     } finally {
       isCriticalSectionLocked = false;
     }
+    console.log(`${filename}-ADD TRACK DONE`, Date.now());
   };
 
 //~~ -------------------------------------
