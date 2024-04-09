@@ -8,7 +8,7 @@ import {
   Pressable,
   TouchableOpacity,
 } from "react-native";
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { usePlaybackStore, usePlaylists, useTrackActions, useTracksStore } from "../../store/store";
 import { Link, useFocusEffect, useNavigation, useRouter } from "expo-router";
 import PlaylistRow from "./PlaylistRow";
@@ -28,12 +28,27 @@ const PlaylistContainer = () => {
   const route = useRouter();
   //! downloadq
   const isDownloading = useDownloadQStore((state) => state.isDownloading);
+  const queueCount = useDownloadQStore((state) => state.queue.length);
 
   // const activeTaskPlaylistIds = useDownloadQStore((state) => [
   //   ...new Set(state.activeTasks.map((task) => task.playlistId)),
   // ]);
-  const downloadQueue = useDownloadQStore((state) => state.queue)[0];
-  console.log("downloadQueue", downloadQueue?.currFolderText);
+  const activeTasks = useDownloadQStore((state) => state.activeTasks);
+  // console.log("activeTasks", activeTasks);
+  const reduced = activeTasks
+    ? activeTasks.reduce(
+        (final, curr) => {
+          if (curr.processStatus === "downloading") {
+            final.downloading = (final?.downloading || 0) + 1;
+          } else {
+            final.adding = (final?.adding || 0) + 1;
+          }
+          return final;
+        },
+        { downloading: 0, adding: 0 }
+      )
+    : {};
+
   // const [activeDownload, setActiveDownload] = useState(false);
   //!
 
@@ -235,8 +250,29 @@ const PlaylistContainer = () => {
       )}
 
       {isDownloading && (
-        <View className="z-10 flex-row items-center bg-white h-[50]">
-          <AnimatedDLText displayText={downloadQueue?.fileName} />
+        <View className="z-10 flex-col justify-center items-center pb-1 bg-white h-[100]">
+          <View>
+            {/* First Line (left) */}
+            <View className="flex-row justify-center items-center">
+              <Text className="text-base">{`Files Left in Process Queue`}</Text>
+              <Text className="text-base text-amber-950 ml-2 font-bold">{queueCount}</Text>
+            </View>
+            {/* Second Line (download/adding) */}
+            <View className="flex-row justify-center items-center">
+              <View className="flex-row justify-center items-center">
+                <Text className="text-base">{`Downloading`}</Text>
+                <Text className="text-base text-red-800 ml-2 font-bold">{reduced.downloading}</Text>
+              </View>
+              <View className="mr-2 ml-2">
+                <Text>-</Text>
+              </View>
+              <View className="flex-row justify-center items-center">
+                <Text className="text-base">{`Adding To Playlist`}</Text>
+                <Text className="text-base text-green-800 ml-2 font-bold">{reduced.adding}</Text>
+              </View>
+            </View>
+          </View>
+          <AnimatedDLText />
         </View>
       )}
       <AnimatePresence>

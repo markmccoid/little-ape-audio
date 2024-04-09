@@ -101,10 +101,8 @@ export const useDownloadQStore = create<DownloadQState>((set, get) => ({
 
           const addItemFunc = await downloadFile(queuedItem);
 
-          // // Call the addItemFunc which will call the trackActions.AddNewTrack() function returned from downloadFile()
-          console.log("BEFORE ADD ITEM", queuedItem.fileName, Date.now());
+          // Call the addItemFunc which will call the trackActions.AddNewTrack() function returned from downloadFile()
           await addItemFunc();
-          console.log("AFTER ADD ITEM", queuedItem.fileName, Date.now());
 
           // Continue processing if there are more items in the queue
           if (get().queue.length > 0) {

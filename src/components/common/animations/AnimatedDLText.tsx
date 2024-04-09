@@ -3,30 +3,11 @@ import React from "react";
 import { MotiView } from "moti";
 import ProgressIndetermined from "./ProcessIndetermined";
 import { colors } from "@constants/Colors";
+import { useDownloadQStore } from "@store/store-downloadq";
 
-const AnimatedDLText = ({ displayText }: { displayText: string }) => {
+const AnimatedDLText = () => {
   return (
     <View className="flex-col justify-center items-center pb-1 flex-1">
-      <MotiView
-        from={{
-          opacity: 0.6,
-          // scale: 1,
-        }}
-        animate={{
-          opacity: 1,
-          // scale: 0.6,
-        }}
-        transition={{
-          type: "timing",
-          duration: 5000, // Duration in milliseconds
-          loop: true, // Set to true to make the animation loop infinitely
-        }}
-        className="flex-1"
-      >
-        <Text className="text-base ml-1 mr-2 flex-1" numberOfLines={1} lineBreakMode="tail">
-          {displayText || "Finalizing Adding Tracks..."}
-        </Text>
-      </MotiView>
       <View className="flex-row items-center justify-center">
         <MotiView
           from={{

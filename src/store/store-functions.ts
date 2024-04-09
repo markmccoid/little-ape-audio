@@ -70,7 +70,7 @@ export const addTrack =
       await new Promise((resolve) => setTimeout(resolve, 100)); // Adjust the timeout as needed
     }
     //!!
-    console.log(`${filename}-ADD TRACK START`, Date.now());
+    // console.log(`${filename}-ADD TRACK START`, Date.now());
     //~ -- If not locked - SET locked and move onto the function
     isCriticalSectionLocked = true;
     // variable for final tags
@@ -238,7 +238,7 @@ export const addTrack =
     } finally {
       isCriticalSectionLocked = false;
     }
-    console.log(`${filename}-ADD TRACK DONE`, Date.now());
+    // console.log(`${filename}-ADD TRACK DONE`, Date.now());
   };
 
 //~~ -------------------------------------
