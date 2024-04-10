@@ -4,11 +4,15 @@ import { getDropboxFileLink } from "@utils/dropboxUtils";
 import { downloadFileWProgress } from "./data/fileSystemAccess";
 import { AudioSourceType } from "@app/audio/dropbox";
 import { DownloadProgressCallbackResult } from "react-native-fs";
-import { beginAsyncEvent } from "react-native/Libraries/Performance/Systrace";
 
+type CompletedDownload = {
+  fileId: string;
+  folderPath: string;
+};
 type DownloadItem = {
   fileId: string;
   playlistId: string;
+  folderPath: string;
   // downloading - activly being downloaded.  Can be stopped
   // adding - being added to a playlist. Can NOT be stopped
   processStatus: "downloading" | "adding";
@@ -32,9 +36,10 @@ export type DownloadQueueItem = {
 type DownloadQState = {
   activeTasks: DownloadItem[];
   queue: DownloadQueueItem[];
-  completedDownloads: string[];
+  completedDownloads: CompletedDownload[];
   maxActiveDownloads: number;
   isDownloading: boolean;
+  stopAllInProgress: boolean;
   actions: {
     addToQueue: ({
       filePathLower,
@@ -59,10 +64,12 @@ export const useDownloadQStore = create<DownloadQState>((set, get) => ({
   completedDownloads: [],
   maxActiveDownloads: 4,
   isDownloading: false,
+  stopAllInProgress: false,
   actions: {
     addToQueue: (downloadProps) => {
       // check to see if passed file in completed download, return if it is.
-      if (get().completedDownloads.includes(downloadProps.fileId)) return;
+      const completedFileIds = get().completedDownloads.map((el) => el.fileId);
+      if (completedFileIds.includes(downloadProps.fileId)) return;
 
       set((state) => ({ queue: [...state.queue, downloadProps], isDownloading: true }));
       get().actions.processQueue(); // Trigger processing after adding a new item
@@ -88,6 +95,7 @@ export const useDownloadQStore = create<DownloadQState>((set, get) => ({
             {
               fileId: queuedItem.fileId,
               playlistId: queuedItem.playlistId,
+              folderPath: queuedItem.pathIn,
               processStatus: "downloading",
               stopDownload: () => {},
             },
@@ -112,11 +120,14 @@ export const useDownloadQStore = create<DownloadQState>((set, get) => ({
           // We are done with this track, remove it from the activeTasks array and add it to the completedDownloads array
           set((state) => ({
             activeTasks: state.activeTasks.filter((task) => task.fileId !== queuedItem.fileId),
-            completedDownloads: [...state.completedDownloads, queuedItem.fileId],
+            completedDownloads: [
+              ...state.completedDownloads,
+              { fileId: queuedItem.fileId, folderPath: queuedItem.pathIn },
+            ],
           }));
           // If there are no more activeTasks, then we are done downloading and we can set isDownloading to false
           if (get().activeTasks.length === 0) {
-            set({ isDownloading: false });
+            set({ isDownloading: false, stopAllInProgress: false });
           }
           // console.log("END Processing Queue", get().downloaded);
         } catch (err) {
@@ -129,7 +140,7 @@ export const useDownloadQStore = create<DownloadQState>((set, get) => ({
     },
     stopAllDownloads: () => {
       // Clear the queue.  This only stops future items from starting.
-      set({ queue: [] });
+      set({ queue: [], stopAllInProgress: true });
     },
   },
 }));

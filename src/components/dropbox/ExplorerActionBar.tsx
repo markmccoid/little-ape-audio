@@ -8,9 +8,7 @@ import {
   EyeOutlineIcon,
 } from "../common/svg/Icons";
 import { MotiView } from "moti";
-import { colors } from "@constants/Colors";
 import { useDropboxStore } from "@store/store-dropbox";
-import { useShallow } from "zustand/react/shallow";
 import { AudioSourceType } from "@app/audio/dropbox";
 import useDownloadQStore from "@store/store-downloadq";
 
@@ -20,6 +18,8 @@ type Props = {
   // total files in directory
   fileCount: number;
   folderCount: number;
+  // pathIn from ExplorerAllContainer.tsx
+  folderPath: string;
   // how many files have been downloaded
   filesDownloaded: number;
   displayMetadata: boolean;
@@ -33,6 +33,7 @@ const ExplorerActionBar = ({
   audioSource,
   fileCount,
   folderCount,
+  folderPath,
   filesDownloaded,
   displayMetadata,
   hasMetadata,
@@ -48,14 +49,29 @@ const ExplorerActionBar = ({
   //! download queue info
   const stopAllDownloads = useDownloadQStore((state) => state.actions.stopAllDownloads);
   const isDownloading = useDownloadQStore((state) => state.activeTasks.length > 0);
+  const stopAllInProgress = useDownloadQStore((state) => state.stopAllInProgress);
+  // -- Start Find out if this path has active tasks
+  const taskFolderIds = useDownloadQStore((state) => [
+    ...new Set(state.activeTasks.map((task) => task.folderPath)),
+  ]);
+  const pathHasActiveTasks = taskFolderIds.includes(folderPath);
+  // -- END has active tasks
+  // console.log("pathHasActiveTasks", pathHasActiveTasks);
   // lets us know that we are on the last item in the queue and it is being added to a playlist, can't be stopped now
-  const lastTaskAdding = useDownloadQStore(
-    (state) => state.activeTasks.length === 1 && state.activeTasks[0].processStatus === "adding"
+  const pathTasks = useDownloadQStore((state) =>
+    state.activeTasks.filter((task) => task.folderPath === folderPath)
   );
-  const downloadedItemCount = useDownloadQStore((state) => state.completedDownloads.length);
+  const lastTaskAdding = pathTasks.length === 1 && pathTasks[0].processStatus === "adding";
+  // const lastTaskAdding = useDownloadQStore(
+  //   (state) => state.activeTasks.length === 1 && state.activeTasks[0].processStatus === "adding"
+  // );
+  const downloadedItemCount = useDownloadQStore(
+    (state) => state.completedDownloads.filter((el) => el.folderPath === folderPath).length
+  );
   const finalDownloadedCount = (filesDownloaded || 0) + (downloadedItemCount || 0);
   const undownloadedFileCount = fileCount - (finalDownloadedCount || 0);
 
+  // console.log("filesDownloaded", filesDownloaded, finalDownloadedCount, undownloadedFileCount);
   //!
 
   // console.log("ActionBAr tasks", metadataCurrentTask, metadataProcessingFlag);
@@ -87,7 +103,7 @@ const ExplorerActionBar = ({
       {/* DOWNLOAD ALL Button */}
       {fileCount > 0 && (
         <View className="flex-shrink flex justify-end">
-          {!isDownloading && (
+          {!pathHasActiveTasks && (
             <TouchableOpacity
               className="flex-row flex-grow items-center space-x-1 pl-2 py-1"
               style={{ opacity: undownloadedFileCount === 0 ? 0.5 : 1 }}
@@ -98,16 +114,17 @@ const ExplorerActionBar = ({
               <Text>All</Text>
             </TouchableOpacity>
           )}
-          {isDownloading && !lastTaskAdding && (
+          {isDownloading && !lastTaskAdding && pathHasActiveTasks && (
             <TouchableOpacity
               className="flex-row flex-grow items-center space-x-1 pl-2 py-1 "
               onPress={() => stopAllDownloads()}
+              disabled={stopAllInProgress}
             >
-              <CloseIcon />
-              <Text>Stop</Text>
+              {!stopAllInProgress && <CloseIcon />}
+              <Text>{`${stopAllInProgress ? "Stopping..." : "Stop"}`}</Text>
             </TouchableOpacity>
           )}
-          {lastTaskAdding && (
+          {lastTaskAdding && pathHasActiveTasks && (
             <MotiView
               className="flex-row items-center py-1"
               from={{ rotate: "0deg", opacity: 0.6 }}

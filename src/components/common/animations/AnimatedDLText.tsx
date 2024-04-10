@@ -3,7 +3,6 @@ import React from "react";
 import { MotiView } from "moti";
 import ProgressIndetermined from "./ProcessIndetermined";
 import { colors } from "@constants/Colors";
-import { useDownloadQStore } from "@store/store-downloadq";
 
 const AnimatedDLText = () => {
   return (

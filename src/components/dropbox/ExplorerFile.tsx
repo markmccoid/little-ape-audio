@@ -26,7 +26,9 @@ type Props = {
 const ExplorerFile = ({ file, playlistId, audioSource, pathIn, currFolderText }: Props) => {
   //! NEW
   const activeTasks = useDownloadQStore((state) => state.activeTasks);
-  const completedDownloads = useDownloadQStore((state) => state.completedDownloads);
+  const completedDownloads = useDownloadQStore((state) =>
+    state.completedDownloads.map((el) => el.fileId)
+  );
   const qActions = useDownloadQStore((state) => state.actions);
   //!
   const isDropbox = !!(audioSource === "dropbox");

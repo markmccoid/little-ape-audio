@@ -1,7 +1,7 @@
 import { View, Text, FlatList, NativeSyntheticEvent, NativeScrollEvent, Alert } from "react-native";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import uuid from "react-native-uuid";
-import { Link, router, useLocalSearchParams, useRouter } from "expo-router";
+import { Link, router, useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { DropboxDir, FileEntry, FolderEntry } from "../../utils/dropboxUtils";
 import ExplorerActionBar from "./ExplorerActionBar";
 // import { useTrackActions } from "../../store/store";
@@ -176,6 +176,7 @@ const ExplorerAllContainer = ({
           folders: filesFolders.folders,
           files: filesFolders.files,
         });
+
         setFilesFolderObj(finalFolderFileList);
         setFlatlistData([...finalFolderFileList.folders, ...finalFolderFileList.files]);
         /** DROPBOX ROUTE */
@@ -210,6 +211,35 @@ const ExplorerAllContainer = ({
     setDownloadAllId(undefined);
     getFiles();
   }, [pathIn]);
+
+  //~ ===========================
+  //~ IMPORTANT Effect - This keeps the list of files and folders tagged properly
+  //~ When we navigate back to a screen, we don't trigger the useEffect above that runs getFiles()
+  //~ This is fine in the sense that the state is cached and we have our files, BUT we don't have the
+  //~ updated isDownloaded tag for files.  We must update it.
+  //~ Notice, when we go unfocused, we are clearing our completed queue.  The completed queue is only needed for items
+  //~ downloaded while on the screen.
+  //~ ===========================
+  useFocusEffect(
+    React.useCallback(() => {
+      // Code to be executed when the screen comes into focus
+      setFilesFolderObj((prev) => {
+        if (prev?.files.length > 0) {
+          const finalFolderFileList = tagFilesAndFolders({
+            folders: prev.folders,
+            files: prev.files,
+          });
+          setFlatlistData([...finalFolderFileList.folders, ...finalFolderFileList.files]);
+          return finalFolderFileList;
+        }
+      });
+
+      return () => {
+        // Cleanup code to be executed when the screen goes out of focus
+        qActions.clearCompletedDownloads();
+      };
+    }, [])
+  );
 
   //~ ====================
   //~ == Navigate forward in Dropbox ==
@@ -312,6 +342,7 @@ const ExplorerAllContainer = ({
           filesDownloaded={
             flatlistData.filter((el) => el[".tag"] === "file" && el.alreadyDownload).length
           }
+          folderPath={pathIn}
           // showMetadata={showMetadata}
           displayMetadata={displayMetadata}
           hasMetadata={hasMetadata}
