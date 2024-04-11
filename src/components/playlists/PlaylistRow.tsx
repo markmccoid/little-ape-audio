@@ -33,6 +33,21 @@ type Props = {
   closeRow: (index: number) => void;
 };
 const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRow }: Props) => {
+  const [touchStartX, setTouchStartX] = useState(0);
+
+  const handleTouchStart = (event) => {
+    setTouchStartX(event.nativeEvent.pageX);
+  };
+
+  const handleTouchEnd = (event) => {
+    const dx = Math.abs(event.nativeEvent.pageX - touchStartX);
+    if (dx < 15) {
+      // Handle the press event
+      onPlaylistSelect(playlist.id);
+    }
+  };
+
+  //!! END TRacking
   const trackActions = useTrackActions();
   const playbackActions = usePlaybackStore((state) => state.actions);
   const currentPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
@@ -106,15 +121,15 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
               locations={isActive ? [0.4, 0.7, 1] : [0.001, 0.002, 1]}
             >
               <View
-                className={`flex-row flex-1  border-r border-r-amber-800 ${
-                  // isActive ? "bg-amber-300" : "bg-amber-50"
-                  isActive
-                }`}
+                className={`flex-row flex-1  border-r border-r-amber-800`}
                 // style={{ backgroundColor: isActive ? playlistColors.gradientTop : "" }}
               >
                 <Pressable
                   className="flex-1 flex-row pt-2 pb-3 px-2"
-                  onPress={async () => await onPlaylistSelect(playlist.id)}
+                  // onPress={async () => await onPlaylistSelect(playlist.id)}
+                  onTouchStart={handleTouchStart}
+                  // onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
                 >
                   {/* IMAGE */}
                   <PlaylistImage style={styles.trackImage} playlistId={playlist.id} noTransition />
@@ -193,7 +208,6 @@ function RenderRight({
     outputRange: [0, 1.1, 1.8],
     extrapolate: "clamp",
   });
-
   return (
     <RNAnimated.View
       className="flex-row items-center justify-center w-[82] bg-amber-200 "

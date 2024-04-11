@@ -35,7 +35,7 @@ const PlaylistContainer = () => {
   // ]);
   const activeTasks = useDownloadQStore((state) => state.activeTasks);
   // console.log("activeTasks", activeTasks);
-  const reduced = activeTasks
+  const activeTasksCountObj: { downloading: number; adding: number } | {} = activeTasks
     ? activeTasks.reduce(
         (final, curr) => {
           if (curr.processStatus === "downloading") {
@@ -149,18 +149,20 @@ const PlaylistContainer = () => {
   //~ --------------------------
   //~ Swipeable auto close code
   //~ --------------------------
-  let prevOpenedRow: Swipeable = undefined;
-  let renderRowRefs: Swipeable[] = [];
+  // let prevOpenedRow: Swipeable = undefined;
+  // let renderRowRefs: Swipeable[] = [];
+  const prevOpenedRow = useRef<Swipeable>(undefined);
+  const renderRowRefs = useRef<Swipeable[]>([]);
 
   const closeRow = (index) => {
-    if (prevOpenedRow && prevOpenedRow !== renderRowRefs[index]) {
-      prevOpenedRow.close();
+    if (prevOpenedRow.current && prevOpenedRow.current !== renderRowRefs.current[index]) {
+      prevOpenedRow.current.close();
     }
-    prevOpenedRow = renderRowRefs[index];
+    prevOpenedRow.current = renderRowRefs[index];
   };
   const closeAllRows = () => {
-    renderRowRefs.forEach((rowRef) => {
-      rowRef.close();
+    renderRowRefs.current.forEach((rowRef) => {
+      if (rowRef) rowRef.close();
     });
   };
   //~ --------------------------
@@ -191,7 +193,7 @@ const PlaylistContainer = () => {
           playlist={item}
           onPlaylistSelect={handleRowSelect}
           index={index}
-          renderRowRefs={renderRowRefs}
+          renderRowRefs={renderRowRefs.current}
           closeRow={closeRow}
         />
       </MotiView>
@@ -261,14 +263,18 @@ const PlaylistContainer = () => {
             <View className="flex-row justify-center items-center">
               <View className="flex-row justify-center items-center">
                 <Text className="text-base">{`Downloading`}</Text>
-                <Text className="text-base text-red-800 ml-2 font-bold">{reduced.downloading}</Text>
+                <Text className="text-base text-red-800 ml-2 font-bold">
+                  {activeTasksCountObj.downloading}
+                </Text>
               </View>
               <View className="mr-2 ml-2">
                 <Text>-</Text>
               </View>
               <View className="flex-row justify-center items-center">
                 <Text className="text-base">{`Adding To Playlist`}</Text>
-                <Text className="text-base text-green-800 ml-2 font-bold">{reduced.adding}</Text>
+                <Text className="text-base text-green-800 ml-2 font-bold">
+                  {activeTasksCountObj.adding}
+                </Text>
               </View>
             </View>
           </View>

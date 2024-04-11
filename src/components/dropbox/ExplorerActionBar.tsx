@@ -46,7 +46,7 @@ const ExplorerActionBar = ({
   const metadataCurrentTask = useDropboxStore(
     (state) => state.folderMetadataProcessingInfo.currentTask
   );
-  //! download queue info
+  //! START download queue info ---------------------------------
   const stopAllDownloads = useDownloadQStore((state) => state.actions.stopAllDownloads);
   const isDownloading = useDownloadQStore((state) => state.activeTasks.length > 0);
   const stopAllInProgress = useDownloadQStore((state) => state.stopAllInProgress);
@@ -72,7 +72,7 @@ const ExplorerActionBar = ({
   const undownloadedFileCount = fileCount - (finalDownloadedCount || 0);
 
   // console.log("filesDownloaded", filesDownloaded, finalDownloadedCount, undownloadedFileCount);
-  //!
+  //! END download queue info ---------------------------------
 
   // console.log("ActionBAr tasks", metadataCurrentTask, metadataProcessingFlag);
   return (
