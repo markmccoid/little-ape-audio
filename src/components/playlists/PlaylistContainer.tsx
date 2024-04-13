@@ -141,9 +141,10 @@ const PlaylistContainer = () => {
       return;
     }
     route.push({ pathname: "/audio/player", params: { playlistId } });
+    // Need to delay since should really come after setting curr playlist, but if we do it after
+    // and the setCurrPlaylist gets colors, user could see blank if navigates back to playlistContainer before done
+    setTimeout(() => setIsSelectingRow(false), 100);
     await setCurrPlaylist(playlistId);
-    setIsSelectingRow(false);
-    // setTimeout(() => setUpdate(false), 500);
   };
 
   //~ --------------------------
@@ -172,13 +173,13 @@ const PlaylistContainer = () => {
   const renderItem = ({ item, index }) => {
     return (
       <MotiView
-        from={{ opacity: 0 }}
+        from={{ opacity: 0.5 }}
         key={`${item.id}-${index}-${isSelectingRow}`}
         animate={{ opacity: 1 }}
         transition={{
           type: "timing",
           duration: 300,
-          delay: 25 * index,
+          delay: 20 * index,
         }}
         style={{
           flex: 1,
@@ -288,7 +289,7 @@ const PlaylistContainer = () => {
             from={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            exitTransition={{ type: "timing", duration: 400 }}
+            exitTransition={{ type: "timing", duration: 250 }}
             className="flex-1"
           >
             <FlatList

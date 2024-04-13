@@ -100,6 +100,8 @@ export const downloadFileWProgress = async (
       begin: (dl) => {},
       progress: progress,
       progressInterval: 100,
+      progressDivider: 10,
+      discretionary: true,
     });
 
     const stopDownload = () => rnfs.stopDownload(res.jobId);

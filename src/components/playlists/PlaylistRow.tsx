@@ -69,6 +69,7 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
             if (currentPlaylistId === playlist.id) {
               await playbackActions.resetPlaybackStore();
             }
+            setIsDeleteed(true);
             await trackActions.removePlaylist(playlist.id);
           },
         },
@@ -82,7 +83,7 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
   // }
   return (
     <AnimatePresence>
-      {/* {isDeleted && <MotiView key={2} from={{ scale: 1 }} animate={{ scale: 0 }} />} */}
+      {isDeleted && <MotiView key={2} from={{ scale: 1 }} animate={{ scale: 0 }} />}
 
       {
         <MotiView
