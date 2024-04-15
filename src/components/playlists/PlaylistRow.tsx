@@ -128,9 +128,10 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
                 <Pressable
                   className="flex-1 flex-row pt-2 pb-3 px-2"
                   // onPress={async () => await onPlaylistSelect(playlist.id)}
-                  onTouchStart={handleTouchStart}
+                  onPressIn={handleTouchStart}
                   // onTouchMove={handleTouchMove}
-                  onTouchEnd={handleTouchEnd}
+                  // onTouchEnd={handleTouchEnd}
+                  onPressOut={handleTouchEnd}
                 >
                   {/* IMAGE */}
                   <PlaylistImage style={styles.trackImage} playlistId={playlist.id} noTransition />
