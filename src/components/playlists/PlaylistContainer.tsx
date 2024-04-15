@@ -22,7 +22,6 @@ import { useSettingStore } from "@store/store-settings";
 import { ChevronDownIcon } from "@components/common/svg/Icons";
 import useDownloadQStore from "@store/store-downloadq";
 import AnimatedDLText from "@components/common/animations/AnimatedDLText";
-const { width, height: screenHeight } = Dimensions.get("window");
 
 const PlaylistContainer = () => {
   const route = useRouter();

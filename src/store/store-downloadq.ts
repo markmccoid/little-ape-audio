@@ -136,7 +136,8 @@ export const useDownloadQStore = create<DownloadQState>((set, get) => ({
       }
     },
     clearCompletedDownloads: () => {
-      set({ completedDownloads: [], isDownloading: false });
+      // Called from app/audio/dropbox/index.tsx and from ExplorerAllContainer.tsx
+      set({ completedDownloads: [] });
     },
     stopAllDownloads: () => {
       // Clear the queue.  This only stops future items from starting.
