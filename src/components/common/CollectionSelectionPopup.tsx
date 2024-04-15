@@ -3,7 +3,6 @@ import React, { useEffect } from "react";
 import { MotiView } from "moti";
 import { useTempStore, useTracksStore } from "@store/store";
 import { useSettingStore } from "@store/store-settings";
-import { exists } from "react-native-fs";
 import { getColorLuminance, getTextColor } from "@utils/otherUtils";
 import { CollectionItem } from "@store/types";
 import { colors } from "@constants/Colors";

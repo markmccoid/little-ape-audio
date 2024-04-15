@@ -8,7 +8,7 @@ import { DownloadProgress, downloadFileWProgress } from "../../store/data/fileSy
 import { usePlaybackStore, useTrackActions } from "../../store/store";
 import * as Progress from "react-native-progress";
 import { AudioSourceType } from "@app/audio/dropbox";
-import { DownloadProgressCallbackResult } from "react-native-fs";
+import { DownloadProgressCallbackResultT } from "@dr.pogodin/react-native-fs";
 import useDownloadQStore, { DownloadQueueItem } from "@store/store-downloadq";
 import { MotiView } from "moti";
 import MemoAnimatedAsterisk from "@components/common/animations/AnimatedAsterisk";
@@ -107,7 +107,7 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn, currFolderText }:
       await resetPlaybackStore();
     }
     // Progress callback
-    const onHandleProgress = (progressData: DownloadProgressCallbackResult) => {
+    const onHandleProgress = (progressData: DownloadProgressCallbackResultT) => {
       setProgress({
         downloadProgress: progressData.bytesWritten / progressData.contentLength,
         bytesExpected: progressData.contentLength,

@@ -2,7 +2,12 @@
 // import { useTracksStore } from "@store/store";
 // import { FileEntry, getDropboxFileLink } from "@utils/dropboxUtils";
 import * as FileSystem from "expo-file-system";
-import rnfs, { DownloadProgressCallbackResult } from "react-native-fs";
+// import rnfs, { DownloadProgressCallbackResult } from "react-native-fs";
+import {
+  downloadFile,
+  stopDownload as stopDownloadrnfs,
+  DownloadProgressCallbackResultT,
+} from "@dr.pogodin/react-native-fs";
 import { AudioSourceType } from "@app/audio/dropbox";
 import { getAccessToken } from "@utils/googleUtils";
 
@@ -80,7 +85,7 @@ export type DownloadProgress = {
 export const downloadFileWProgress = async (
   downloadLink: string,
   filename: string,
-  progress: (res: DownloadProgressCallbackResult) => void,
+  progress: (res: DownloadProgressCallbackResultT) => void,
   audioSource: AudioSourceType
 ) => {
   const cleanFileName = getCleanFileName(filename);
@@ -93,7 +98,7 @@ export const downloadFileWProgress = async (
     : downloadLink;
 
   try {
-    const res = rnfs.downloadFile({
+    const res = downloadFile({
       fromUrl: downloadUri,
       toFile: fileUri,
       ...includeHeaders,
@@ -104,7 +109,7 @@ export const downloadFileWProgress = async (
       discretionary: true,
     });
 
-    const stopDownload = () => rnfs.stopDownload(res.jobId);
+    const stopDownload = () => stopDownloadrnfs(res.jobId);
     const startDownload = async () => await res.promise;
     return { cleanFileName, stopDownload, startDownload };
   } catch (err) {
