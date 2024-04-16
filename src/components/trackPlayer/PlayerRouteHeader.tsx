@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import IOSBack from "@components/common/svg/IOSBack";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import usePlaylistColors from "hooks/usePlaylistColors";
+import { MotiView } from "moti";
 
 const PlayerHeaderComponent = ({ playlistId }: { playlistId: string }) => {
   const insets = useSafeAreaInsets();
@@ -15,7 +16,10 @@ const PlayerHeaderComponent = ({ playlistId }: { playlistId: string }) => {
   const playlistColors = usePlaylistColors(playlistId);
 
   return (
-    <View
+    <MotiView
+      // from={{ opacity: 0.9 }}
+      // animate={{ opacity: 1 }}
+      // transition={{ type: "timing", duration: 1000 }}
       className={`flex-row px-2 items-center justify-start`}
       style={{ backgroundColor: playlistColors?.secondary?.color, paddingTop: insets.top - 5 }}
     >
@@ -49,7 +53,7 @@ const PlayerHeaderComponent = ({ playlistId }: { playlistId: string }) => {
           </Pressable>
         </Link>
       </View>
-    </View>
+    </MotiView>
   );
 };
 

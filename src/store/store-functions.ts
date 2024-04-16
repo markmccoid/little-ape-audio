@@ -76,11 +76,9 @@ export const addTrack =
     // variable for final tags
     let finalTags: AudioMetadata;
     // Get metadata for passed audio file
-
     const tags = (await getAudioFileTags(
       `${FileSystem.documentDirectory}${fileURI}`
     )) as AudioMetadata;
-
     // process track number info
     // let trackNum = tags.trackRaw;
     let trackNum: number | string = "";
@@ -137,7 +135,6 @@ export const addTrack =
         externalMetadata.fullPath = `${pathIn}`;
       }
     }
-
     //- merge LAABMeta with the final tag info, this only merges like keys
     //- adding chapters after
     if (LAABMeta) {
@@ -212,7 +209,6 @@ export const addTrack =
       await TrackPlayer.reset();
       await TrackPlayer.add([trackPlayerTrack]);
       await TrackPlayer.skip(0);
-
       /**
        * PLAYLIST
        *  - id - uuid

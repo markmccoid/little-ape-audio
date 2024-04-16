@@ -99,7 +99,7 @@ const TrackPlayerScroller = () => {
           >
             {isLoaded && (
               <MotiView
-                from={{ opacity: 0.5, scale: 0.8 }}
+                from={{ opacity: 0.5, scale: 1 }}
                 animate={{
                   opacity: currIndex === index ? 1 : 0.5,
                   scale: currIndex === index ? 1 : 0.7,

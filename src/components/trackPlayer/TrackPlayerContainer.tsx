@@ -58,6 +58,7 @@ const TrackPlayerContainer = () => {
           </View>
         ) : null}
       </LinearGradient>
+
       <View className=" justify-end mb-[30] mt-[25]">
         {isLoaded ? (
           <MotiView

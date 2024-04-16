@@ -62,7 +62,7 @@ export const useDownloadQStore = create<DownloadQState>((set, get) => ({
   queue: [],
   activeTasks: [],
   completedDownloads: [],
-  maxActiveDownloads: 4,
+  maxActiveDownloads: 8,
   isDownloading: false,
   stopAllInProgress: false,
   actions: {

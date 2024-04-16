@@ -39,11 +39,13 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
     setTouchStartX(event.nativeEvent.pageX);
   };
 
-  const handleTouchEnd = (event) => {
+  //!! Maybe need to set state in PlaylistContainer (buttonsDisabled) so that while we are "selecting"
+  //!! a playlist no other button can be pressed
+  const handleTouchEnd = async (event) => {
     const dx = Math.abs(event.nativeEvent.pageX - touchStartX);
-    if (dx < 15) {
+    if (dx < 10) {
       // Handle the press event
-      onPlaylistSelect(playlist.id);
+      await onPlaylistSelect(playlist.id);
     }
   };
 
@@ -131,7 +133,7 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
                   onPressIn={handleTouchStart}
                   // onTouchMove={handleTouchMove}
                   // onTouchEnd={handleTouchEnd}
-                  onPressOut={handleTouchEnd}
+                  onPressOut={async (e) => await handleTouchEnd(e)}
                 >
                   {/* IMAGE */}
                   <PlaylistImage style={styles.trackImage} playlistId={playlist.id} noTransition />
