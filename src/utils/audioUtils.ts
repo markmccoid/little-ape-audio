@@ -13,7 +13,13 @@ import { getFileExtension } from "./otherUtils";
 //--=================================
 export const getAudioFileTags = async (fullFileURI: string) => {
   const fileExt = getFileExtension(fullFileURI);
-  let durationSeconds = await getAudioFileDuration(fullFileURI);
+  let durationSeconds = 0;
+  try {
+    console.log("druation start");
+    durationSeconds = await getAudioFileDuration(fullFileURI);
+  } catch (error) {
+    console.log("Error getting audio file duration", error);
+  }
 
   // fullFileURI is the full path to the audio file
   // It is expected to be in the apps storage, with the "file:///" in front
@@ -137,16 +143,26 @@ const processChapters = (
 //-- getAudioFileDuration
 //--=================================
 export const getAudioFileDuration = async (fileURI: string) => {
-  const soundObj = new Audio.Sound();
+  // const soundObj = new Audio.Sound();
+  const timeout = 1000; // 1 seconds
+  // Create a timeout promise to make sure our createAsync call doesn't hang forever.
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("Audio load timed out")), timeout)
+  );
 
   let info;
   try {
     info = await FileSystem.getInfoAsync(fileURI);
-    await soundObj.loadAsync({ uri: `${fileURI}` });
-    const metadata = (await soundObj.getStatusAsync()) as AVPlaybackStatusSuccess;
+    // Race with timeoutPromise to reject if call to duration is not resolved in 1 seconds.
+    //! Maybe if failure, don't download.  Not having duration could be a problem.
+    const { sound } = await Promise.race([
+      Audio.Sound.createAsync({ uri: fileURI }, { shouldPlay: false }),
+      timeoutPromise,
+    ]);
+    const metadata = (await sound.getStatusAsync()) as AVPlaybackStatusSuccess;
 
     const durationSeconds = metadata.durationMillis ? metadata.durationMillis / 1000 : 0;
-    await soundObj.unloadAsync();
+    await sound.unloadAsync();
     return durationSeconds;
   } catch (err) {
     console.log("Error in getAudioFileDuration ->", err);

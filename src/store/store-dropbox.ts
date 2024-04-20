@@ -843,7 +843,7 @@ export const downloadFolderMetadata = async (folders: Partial<FolderEntry>[]) =>
   // console.log(useDropboxStore.getState().folderMetadata);
 };
 
-const audioFormats = [".mp3", ".m4b", ".flac", ".wav", ".m4a", ".aac", ".aif"];
+const audioFormats = [".mp3", ".m4b", ".flac", ".wav", ".m4a", ".aac", ".aif", ".opus"];
 //~ -------------------------
 //~ downloadFolderMetadata
 //~ -------------------------

@@ -3,7 +3,7 @@ import { usePlaybackStore, useTracksStore } from "./store";
 import { getDropboxFileLink } from "@utils/dropboxUtils";
 import { downloadFileWProgress } from "./data/fileSystemAccess";
 import { AudioSourceType } from "@app/audio/dropbox";
-import { DownloadProgressCallbackResult } from "react-native-fs";
+import { DownloadProgressCallbackResultT } from "@dr.pogodin/react-native-fs";
 
 type CompletedDownload = {
   fileId: string;
@@ -171,7 +171,7 @@ const downloadFile = async (downloadProps: DownloadQueueItem) => {
     await resetPlaybackStore();
   }
   // Progress callback
-  const onHandleProgress = (progressData: DownloadProgressCallbackResult) => {
+  const onHandleProgress = (progressData: DownloadProgressCallbackResultT) => {
     useDownloadQStore.setState((state) => ({
       activeTasks: state.activeTasks.map((task) => {
         if (task.fileId === fileId) {
@@ -259,4 +259,68 @@ const downloadFile = async (downloadProps: DownloadQueueItem) => {
   }
 };
 
+export const useDownloadQStatus = ({
+  folderPath,
+  fileCount,
+  filesDownloaded,
+}: {
+  folderPath: string;
+  fileCount: number;
+  filesDownloaded: number;
+}) => {
+  console.log("useDownloadQStatus HIT");
+  const stopAllDownloads = useDownloadQStore((state) => state.actions.stopAllDownloads);
+  // const isDownloading = useDownloadQStore((state) => state.activeTasks.length > 0);
+  const stopAllInProgress = useDownloadQStore((state) => state.stopAllInProgress);
+  // -- Start Find out if this path has active tasks
+  const taskFolderIds = useDownloadQStore((state) => [
+    ...new Set(state.activeTasks.map((task) => task.folderPath)),
+  ]);
+  const pathHasActiveTasks = taskFolderIds.includes(folderPath);
+  // -- END has active tasks
+
+  // lets us know that we are on the last item in the queue and it is being added to a playlist, can't be stopped now
+  const pathTasks = useDownloadQStore((state) =>
+    state.activeTasks.filter((task) => task.folderPath === folderPath)
+  );
+  const lastTaskAdding = pathTasks.length === 1 && pathTasks[0].processStatus === "adding";
+  // const lastTaskAdding = useDownloadQStore(
+  //   (state) => state.activeTasks.length === 1 && state.activeTasks[0].processStatus === "adding"
+  // );
+  const downloadedItemCount = useDownloadQStore(
+    (state) => state.completedDownloads.filter((el) => el.folderPath === folderPath).length
+  );
+  const finalDownloadedCount = (filesDownloaded || 0) + (downloadedItemCount || 0);
+  const undownloadedFileCount = fileCount - (finalDownloadedCount || 0);
+  return {
+    stopAllDownloads,
+    pathHasActiveTasks,
+    stopAllInProgress,
+    lastTaskAdding,
+    undownloadedFileCount,
+  };
+};
+
+export const useDownloadQDownloadCounts = ({
+  folderPath,
+  fileCount,
+  filesDownloaded,
+}: {
+  folderPath: string;
+  fileCount: number;
+  filesDownloaded: number;
+}) => {
+  // console.log("!!!DownloadCounts HIT", folderPath);
+  const stopAllDownloads = useDownloadQStore((state) => state.actions.stopAllDownloads);
+  const downloadedItemCount = useDownloadQStore(
+    (state) => state.completedDownloads.filter((el) => el.folderPath === folderPath).length
+  );
+  const finalDownloadedCount = (filesDownloaded || 0) + (downloadedItemCount || 0);
+  const undownloadedFileCount = fileCount - (finalDownloadedCount || 0);
+
+  return {
+    stopAllDownloads,
+    undownloadedFileCount,
+  };
+};
 export default useDownloadQStore;

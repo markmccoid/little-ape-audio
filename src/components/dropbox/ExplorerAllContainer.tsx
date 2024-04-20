@@ -395,7 +395,7 @@ const ExplorerAllContainer = ({
   );
 };
 
-export default ExplorerAllContainer;
+export default React.memo(ExplorerAllContainer);
 
 function goBackInPath(path: string, delimiter: string = "/") {
   const lastSlash = path.lastIndexOf(delimiter);

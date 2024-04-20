@@ -10,7 +10,10 @@ import {
 import { MotiView } from "moti";
 import { useDropboxStore } from "@store/store-dropbox";
 import { AudioSourceType } from "@app/audio/dropbox";
-import useDownloadQStore from "@store/store-downloadq";
+import useDownloadQStore, {
+  useDownloadQDownloadCounts,
+  useDownloadQStatus,
+} from "@store/store-downloadq";
 
 type Props = {
   // currentPath: string;
@@ -46,32 +49,49 @@ const ExplorerActionBar = ({
   const metadataCurrentTask = useDropboxStore(
     (state) => state.folderMetadataProcessingInfo.currentTask
   );
+  const isDownloading = useDownloadQStore((state) => state.isDownloading);
+  const lastTaskAdding = false;
+  const pathHasActiveTasks = false;
+  const stopAllInProgress = false;
+  // const {
+  //   lastTaskAdding,
+  //   pathHasActiveTasks,
+  //   stopAllInProgress,
+  // } = useDownloadQStatus({
+  //   folderPath,
+  //   fileCount,
+  //   filesDownloaded,
+  // });
+  const { stopAllDownloads, undownloadedFileCount } = useDownloadQDownloadCounts({
+    folderPath,
+    fileCount,
+    filesDownloaded,
+  });
   //! START download queue info ---------------------------------
-  const stopAllDownloads = useDownloadQStore((state) => state.actions.stopAllDownloads);
-  const isDownloading = useDownloadQStore((state) => state.activeTasks.length > 0);
-  const stopAllInProgress = useDownloadQStore((state) => state.stopAllInProgress);
-  // -- Start Find out if this path has active tasks
-  const taskFolderIds = useDownloadQStore((state) => [
-    ...new Set(state.activeTasks.map((task) => task.folderPath)),
-  ]);
-  const pathHasActiveTasks = taskFolderIds.includes(folderPath);
-  // -- END has active tasks
-  // console.log("pathHasActiveTasks", pathHasActiveTasks);
-  // lets us know that we are on the last item in the queue and it is being added to a playlist, can't be stopped now
-  const pathTasks = useDownloadQStore((state) =>
-    state.activeTasks.filter((task) => task.folderPath === folderPath)
-  );
-  const lastTaskAdding = pathTasks.length === 1 && pathTasks[0].processStatus === "adding";
-  // const lastTaskAdding = useDownloadQStore(
-  //   (state) => state.activeTasks.length === 1 && state.activeTasks[0].processStatus === "adding"
-  // );
-  const downloadedItemCount = useDownloadQStore(
-    (state) => state.completedDownloads.filter((el) => el.folderPath === folderPath).length
-  );
-  const finalDownloadedCount = (filesDownloaded || 0) + (downloadedItemCount || 0);
-  const undownloadedFileCount = fileCount - (finalDownloadedCount || 0);
+  // const stopAllDownloads = useDownloadQStore((state) => state.actions.stopAllDownloads);
+  // // const isDownloading = useDownloadQStore((state) => state.activeTasks.length > 0);
+  // const isDownloading = useDownloadQStore((state) => state.isDownloading);
+  // const stopAllInProgress = useDownloadQStore((state) => state.stopAllInProgress);
+  // // -- Start Find out if this path has active tasks
+  // const taskFolderIds = useDownloadQStore((state) => [
+  //   ...new Set(state.activeTasks.map((task) => task.folderPath)),
+  // ]);
+  // const pathHasActiveTasks = taskFolderIds.includes(folderPath);
+  // // -- END has active tasks
 
-  // console.log("filesDownloaded", filesDownloaded, finalDownloadedCount, undownloadedFileCount);
+  // // lets us know that we are on the last item in the queue and it is being added to a playlist, can't be stopped now
+  // const pathTasks = useDownloadQStore((state) =>
+  //   state.activeTasks.filter((task) => task.folderPath === folderPath)
+  // );
+  // const lastTaskAdding = pathTasks.length === 1 && pathTasks[0].processStatus === "adding";
+  // // const lastTaskAdding = useDownloadQStore(
+  // //   (state) => state.activeTasks.length === 1 && state.activeTasks[0].processStatus === "adding"
+  // // );
+  // const downloadedItemCount = useDownloadQStore(
+  //   (state) => state.completedDownloads.filter((el) => el.folderPath === folderPath).length
+  // );
+  // const finalDownloadedCount = (filesDownloaded || 0) + (downloadedItemCount || 0);
+  // const undownloadedFileCount = fileCount - (finalDownloadedCount || 0);
   //! END download queue info ---------------------------------
 
   // console.log("ActionBAr tasks", metadataCurrentTask, metadataProcessingFlag);
@@ -149,4 +169,5 @@ const styles = StyleSheet.create({
     padding: 5,
   },
 });
-export default ExplorerActionBar;
+// export default ExplorerActionBar;
+export default React.memo(ExplorerActionBar);

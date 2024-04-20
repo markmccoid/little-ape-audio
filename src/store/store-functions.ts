@@ -76,9 +76,11 @@ export const addTrack =
     // variable for final tags
     let finalTags: AudioMetadata;
     // Get metadata for passed audio file
+    // console.log("Get Tags Start", Date.now());
     const tags = (await getAudioFileTags(
       `${FileSystem.documentDirectory}${fileURI}`
     )) as AudioMetadata;
+    // console.log("Get Tags END", Date.now());
     // process track number info
     // let trackNum = tags.trackRaw;
     let trackNum: number | string = "";
@@ -200,6 +202,7 @@ export const addTrack =
       //~ We could probably use this techinique for the other metadata
       //~ but for now above works.
       //! ----- ----- ----- ----- ----- ----- -----
+      // console.log("Trackplayer Chapter Check start");
       const trackPlayerTrack = {
         id: `${filename}`,
         filename: `${filename}`,
@@ -209,6 +212,7 @@ export const addTrack =
       await TrackPlayer.reset();
       await TrackPlayer.add([trackPlayerTrack]);
       await TrackPlayer.skip(0);
+      // console.log("Trackplayer Chapter Check END");
       /**
        * PLAYLIST
        *  - id - uuid
@@ -226,6 +230,7 @@ export const addTrack =
       const finalPlaylistId = get().actions.addNewPlaylist(plName, plAuthor, playlistId);
       try {
         await get().actions.addTracksToPlaylist(finalPlaylistId, [newAudioFile.id]);
+
         await saveToAsyncStorage("tracks", newAudioFileList);
       } catch (e) {
         console.log("Error in addTrack (store-function) adding track to playlist", playlistId);
