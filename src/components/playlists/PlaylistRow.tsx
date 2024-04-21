@@ -34,7 +34,7 @@ type Props = {
 };
 const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRow }: Props) => {
   const [touchStartX, setTouchStartX] = useState(0);
-
+  const [isSelected, setIsSelected] = useState(false);
   const handleTouchStart = (event) => {
     setTouchStartX(event.nativeEvent.pageX);
   };
@@ -45,7 +45,9 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
     const dx = Math.abs(event.nativeEvent.pageX - touchStartX);
     if (dx < 10) {
       // Handle the press event
+      setIsSelected(true);
       await onPlaylistSelect(playlist.id);
+      setIsSelected(false);
     }
   };
 
@@ -130,6 +132,7 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
                 <Pressable
                   className="flex-1 flex-row pt-2 pb-3 px-2"
                   // onPress={async () => await onPlaylistSelect(playlist.id)}
+                  disabled={isSelected}
                   onPressIn={handleTouchStart}
                   // onTouchMove={handleTouchMove}
                   // onTouchEnd={handleTouchEnd}

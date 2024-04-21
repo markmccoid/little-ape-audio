@@ -11,6 +11,8 @@ import {
 import { AudioSourceType } from "@app/audio/dropbox";
 import { getAccessToken } from "@utils/googleUtils";
 
+import ReactNativeBlobUtil from "react-native-blob-util";
+
 //--============================================================
 //-- readFileSystem - Reads file system from Root dir
 //-- starting dir is FileSystem.documentDirectory
@@ -76,7 +78,92 @@ export type DownloadProgress = {
   bytesWritten: number;
   bytesExpected: number;
 };
+//!! react-native-blob-util TEST START
+export const downloadFileBlob = async (
+  downloadLink: string,
+  filename: string,
+  progress: (received, total) => void,
+  audioSource: AudioSourceType
+) => {
+  let dirs = ReactNativeBlobUtil.fs.dirs;
+  const cleanFileName = getCleanFileName(filename);
+  // Need to use react-native-blob-utils documentDir.  rnblobUtil does NOT want the "file:///"
+  // that FileSystem from expo provides.
+  const fileUri = `${dirs.DocumentDir}/${cleanFileName}`;
+  const isGoogle = audioSource === "google";
+  const accessToken = isGoogle ? await getAccessToken() : undefined;
+  const includeHeaders = isGoogle ? { Authorization: `Bearer ${accessToken}` } : {};
 
+  const downloadUri = isGoogle
+    ? `https://www.googleapis.com/drive/v3/files/${downloadLink}?alt=media`
+    : downloadLink;
+
+  let downloadTask;
+
+  const config = {
+    path: fileUri,
+  };
+  downloadTask = ReactNativeBlobUtil.config(config);
+  const startDownload = async () => {
+    try {
+      await downloadTask
+        .fetch("GET", downloadUri, includeHeaders)
+        .progress({ interval: 100 }, (received: number, total: number) => {
+          // console.log("progress", received, total, received / total);
+          progress(received, total);
+        });
+
+      return cleanFileName;
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const stopDownload = () => {
+    if (downloadTask) {
+      downloadTask.cancel();
+    }
+  };
+
+  return { cleanFileName, startDownload, stopDownload };
+  //!! Async/Await try 1
+  // try {
+  //   const res = await ReactNativeBlobUtil.config({
+  //     path: fileUri,
+  //   })
+  //     .fetch("GET", downloadUri, { ...includeHeaders })
+  //     .progress({ interval: 100 }, (received, total) => {
+  //       console.log("progress", received, total);
+  //     });
+
+  //   console.log("The file saved to ", res.path());
+  //   const fileInfo = await FileSystem.getInfoAsync(fileUri);
+  //   console.log("fileInfo", fileInfo);
+
+  //   return cleanFileName;
+  // } catch (error) {
+  //   console.error(error);
+  // }
+  //! THEN Chain version
+  // ReactNativeBlobUtil.config({
+  //   // response data will be saved to this path if it has access right.
+  //   path: fileUri,
+  // })
+  //   .fetch("GET", downloadUri, { ...includeHeaders }) // listen to download progress event
+  //   .progress({ interval: 100 }, (received, total) => {
+  //     console.log("progress", received, total);
+  //   })
+  //   .then((res) => {
+  //     // the path should be dirs.DocumentDir + 'path-to-file.anything'
+  //     console.log("The file saved to ", res.path());
+  //     return cleanFileName;
+  //   })
+  //   .catch((error) => {
+  //     console.log(error);
+  //   });
+};
+
+//!! react-native-blob-util TEST END
 //~ ==========================================
 //~ Download a file with Progress using
 //~ react-native-fs

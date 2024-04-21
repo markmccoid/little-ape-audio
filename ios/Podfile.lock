@@ -1036,6 +1036,8 @@ PODS:
   - react-native-app-auth (7.1.0):
     - AppAuth (~> 1.6)
     - React-Core
+  - react-native-blob-util (0.19.9):
+    - React-Core
   - react-native-pager-view (6.2.3):
     - glog
     - RCT-Folly (= 2022.05.16.00)
@@ -1300,6 +1302,7 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - react-native-app-auth (from `../node_modules/react-native-app-auth`)
+  - react-native-blob-util (from `../node_modules/react-native-blob-util`)
   - react-native-pager-view (from `../node_modules/react-native-pager-view`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
@@ -1461,6 +1464,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   react-native-app-auth:
     :path: "../node_modules/react-native-app-auth"
+  react-native-blob-util:
+    :path: "../node_modules/react-native-blob-util"
   react-native-pager-view:
     :path: "../node_modules/react-native-pager-view"
   react-native-safe-area-context:
@@ -1589,6 +1594,7 @@ SPEC CHECKSUMS:
   React-logger: 0a57b68dd2aec7ff738195f081f0520724b35dab
   React-Mapbuffer: 63913773ed7f96b814a2521e13e6d010282096ad
   react-native-app-auth: 1da4b0ec30756ae1f4df8e96d2505b1ce5fbcc1f
+  react-native-blob-util: 18b510205c080a453574a7d2344d64673d0ad9af
   react-native-pager-view: d81ab2060b9caf57ca8c3a0d57467ff407cdb825
   react-native-safe-area-context: 0ee144a6170530ccc37a0fd9388e28d06f516a89
   react-native-slider: 33b8d190b59d4f67a541061bb91775d53d617d9d

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { usePlaybackStore, useTracksStore } from "./store";
 import { getDropboxFileLink } from "@utils/dropboxUtils";
-import { downloadFileWProgress } from "./data/fileSystemAccess";
+import { downloadFileBlob, downloadFileWProgress } from "./data/fileSystemAccess";
 import { AudioSourceType } from "@app/audio/dropbox";
 import { DownloadProgressCallbackResultT } from "@dr.pogodin/react-native-fs";
 
@@ -170,8 +170,8 @@ const downloadFile = async (downloadProps: DownloadQueueItem) => {
   if (playlistLoaded) {
     await resetPlaybackStore();
   }
-  // Progress callback
-  const onHandleProgress = (progressData: DownloadProgressCallbackResultT) => {
+  // Progress callback if using react-native-fs
+  const onHandleProgressRNFS = (progressData: DownloadProgressCallbackResultT) => {
     useDownloadQStore.setState((state) => ({
       activeTasks: state.activeTasks.map((task) => {
         if (task.fileId === fileId) {
@@ -185,10 +185,31 @@ const downloadFile = async (downloadProps: DownloadQueueItem) => {
     }));
   };
 
+  // Progress callback for react-native-blob-util
+  const onHandleProgress = (received: number, total: number) => {
+    useDownloadQStore.setState((state) => ({
+      activeTasks: state.activeTasks.map((task) => {
+        if (task.fileId === fileId) {
+          task.downloadProgress = received / total;
+          task.bytesExpected = total;
+          task.bytesWritten = received;
+          return task;
+        }
+        return task;
+      }),
+    }));
+  };
   // based on if google or dropbox
   const downloadLink = audioSource === "google" ? fileId : await getDropboxFileLink(filePathLower);
   // Prepare to start the download
-  const { cleanFileName, stopDownload, startDownload } = await downloadFileWProgress(
+  //! react-native-fs CODE
+  // const { cleanFileName, stopDownload, startDownload } = await downloadFileWProgress(
+  //   downloadLink,
+  //   fileName,
+  //   onHandleProgress,
+  //   audioSource
+  // );
+  const { cleanFileName, stopDownload, startDownload } = await downloadFileBlob(
     downloadLink,
     fileName,
     onHandleProgress,

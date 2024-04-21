@@ -53,6 +53,7 @@
     "react-native": "0.73.4",
     "react-native-app-auth": "^7",
     "react-native-base64": "^0.2.1",
+    "react-native-blob-util": "^0.19.9",
     "react-native-draggable-flatlist": "^4.0.1",
     "react-native-gesture-handler": "~2.14.0",
     "react-native-image-colors": "^2.3.0",

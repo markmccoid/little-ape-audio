@@ -4,7 +4,12 @@ import { FileEntry, getDropboxFileLink } from "../../utils/dropboxUtils";
 import { AsteriskIcon, CloseIcon, CloudDownloadIcon } from "../common/svg/Icons";
 import { formatBytes } from "../../utils/formatUtils";
 import { colors } from "../../constants/Colors";
-import { DownloadProgress, downloadFileWProgress } from "../../store/data/fileSystemAccess";
+import {
+  DownloadProgress,
+  downloadFileBlob,
+  downloadFileWProgress,
+  getCleanFileName,
+} from "../../store/data/fileSystemAccess";
 import { usePlaybackStore, useTrackActions } from "../../store/store";
 import * as Progress from "react-native-progress";
 import { AudioSourceType } from "@app/audio/dropbox";
@@ -86,6 +91,29 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn, currFolderText }:
   };
   //~ --- downloadFile function to download file while setting progress state --------------
   const downloadFile = async (file: FileEntry) => {
+    // const downloadLink1 = isGoogle ? file.id : await getDropboxFileLink(file.path_lower);
+    // // const cleanFileName1 = await downloadFileBlob(downloadLink1, file.name, () => {}, audioSource);
+    // const cleanFileName1 = getCleanFileName(file.name);
+    // const res = await downloadFileBlob(downloadLink1, file.name, () => {}, audioSource);
+    // const startBlobDownload = res.startDownload;
+    // const stopBlobDownload = res.stopDownload;
+    // const returnval = await startBlobDownload();
+    // console.log("returnval", returnval);
+    // try {
+    //   // Add new Track to store
+    //   await trackActions.addNewTrack({
+    //     fileURI: cleanFileName1,
+    //     filename: file.name,
+    //     sourceLocation: file.path_lower,
+    //     playlistId: playlistId,
+    //     pathIn,
+    //     currFolderText,
+    //     audioSource,
+    //   });
+    // } catch (e) {
+    //   console.log(`Error trackActions.addNewTrack for ${cleanFileName1} `, e);
+    // }
+    // return;
     //! NEW
     const downloadItem: DownloadQueueItem = {
       fileId: file.id,

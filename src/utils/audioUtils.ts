@@ -15,7 +15,6 @@ export const getAudioFileTags = async (fullFileURI: string) => {
   const fileExt = getFileExtension(fullFileURI);
   let durationSeconds = 0;
   try {
-    console.log("druation start");
     durationSeconds = await getAudioFileDuration(fullFileURI);
   } catch (error) {
     console.log("Error getting audio file duration", error);
@@ -144,7 +143,7 @@ const processChapters = (
 //--=================================
 export const getAudioFileDuration = async (fileURI: string) => {
   // const soundObj = new Audio.Sound();
-  const timeout = 1000; // 1 seconds
+  const timeout = 10000; // 10 seconds
   // Create a timeout promise to make sure our createAsync call doesn't hang forever.
   const timeoutPromise = new Promise((_, reject) =>
     setTimeout(() => reject(new Error("Audio load timed out")), timeout)
@@ -153,7 +152,7 @@ export const getAudioFileDuration = async (fileURI: string) => {
   let info;
   try {
     info = await FileSystem.getInfoAsync(fileURI);
-    // Race with timeoutPromise to reject if call to duration is not resolved in 1 seconds.
+    // Race with timeoutPromise to reject if call to duration is not resolved in 10 seconds.
     //! Maybe if failure, don't download.  Not having duration could be a problem.
     const { sound } = await Promise.race([
       Audio.Sound.createAsync({ uri: fileURI }, { shouldPlay: false }),
