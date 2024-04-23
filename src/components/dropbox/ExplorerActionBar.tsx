@@ -50,18 +50,14 @@ const ExplorerActionBar = ({
     (state) => state.folderMetadataProcessingInfo.currentTask
   );
   const isDownloading = useDownloadQStore((state) => state.isDownloading);
-  const lastTaskAdding = false;
-  const pathHasActiveTasks = false;
-  const stopAllInProgress = false;
-  // const {
-  //   lastTaskAdding,
-  //   pathHasActiveTasks,
-  //   stopAllInProgress,
-  // } = useDownloadQStatus({
-  //   folderPath,
-  //   fileCount,
-  //   filesDownloaded,
-  // });
+  // const lastTaskAdding = false;
+  // const pathHasActiveTasks = false;
+  // const stopAllInProgress = false;
+  const { lastTaskAdding, pathHasActiveTasks, stopAllInProgress } = useDownloadQStatus({
+    folderPath,
+    fileCount,
+    filesDownloaded,
+  });
   const { stopAllDownloads, undownloadedFileCount } = useDownloadQDownloadCounts({
     folderPath,
     fileCount,

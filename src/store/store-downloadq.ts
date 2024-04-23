@@ -1,7 +1,11 @@
+import { getCleanFileName } from "@store/data/fileSystemAccess";
 import { create } from "zustand";
 import { usePlaybackStore, useTracksStore } from "./store";
 import { getDropboxFileLink } from "@utils/dropboxUtils";
-import { downloadFileBlob, downloadFileWProgress } from "./data/fileSystemAccess";
+import {
+  downloadFileBlob as downloadFileBlobUtil,
+  downloadFileWProgress,
+} from "./data/fileSystemAccess";
 import { AudioSourceType } from "@app/audio/dropbox";
 import { DownloadProgressCallbackResultT } from "@dr.pogodin/react-native-fs";
 
@@ -62,7 +66,7 @@ export const useDownloadQStore = create<DownloadQState>((set, get) => ({
   queue: [],
   activeTasks: [],
   completedDownloads: [],
-  maxActiveDownloads: 8,
+  maxActiveDownloads: 3,
   isDownloading: false,
   stopAllInProgress: false,
   actions: {
@@ -209,7 +213,8 @@ const downloadFile = async (downloadProps: DownloadQueueItem) => {
   //   onHandleProgress,
   //   audioSource
   // );
-  const { cleanFileName, stopDownload, startDownload } = await downloadFileBlob(
+
+  const { task, cleanFileName, cancelDownload } = await downloadFileBlobUtil(
     downloadLink,
     fileName,
     onHandleProgress,
@@ -217,12 +222,17 @@ const downloadFile = async (downloadProps: DownloadQueueItem) => {
   );
 
   //~ Function to stop the download and update the activeTasks array (remove the task/download item)
-  const stopDownloading = () => {
-    stopDownload();
+  const stopDownloading = async () => {
+    // If there is more than one active task, then we are still downloading.
+    let isDownloading = false;
+    if (useDownloadQStore.getState().activeTasks.length > 1) {
+      isDownloading = true;
+    }
     useDownloadQStore.setState((state) => ({
       activeTasks: state.activeTasks.filter((task) => task.fileId !== fileId),
-      isDownloading: false,
+      isDownloading,
     }));
+    await cancelDownload();
   };
   // Add the stopDownloading function to the activeTasks array
   useDownloadQStore.setState((state) => ({
@@ -237,7 +247,8 @@ const downloadFile = async (downloadProps: DownloadQueueItem) => {
 
   // Start the download
   try {
-    const res = await startDownload();
+    // const res = await startDownload();
+    const res = await task;
   } catch (err) {
     throw err;
   }
@@ -289,7 +300,6 @@ export const useDownloadQStatus = ({
   fileCount: number;
   filesDownloaded: number;
 }) => {
-  console.log("useDownloadQStatus HIT");
   const stopAllDownloads = useDownloadQStore((state) => state.actions.stopAllDownloads);
   // const isDownloading = useDownloadQStore((state) => state.activeTasks.length > 0);
   const stopAllInProgress = useDownloadQStore((state) => state.stopAllInProgress);

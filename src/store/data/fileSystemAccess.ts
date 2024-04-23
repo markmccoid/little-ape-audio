@@ -98,69 +98,33 @@ export const downloadFileBlob = async (
     ? `https://www.googleapis.com/drive/v3/files/${downloadLink}?alt=media`
     : downloadLink;
 
-  let downloadTask;
+  let downloadTask: ReactNativeBlobUtil;
 
   const config = {
     path: fileUri,
   };
-  downloadTask = ReactNativeBlobUtil.config(config);
-  const startDownload = async () => {
-    try {
-      await downloadTask
-        .fetch("GET", downloadUri, includeHeaders)
-        .progress({ interval: 100 }, (received: number, total: number) => {
-          // console.log("progress", received, total, received / total);
-          progress(received, total);
-        });
 
-      return cleanFileName;
-    } catch (error) {
-      console.error(error);
-    }
+  const task = ReactNativeBlobUtil.config(config).fetch("GET", downloadUri, includeHeaders);
+  const cancelDownload = async () => {
+    await task.cancel();
   };
 
-  const stopDownload = () => {
-    if (downloadTask) {
-      downloadTask.cancel();
+  // task.progress({ interval: 10 }, (received: number, total: number) => {
+  //   progress(received, total);
+  // });
+  let lastUpdateTime = 0;
+  const updateInterval = 100; // 500 milliseconds
+  task.progress({ interval: 120 }, (received: number, total: number) => {
+    const currentTime = Date.now();
+    if (currentTime - lastUpdateTime >= updateInterval) {
+      lastUpdateTime = currentTime;
+      requestAnimationFrame(() => {
+        progress(received, total);
+      });
     }
-  };
+  });
 
-  return { cleanFileName, startDownload, stopDownload };
-  //!! Async/Await try 1
-  // try {
-  //   const res = await ReactNativeBlobUtil.config({
-  //     path: fileUri,
-  //   })
-  //     .fetch("GET", downloadUri, { ...includeHeaders })
-  //     .progress({ interval: 100 }, (received, total) => {
-  //       console.log("progress", received, total);
-  //     });
-
-  //   console.log("The file saved to ", res.path());
-  //   const fileInfo = await FileSystem.getInfoAsync(fileUri);
-  //   console.log("fileInfo", fileInfo);
-
-  //   return cleanFileName;
-  // } catch (error) {
-  //   console.error(error);
-  // }
-  //! THEN Chain version
-  // ReactNativeBlobUtil.config({
-  //   // response data will be saved to this path if it has access right.
-  //   path: fileUri,
-  // })
-  //   .fetch("GET", downloadUri, { ...includeHeaders }) // listen to download progress event
-  //   .progress({ interval: 100 }, (received, total) => {
-  //     console.log("progress", received, total);
-  //   })
-  //   .then((res) => {
-  //     // the path should be dirs.DocumentDir + 'path-to-file.anything'
-  //     console.log("The file saved to ", res.path());
-  //     return cleanFileName;
-  //   })
-  //   .catch((error) => {
-  //     console.log(error);
-  //   });
+  return { task, cancelDownload, cleanFileName };
 };
 
 //!! react-native-blob-util TEST END

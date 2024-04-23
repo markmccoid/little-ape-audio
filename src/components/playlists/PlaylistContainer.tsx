@@ -26,27 +26,27 @@ import AnimatedDLText from "@components/common/animations/AnimatedDLText";
 const PlaylistContainer = () => {
   const route = useRouter();
   //! downloadq
-  const isDownloading = useDownloadQStore((state) => state.isDownloading);
-  const queueCount = useDownloadQStore((state) => state.queue.length);
+  // const isDownloading = useDownloadQStore((state) => state.isDownloading);
+  // const queueCount = useDownloadQStore((state) => state.queue.length);
 
-  // const activeTaskPlaylistIds = useDownloadQStore((state) => [
-  //   ...new Set(state.activeTasks.map((task) => task.playlistId)),
-  // ]);
-  const activeTasks = useDownloadQStore((state) => state.activeTasks);
-  // console.log("activeTasks", activeTasks);
-  const activeTasksCountObj: { downloading: number; adding: number } | {} = activeTasks
-    ? activeTasks.reduce(
-        (final, curr) => {
-          if (curr.processStatus === "downloading") {
-            final.downloading = (final?.downloading || 0) + 1;
-          } else {
-            final.adding = (final?.adding || 0) + 1;
-          }
-          return final;
-        },
-        { downloading: 0, adding: 0 }
-      )
-    : {};
+  // // const activeTaskPlaylistIds = useDownloadQStore((state) => [
+  // //   ...new Set(state.activeTasks.map((task) => task.playlistId)),
+  // // ]);
+  // const activeTasks = useDownloadQStore((state) => state.activeTasks);
+  // // console.log("activeTasks", activeTasks);
+  // const activeTasksCountObj: { downloading: number; adding: number } | {} = activeTasks
+  //   ? activeTasks.reduce(
+  //       (final, curr) => {
+  //         if (curr.processStatus === "downloading") {
+  //           final.downloading = (final?.downloading || 0) + 1;
+  //         } else {
+  //           final.adding = (final?.adding || 0) + 1;
+  //         }
+  //         return final;
+  //       },
+  //       { downloading: 0, adding: 0 }
+  //     )
+  //   : {};
 
   // const [activeDownload, setActiveDownload] = useState(false);
   //!
@@ -250,37 +250,7 @@ const PlaylistContainer = () => {
           <PlaylistActionBar closeActionBar={() => setOnShow(false)} barHeight={40} />
         </MotiView>
       )}
-
-      {isDownloading && (
-        <View className="z-10 flex-col justify-center items-center pb-1 bg-white h-[100]">
-          <View>
-            {/* First Line (left) */}
-            <View className="flex-row justify-center items-center">
-              <Text className="text-base">{`Files Left in Process Queue`}</Text>
-              <Text className="text-base text-amber-950 ml-2 font-bold">{queueCount}</Text>
-            </View>
-            {/* Second Line (download/adding) */}
-            <View className="flex-row justify-center items-center">
-              <View className="flex-row justify-center items-center">
-                <Text className="text-base">{`Downloading`}</Text>
-                <Text className="text-base text-red-800 ml-2 font-bold">
-                  {activeTasksCountObj.downloading}
-                </Text>
-              </View>
-              <View className="mr-2 ml-2">
-                <Text>-</Text>
-              </View>
-              <View className="flex-row justify-center items-center">
-                <Text className="text-base">{`Adding To Playlist`}</Text>
-                <Text className="text-base text-green-800 ml-2 font-bold">
-                  {activeTasksCountObj.adding}
-                </Text>
-              </View>
-            </View>
-          </View>
-          <AnimatedDLText />
-        </View>
-      )}
+      {/* //! OLD Download indicator went here //! ----------------- */}
       <AnimatePresence>
         {!isSelectingRow && (
           <MotiView
