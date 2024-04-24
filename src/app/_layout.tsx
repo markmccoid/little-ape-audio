@@ -8,6 +8,7 @@ import { Lato_100Thin, Lato_400Regular, Lato_700Bold } from "@expo-google-fonts/
 import TrackPlayer, { Capability, IOSCategoryMode } from "react-native-track-player";
 import { onInitialize } from "../store/store-init";
 import { useSettingStore } from "../store/store-settings";
+import { usePlaybackStore, useTracksStore } from "../store/store";
 import { deactivateKeepAwake } from "expo-keep-awake";
 import { Orientation, lockPlatformAsync } from "expo-screen-orientation";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -18,6 +19,9 @@ import {
   laabMetaAggrRecurseBegin,
   useDropboxStore,
 } from "@store/store-dropbox";
+import { Platform } from "react-native";
+import * as QuickActions from "expo-quick-actions";
+import { useQuickActionCallback } from "expo-quick-actions/hooks";
 
 let isTPSetup = false;
 export {
@@ -39,12 +43,20 @@ export default function RootLayout() {
   useEffect(() => {
     if (error) throw error;
   }, [error]);
+
+  useQuickActionCallback(async (action) => {
+    const playlistId = action.params.playlistId as string;
+    await usePlaybackStore.getState().actions.setCurrentPlaylist(playlistId);
+    await usePlaybackStore.getState().actions.play();
+  });
+
   //--------
   // Zustand Store and app initialization
   //--------
   useEffect(() => {
     const setupTP = async () => {
       await onInitialize();
+
       const jumpForwardSeconds = useSettingStore.getState().jumpForwardSeconds;
       const jumpBackwardSeconds = useSettingStore.getState().jumpBackwardSeconds;
 
@@ -89,7 +101,28 @@ export default function RootLayout() {
           await laabMetaAggrRecurseBegin(metaFolder, undefined, true);
         }
       }
+
+      const playlists = useTracksStore.getState().playlists;
+      const playlistArray = Object.keys(playlists).map((key) => ({
+        playlistId: playlists[key].id,
+        playlistName: playlists[key].name,
+        author: playlists[key].author,
+        lastPlay: playlists[key].lastPlayedDateTime,
+      }));
+      const sortedPlaylists = playlistArray.sort((a, b) => b.lastPlay - a.lastPlay).slice(0, 5);
+
+      const quickActions = sortedPlaylists.map((pl, index) => {
+        return {
+          title: pl.playlistName,
+          subtitle: pl.author,
+          icon: Platform.OS === "ios" ? "symbol:play.fill" : undefined,
+          id: index.toString(),
+          params: { playlistId: pl.playlistId },
+        };
+      });
+      QuickActions.setItems(quickActions);
     };
+
     // Run your initialization code here
     // It can be async
     setupTP();

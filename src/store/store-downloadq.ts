@@ -213,7 +213,8 @@ const downloadFile = async (downloadProps: DownloadQueueItem) => {
   //   onHandleProgress,
   //   audioSource
   // );
-
+  // We only await the downloadFileBlobUtil because of google auth token get
+  // the "task" variable is the actual promise that will be awaited below.
   const { task, cleanFileName, cancelDownload } = await downloadFileBlobUtil(
     downloadLink,
     fileName,
