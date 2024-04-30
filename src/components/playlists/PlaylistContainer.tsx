@@ -20,37 +20,9 @@ import AddBook from "@components/common/svg/AddBook";
 import CollectionSelectionPopup from "@components/common/CollectionSelectionPopup";
 import { useSettingStore } from "@store/store-settings";
 import { ChevronDownIcon } from "@components/common/svg/Icons";
-import useDownloadQStore from "@store/store-downloadq";
-import AnimatedDLText from "@components/common/animations/AnimatedDLText";
 
 const PlaylistContainer = () => {
   const route = useRouter();
-  //! downloadq
-  // const isDownloading = useDownloadQStore((state) => state.isDownloading);
-  // const queueCount = useDownloadQStore((state) => state.queue.length);
-
-  // // const activeTaskPlaylistIds = useDownloadQStore((state) => [
-  // //   ...new Set(state.activeTasks.map((task) => task.playlistId)),
-  // // ]);
-  // const activeTasks = useDownloadQStore((state) => state.activeTasks);
-  // // console.log("activeTasks", activeTasks);
-  // const activeTasksCountObj: { downloading: number; adding: number } | {} = activeTasks
-  //   ? activeTasks.reduce(
-  //       (final, curr) => {
-  //         if (curr.processStatus === "downloading") {
-  //           final.downloading = (final?.downloading || 0) + 1;
-  //         } else {
-  //           final.adding = (final?.adding || 0) + 1;
-  //         }
-  //         return final;
-  //       },
-  //       { downloading: 0, adding: 0 }
-  //     )
-  //   : {};
-
-  // const [activeDownload, setActiveDownload] = useState(false);
-  //!
-
   const [isSelectingRow, setIsSelectingRow] = useState(false);
   const [onShow, setOnShow] = useState(false);
   const [layoutHeight, setLayoutHeight] = useState(0);

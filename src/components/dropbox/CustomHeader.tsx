@@ -6,7 +6,6 @@ import { useDropboxStore } from "@store/store-dropbox";
 import { colors } from "@constants/Colors";
 
 function CustomHeader({ title, backText, sessionAudioSource }) {
-  const actions = useDropboxStore((state) => state.actions);
   const navigation = useNavigation();
   const router = useRouter();
   const pathname = usePathname();

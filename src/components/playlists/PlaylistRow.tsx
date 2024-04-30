@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useMemo, useState } from "react";
-import { usePlaybackStore, useTrackActions } from "../../store/store";
+import { usePlaybackStore, useTrackActions, useTracksStore } from "../../store/store";
 import { Playlist, AudioTrack } from "../../store/types";
 import { Link, router, useRouter } from "expo-router";
 import { formatSeconds } from "../../utils/formatUtils";
@@ -24,6 +24,7 @@ import usePlaylistColors from "hooks/usePlaylistColors";
 import { LinearGradient } from "expo-linear-gradient";
 import { AnimatePresence, MotiView } from "moti";
 import { useSettingStore } from "@store/store-settings";
+import TrackPlayer, { useProgress } from "react-native-track-player";
 
 type Props = {
   playlist: Playlist;

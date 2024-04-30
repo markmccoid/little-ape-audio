@@ -8,7 +8,7 @@ import {
   defaultCollections,
 } from "./types";
 import { create } from "zustand";
-import { Alert, Image } from "react-native";
+import { Alert, Image, Platform } from "react-native";
 import uuid from "react-native-uuid";
 import {
   loadFromAsyncStorage,
@@ -20,10 +20,9 @@ import sortBy from "lodash/sortBy";
 import orderBy from "lodash/orderBy";
 import map from "lodash/map";
 import TrackPlayer, { Track, State, Event, PitchAlgorithm } from "react-native-track-player";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Chapter, addTrack } from "./store-functions";
 import { deleteFromFileSystem } from "./data/fileSystemAccess";
-import { useDropboxStore } from "./store-dropbox";
 import { useSettingStore } from "./store-settings";
 import { defaultImages, getRandomNumber } from "./storeUtils";
 import * as FileSystem from "expo-file-system";
@@ -32,7 +31,9 @@ import { router } from "expo-router";
 import { getCurrentChapter } from "@utils/chapterUtils";
 import { debounce, reverse } from "lodash";
 import { getImageColors } from "@utils/otherUtils";
-import { colors } from "@constants/Colors";
+
+import * as QuickActions from "expo-quick-actions";
+import { pl } from "date-fns/locale";
 
 let eventPlayerTrackChange = undefined;
 let eventEndOfQueue = undefined;
@@ -65,6 +66,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
   playlists: {},
   playlistUpdated: new Date(),
   collections: defaultCollections,
+  quickActionsList: [],
   actions: {
     addNewTrack: addTrack(set, get),
     updateTrackMetadata: async (trackId, trackMetadata) => {
@@ -272,6 +274,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       // );
       set({ playlists: updatedPlayList });
       await saveToAsyncStorage("playlists", updatedPlayList);
+      await get().actions.updateQuickActionsList();
     },
     getPlaylist: (playlistId) => {
       return get().playlists[playlistId];
@@ -508,6 +511,36 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       await saveToAsyncStorage("collections", newCollections);
       await saveToAsyncStorage("playlists", playlists);
     },
+    updateQuickActionsList: async () => {
+      // Make sure we don't have duplicates before we slice
+      // const quickActionsList = [...new Set([newListItem, ...get().quickActionsList])].slice(0, 4);
+
+      const playlists = { ...get().playlists };
+
+      //!!
+      const playlistArray = Object.keys(playlists)
+        .slice(0, 4)
+        .map((key) => ({
+          playlistId: playlists[key].id,
+          playlistName: playlists[key].name,
+          author: playlists[key].author,
+          lastPlay: playlists[key].lastPlayedDateTime,
+        }));
+      const sortedPlaylists = playlistArray.sort((a, b) => b.lastPlay - a.lastPlay);
+      // update teh quickActionsList in zustand with the top 4
+      useTracksStore.setState({ quickActionsList: sortedPlaylists.map((pl) => pl.playlistId) });
+      const quickActions = sortedPlaylists.map((pl, index) => {
+        return {
+          title: pl.playlistName,
+          subtitle: pl.author,
+          icon: Platform.OS === "ios" ? "symbol:play.fill" : undefined,
+          id: index.toString(),
+          params: { playlistId: pl.playlistId },
+        };
+      });
+      await QuickActions.setItems(quickActions);
+      set({ quickActionsList: sortedPlaylists.map((pl) => pl.playlistId) });
+    },
   },
 }));
 
@@ -524,6 +557,7 @@ export const usePlaylists = () => {
   const finalOrdered = orderBy(filtered, ["lastPlayedDateTime"], ["desc"]);
   return finalOrdered;
 };
+
 // useTracksStore((state) => orderBy(map(state.playlists), ["lastPlayedDateTime"], ["desc"]));
 //!! NEED TO Make sure to update playlistUpdated whenever a change is made to
 //!! playlist that we want to track state changes.
@@ -717,7 +751,12 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
         useTracksStore.getState().actions.updatePlaylistFields(playlistId, { imageColors: colors });
         set({ didUpdate: uuid.v4().toString() });
       }
+
+      // - Update the quick actions menu
+      await useTracksStore.getState().actions.updateQuickActionsList();
+
       mountTrackPlayerListeners();
+
       set({ playlistLoaded: true });
       if (useSettingStore.getState().autoPlay) {
         await TrackPlayer.play();
@@ -1082,7 +1121,6 @@ const saveCurrentTrackInfoBase = async () => {
     //! Instead of polling TrackPlayer for position, get it from PlaybackStore
     //! We are updating this field every second in the PlaybackProgressUpdate listener
     const { position } = await TrackPlayer.getProgress(); // usePlaybackStore.getState().currentTrackPosition;
-
     const playlist = {
       ...useTracksStore.getState().playlists[usePlaybackStore.getState().currentPlaylistId],
     };
@@ -1298,6 +1336,7 @@ const mountTrackPlayerListeners = () => {
     // console.log("STATE CHANGE", event);
     // Whenever state chagnes to Paused, then save the current position
     // on PlaybackStore AND TrackStore
+
     const { position } = await TrackPlayer.getProgress();
     //! NOTE: in trackPlayerUtils.ts, I setup another state change event listener
     //! its only job is to update teh playerState in the Playback Store
