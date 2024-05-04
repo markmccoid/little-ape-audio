@@ -8,7 +8,7 @@ import {
   usePathname,
   useLocalSearchParams,
 } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { View, useColorScheme } from "react-native";
 import { Lato_100Thin, Lato_400Regular, Lato_700Bold } from "@expo-google-fonts/lato";
 
@@ -27,6 +27,7 @@ import {
   useDropboxStore,
 } from "@store/store-dropbox";
 import { useQuickActionCallback } from "expo-quick-actions/hooks";
+import * as QuickActions from "expo-quick-actions";
 
 let isTPSetup = false;
 export {
@@ -49,23 +50,20 @@ export default function RootLayout() {
     if (error) throw error;
   }, [error]);
 
-  useQuickActionCallback(async (action) => {
-    // ! NOTE: when in dev mode and you reload without quitting app, TrackPlayer STAYS SETUP, but isTPSetup gets set to false.
-    while (!isTPSetup) {
-      await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for 100ms
-    }
-    const playlistId = action.params.playlistId as string;
+  // useQuickActionCallback(async (action) => {
+  //   // ! NOTE: when in dev mode and you reload without quitting app, TrackPlayer STAYS SETUP, but isTPSetup gets set to false.
+  //   console.log("ACTION", action);
+  //   // while (!isTPSetup) {
+  //   //   await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for 100ms
+  //   // }
+  //   const playlistId = action.params.playlistId as string;
 
-    await usePlaybackStore.getState().actions.setCurrentPlaylist(playlistId);
-    await usePlaybackStore.getState().actions.play();
-    //! Setting the playlist search param AFTER setting the current playlist.
-    //! This is useful when in the track player and a Quick Action is used.
-    router.setParams({ playlistId });
-    // if (pathname !== "/audio") {
-    // router.replace("/audio/");
-    // }
-  });
-
+  //   await usePlaybackStore.getState().actions.setCurrentPlaylist(playlistId);
+  //   await usePlaybackStore.getState().actions.play();
+  //   //! Setting the playlist search param AFTER setting the current playlist.
+  //   //! This is useful when in the track player and a Quick Action is used.
+  //   router.setParams({ playlistId });
+  // });
   //--------
   // Zustand Store and app initialization
   //--------
@@ -118,32 +116,33 @@ export default function RootLayout() {
         }
       }
 
-      // const playlists = useTracksStore.getState().playlists;
-      // const playlistArray = Object.keys(playlists).map((key) => ({
-      //   playlistId: playlists[key].id,
-      //   playlistName: playlists[key].name,
-      //   author: playlists[key].author,
-      //   lastPlay: playlists[key].lastPlayedDateTime,
-      // }));
-      // const sortedPlaylists = playlistArray.sort((a, b) => b.lastPlay - a.lastPlay).slice(0, 4);
-      // // update teh quickActionsList in zustand with the top 4
-      // useTracksStore.setState({ quickActionsList: sortedPlaylists.map((pl) => pl.playlistId) });
-      // const quickActions = sortedPlaylists.map((pl, index) => {
-      //   return {
-      //     title: pl.playlistName,
-      //     subtitle: pl.author,
-      //     icon: Platform.OS === "ios" ? "symbol:play.fill" : undefined,
-      //     id: index.toString(),
-      //     params: { playlistId: pl.playlistId },
-      //   };
-      // });
-      // QuickActions.setItems(quickActions);
       await useTracksStore.getState().actions.updateQuickActionsList();
     };
 
     // Run your initialization code here
     // It can be async
     setupTP();
+  }, []);
+
+  //!! Quick Actions Try
+  useEffect(() => {
+    const subscription = QuickActions.addListener(async (action) => {
+      console.log(action.title);
+      // while (!isTPSetup) {
+      //   await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for 100ms
+      // }
+      const playlistId = action.params.playlistId as string;
+
+      await usePlaybackStore.getState().actions.setCurrentPlaylist(playlistId);
+      await usePlaybackStore.getState().actions.play();
+      //! Setting the playlist search param AFTER setting the current playlist.
+      //! This is useful when in the track player and a Quick Action is used.
+      router.setParams({ playlistId });
+    });
+    return () => {
+      console.log("Removing QA Sub");
+      subscription.remove();
+    };
   }, []);
 
   useEffect(() => {
