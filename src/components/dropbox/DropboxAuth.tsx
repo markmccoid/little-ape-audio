@@ -105,7 +105,7 @@ const DropboxAuthContainer = () => {
   }, []);
 
   return (
-    <View className="flex-col items-center justify-start border">
+    <View className="flex-col items-center justify-start border-b border-t">
       {/* <TouchableOpacity style={styles.authButton} onPress={onAuthorize}>
         <Text style={{ color: "white" }}>Authorize Dropbox</Text>
       </TouchableOpacity>
@@ -114,9 +114,16 @@ const DropboxAuthContainer = () => {
       <Text>isMounted: {JSON.stringify(isCheckingToken)}</Text> */}
       {/* {!isMounted?.current && <ActivityIndicator size="large" />} */}
       {validToken && !isCheckingToken && (
-        <>
-          <Text className="text-lg font-bold">Dropbox is Authorized</Text>
-        </>
+        <View className="flex-row justify-between items-center w-full my-2 mx-2">
+          <Text className="text-lg font-bold pl-2">Dropbox is Authorized</Text>
+          <View className="flex-row items-center justify-start">
+            <TouchableOpacity style={styles.revokeButton} onPress={onRevoke}>
+              <Text style={{ color: "white" }} allowFontScaling={false}>
+                Revoke
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       )}
       {!validToken && !isCheckingToken && (
         <View className="flex-col justify-center items-center">
@@ -136,21 +143,6 @@ const DropboxAuthContainer = () => {
             </TouchableOpacity>
           </View>
           <Monkey size={100} />
-        </View>
-      )}
-      {validToken && !isCheckingToken && (
-        <View className="flex-col justify-center items-center w-full">
-          <View className="flex-row items-center justify-start">
-            <TouchableOpacity style={styles.revokeButton} onPress={onRevoke}>
-              <Text style={{ color: "white" }} allowFontScaling={false}>
-                Revoke Dropbox Authorization
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <View className="flex-row justify-center">
-            <Monkey size={100} color={colors.dropboxBlue} />
-          </View>
-          <Text className="text-lg">Happy Listening</Text>
         </View>
       )}
     </View>

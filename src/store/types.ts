@@ -141,7 +141,6 @@ export type AudioState = {
   playlists: Record<PlaylistId, Playlist>;
   playlistUpdated: Date;
   collections: CollectionItem[];
-  quickActionsList: string[]; // array of playlist ids
   actions: {
     // given the audio file location in storage, look up metadata and create
     // record in AudioState.audioFiles store array
@@ -220,7 +219,6 @@ export type AudioState = {
     addOrUpdateCollection: (collection: CollectionItem) => Promise<void>;
     deleteCollection: (collectionId: string) => Promise<void>;
     clearAll: () => Promise<void>;
-    updateQuickActionsList: () => Promise<void>;
   };
 };
 

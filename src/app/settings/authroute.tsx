@@ -2,6 +2,7 @@ import { View, Text, Dimensions, Pressable } from "react-native";
 import React from "react";
 import DropboxAuth from "../../components/dropbox/DropboxAuth";
 import GoogleAuth from "../../components/dropbox/GoogleAuth";
+import ABSAuth from "../../components/dropbox/AbsAuth";
 import { Stack, Link } from "expo-router";
 import { HomeIcon } from "../../components/common/svg/Icons";
 
@@ -28,6 +29,7 @@ const DropboxAuthScreen = () => {
       </View>
       <DropboxAuth />
       <GoogleAuth />
+      <ABSAuth />
     </View>
   );
 };

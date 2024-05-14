@@ -67,16 +67,27 @@ const GoogleAuthContainer = () => {
   return (
     <View className="flex-col items-center border-b border-amber-950">
       {isSignedIn && (
-        <View className="flex-col items-center">
-          <Text className="text-lg font-bold">Google Is Authorized</Text>
-          <TouchableOpacity style={styles.revokeButton} onPress={signUserOut}>
-            <Text style={{ color: "white" }}>Revoke Google Authorization</Text>
-          </TouchableOpacity>
-          <View className="flex-row justify-center">
-            <Monkey size={100} color={colors.amber500} />
-          </View>
+        // <View className="flex-col items-center">
+        //   <Text className="text-lg font-bold">Google Is Authorized</Text>
+        //   <TouchableOpacity style={styles.revokeButton} onPress={signUserOut}>
+        //     <Text style={{ color: "white" }}>Revoke Google Authorization</Text>
+        //   </TouchableOpacity>
+        //   <View className="flex-row justify-center">
+        //     <Monkey size={100} color={colors.amber500} />
+        //   </View>
 
-          <Text className="text-lg">Happy Listening</Text>
+        //   <Text className="text-lg">Happy Listening</Text>
+        // </View>
+
+        <View className="flex-row justify-between items-center w-full my-2 mx-2">
+          <Text className="text-lg font-bold pl-2">Google is Authorized</Text>
+          <View className="flex-row items-center justify-start">
+            <TouchableOpacity style={styles.revokeButton} onPress={signUserOut}>
+              <Text style={{ color: "white" }} allowFontScaling={false}>
+                Revoke
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       )}
 

@@ -12,7 +12,8 @@ type StorageKeys =
   | "foldermetadataerrors"
   | "laabmetaaggrcontrols"
   | "collections"
-  | "quickActionsList";
+  | "quickActionsList"
+  | "absSettings";
 
 // --------------------------------------------
 // -- LOAD passed key from Local Storage

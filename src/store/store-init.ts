@@ -4,6 +4,7 @@ import {
   saveToAsyncStorage,
 } from "./data/asyncStorage";
 import { useTracksStore } from "./store";
+import { useABSStore } from "./store-abs";
 import { useDropboxStore } from "./store-dropbox";
 import { useSettingStore } from "./store-settings";
 import { Playlist, defaultCollections } from "./types";
@@ -29,6 +30,7 @@ export const onInitialize = async () => {
   const laabMetaAggrControls = await loadFromAsyncStorage("laabmetaaggrcontrols");
   const collections = await loadFromAsyncStorage("collections");
   const settings = await loadFromAsyncStorage("settings");
+  const audiobookshelfSettings = await loadFromAsyncStorage("absSettings");
 
   useTracksStore.setState({
     tracks: tracks || [],
@@ -38,24 +40,24 @@ export const onInitialize = async () => {
 
   // ******************
   // * patch favFolders
-  if (favFolders) {
-    const patchedFavs =
-      favFolders &&
-      favFolders.map((folder) => ({
-        ...folder,
-        audioSource: folder?.audioSource ? folder.audioSource : "dropbox",
-      }));
-    saveToAsyncStorage("favfolders", patchedFavs);
-    useDropboxStore.setState({ favoriteFolders: patchedFavs });
-  }
-  // * Patch playlist collections
-  if (playlists) {
-    for (const key of Object.keys(playlists)) {
-      if (!playlists[key]?.collection) {
-        playlists[key].collection = {};
-      }
-    }
-  }
+  // if (favFolders) {
+  //   const patchedFavs =
+  //     favFolders &&
+  //     favFolders.map((folder) => ({
+  //       ...folder,
+  //       audioSource: folder?.audioSource ? folder.audioSource : "dropbox",
+  //     }));
+  //   saveToAsyncStorage("favfolders", patchedFavs);
+  //   useDropboxStore.setState({ favoriteFolders: patchedFavs });
+  // }
+  // // * Patch playlist collections
+  // if (playlists) {
+  //   for (const key of Object.keys(playlists)) {
+  //     if (!playlists[key]?.collection) {
+  //       playlists[key].collection = {};
+  //     }
+  //   }
+  // }
   // ******************
   const laabMetaDefault = {
     folders: [],
@@ -74,6 +76,10 @@ export const onInitialize = async () => {
     jumpForwardSeconds: settings?.jumpForwardSeconds || 15,
     jumpBackwardSeconds: settings?.jumpBackwardSeconds || 15,
   });
-
+  const absActions = useABSStore.getState().actions;
+  useABSStore.setState({
+    ...audiobookshelfSettings,
+    actions: absActions,
+  });
   return;
 };

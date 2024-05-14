@@ -32,9 +32,6 @@ import { getCurrentChapter } from "@utils/chapterUtils";
 import { debounce, reverse } from "lodash";
 import { getImageColors } from "@utils/otherUtils";
 
-import * as QuickActions from "expo-quick-actions";
-import { pl } from "date-fns/locale";
-
 let eventPlayerTrackChange = undefined;
 let eventEndOfQueue = undefined;
 let eventPlayerStateChange = undefined;
@@ -66,7 +63,6 @@ export const useTracksStore = create<AudioState>((set, get) => ({
   playlists: {},
   playlistUpdated: new Date(),
   collections: defaultCollections,
-  quickActionsList: [],
   actions: {
     addNewTrack: addTrack(set, get),
     updateTrackMetadata: async (trackId, trackMetadata) => {
@@ -274,7 +270,6 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       // );
       set({ playlists: updatedPlayList });
       await saveToAsyncStorage("playlists", updatedPlayList);
-      await get().actions.updateQuickActionsList();
     },
     getPlaylist: (playlistId) => {
       return get().playlists[playlistId];
@@ -511,36 +506,6 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       await saveToAsyncStorage("collections", newCollections);
       await saveToAsyncStorage("playlists", playlists);
     },
-    updateQuickActionsList: async () => {
-      // Make sure we don't have duplicates before we slice
-      // const quickActionsList = [...new Set([newListItem, ...get().quickActionsList])].slice(0, 4);
-
-      const playlists = { ...get().playlists };
-
-      //!!
-      const playlistArray = Object.keys(playlists)
-        .slice(0, 4)
-        .map((key) => ({
-          playlistId: playlists[key].id,
-          playlistName: playlists[key].name,
-          author: playlists[key].author,
-          lastPlay: playlists[key].lastPlayedDateTime,
-        }));
-      const sortedPlaylists = playlistArray.sort((a, b) => b.lastPlay - a.lastPlay);
-      // update teh quickActionsList in zustand with the top 4
-      useTracksStore.setState({ quickActionsList: sortedPlaylists.map((pl) => pl.playlistId) });
-      const quickActions = sortedPlaylists.map((pl, index) => {
-        return {
-          title: pl.playlistName,
-          subtitle: pl.author,
-          icon: Platform.OS === "ios" ? "symbol:play.fill" : undefined,
-          id: index.toString(),
-          params: { playlistId: pl.playlistId },
-        };
-      });
-      await QuickActions.setItems(quickActions);
-      set({ quickActionsList: sortedPlaylists.map((pl) => pl.playlistId) });
-    },
   },
 }));
 
@@ -751,9 +716,6 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
         useTracksStore.getState().actions.updatePlaylistFields(playlistId, { imageColors: colors });
         set({ didUpdate: uuid.v4().toString() });
       }
-
-      // - Update the quick actions menu
-      await useTracksStore.getState().actions.updateQuickActionsList();
 
       mountTrackPlayerListeners();
 
