@@ -27,6 +27,16 @@ const DropboxLayout = () => {
         }}
       />
       <Stack.Screen
+        name="audiobookshelf"
+        options={{
+          headerShown: false,
+          title: "AudiobookShelf",
+          presentation: "card",
+          headerStyle: { backgroundColor: colors.amber200 },
+          headerTintColor: colors.amber900,
+        }}
+      />
+      <Stack.Screen
         name="[newdir]"
         options={{
           title: "overwrite",

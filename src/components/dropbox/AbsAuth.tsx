@@ -1,4 +1,4 @@
-import { View, Text, TextInput, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Pressable } from "react-native";
 import React, { useEffect } from "react";
 import { MotiPressable } from "moti/interactions";
 import { ABSGetLibraries, absGetLibraries, absLogin } from "@store/data/absAPI";
@@ -17,7 +17,7 @@ const AbsAuth = () => {
   const actions = useABSStore((state) => state.actions);
 
   const handleLogin = async () => {
-    console.log("absLogin", username, password);
+    if (!username || !password || !absURL) return;
     const loginInfo = await absLogin(absURL, username, password);
     const userInfo: UserInfo = {
       id: loginInfo.id,
@@ -28,25 +28,20 @@ const AbsAuth = () => {
       absURL,
     };
     // Store UserInfo from Login
-    actions.storeUserInfo(userInfo);
+    actions.saveUserInfo(userInfo);
 
     // Get Libraries in ABS
     const libs = await absGetLibraries();
     // set the default libray to the first one we find
-    const finalLibraries = libs.map((lib, index) => ({
-      ...lib,
-      active: index === 0 ? true : false,
-    }));
-    actions.storeLibraries(finalLibraries);
-    actions.setActiveLibraryId(finalLibraries.find((lib) => lib.active)?.id);
+
+    actions.saveLibraries(libs, libs[0].id);
+
     setLoggedIn(true);
-    setLibraries(libs);
   };
 
   const handleLogout = () => {
-    actions.storeUserInfo(undefined);
-    actions.storeLibraries(undefined);
-    actions.setActiveLibraryId(undefined);
+    actions.saveUserInfo(undefined);
+    actions.saveLibraries(undefined, undefined);
     setLoggedIn(false);
   };
 
@@ -56,7 +51,11 @@ const AbsAuth = () => {
     } else {
       setLoggedIn(false);
     }
-  });
+  }, [absUserInfo?.token]);
+  //~ Pull in stored libraries when active lib changes
+  useEffect(() => {
+    setLibraries(librariesStored);
+  }, [librariesStored]);
   //!! -----------------------------------------
   //!! Based on Logged in hide the username/pw fields
   //!! change login to LOGOUT
@@ -83,14 +82,14 @@ const AbsAuth = () => {
         </TouchableOpacity>
       </View>
       {!loggedIn && (
-        <View className="mx-2">
+        <View className="m-2">
           <TextInput
             onChangeText={setAbsURL}
             placeholder="AudiobookShelf URL"
             spellCheck={false}
             autoCapitalize="none"
             value={absURL}
-            className="border p-1 mr-1 mb-2"
+            className="border p-1 mr-1 mb-2 bg-white"
           />
           <View className="flex-row items-center justify-between">
             <TextInput
@@ -99,7 +98,7 @@ const AbsAuth = () => {
               value={username}
               autoCapitalize="none"
               spellCheck={false}
-              className="flex-1 border p-1 mr-1"
+              className="flex-1 border p-1 mr-1 bg-white"
             />
             <TextInput
               onChangeText={setPassword}
@@ -108,29 +107,38 @@ const AbsAuth = () => {
               value={password}
               autoCapitalize="none"
               secureTextEntry={true}
-              className="flex-1 border p-1 ml-1"
+              className="flex-1 border p-1 ml-1 bg-white"
             />
           </View>
         </View>
       )}
-      <View className="border border-amber-900 bg-white mx-2">
+      <View className={`${loggedIn && "border border-amber-900 bg-white mx-2"}`}>
         {loggedIn && (
           <View className="flex flex-col justify-center mx-2">
-            <Text className="text-base font-semibold">{absUserInfo.absURL}</Text>
+            <Text className="text-base font-semibold">{absUserInfo?.absURL}</Text>
             <View className="flex flex-row justify-start mb-1">
               <Text className="text-base">Logged in as </Text>
-              <Text className="text-base font-bold">{absUserInfo.username}</Text>
+              <Text className="text-base font-bold">{absUserInfo?.username}</Text>
             </View>
           </View>
         )}
         {loggedIn && libraries && (
-          <View className="mx-2">
-            <Text>Libraries:</Text>
-            {Object.values(libraries).map((lib) => (
-              <Text className={`${lib.active ? "bg-green-400" : "bg-white"}`} key={lib.id}>
-                {lib.name}
-              </Text>
-            ))}
+          <View className="m-2">
+            <Text className="text-base font-semibold">Libraries</Text>
+            <View className="border ">
+              {Object.values(libraries).map((lib, index) => (
+                <Pressable
+                  key={lib.id}
+                  onPress={() => actions.saveLibraries(libraries, lib.id)}
+                  className={`flex flex-row justify-between px-2 py-1 ${
+                    lib.active ? "bg-green-400" : "bg-white"
+                  } ${index !== 0 && "border-t"} `}
+                >
+                  <Text key={lib.id}>{lib.name}</Text>
+                  <Text className="font-semibold">{lib.active && "Active"}</Text>
+                </Pressable>
+              ))}
+            </View>
           </View>
         )}
       </View>

@@ -1,13 +1,6 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
-import {
-  Slot,
-  SplashScreen,
-  useRouter,
-  useRootNavigationState,
-  usePathname,
-  useLocalSearchParams,
-} from "expo-router";
+import { Slot, SplashScreen, useRouter, usePathname } from "expo-router";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { View, useColorScheme } from "react-native";
 import { Lato_100Thin, Lato_400Regular, Lato_700Bold } from "@expo-google-fonts/lato";
@@ -15,17 +8,14 @@ import { Lato_100Thin, Lato_400Regular, Lato_700Bold } from "@expo-google-fonts/
 import TrackPlayer, { Capability, IOSCategoryMode } from "react-native-track-player";
 import { onInitialize } from "../store/store-init";
 import { useSettingStore } from "../store/store-settings";
-import { usePlaybackStore, useTracksStore } from "../store/store";
+
 import { deactivateKeepAwake } from "expo-keep-awake";
 import { Orientation, lockPlatformAsync } from "expo-screen-orientation";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
+
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import {
-  laabMetaAggrRecurse,
-  laabMetaAggrRecurseBegin,
-  useDropboxStore,
-} from "@store/store-dropbox";
+import { laabMetaAggrRecurseBegin, useDropboxStore } from "@store/store-dropbox";
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 
 let isTPSetup = false;
 export {
@@ -118,13 +108,15 @@ export default function RootLayout() {
 
   return <RootLayoutNav />;
 }
-
+const queryClient = new QueryClient();
 function RootLayoutNav() {
   return (
     <SafeAreaProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <Slot />
-      </GestureHandlerRootView>
+      <QueryClientProvider client={queryClient}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <Slot />
+        </GestureHandlerRootView>
+      </QueryClientProvider>
     </SafeAreaProvider>
   );
 }

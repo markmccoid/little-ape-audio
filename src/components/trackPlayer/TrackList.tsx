@@ -243,6 +243,20 @@ const TrackList = ({ isExpanded }) => {
     const isCurrentSection = isCurrChapter && isCurrentTrack;
 
     if (viewSectionChapters.includes(section?.queuePos)) return null;
+    const skipToChapter = async () => {
+      const { chapterInfo, chapterIndex, chapterProgressOffset, nextChapterExists } =
+        getCurrentChapter({
+          chapters: queue[section.queuePos]?.chapters,
+          position: item?.startSeconds,
+        });
+      if (!isCurrentTrack) {
+        await TrackPlayer.skip(section.queuePos);
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+      setCurrLocation({ trackIndex: section.queuePos, chapterIndex });
+      await playbackActions.seekTo(item?.startSeconds);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    };
 
     return (
       <View
@@ -254,26 +268,7 @@ const TrackList = ({ isExpanded }) => {
           height: 45,
         }}
       >
-        <TouchableOpacity
-          onPress={async () => {
-            // console.log("press", section.queuePos, item?.title, item?.startSeconds, queueOffset);
-            const { chapterInfo, chapterIndex, chapterProgressOffset, nextChapterExists } =
-              getCurrentChapter({
-                chapters: queue[section.queuePos]?.chapters,
-                position: item?.startSeconds,
-              });
-            if (!isCurrentTrack) {
-              await TrackPlayer.skip(section.queuePos);
-              await new Promise((resolve) => setTimeout(resolve, 10));
-              // await playbackActions.goToTrack(section.queuePos);
-            }
-            setCurrLocation({ trackIndex: section.queuePos, chapterIndex });
-            await playbackActions.seekTo(item?.startSeconds);
-            await new Promise((resolve) => setTimeout(resolve, 10));
-            // await TrackPlayer.seekTo(item?.startSeconds);
-            // setIsCurrChapter(true);
-          }}
-        >
+        <TouchableOpacity onPress={skipToChapter}>
           <View
             className="w-[40] flex-row justify-center items-center flex-grow"
             style={{
@@ -291,20 +286,22 @@ const TrackList = ({ isExpanded }) => {
             </Text>
           </View>
         </TouchableOpacity>
-        <View className={`flex-row pl-2 py-2 items-center justify-between flex-1`}>
-          {/* <Text className="text-base">{props.item.title}</Text> */}
-          <Text
-            className="text-sm flex-1"
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            style={{ color: chaptText }}
-          >
-            {item.title}
-          </Text>
-          <Text className="text-xs pr-2" style={{ color: chaptText }}>{`${formatSeconds(
-            item?.startSeconds
-          )} - ${formatSeconds(item.endSeconds)}`}</Text>
-        </View>
+        <TouchableOpacity className={`flex-row flex-1 h-full`} onPress={skipToChapter}>
+          <View className={`flex-row pl-2 items-center justify-between flex-1`}>
+            {/* <Text className="text-base">{props.item.title}</Text> */}
+            <Text
+              className="text-sm flex-1"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={{ color: chaptText }}
+            >
+              {item.title}
+            </Text>
+            <Text className="text-xs pr-2" style={{ color: chaptText }}>{`${formatSeconds(
+              item?.startSeconds
+            )} - ${formatSeconds(item.endSeconds)}`}</Text>
+          </View>
+        </TouchableOpacity>
       </View>
     );
   };

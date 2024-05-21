@@ -84,14 +84,41 @@ type ServerSettings = {
 export type Library = {
   id: string;
   name: string;
-  folders: any[]; // Replace 'any' with the type representing the folders structure
+  folders: {
+    id: string;
+    fullPath: string;
+    libraryId: string;
+    addedAt: number;
+  }[];
   displayOrder: number;
   icon: string;
   mediaType: string;
   provider: string;
-  settings: any; // Replace 'any' with the type representing the settings structure
+  settings: {
+    coverAspectRatio: number;
+    disableWatcher: boolean;
+    skipMatchingMediaWithAsin: boolean;
+    skipMatchingMediaWithIsbn: boolean;
+    autoScanCronExpression: string | null;
+  };
   createdAt: number;
   lastUpdate: number;
+};
+
+export type FilterData = {
+  authors: { id: string; name: string }[];
+  genres: string[];
+  tags: string[];
+  series: { id: string; name: string }[];
+  narrators: string[];
+  languages: string[];
+};
+
+export type LibraryGetResponse = {
+  filterdata: FilterData;
+  issues: number;
+  numUserPlaylists: number;
+  library: Library;
 };
 //~~ ========================================================
 //~~ Library Items Type -
@@ -353,4 +380,133 @@ export type LibraryBookExtended = {
   // using the same api as the audio files
   libraryFiles: libraryFile[];
   size: number;
+};
+
+//!!!!!!!!!!!!!!!!
+
+type Author = {
+  id: string;
+  name: string;
+};
+
+type Series = {
+  id: string;
+  name: string;
+};
+
+type Metadata = {
+  title: string;
+  subtitle: string | null;
+  authors: Author[];
+  narrators: string[];
+  series: Series[];
+  genres: string[];
+  publishedYear: string;
+  publishedDate: string | null;
+  publisher: string | null;
+  description: string;
+  isbn: string | null;
+  asin: string;
+  language: string | null;
+  explicit: boolean;
+  abridged: boolean;
+};
+
+type AudioFileMetadata = {
+  filename: string;
+  ext: string;
+  path: string;
+  relPath: string;
+  size: number;
+  mtimeMs: number;
+  ctimeMs: number;
+  birthtimeMs: number;
+};
+
+type Chapter = {
+  id: number;
+  start: number;
+  end: number;
+  title: string;
+};
+
+export type AudioFile = {
+  index: number;
+  ino: string;
+  metadata: AudioFileMetadata;
+  addedAt: number;
+  updatedAt: number;
+  trackNumFromMeta: number | null;
+  discNumFromMeta: number | null;
+  trackNumFromFilename: number | null;
+  discNumFromFilename: number | null;
+  manuallyVerified: boolean;
+  exclude: boolean;
+  error: string | null;
+  format: string;
+  duration: number;
+  bitRate: number;
+  language: string;
+  codec: string;
+  timeBase: string;
+  channels: number;
+  channelLayout: string;
+  chapters: Chapter[];
+  embeddedCoverArt: string;
+  metaTags: { [key: string]: string };
+  mimeType: string;
+};
+
+type LibraryFileMetadata = {
+  filename: string;
+  ext: string;
+  path: string;
+  relPath: string;
+  size: number;
+  mtimeMs: number;
+  ctimeMs: number;
+  birthtimeMs: number;
+};
+
+type LibraryFile = {
+  ino: string;
+  metadata: LibraryFileMetadata;
+  isSupplementary: boolean | null;
+  addedAt: number;
+  updatedAt: number;
+  fileType: string;
+};
+
+export type Media = {
+  id: string;
+  libraryItemId: string;
+  metadata: Metadata;
+  coverPath: string;
+  tags: string[];
+  audioFiles: AudioFile[];
+  chapters: Chapter[];
+  ebookFile: any | null;
+};
+
+export type LibraryItem = {
+  id: string;
+  ino: string;
+  oldLibraryItemId: string | null;
+  libraryId: string;
+  folderId: string;
+  path: string;
+  relPath: string;
+  isFile: boolean;
+  mtimeMs: number;
+  ctimeMs: number;
+  birthtimeMs: number;
+  addedAt: number;
+  updatedAt: number;
+  lastScan: number;
+  scanVersion: string;
+  isMissing: boolean;
+  isInvalid: boolean;
+  mediaType: string;
+  media: Media;
+  libraryFiles: LibraryFile[];
 };

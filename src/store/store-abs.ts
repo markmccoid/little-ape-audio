@@ -1,7 +1,5 @@
 import { create } from "zustand";
 import { saveToAsyncStorage } from "./data/asyncStorage";
-import uuid from "react-native-uuid";
-import { Library } from "./data/absTypes";
 
 export type UserInfo = {
   id: string;
@@ -23,9 +21,8 @@ type ABSState = {
   libraries?: StoredLibraries[];
   activeLibraryId?: string;
   actions: {
-    storeUserInfo: (userInfo: UserInfo) => void;
-    storeLibraries: (libraries: StoredLibraries[]) => void;
-    setActiveLibraryId: (libraryId: string) => void;
+    saveUserInfo: (userInfo: UserInfo) => void;
+    saveLibraries: (libraries: StoredLibraries[], activeLibraryId: string) => void;
   };
 };
 
@@ -34,22 +31,34 @@ export const useABSStore = create<ABSState>((set, get) => ({
   libraries: undefined,
   activeLibraryId: undefined,
   actions: {
-    storeUserInfo: (userInfo) => {
+    saveUserInfo: async (userInfo) => {
       set({ userInfo });
 
-      saveToAsyncStorage("absSettings", { userInfo, libraries: get().libraries });
-    },
-    storeLibraries: (libraries) => {
-      set({ libraries });
-      saveToAsyncStorage("absSettings", { userInfo: get().userInfo, libraries });
-    },
-    setActiveLibraryId: (libraryId) => {
-      set({ activeLibraryId: libraryId });
-      saveToAsyncStorage("absSettings", {
-        userInfo: get().userInfo,
+      await saveToAsyncStorage("absSettings", {
+        userInfo,
         libraries: get().libraries,
-        activeLibraryId: libraryId,
+        activeLibraryId: get().activeLibraryId,
       });
+    },
+    saveLibraries: async (libraries, activeLibraryId) => {
+      if (!libraries) {
+        set({
+          libraries: undefined,
+          activeLibraryId: undefined,
+        });
+        saveToAsyncStorage("absSettings", { userInfo: get().userInfo, libraries, activeLibraryId });
+      } else {
+        const finalLibs = libraries.map((lib) => ({ ...lib, active: lib.id === activeLibraryId }));
+        set({
+          libraries: finalLibs,
+          activeLibraryId,
+        });
+        await saveToAsyncStorage("absSettings", {
+          userInfo: get().userInfo,
+          libraries: finalLibs,
+          activeLibraryId,
+        });
+      }
     },
   },
 }));

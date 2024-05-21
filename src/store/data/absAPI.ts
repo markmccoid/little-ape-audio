@@ -3,9 +3,18 @@
 //~~ ========================================================
 
 import axios from "axios";
-import { ABSLoginResponse, Library } from "./absTypes";
+import {
+  ABSLoginResponse,
+  FilterData,
+  GetLibraryItemsResponse,
+  Library,
+  LibraryItem,
+} from "./absTypes";
 import { useABSStore } from "@store/store-abs";
-import { Alert } from "react-native";
+import { Alert, Image } from "react-native";
+import { btoa } from "react-native-quick-base64";
+import { getImageSize } from "@utils/otherUtils";
+import { defaultImages, getRandomNumber } from "@store/storeUtils";
 
 //~ =======
 //~ UTILS
@@ -61,7 +70,7 @@ export const absLogin = async (absURL: string, username: string, password: strin
 };
 
 //~~ ========================================================
-//~~ absGetLibraries -
+//~~ absGetLibraries - Get the Libraries in the ABS Server (many times just one exists)
 //~~ ========================================================
 export type ABSGetLibraries = Awaited<ReturnType<typeof absGetLibraries>>;
 export const absGetLibraries = async () => {
@@ -83,4 +92,169 @@ export const absGetLibraries = async () => {
     };
   });
   return libraryList;
+};
+
+//~~ ========================================================
+//~~ absGetLibraryFilterData - Get the filterdata
+//~~ genres, tags, authors and series
+//~~ include the base64 encoded versions needed for search
+//~~ ========================================================
+export const absGetLibraryFilterData = async (libraryId?: string) => {
+  const authHeader = getAuthHeader();
+  const activeLibraryId = useABSStore.getState().activeLibraryId;
+  const libraryIdToUse = libraryId || activeLibraryId;
+  // console.log("libraryIdToUse", libraryIdToUse);
+  // console.log("authHeader", authHeader);
+  console.log("getFilterData");
+  const url = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/filterdata`;
+
+  let response;
+  try {
+    response = await axios.get(url, { headers: authHeader });
+  } catch (error) {
+    throw new Error(`absGetLibraryFilterData - ${error}`);
+  }
+
+  const libararyData = response.data as FilterData;
+  // create encodings that can be used in filter query param in "Get a Library's Items"
+  const genres = libararyData.genres.map((genre) => ({
+    name: genre,
+    b64Encoded: btoa(genre),
+  }));
+  const tags = libararyData.tags.map((tag) => ({ name: tag, b64Encoded: btoa(tag) }));
+  const authors = libararyData.authors.map((author) => ({
+    ...author,
+    base64encoded: btoa(author.id),
+  }));
+  const series = libararyData.series.map((series) => ({
+    ...series,
+    base64encoded: btoa(series.id),
+  }));
+
+  // Return
+  return {
+    id: libraryId,
+    // name: libararyData.library.name,
+    genres,
+    tags,
+    authors,
+    series,
+  };
+};
+
+//~~ ========================================================
+//~~ absGetLibraryItems - Return a subset of a libraries items
+//~~  based on the passed filterType
+//~~ ========================================================
+export type ABSGetLibraryItems = Awaited<ReturnType<typeof absGetLibraryItems>>;
+export type FilterType = "genres" | "tags" | "authors" | "series";
+type GetLibraryItemsParams = {
+  libraryId?: string;
+  filterType?: FilterType;
+  // NOTE: for filterType "authors" and "series", the filterValue should be the ID of the author or series
+  //       for filterType "genres" and "tags", the filterValue should be the base64 version of the genre or tag
+  filterValue?: string;
+  page?: number;
+  limit?: number;
+};
+export const absGetLibraryItems = async ({
+  libraryId,
+  filterType,
+  filterValue,
+  page,
+  limit,
+}: GetLibraryItemsParams) => {
+  const authHeader = getAuthHeader();
+  const activeLibraryId = useABSStore.getState().activeLibraryId;
+  const libraryIdToUse = libraryId || activeLibraryId;
+  let response;
+  let filterData;
+  if (filterType) {
+    filterData = `?filter=${filterType}.${filterValue}`;
+    console.log("filterData", filterData);
+  }
+
+  const url = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items${filterData}`;
+  try {
+    response = await axios.get(url, { headers: authHeader });
+  } catch (error) {
+    console.log("error", error);
+    throw error;
+  }
+  const libraryItems = response.data as GetLibraryItemsResponse;
+
+  const booksMin = libraryItems.results.map((item) => {
+    return {
+      id: item.id,
+      title: item.media.metadata.title,
+      author: item.media.metadata.authorName,
+      series: item.media.metadata.seriesName,
+      addedAt: item.addedAt,
+      updatedAt: item.updatedAt,
+      cover: buildCoverURL(item.id),
+      numAudioFiles: item.media.numAudioFiles,
+      genres: item.media.metadata.genres,
+      tags: item.media.tags,
+    };
+  });
+  return booksMin;
+};
+
+//~~ ========================================================
+//~~ absGetItemDetails
+//~~ ========================================================
+export const absGetItemDetails = async (itemId?: string) => {
+  // https://abs.mccoidco.xyz/api/items/{token}&expanded=1
+  const authHeader = getAuthHeader();
+
+  let libraryItem: LibraryItem;
+  const url = `https://abs.mccoidco.xyz/api/items/${itemId}?expanded=1`;
+  try {
+    const response = await axios.get(url, { headers: authHeader });
+    libraryItem = response.data;
+  } catch (error) {
+    console.log("error", error);
+    throw error;
+  }
+  console.log(
+    "LIB ITEM",
+    libraryItem.media.metadata.title,
+    libraryItem.media.audioFiles.map((el) => el.metadata.filename)
+  );
+  return {
+    id: libraryItem.id,
+    audioFiles: libraryItem.media.audioFiles,
+    media: libraryItem.media,
+    coverURI: buildCoverURL(libraryItem.id),
+  };
+};
+//~~ ========================================================
+//~~ absGetItemDetails
+//~~ ========================================================
+export const absDownloadItem = async (itemId: string, fileIno: string) => {
+  //  https://abs.mccoidco.xyz/api/items/<BOOK ID>/file/<FILE INO>/download
+  const authHeader = getAuthHeader();
+  const url = `https://abs.mccoidco.xyz/api/items/${itemId}/file/${fileIno}/download`;
+};
+
+//~~ =======================================================
+//~~ UTILS
+//~~ =======================================================
+// -- buildCoverURL
+const buildCoverURL = (itemId: string) => {
+  return `https://abs.mccoidco.xyz/api/items/${itemId}/cover`;
+};
+
+// -- getCoverURI
+export const getCoverURI = async (coverURL: string): Promise<string> => {
+  let cover: string;
+  try {
+    const coverRes = await getImageSize(coverURL);
+    return coverURL;
+  } catch (err) {
+    const randomNum = getRandomNumber();
+    const randomImageInfo = Image.resolveAssetSource(defaultImages[`image${randomNum}`]);
+    const randomImageAspect = randomImageInfo.width / randomImageInfo.height;
+    return randomImageInfo.uri;
+  }
 };

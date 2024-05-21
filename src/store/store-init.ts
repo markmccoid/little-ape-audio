@@ -77,6 +77,7 @@ export const onInitialize = async () => {
     jumpBackwardSeconds: settings?.jumpBackwardSeconds || 15,
   });
   const absActions = useABSStore.getState().actions;
+
   useABSStore.setState({
     ...audiobookshelfSettings,
     actions: absActions,

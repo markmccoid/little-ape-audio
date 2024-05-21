@@ -2,7 +2,7 @@ import * as WebBrowser from "expo-web-browser";
 import * as Clipboard from "expo-clipboard";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
-
+import { Image } from "react-native";
 import { getColors } from "react-native-image-colors";
 import { IOSImageColors } from "react-native-image-colors/build/types";
 import { PlaylistImageColors } from "@store/types";
@@ -266,3 +266,19 @@ export function sanitizeString(title: string) {
   // Old is below
   // return title.replace(/[^\w.]+/g, "_").replace(/_$/, "");
 }
+
+export const properCase = (value: string) => {
+  return `${value.split("")[0].toUpperCase()}${value.split("").slice(1).join("")}`;
+};
+//~-=======================================
+//~ Async version of getSize for images
+//~-=======================================
+export const getImageSize = (uri: string) => {
+  return new Promise((resolve, reject) => {
+    Image.getSize(
+      uri,
+      (width, height) => resolve({ width, height }),
+      (error) => reject(error)
+    );
+  });
+};

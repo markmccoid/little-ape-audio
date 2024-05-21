@@ -2,8 +2,6 @@ import { View, Text } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { Link, Redirect, useRootNavigationState, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useQuickActionCallback } from "expo-quick-actions/hooks";
-import { usePlaybackStore } from "@store/store";
 
 const RootIndex = () => {
   const router = useRouter();

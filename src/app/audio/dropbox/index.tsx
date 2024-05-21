@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Dimensions, Pressable } from "react-native";
+import { View, Text, StyleSheet, Dimensions, Pressable, Image } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Href, Link } from "expo-router";
 import {
@@ -22,7 +22,7 @@ import useLocalFiles from "../../../hooks/useLocalFiles";
 import * as Progress from "react-native-progress";
 import useDownloadQStore from "@store/store-downloadq";
 
-export type AudioSourceType = "dropbox" | "google" | "local";
+export type AudioSourceType = "dropbox" | "google" | "local" | "abs";
 export type AudioSourceLinkParams = {
   newdir: string;
   fullPath: string;
@@ -133,6 +133,44 @@ const DropboxScreens = () => {
             <View className="flex-row px-2 py-3 items-center">
               <GoogleDriveIcon color={"gray"} />
               <Text className="ml-3 text">Google Drive</Text>
+            </View>
+          )}
+        </View>
+        {/* -- AudiobookShelf -- */}
+        <View
+          className="rounded-xl bg-white mt-2 flex-row items-center"
+          style={{
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.amber900,
+          }}
+        >
+          {networkActive ? (
+            <Link
+              href={{
+                pathname: "audio/dropbox/audiobookshelf",
+                params: {
+                  fullPath: "",
+                  backTitle: "Back",
+                  audioSource: "abs",
+                } as AudioSourceLinkParams,
+              }}
+              className="flex-1"
+            >
+              <View className="flex-row px-2 py-3 items-center">
+                <Image
+                  source={require("../../../../assets/absLogo.png")}
+                  style={{ width: 28, height: 28 }}
+                />
+                <Text className="ml-3 text">AudiobookShelf</Text>
+              </View>
+            </Link>
+          ) : (
+            <View className="flex-row px-2 py-3 items-center">
+              <Image
+                source={require("../../../../assets/absLogo.png")}
+                style={{ width: 28, height: 28 }}
+              />
+              <Text className="ml-3 text">AudiobookShelf</Text>
             </View>
           )}
         </View>
