@@ -12,7 +12,7 @@ const formatAuthors = (authorsObj: { id: string; name: string }[]) => {
   return authorsObj.map((el) => el.name).join(", ");
 };
 const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
-  console.log("BOOKID", media.libraryItemId);
+  // console.log("BOOKID", media.libraryItemId);
   const authors = formatAuthors(media.metadata.authors);
   return (
     <View className="flex-col">
