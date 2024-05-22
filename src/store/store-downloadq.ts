@@ -8,6 +8,7 @@ import {
 } from "./data/fileSystemAccess";
 import { AudioSourceType } from "@app/audio/dropbox";
 import { DownloadProgressCallbackResultT } from "@dr.pogodin/react-native-fs";
+import { absDownloadItem } from "./data/absAPI";
 
 type CompletedDownload = {
   fileId: string;
@@ -204,7 +205,19 @@ const downloadFile = async (downloadProps: DownloadQueueItem) => {
     }));
   };
   // based on if google or dropbox
-  const downloadLink = audioSource === "google" ? fileId : await getDropboxFileLink(filePathLower);
+  let downloadLink;
+  switch (audioSource) {
+    case "google":
+      downloadLink = fileId;
+      break;
+    case "dropbox":
+      downloadLink = await getDropboxFileLink(filePathLower);
+    case "abs":
+      downloadLink = absDownloadItem(pathIn, fileId).urlWithToken;
+    default:
+      break;
+  }
+  // const downloadLink = audioSource === "google" ? fileId : await getDropboxFileLink(filePathLower);
   // Prepare to start the download
   //! react-native-fs CODE
   // const { cleanFileName, stopDownload, startDownload } = await downloadFileWProgress(

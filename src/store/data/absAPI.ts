@@ -231,10 +231,13 @@ export const absGetItemDetails = async (itemId?: string) => {
 //~~ ========================================================
 //~~ absGetItemDetails
 //~~ ========================================================
-export const absDownloadItem = async (itemId: string, fileIno: string) => {
+export const absDownloadItem = (itemId: string, fileIno: string) => {
   //  https://abs.mccoidco.xyz/api/items/<BOOK ID>/file/<FILE INO>/download
   const authHeader = getAuthHeader();
+  const token = getToken();
   const url = `https://abs.mccoidco.xyz/api/items/${itemId}/file/${fileIno}/download`;
+  const urlWithToken = `${url}?token=${token}`;
+  return { url, urlWithToken, authHeader };
 };
 
 //~~ =======================================================

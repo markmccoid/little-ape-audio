@@ -27,6 +27,10 @@ const ABSItem = () => {
   });
 
   isLoading || console.log("media", data.id, data.media.tags);
+  let backTitle = title || "Back";
+  if (!isLoading) {
+    backTitle = data?.media?.metadata?.title || backTitle;
+  }
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Stack.Screen
@@ -34,11 +38,7 @@ const ABSItem = () => {
           headerBackTitleVisible: false,
           headerBackVisible: false,
           header: () => (
-            <CustomHeader
-              title={"BOOK"}
-              backText={`${title || data.media.metadata.title || "Back"}`}
-              sessionAudioSource={"abs"}
-            />
+            <CustomHeader title={"BOOK"} backText={backTitle} sessionAudioSource={"abs"} />
           ),
         }}
       />

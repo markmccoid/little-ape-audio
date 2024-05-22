@@ -1,6 +1,8 @@
 import { View, Text, Image, StyleSheet, ScrollView } from "react-native";
 import React from "react";
 import { AudioFile, Media } from "@store/data/absTypes";
+import { downloadFileBlob, getCleanFileName } from "@store/data/fileSystemAccess";
+import ABSFile from "./ABSFile";
 
 type Props = {
   audioFiles: AudioFile[];
@@ -11,6 +13,7 @@ type Props = {
 const formatAuthors = (authorsObj: { id: string; name: string }[]) => {
   return authorsObj.map((el) => el.name).join(", ");
 };
+
 const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
   // console.log("BOOKID", media.libraryItemId);
   const authors = formatAuthors(media.metadata.authors);
@@ -48,17 +51,11 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
           </Text>
         </View>
       </View>
-      <Text>HI = {authors}</Text>
+      <Text>{authors}</Text>
       <ScrollView>
         {audioFiles.map((audio) => {
-          console.log("INO", audio.ino, media.libraryItemId);
-          return (
-            <View key={audio.ino}>
-              <Text>{audio.ino}</Text>
-
-              <Text>{audio.metadata.filename}</Text>
-            </View>
-          );
+          // console.log("INO", audio.ino, media.libraryItemId);
+          return <ABSFile audio={audio} bookId={media.libraryItemId} key={audio.ino} />;
         })}
       </ScrollView>
       {/* <Text>{audio.ino}</Text>
