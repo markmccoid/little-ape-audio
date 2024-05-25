@@ -216,11 +216,7 @@ export const absGetItemDetails = async (itemId?: string) => {
     console.log("error", error);
     throw error;
   }
-  console.log(
-    "LIB ITEM",
-    libraryItem.media.metadata.title,
-    libraryItem.media.audioFiles.map((el) => el.metadata.filename)
-  );
+
   return {
     id: libraryItem.id,
     audioFiles: libraryItem.media.audioFiles,

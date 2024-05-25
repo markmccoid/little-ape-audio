@@ -1,3 +1,4 @@
+import { SourceLocation } from "./../../node_modules/@babel/types/lib/index-legacy.d";
 import { Alert, Image } from "react-native";
 import { defaultImages, getRandomNumber } from "./storeUtils";
 import uuid from "react-native-uuid";
@@ -21,6 +22,7 @@ import { differenceInDays, format } from "date-fns";
 import { getJsonDataByFileID } from "@utils/googleUtils";
 import { sanitizeString } from "@utils/otherUtils";
 import { router } from "expo-router";
+import { AudioFile } from "./data/absTypes";
 
 //-- ==================================
 //-- DROPBOX STORE
@@ -537,6 +539,7 @@ export const tagFilesAndFolders = (foldersAndFiles: {
   };
   return finalFolderFileList;
 };
+
 //~ -------------------------------
 //~ Check for Folder Metadata
 //~ This will check for the LAAB_MetaAggr....json file which contains

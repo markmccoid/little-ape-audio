@@ -40,24 +40,24 @@ export const onInitialize = async () => {
 
   // ******************
   // * patch favFolders
-  // if (favFolders) {
-  //   const patchedFavs =
-  //     favFolders &&
-  //     favFolders.map((folder) => ({
-  //       ...folder,
-  //       audioSource: folder?.audioSource ? folder.audioSource : "dropbox",
-  //     }));
-  //   saveToAsyncStorage("favfolders", patchedFavs);
-  //   useDropboxStore.setState({ favoriteFolders: patchedFavs });
-  // }
-  // // * Patch playlist collections
-  // if (playlists) {
-  //   for (const key of Object.keys(playlists)) {
-  //     if (!playlists[key]?.collection) {
-  //       playlists[key].collection = {};
-  //     }
-  //   }
-  // }
+  if (favFolders) {
+    const patchedFavs =
+      favFolders &&
+      favFolders.map((folder) => ({
+        ...folder,
+        audioSource: folder?.audioSource ? folder.audioSource : "dropbox",
+      }));
+    saveToAsyncStorage("favfolders", patchedFavs);
+    useDropboxStore.setState({ favoriteFolders: patchedFavs });
+  }
+  // * Patch playlist collections
+  if (playlists) {
+    for (const key of Object.keys(playlists)) {
+      if (!playlists[key]?.collection) {
+        playlists[key].collection = {};
+      }
+    }
+  }
   // ******************
   const laabMetaDefault = {
     folders: [],

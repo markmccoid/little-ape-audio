@@ -1,8 +1,10 @@
-import { View, Text, Image, StyleSheet, ScrollView } from "react-native";
-import React from "react";
+import { View, Text, Image, StyleSheet, ScrollView, SafeAreaView } from "react-native";
+import React, { useMemo } from "react";
 import { AudioFile, Media } from "@store/data/absTypes";
 import { downloadFileBlob, getCleanFileName } from "@store/data/fileSystemAccess";
 import ABSFile from "./ABSFile";
+import ABSActionBar from "./ABSActionBar";
+import { absTagFiles } from "@store/store-abs";
 
 type Props = {
   audioFiles: AudioFile[];
@@ -17,8 +19,17 @@ const formatAuthors = (authorsObj: { id: string; name: string }[]) => {
 const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
   // console.log("BOOKID", media.libraryItemId);
   const authors = formatAuthors(media.metadata.authors);
+  const taggedAudioFiles = useMemo(
+    () => absTagFiles(audioFiles, media.libraryItemId),
+    [audioFiles]
+  );
   return (
-    <View className="flex-col">
+    <SafeAreaView className="flex-col flex-1">
+      <ABSActionBar
+        audio={audioFiles}
+        bookId={media.libraryItemId}
+        filesDownloaded={taggedAudioFiles.filter((el) => el.alreadyDownload).length}
+      />
       <View className="flex flex-row justify-start items-start border-b bg-yellow-500 py-1">
         <Image
           source={{ uri: coverURI }}
@@ -51,16 +62,23 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
           </Text>
         </View>
       </View>
-      <Text>{authors}</Text>
-      <ScrollView>
-        {audioFiles.map((audio) => {
+      <ScrollView
+        style={{
+          flex: 1,
+          backgroundColor: "white",
+        }}
+        contentContainerStyle={{
+          paddingBottom: 25,
+        }}
+      >
+        {taggedAudioFiles.map((audio) => {
           // console.log("INO", audio.ino, media.libraryItemId);
           return <ABSFile audio={audio} bookId={media.libraryItemId} key={audio.ino} />;
         })}
       </ScrollView>
       {/* <Text>{audio.ino}</Text>
       <Text>{audio.metadata.filename}</Text> */}
-    </View>
+    </SafeAreaView>
   );
 };
 

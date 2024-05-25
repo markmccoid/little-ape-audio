@@ -26,7 +26,6 @@ const ABSItem = () => {
     queryFn: async () => await absGetItemDetails(absitem),
   });
 
-  isLoading || console.log("media", data.id, data.media.tags);
   let backTitle = title || "Back";
   if (!isLoading) {
     backTitle = data?.media?.metadata?.title || backTitle;

@@ -12,11 +12,9 @@ import { formatBytes } from "@utils/formatUtils";
 
 type Props = {
   bookId: string;
-  audio: AudioFile;
+  audio: AudioFile & { path_lower: string; alreadyDownload: boolean };
 };
 const ABSFile = ({ bookId, audio }: Props) => {
-  //!! TEST DOWNLOAD
-  const trackActions = useTrackActions();
   const activeTasks = useDownloadQStore((state) => state.activeTasks);
   const completedDownloads = useDownloadQStore((state) =>
     state.completedDownloads.map((el) => el.fileId)
@@ -25,7 +23,7 @@ const ABSFile = ({ bookId, audio }: Props) => {
   const activeTask = activeTasks.find((task) => task.fileId === audio.ino);
   const isDownloading = activeTask?.processStatus === "downloading";
   const isAdding = activeTask?.processStatus === "adding";
-  const isDownloaded = completedDownloads.includes(audio.ino);
+  const isDownloaded = completedDownloads.includes(audio.ino) || audio.alreadyDownload;
   const progress = {
     downloadProgress: activeTask?.downloadProgress,
     bytesExpected: activeTask?.bytesExpected,

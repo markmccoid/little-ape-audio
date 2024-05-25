@@ -136,6 +136,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       const sourceArray = get().tracks.map((el) => el.sourceLocation);
       let taggedFiles = [];
       if (Array.isArray(tracksToCheck)) {
+        console.log(sourceArray);
         for (const source of tracksToCheck) {
           const isDownloaded = sourceArray.includes(source.path_lower);
           taggedFiles.push({ ...source, alreadyDownload: isDownloaded });
