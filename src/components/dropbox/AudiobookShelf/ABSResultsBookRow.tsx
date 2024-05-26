@@ -1,6 +1,7 @@
 import { View, Text, Image, Pressable, StyleSheet } from "react-native";
 import React from "react";
-import { ABSGetLibraryItems, getCoverURI } from "@store/data/absAPI";
+import { ABSGetLibraryItems } from "@store/data/absAPI";
+import { getCoverURI } from "@store/data/absUtils";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useRouter } from "expo-router";
 

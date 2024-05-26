@@ -13,6 +13,7 @@ import { PlaylistImageColors } from "@store/types";
 import { getImageColors, sanitizeString } from "@utils/otherUtils";
 import TrackPlayer from "react-native-track-player";
 import { BookJSONMetadata, CleanBookMetadata, cleanOneBook } from "@utils/audiobookMetadata";
+import { buildCoverURL } from "./data/absUtils";
 let isCriticalSectionLocked = false;
 const gdrive = new GDrive();
 
@@ -53,10 +54,10 @@ export const addTrack =
   async ({
     fileURI, // Clean filename including extension
     filename, // non cleaned filename including extension
-    sourceLocation, // Either full path with filename or google fileId TO THE FILE
-    pathIn, // This is the path or fileId to the **FOLDER** where the track was located.
+    sourceLocation, // Dropbox - full path with filename; Google - fileId TO THE FILE; abs - itemId~fileIno
+    pathIn, // Dropbox - the base path to file; Google - fileId to the **FOLDER** where the track was located; abs - itemId of Book
     currFolderText, // This is the name of the folder where the track was located. This will be the text and not an id if in google
-    audioSource, // google or dropbox
+    audioSource, // google or dropbox or abs
     playlistId = undefined,
     calculateColor = false,
     directory = "",
@@ -94,6 +95,11 @@ export const addTrack =
       trackNum = parseInt(tags.trackRaw) || "";
     }
     // Track Raw End
+    // If "abs" source and no metadata picture, use image from audiobookshelf
+    if (audioSource === "abs" && !tags.pictureURI) {
+      tags.pictureURI = buildCoverURL(pathIn);
+    }
+
     // Get picture colors if available
     if (tags.pictureURI && calculateColor) {
       const colors = (await getImageColors(tags.pictureURI)) as PlaylistImageColors;

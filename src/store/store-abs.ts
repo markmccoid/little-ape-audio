@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { saveToAsyncStorage } from "./data/asyncStorage";
 import { AudioFile } from "./data/absTypes";
 import { useTracksStore } from "./store";
+import { buildFilePathLower } from "./data/absUtils";
 
 export type UserInfo = {
   id: string;
@@ -72,7 +73,7 @@ export const absTagFiles = (audioFiles: AudioFile[], bookId: string) => {
   const trackActions = useTracksStore.getState().actions;
   const absFiles = audioFiles.map((audioFile) => ({
     ...audioFile,
-    path_lower: `${bookId}-${audioFile.ino}`,
+    path_lower: buildFilePathLower(bookId, audioFile.ino),
   }));
 
   //!!! DEEP CLONING of object may be issue, we may be losing the nested objects
@@ -84,7 +85,7 @@ export const absTagFiles = (audioFiles: AudioFile[], bookId: string) => {
 };
 
 type AFPlus = AudioFile & { path_lower: string };
-
+//-- Check to see if passed tracks have been downloaded, if so tag with isDownload
 const absIsTrackDownloaded = (tracksToCheck: AFPlus[]) => {
   const sourceArray = useTracksStore.getState().tracks.map((el) => el.sourceLocation);
   let taggedFiles = [];

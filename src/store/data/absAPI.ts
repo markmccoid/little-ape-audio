@@ -1,3 +1,4 @@
+import { AudioFile } from "./absTypes";
 //~~ ========================================================
 //~~ AudioBookShelf APIs                                    -
 //~~ ========================================================
@@ -15,6 +16,8 @@ import { Alert, Image } from "react-native";
 import { btoa } from "react-native-quick-base64";
 import { getImageSize } from "@utils/otherUtils";
 import { defaultImages, getRandomNumber } from "@store/storeUtils";
+import { buildCoverURL } from "./absUtils";
+import { sortBy } from "lodash";
 
 //~ =======
 //~ UTILS
@@ -197,7 +200,7 @@ export const absGetLibraryItems = async ({
       tags: item.media.tags,
     };
   });
-  return booksMin;
+  return sortBy(booksMin, ["author"]);
 };
 
 //~~ ========================================================
@@ -234,26 +237,4 @@ export const absDownloadItem = (itemId: string, fileIno: string) => {
   const url = `https://abs.mccoidco.xyz/api/items/${itemId}/file/${fileIno}/download`;
   const urlWithToken = `${url}?token=${token}`;
   return { url, urlWithToken, authHeader };
-};
-
-//~~ =======================================================
-//~~ UTILS
-//~~ =======================================================
-// -- buildCoverURL
-const buildCoverURL = (itemId: string) => {
-  return `https://abs.mccoidco.xyz/api/items/${itemId}/cover`;
-};
-
-// -- getCoverURI
-export const getCoverURI = async (coverURL: string): Promise<string> => {
-  let cover: string;
-  try {
-    const coverRes = await getImageSize(coverURL);
-    return coverURL;
-  } catch (err) {
-    const randomNum = getRandomNumber();
-    const randomImageInfo = Image.resolveAssetSource(defaultImages[`image${randomNum}`]);
-    const randomImageAspect = randomImageInfo.width / randomImageInfo.height;
-    return randomImageInfo.uri;
-  }
 };

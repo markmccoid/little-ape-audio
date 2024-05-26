@@ -1,9 +1,9 @@
 import { View, Text, Pressable } from "react-native";
 import React from "react";
 import { AudioFile } from "@store/data/absTypes";
-import { downloadFileBlob, getCleanFileName } from "@store/data/fileSystemAccess";
 import { absDownloadItem } from "@store/data/absAPI";
-import { useTrackActions } from "@store/store";
+import { buildFilePathLower } from "@store/data/absUtils";
+
 import useDownloadQStore, { DownloadQueueItem } from "@store/store-downloadq";
 import { AsteriskIcon, CloseIcon, CloudDownloadIcon } from "@components/common/svg/Icons";
 import MemoAnimatedAsterisk from "@components/common/animations/AnimatedAsterisk";
@@ -33,14 +33,13 @@ const ABSFile = ({ bookId, audio }: Props) => {
   async function downloadFile(audioIno: string) {
     // const cleanFileName1 = await downloadFileBlob(downloadLink1, file.name, () => {}, audioSource);
     const filename = audio.metadata.filename;
-    const cleanFileName = getCleanFileName(filename);
     const downloadLink = absDownloadItem(bookId, audioIno);
     // console.log("DownloadLink", downloadLink);
 
     const downloadItem: DownloadQueueItem = {
       fileId: audioIno,
-      fileName: cleanFileName,
-      filePathLower: `${bookId}-${audioIno}`,
+      fileName: filename,
+      filePathLower: buildFilePathLower(bookId, audioIno),
       pathIn: bookId,
       currFolderText: "currFolderText ABSTEST",
       playlistId: bookId,
@@ -51,10 +50,9 @@ const ABSFile = ({ bookId, audio }: Props) => {
   }
 
   return (
-    <View className="p-2 border ">
-      <View>
-        <Text>{audio.ino}</Text>
-
+    <View className="flex-row flex-1 p-2">
+      <View className="flex-row flex-1 justify-start items-center">
+        <Text className="pl-2 pr-4">{audio.trackNumFromMeta || audio.trackNumFromFilename}</Text>
         <Text>{audio.metadata.filename}</Text>
       </View>
       <View className="flex-row justify-end items-center flex-shrink-0">

@@ -8,6 +8,7 @@ import useDownloadQStore, {
 } from "@store/store-downloadq";
 import { MotiView } from "moti";
 import { AsteriskIcon, CloseIcon, CloudDownloadIcon } from "@components/common/svg/Icons";
+import { buildFilePathLower } from "@store/data/absUtils";
 
 type Props = {
   audio: AudioFile[];
@@ -41,7 +42,7 @@ const ABSActionBar = ({ audio, bookId, filesDownloaded }: Props) => {
       const downloadItem: DownloadQueueItem = {
         fileId: file.ino,
         fileName: file.metadata.filename,
-        filePathLower: `${bookId}-${file.ino}`,
+        filePathLower: buildFilePathLower(bookId, file.ino),
         pathIn: bookId,
         currFolderText: "currFolderText ABSTEST",
         playlistId: bookId,
@@ -54,7 +55,7 @@ const ABSActionBar = ({ audio, bookId, filesDownloaded }: Props) => {
   };
 
   return (
-    <View className="flex-row justify-end mr-4">
+    <View className="flex-row justify-end pr-4 bg-amber-50">
       {/* DOWNLOAD ALL Button */}
       {fileCount > 0 && (
         <View className="flex-shrink flex justify-end">

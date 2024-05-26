@@ -15,6 +15,8 @@ export type AnimateHeightProps = {
   style: ViewStyle;
   onHeightDidAnimate?: (height: number) => void;
   initialHeight?: number;
+  // max height that will be animated to.
+  maxHeight?: number;
 };
 
 const transition = { duration: 300 } as const;
@@ -25,6 +27,7 @@ function AnimateHeight({
   style,
   onHeightDidAnimate,
   initialHeight = 0,
+  maxHeight,
 }: AnimateHeightProps) {
   const measuredHeight = useSharedValue(initialHeight);
 
@@ -36,16 +39,15 @@ function AnimateHeight({
   );
 
   const containerStyle = useAnimatedStyle(() => {
+    if (measuredHeight.value > maxHeight) {
+      measuredHeight.value = maxHeight;
+    }
     return {
-      height: withTiming(
-        hide ? 0 : measuredHeight.value || 0,
-        transition,
-        () => {
-          if (onHeightDidAnimate) {
-            runOnJS(onHeightDidAnimate)(measuredHeight.value);
-          }
+      height: withTiming(hide ? 0 : measuredHeight.value || 0, transition, () => {
+        if (onHeightDidAnimate) {
+          runOnJS(onHeightDidAnimate)(measuredHeight.value);
         }
-      ),
+      }),
     };
   }, [hide, measuredHeight]);
 
