@@ -107,6 +107,9 @@ export const EraserIcon = ({ size = 25, color, style }: Props) => {
   return <MaterialCommunityIcons name="eraser" size={size} color={color} style={style} />;
 };
 
+export const SortIcon = ({ size = 25, color, style }: Props) => {
+  return <FontAwesome name="sort" size={size} color={color} style={style} />;
+};
 export const RefreshIcon = ({ size = 25, color, style }: Props) => {
   return <FontAwesome name="refresh" size={size} color={color} style={style} />;
 };

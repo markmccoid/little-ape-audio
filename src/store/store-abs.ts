@@ -19,13 +19,26 @@ export type StoredLibraries = {
   displayOrder: number;
   active: boolean;
 };
-type ABSState = {
+
+export type ResultSort = {
+  field: "author" | "title" | "dateAdded" | "dateModified" | "duration";
+  direction: "asc" | "desc";
+};
+export type ABSState = {
   userInfo?: UserInfo;
   libraries?: StoredLibraries[];
   activeLibraryId?: string;
+  // This is the sort for the results from useGetABSBooks()
+  resultSort: ResultSort;
+  searchObject: {
+    searchField: "author" | "title" | "description" | undefined;
+    searchValue: string;
+  };
   actions: {
-    saveUserInfo: (userInfo: UserInfo) => void;
-    saveLibraries: (libraries: StoredLibraries[], activeLibraryId: string) => void;
+    saveUserInfo: (userInfo: UserInfo) => Promise<void>;
+    saveLibraries: (libraries: StoredLibraries[], activeLibraryId: string) => Promise<void>;
+    updateResultSort: (resultSort: ResultSort) => Promise<void>;
+    updateSearchObject: (searchObject: ABSState["searchObject"]) => Promise<void>;
   };
 };
 
@@ -33,15 +46,19 @@ export const useABSStore = create<ABSState>((set, get) => ({
   userInfo: undefined,
   libraries: undefined,
   activeLibraryId: undefined,
+  resultSort: {
+    field: "author",
+    direction: "desc",
+  },
+  searchObject: {
+    searchField: undefined,
+    searchValue: "",
+  },
   actions: {
     saveUserInfo: async (userInfo) => {
       set({ userInfo });
 
-      await saveToAsyncStorage("absSettings", {
-        userInfo,
-        libraries: get().libraries,
-        activeLibraryId: get().activeLibraryId,
-      });
+      await absSaveStore();
     },
     saveLibraries: async (libraries, activeLibraryId) => {
       if (!libraries) {
@@ -56,15 +73,33 @@ export const useABSStore = create<ABSState>((set, get) => ({
           libraries: finalLibs,
           activeLibraryId,
         });
-        await saveToAsyncStorage("absSettings", {
-          userInfo: get().userInfo,
-          libraries: finalLibs,
-          activeLibraryId,
-        });
+
+        await absSaveStore();
       }
+    },
+    updateResultSort: async (resultSort) => {
+      set({ resultSort });
+
+      await absSaveStore();
+    },
+    updateSearchObject: async (searchObject) => {
+      set({ searchObject });
+
+      await absSaveStore();
     },
   },
 }));
+
+const absSaveStore = async () => {
+  const absState = useABSStore.getState();
+  await saveToAsyncStorage("absSettings", {
+    userInfo: absState.userInfo,
+    libraries: absState.libraries,
+    activeLibraryId: absState.activeLibraryId,
+    resultSort: absState.resultSort,
+    searchObject: absState.searchObject,
+  });
+};
 
 //~ -------------------------------
 //~ Tag audiobookshelf Files as being already download

@@ -1,9 +1,10 @@
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { View, Text, ScrollView, Pressable, SafeAreaView } from "react-native";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { absGetLibraryFilterData } from "@store/data/absAPI";
 import { Link } from "expo-router";
 import ABSErrorView from "./ABSErrorView";
+import { useABSStore } from "@store/store-abs";
 
 const ABSFilterPageContainer = () => {
   const { data, isLoading, error } = useQuery({
@@ -25,9 +26,9 @@ const ABSFilterPageContainer = () => {
   return (
     <>
       {!isLoading && (
-        <View>
+        <SafeAreaView>
           <Text className="mt-2 mx-2 text-base font-semibold">Select a Genre</Text>
-          <ScrollView>
+          <ScrollView className="mb-10" contentContainerStyle={{ paddingBottom: 50 }}>
             {data.genres.map((genre, index) => (
               <Link
                 href={{
@@ -50,7 +51,7 @@ const ABSFilterPageContainer = () => {
               </Link>
             ))}
           </ScrollView>
-        </View>
+        </SafeAreaView>
       )}
     </>
   );

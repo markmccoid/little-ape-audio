@@ -11,13 +11,13 @@ import {
   Library,
   LibraryItem,
 } from "./absTypes";
-import { useABSStore } from "@store/store-abs";
+import { ResultSort, useABSStore } from "@store/store-abs";
 import { Alert, Image } from "react-native";
 import { btoa } from "react-native-quick-base64";
 import { getImageSize } from "@utils/otherUtils";
 import { defaultImages, getRandomNumber } from "@store/storeUtils";
 import { buildCoverURL } from "./absUtils";
-import { sortBy } from "lodash";
+import { reverse, sortBy } from "lodash";
 
 //~ =======
 //~ UTILS
@@ -176,8 +176,13 @@ export const absGetLibraryItems = async ({
     filterData = `?filter=${filterType}.${filterValue}`;
     console.log("filterData", filterData);
   }
+  //! Server sort, not used
+  // const sortField = sort ? `media.metadata.${sort.field}` : "media.metadata.title";
+  // const sortOrder = sort ? sort.direction === "asc" && 0 : 1;
+  // const url = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items${filterData}&sort=${sortField}&desc=${sortOrder}`;
 
   const url = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items${filterData}`;
+  console.log("url", url);
   try {
     response = await axios.get(url, { headers: authHeader });
   } catch (error) {
@@ -192,6 +197,9 @@ export const absGetLibraryItems = async ({
       title: item.media.metadata.title,
       author: item.media.metadata.authorName,
       series: item.media.metadata.seriesName,
+      publishedDate: item.media.metadata.publishedDate,
+      publishedYear: item.media.metadata.publishedYear,
+      narratedBy: item.media.metadata.narratorName,
       addedAt: item.addedAt,
       updatedAt: item.updatedAt,
       cover: buildCoverURL(item.id),
@@ -200,7 +208,7 @@ export const absGetLibraryItems = async ({
       tags: item.media.tags,
     };
   });
-  return sortBy(booksMin, ["author"]);
+  return booksMin;
 };
 
 //~~ ========================================================

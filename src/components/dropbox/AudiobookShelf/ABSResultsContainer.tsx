@@ -1,4 +1,13 @@
-import { View, Text, SafeAreaView, ScrollView, Image, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  SafeAreaView,
+  ScrollView,
+  Image,
+  FlatList,
+  TouchableOpacity,
+  TextInput,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { defaultImages, getRandomNumber } from "@store/storeUtils";
 import { ABSGetLibraryItems, absGetLibraryItems } from "@store/data/absAPI";
@@ -8,6 +17,9 @@ import { useQuery } from "@tanstack/react-query";
 import ABSErrorView from "./ABSErrorView";
 import ABSResultsBookRow from "./ABSResultsBookRow";
 import { ABSDirParams } from "@app/audio/dropbox/audiobookshelf/filtered";
+import { useABSStore } from "@store/store-abs";
+import { useGetABSBooks } from "@store/data/absHooks";
+import ABSResultSearchInput from "./ABSResultSearchInput";
 
 const ABSResultsContainer = ({
   absdir,
@@ -15,15 +27,14 @@ const ABSResultsContainer = ({
   filterValue,
   filterValueEncoded,
 }: ABSDirParams) => {
-  const {
-    data: books,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: [filterType, filterValue],
-    queryFn: async () => await absGetLibraryItems({ filterType, filterValue: filterValueEncoded }),
-    staleTime: 60000,
-  });
+  // const { field: sortField, direction: sortDirection } = useABSStore((state) => state.resultSort);
+  const updateSearchObject = useABSStore((state) => state.actions.updateSearchObject);
+  const { books, isLoading, error } = useGetABSBooks({ filterType, filterValueEncoded });
+
+  const handleUpdateSearch = (searchObject) => {
+    console.log("Updating search object", searchObject);
+    updateSearchObject(searchObject);
+  };
 
   //! Error view - most likely "server not available"
   if (error) {
@@ -42,6 +53,7 @@ const ABSResultsContainer = ({
         <Text>Filter Value: </Text>
         <Text className="flex-1 font-semibold">{filterValue}</Text>
       </View>
+      <ABSResultSearchInput updateSearch={handleUpdateSearch} />
       <FlatList data={books} renderItem={renderItem} keyExtractor={(item) => item.id} />
     </View>
   );
