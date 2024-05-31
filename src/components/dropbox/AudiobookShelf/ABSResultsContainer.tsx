@@ -32,7 +32,6 @@ const ABSResultsContainer = ({
   const { books, isLoading, error } = useGetABSBooks({ filterType, filterValueEncoded });
 
   const handleUpdateSearch = (searchObject) => {
-    console.log("Updating search object", searchObject);
     updateSearchObject(searchObject);
   };
 

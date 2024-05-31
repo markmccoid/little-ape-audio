@@ -28,6 +28,11 @@ const ABSFilterPageContainer = () => {
       {!isLoading && (
         <SafeAreaView>
           <Text className="mt-2 mx-2 text-base font-semibold">Select a Genre</Text>
+          {/* <ScrollView>
+            {data.tags.map((tag, index) => {
+              return <Text>{tag.name}</Text>;
+            })}
+          </ScrollView> */}
           <ScrollView className="mb-10" contentContainerStyle={{ paddingBottom: 50 }}>
             {data.genres.map((genre, index) => (
               <Link

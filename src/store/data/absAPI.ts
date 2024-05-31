@@ -11,13 +11,10 @@ import {
   Library,
   LibraryItem,
 } from "./absTypes";
-import { ResultSort, useABSStore } from "@store/store-abs";
-import { Alert, Image } from "react-native";
+import { useABSStore } from "@store/store-abs";
+import { Alert } from "react-native";
 import { btoa } from "react-native-quick-base64";
-import { getImageSize } from "@utils/otherUtils";
-import { defaultImages, getRandomNumber } from "@store/storeUtils";
 import { buildCoverURL } from "./absUtils";
-import { reverse, sortBy } from "lodash";
 
 //~ =======
 //~ UTILS
@@ -171,10 +168,9 @@ export const absGetLibraryItems = async ({
   const activeLibraryId = useABSStore.getState().activeLibraryId;
   const libraryIdToUse = libraryId || activeLibraryId;
   let response;
-  let filterData;
+  let filterData = "";
   if (filterType) {
     filterData = `?filter=${filterType}.${filterValue}`;
-    console.log("filterData", filterData);
   }
   //! Server sort, not used
   // const sortField = sort ? `media.metadata.${sort.field}` : "media.metadata.title";
@@ -182,7 +178,7 @@ export const absGetLibraryItems = async ({
   // const url = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items${filterData}&sort=${sortField}&desc=${sortOrder}`;
 
   const url = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items${filterData}`;
-  console.log("url", url);
+  console.log("URL absAPI", url);
   try {
     response = await axios.get(url, { headers: authHeader });
   } catch (error) {

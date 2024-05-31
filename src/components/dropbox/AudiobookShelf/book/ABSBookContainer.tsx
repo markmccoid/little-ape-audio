@@ -13,7 +13,8 @@ import { AudioFile, Media } from "@store/data/absTypes";
 import { downloadFileBlob, getCleanFileName } from "@store/data/fileSystemAccess";
 import ABSFile from "./ABSFile";
 import ABSActionBar from "./ABSActionBar";
-import { absTagFiles } from "@store/store-abs";
+import { absTagFiles } from "@store/data/absTagFile";
+// import { absTagFiles } from "@store/store-abs";
 import { AnimateHeight } from "@components/common/animations/AnimateHeight";
 import { colors } from "@constants/Colors";
 import { MotiView } from "moti";
@@ -50,7 +51,7 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
   return (
     <SafeAreaView className="flex-col flex-1">
       <ABSActionBar
-        audio={audioFiles}
+        audio={taggedAudioFiles}
         bookId={media.libraryItemId}
         filesDownloaded={taggedAudioFiles.filter((el) => el.alreadyDownload).length}
       />
@@ -161,7 +162,7 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
           // console.log("INO", audio.ino, media.libraryItemId);
           return (
             <View
-              className={`border-b ${index % 2 === 0 ? "bg-amber-50" : "bg-white"}`}
+              className={`flex-1 border-b ${index % 2 === 0 ? "bg-amber-50" : "bg-white"}`}
               key={audio.ino}
             >
               <ABSFile audio={audio} bookId={media.libraryItemId} key={audio.ino} />

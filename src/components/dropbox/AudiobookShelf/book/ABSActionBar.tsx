@@ -11,7 +11,7 @@ import { AsteriskIcon, CloseIcon, CloudDownloadIcon } from "@components/common/s
 import { buildFilePathLower } from "@store/data/absUtils";
 
 type Props = {
-  audio: AudioFile[];
+  audio: (AudioFile & { path_lower: string; alreadyDownload: boolean })[];
   bookId: string;
   filesDownloaded: number;
 };
@@ -38,7 +38,7 @@ const ABSActionBar = ({ audio, bookId, filesDownloaded }: Props) => {
     const playlistId = bookId;
     //-- Add the files to the download queue
     let i = 0;
-    for (let file of audio) {
+    for (let file of audio.filter((el) => el.alreadyDownload === false)) {
       const downloadItem: DownloadQueueItem = {
         fileId: file.ino,
         fileName: file.metadata.filename,

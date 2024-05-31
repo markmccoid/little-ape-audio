@@ -14,6 +14,7 @@ import { getImageColors, sanitizeString } from "@utils/otherUtils";
 import TrackPlayer from "react-native-track-player";
 import { BookJSONMetadata, CleanBookMetadata, cleanOneBook } from "@utils/audiobookMetadata";
 import { buildCoverURL } from "./data/absUtils";
+import { absGetItemDetails } from "./data/absAPI";
 let isCriticalSectionLocked = false;
 const gdrive = new GDrive();
 
@@ -82,8 +83,8 @@ export const addTrack =
       `${FileSystem.documentDirectory}${fileURI}`
     )) as AudioMetadata;
     // console.log("Get Tags END", Date.now());
+
     // process track number info
-    // let trackNum = tags.trackRaw;
     let trackNum: number | string = "";
     let totalTracks = undefined;
     const trackRaw = `${tags.trackRaw}`;
@@ -96,8 +97,17 @@ export const addTrack =
     }
     // Track Raw End
     // If "abs" source and no metadata picture, use image from audiobookshelf
-    if (audioSource === "abs" && !tags.pictureURI) {
-      tags.pictureURI = buildCoverURL(pathIn);
+    if (audioSource === "abs") {
+      if (!tags.pictureURI) {
+        tags.pictureURI = buildCoverURL(pathIn);
+      }
+
+      const results = await absGetItemDetails(pathIn);
+      const currentIno = sourceLocation.split("~")[1];
+      const currentAudio = results.audioFiles.find((file) => file.ino === currentIno);
+      const absChapters = absChapterConvert(currentAudio.chapters);
+      console.log("absChapters", absChapters);
+      tags.chapters = absChapters;
     }
 
     // Get picture colors if available
@@ -187,16 +197,7 @@ export const addTrack =
     const newAudioFileList = [...filteredList, newAudioFile];
     set({ tracks: newAudioFileList });
 
-    // //!! ----------
-    // // Check if the critical section is locked; if it is, wait and try again later
-    // // If global var is true, we will loop on this until it is not true, then continue.
-    // while (isCriticalSectionLocked) {
-    //   await new Promise((resolve) => setTimeout(resolve, 100)); // Adjust the timeout as needed
-    // }
-
-    // // Lock the critical section
-    // isCriticalSectionLocked = true;
-
+    // //!! ---------
     try {
       //! ----- ----- ----- ----- ----- ----- -----
       //! This code is to only here to make the
@@ -208,16 +209,18 @@ export const addTrack =
       //~ We could probably use this techinique for the other metadata
       //~ but for now above works.
       //! ----- ----- ----- ----- ----- ----- -----
-      // console.log("Trackplayer Chapter Check start");
-      const trackPlayerTrack = {
-        id: `${filename}`,
-        filename: `${filename}`,
-        url: `${FileSystem.documentDirectory}${fileURI}`,
-        duration: tags.durationSeconds,
-      };
-      await TrackPlayer.reset();
-      await TrackPlayer.add([trackPlayerTrack]);
-      await TrackPlayer.skip(0);
+      //
+      if (!tags?.chapters || tags?.chapters?.length === 0) {
+        const trackPlayerTrack = {
+          id: `${filename}`,
+          filename: `${filename}`,
+          url: `${FileSystem.documentDirectory}${fileURI}`,
+          duration: tags.durationSeconds,
+        };
+        await TrackPlayer.reset();
+        await TrackPlayer.add([trackPlayerTrack]);
+        await TrackPlayer.skip(0);
+      }
       // console.log("Trackplayer Chapter Check END");
       /**
        * PLAYLIST
@@ -306,6 +309,36 @@ const getMetadataDropbox = async (sourceLocation: string, filename: string) => {
   return convertedMeta;
 };
 
+//~~ -------------------------------------
+//~~ -------------------------------------
+type ABSChapter = {
+  id: number;
+  title: string;
+  start: number;
+  end: number;
+};
+
+const absChapterConvert = (chapters: ABSChapter[]) => {
+  if (!chapters || chapters.length === 0) return undefined;
+
+  const newChapters = [];
+  for (const chapter of chapters) {
+    const chapterStart = Math.floor(chapter.start);
+    const chapterEnd = Math.floor(chapter.end) - 1;
+    newChapters.push({
+      title: chapter.title,
+      startSeconds: chapterStart,
+      endSeconds: chapterEnd,
+      durationSeconds: chapterEnd - chapterStart,
+      startMilliSeconds: chapterStart * 1000,
+      endMilliSeconds: chapterEnd * 1000,
+      lengthMilliSeconds: (chapterEnd - chapterStart) * 1000,
+    });
+  }
+  return newChapters;
+};
+
+//~~ ======================================
 const laabMetaDropbox = async (sourceLocation: string, filename: string) => {
   //~~ Check for LAAB Meta file
   const laabPath = sourceLocation.slice(0, sourceLocation.lastIndexOf("/"));
