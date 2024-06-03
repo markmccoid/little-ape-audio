@@ -28,12 +28,7 @@ const ABSResultsContainer = ({
   filterValueEncoded,
 }: ABSDirParams) => {
   // const { field: sortField, direction: sortDirection } = useABSStore((state) => state.resultSort);
-  const updateSearchObject = useABSStore((state) => state.actions.updateSearchObject);
   const { books, isLoading, error } = useGetABSBooks({ filterType, filterValueEncoded });
-
-  const handleUpdateSearch = (searchObject) => {
-    updateSearchObject(searchObject);
-  };
 
   //! Error view - most likely "server not available"
   if (error) {
@@ -52,7 +47,7 @@ const ABSResultsContainer = ({
         <Text>Filter Value: </Text>
         <Text className="flex-1 font-semibold">{filterValue}</Text>
       </View>
-      <ABSResultSearchInput updateSearch={handleUpdateSearch} />
+      {/* <ABSResultSearchInput updateSearch={handleUpdateSearch} /> */}
       <FlatList data={books} renderItem={renderItem} keyExtractor={(item) => item.id} />
     </View>
   );

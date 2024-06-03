@@ -2,7 +2,7 @@ import { View, Text, Button, Pressable } from "react-native";
 import React from "react";
 import { Stack, useRouter } from "expo-router";
 import { colors } from "../../../../constants/Colors";
-import { ChevronBackIcon } from "@components/common/svg/Icons";
+import { ChevronBackIcon, SearchIcon } from "@components/common/svg/Icons";
 
 const ABSLayout = () => {
   const router = useRouter();
@@ -22,6 +22,11 @@ const ABSLayout = () => {
             </Pressable>
           ),
           presentation: "card",
+          headerRight: () => (
+            <Pressable onPress={() => router.push("/audio/dropbox/audiobookshelf/advsearch")}>
+              <SearchIcon />
+            </Pressable>
+          ),
           headerStyle: { backgroundColor: colors.amber200 },
           headerTintColor: colors.amber900,
         }}
@@ -43,6 +48,17 @@ const ABSLayout = () => {
           // title: "overwrite",
           // headerBackTitleVisible: false,
           // headerBackVisible: false,
+        }}
+      />
+      <Stack.Screen
+        name="advsearch"
+        options={{
+          presentation: "modal",
+          title: "Advanced Search",
+          headerShown: false,
+          // headerBackTitleVisible: false,
+          // headerBackVisible: false,
+          // headerStyle: { backgroundColor: colors.amber500 },
         }}
       />
     </Stack>

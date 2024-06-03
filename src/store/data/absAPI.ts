@@ -178,7 +178,7 @@ export const absGetLibraryItems = async ({
   // const url = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items${filterData}&sort=${sortField}&desc=${sortOrder}`;
 
   const url = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items${filterData}`;
-  console.log("URL absAPI", url);
+  console.log("URL absGetLibraryItems", url);
   try {
     response = await axios.get(url, { headers: authHeader });
   } catch (error) {
@@ -196,6 +196,7 @@ export const absGetLibraryItems = async ({
       publishedDate: item.media.metadata.publishedDate,
       publishedYear: item.media.metadata.publishedYear,
       narratedBy: item.media.metadata.narratorName,
+      description: item.media.metadata.description,
       addedAt: item.addedAt,
       updatedAt: item.updatedAt,
       cover: buildCoverURL(item.id),

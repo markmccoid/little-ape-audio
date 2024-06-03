@@ -106,7 +106,17 @@ export const DeleteIcon = ({ size = 25, color = "#b20a2c", style }: Props) => {
 export const EraserIcon = ({ size = 25, color, style }: Props) => {
   return <MaterialCommunityIcons name="eraser" size={size} color={color} style={style} />;
 };
+export const ExpandDownIcon = ({ size, color = undefined, style = undefined }) => {
+  return (
+    <MaterialCommunityIcons name="arrow-expand-down" color={color} size={size} style={style} />
+  );
+};
 
+export const CollapseUpIcon = ({ size, color = undefined, style = undefined }) => {
+  return (
+    <MaterialCommunityIcons name="arrow-collapse-up" color={color} size={size} style={style} />
+  );
+};
 export const SortIcon = ({ size = 25, color, style }: Props) => {
   return <FontAwesome name="sort" size={size} color={color} style={style} />;
 };

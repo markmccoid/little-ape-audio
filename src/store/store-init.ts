@@ -80,6 +80,7 @@ export const onInitialize = async () => {
 
   useABSStore.setState({
     ...audiobookshelfSettings,
+    // searchObject: {},
     actions: absActions,
   });
   return;

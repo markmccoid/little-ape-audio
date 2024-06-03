@@ -108,7 +108,14 @@ export default function RootLayout() {
 
   return <RootLayoutNav />;
 }
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // --------            -Minutes-
+      staleTime: 1000 * 60 * 30,
+    },
+  },
+});
 function RootLayoutNav() {
   return (
     <SafeAreaProvider>
