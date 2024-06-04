@@ -7,9 +7,10 @@ import { CloseIcon } from "@components/common/svg/Icons";
 type Props = {
   updateSearch: (value: string) => void;
   label: string;
+  value?: string;
 };
-const ABSResultSearchInputText = ({ updateSearch, label }: Props) => {
-  const [searchText, setSearchText] = useState("");
+const ABSResultSearchInputText = ({ updateSearch, label, value }: Props) => {
+  const [searchText, setSearchText] = useState(value || "");
 
   const debouncedSetSearchText = useCallback(
     debounce((searchValue) => updateSearch(searchValue), 500),

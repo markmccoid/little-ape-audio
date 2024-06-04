@@ -8,10 +8,12 @@ export function SortMenu() {
   const currentSort = `${field}${direction}` as const;
   const updateResultSort = useABSStore((state) => state.actions.updateResultSort);
 
-  const changeSort = (field: ResultSort["field"], direction: ResultSort["direction"]) => {
-    updateResultSort({ field, direction });
+  const changeFieldSort = (fieldIn: ResultSort["field"]) => {
+    updateResultSort({ field: fieldIn, direction });
   };
-
+  const changeSortDirection = (directionIn: ResultSort["direction"]) => {
+    updateResultSort({ field, direction: directionIn });
+  };
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
@@ -21,27 +23,92 @@ export function SortMenu() {
       </DropdownMenu.Trigger>
 
       <DropdownMenu.Content>
-        <DropdownMenu.Group horizontal>
-          <DropdownMenu.Label>Sort Ascending</DropdownMenu.Label>
-          <DropdownMenu.Item key="authorasc" onSelect={() => changeSort("author", "asc")}>
-            <DropdownMenu.ItemTitle>
-              {currentSort === "authorasc" ? "* By Author *" : "By Author"}
-            </DropdownMenu.ItemTitle>
+        <DropdownMenu.Group>
+          {/* <DropdownMenu.Label>Sort Ascending</DropdownMenu.Label> */}
+          {/* Author */}
+          <DropdownMenu.Item key="author" onSelect={() => changeFieldSort("author")}>
+            <DropdownMenu.ItemTitle>Author</DropdownMenu.ItemTitle>
+            <DropdownMenu.ItemIcon
+              ios={{
+                name: field === "author" ? "checkmark.circle.fill" : "person",
+                pointSize: 18,
+                weight: "semibold",
+                scale: field === "author" ? "large" : "medium",
+              }}
+            ></DropdownMenu.ItemIcon>
           </DropdownMenu.Item>
-          <DropdownMenu.Item key="titleasc" onSelect={() => changeSort("title", "asc")}>
-            {currentSort === "titleasc" ? "* By Title *" : "By Title"}
+          {/* Title */}
+          <DropdownMenu.Item key="title" onSelect={() => changeFieldSort("title")}>
+            <DropdownMenu.ItemTitle>Title</DropdownMenu.ItemTitle>
+            <DropdownMenu.ItemIcon
+              ios={{
+                name: field === "title" ? "checkmark.circle.fill" : "book.pages",
+                pointSize: 18,
+                weight: "semibold",
+                scale: field === "title" ? "large" : "medium",
+              }}
+            ></DropdownMenu.ItemIcon>
+          </DropdownMenu.Item>
+          {/* Release Date */}
+          <DropdownMenu.Item key="publishedyear" onSelect={() => changeFieldSort("publishedYear")}>
+            <DropdownMenu.ItemTitle>Published Year</DropdownMenu.ItemTitle>
+            <DropdownMenu.ItemIcon
+              ios={{
+                name: field === "publishedYear" ? "checkmark.circle.fill" : "calendar.badge.clock",
+                pointSize: 18,
+                weight: "semibold",
+                scale: field === "publishedYear" ? "large" : "medium",
+              }}
+            ></DropdownMenu.ItemIcon>
+          </DropdownMenu.Item>
+          {/* Date Added */}
+          <DropdownMenu.Item key="adddate" onSelect={() => changeFieldSort("addedAt")}>
+            <DropdownMenu.ItemTitle>Date Added</DropdownMenu.ItemTitle>
+            <DropdownMenu.ItemIcon
+              ios={{
+                name: field === "addedAt" ? "checkmark.circle.fill" : "calendar.badge.plus",
+                pointSize: 18,
+                weight: "semibold",
+                scale: field === "addedAt" ? "large" : "medium",
+              }}
+            ></DropdownMenu.ItemIcon>
+          </DropdownMenu.Item>
+          {/* Duration */}
+          <DropdownMenu.Item key="duration" onSelect={() => changeFieldSort("duration")}>
+            <DropdownMenu.ItemTitle>Duration</DropdownMenu.ItemTitle>
+            <DropdownMenu.ItemIcon
+              ios={{
+                name: field === "duration" ? "checkmark.circle.fill" : "timer",
+                pointSize: 18,
+                weight: "semibold",
+                scale: field === "duration" ? "large" : "medium",
+              }}
+            ></DropdownMenu.ItemIcon>
           </DropdownMenu.Item>
         </DropdownMenu.Group>
         {/* Sort Descending */}
-        <DropdownMenu.Group horizontal>
-          <DropdownMenu.Label>Sort Descending</DropdownMenu.Label>
-          <DropdownMenu.Item key="authordesc" onSelect={() => changeSort("author", "desc")}>
-            <DropdownMenu.ItemTitle>
-              {currentSort === "authordesc" ? "* By Author *" : "By Author"}
-            </DropdownMenu.ItemTitle>
+        <DropdownMenu.Group>
+          <DropdownMenu.Item key="asc" onSelect={() => changeSortDirection("asc")}>
+            <DropdownMenu.ItemTitle>Ascending</DropdownMenu.ItemTitle>
+            <DropdownMenu.ItemIcon
+              ios={{
+                name: direction === "asc" ? "checkmark.circle.fill" : "arrow.up.to.line",
+                pointSize: 18,
+                weight: "semibold",
+                scale: direction === "asc" ? "large" : "medium",
+              }}
+            ></DropdownMenu.ItemIcon>
           </DropdownMenu.Item>
-          <DropdownMenu.Item key="titledesc" onSelect={() => changeSort("title", "desc")}>
-            {currentSort === "titledesc" ? "* By Title *" : "By Title"}
+          <DropdownMenu.Item key="desc" onSelect={() => changeSortDirection("desc")}>
+            <DropdownMenu.ItemTitle>Descending</DropdownMenu.ItemTitle>
+            <DropdownMenu.ItemIcon
+              ios={{
+                name: direction === "desc" ? "checkmark.circle.fill" : "arrow.down.to.line",
+                pointSize: 18,
+                weight: "semibold",
+                scale: direction === "desc" ? "large" : "medium",
+              }}
+            ></DropdownMenu.ItemIcon>
           </DropdownMenu.Item>
         </DropdownMenu.Group>
       </DropdownMenu.Content>

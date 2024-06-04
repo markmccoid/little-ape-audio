@@ -5,6 +5,7 @@ import ABSAdvSearchGenres from "./ABSAdvSearchGenres";
 import ABSAdvSearchTags from "./ABSAdvSearchTags";
 import HiddenContainer from "@components/common/hiddenContainer/HiddenContainer";
 import { useABSStore } from "@store/store-abs";
+import ABSResultSearchInputText from "./ABSSearchInputText";
 
 const buildExtraInfo = (selectedItems: string[]) => {
   if (!selectedItems || selectedItems?.length === 0) return "";
@@ -15,11 +16,15 @@ const buildExtraInfo = (selectedItems: string[]) => {
 };
 const ABSAdvSearchContainer = () => {
   useFocusEffect(() => {
-    console.log("Focuse Effect - ABSAdvSearchContianer.tsx");
-    return () => console.log("UNMOUNT focus effect-ABSAdvSearchContianer");
+    // console.log("Focuse Effect - ABSAdvSearchContianer.tsx");
+    // return () => console.log("UNMOUNT focus effect-ABSAdvSearchContianer");
   });
   const searchObject = useABSStore((state) => state.searchObject);
 
+  const updateSearchObject = useABSStore((state) => state.actions.updateSearchObject);
+  const updateDescription = (description: string) => {
+    updateSearchObject({ description });
+  };
   return (
     <View>
       <View className="p-3 border-b border-amber-900 mb-2 flex-row justify-center bg-amber-500">
@@ -40,6 +45,11 @@ const ABSAdvSearchContainer = () => {
         >
           <ABSAdvSearchTags />
         </HiddenContainer>
+        <ABSResultSearchInputText
+          updateSearch={updateDescription}
+          label="Description"
+          value={searchObject.description || ""}
+        />
       </ScrollView>
     </View>
   );

@@ -5,8 +5,8 @@ import ABSAdvSearchContainer from "@components/dropbox/AudiobookShelf/search/ABS
 
 const AdvancedSearch = () => {
   useFocusEffect(() => {
-    console.log("Focuse Effect - advsearch.tsx");
-    return () => console.log("UNMOUNT focus effect-advsearch.tsx");
+    // console.log("Focuse Effect - advsearch.tsx");
+    // return () => console.log("UNMOUNT focus effect-advsearch.tsx");
   });
   return (
     <View className="flex-1">

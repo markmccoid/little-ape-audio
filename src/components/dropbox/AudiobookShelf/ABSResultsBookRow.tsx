@@ -4,6 +4,7 @@ import { ABSGetLibraryItems } from "@store/data/absAPI";
 import { getCoverURI } from "@store/data/absUtils";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useRouter } from "expo-router";
+import { formatSeconds } from "@utils/formatUtils";
 
 type Unpacked<T> = T extends (infer U)[] ? U : T;
 type Props = {
@@ -18,7 +19,13 @@ const ABSResultsBookRow = ({ book, index }: Props) => {
   });
 
   return (
-    <View className={`flex flex-row border-b ${index === 0 && "border-t"} bg-amber-50 py-1`}>
+    <View
+      className={`flex flex-row bg-amber-50 py-1`}
+      style={{
+        borderTopWidth: index === 0 ? StyleSheet.hairlineWidth : 0,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+      }}
+    >
       <View className="m-2">
         <Image
           source={{ uri: data || book.cover }}
@@ -49,6 +56,13 @@ const ABSResultsBookRow = ({ book, index }: Props) => {
             <Text lineBreakMode="tail" numberOfLines={2} className="flex-1 text-amber-900">
               by {book.author}
             </Text>
+          </View>
+          <View className="flex-row ">
+            <Text className="text-amber-900">Duration:</Text>
+            <Text className="text-amber-900 font-semibold">{formatSeconds(book.duration)}</Text>
+          </View>
+          <View className="flex-row ">
+            <Text className="font-semibold text-amber-950">{book.publishedYear}</Text>
           </View>
         </View>
       </Pressable>

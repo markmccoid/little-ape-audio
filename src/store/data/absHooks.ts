@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ABSGetLibraryItems, absGetLibraryFilterData, absGetLibraryItems } from "./absAPI";
 import { reverse, sortBy } from "lodash";
 import { useABSStore } from "@store/store-abs";
+import { useMemo } from "react";
 
 //~~ ================================================================
 //~~ useGetFilterData - Get the filter data for the library
@@ -47,18 +48,33 @@ export const useGetABSBooks = ({ filterType, filterValueEncoded }) => {
 //~~ ================================================================
 export const useGetAllABSBooks = () => {
   const { title, author, description, genres, tags } = useABSStore((state) => state.searchObject);
+  const { field, direction } = useABSStore((state) => state.resultSort);
   const { data, ...rest } = useQuery({
     queryKey: ["allABSBooks"],
     queryFn: async () => await absGetLibraryItems({}),
     staleTime: 1800000,
   });
-
   // If no data, return empty array
   if (!data) {
     return {
       books: [],
       totalBookCount: 0,
       selectedBookCount: 0,
+      ...rest,
+    };
+  }
+
+  const randNums = useMemo(() => generateRandomIntegers(25, 1, data.length), []);
+  // If not filters for data, then return 25 random books
+  if (!title && !author && !description && !genres?.length && !tags?.length) {
+    let discoverBooks = [];
+    for (const random of randNums) {
+      discoverBooks.push(data[random as number]);
+    }
+    return {
+      books: discoverBooks,
+      totalBookCount: data.length,
+      selectedBookCount: 25,
       ...rest,
     };
   }
@@ -71,8 +87,6 @@ export const useGetAllABSBooks = () => {
     const bookDescription = book.description?.toLowerCase() || "";
 
     let includeFlag = undefined;
-    // If not filters for data, then return nothing
-    if (!title && !author && !description && !genres?.length && !tags?.length) break;
 
     // -- Title match
     includeFlag = checkString(bookTitle, title, includeFlag);
@@ -89,7 +103,9 @@ export const useGetAllABSBooks = () => {
       filterData.push(book);
     }
   }
-  console.log("USEGETALLBOOKS Returns -- ", filterData.length);
+  // console.log("USEGETALLBOOKS Returns -- ", filterData.length);
+  filterData =
+    direction === "asc" ? sortBy(filterData, [field]) : reverse(sortBy(filterData, [field]));
   return {
     books: filterData,
     totalBookCount: data.length,
@@ -132,3 +148,14 @@ const checkArray = (fieldArray: string[], checkArray: string[], currentIncludeVa
   }
   return false;
 };
+
+function generateRandomIntegers(count, min, max) {
+  const randomNumbers = new Set();
+
+  while (randomNumbers.size < count) {
+    const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+    randomNumbers.add(randomNumber);
+  }
+
+  return Array.from(randomNumbers);
+}

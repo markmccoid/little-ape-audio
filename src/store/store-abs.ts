@@ -18,7 +18,7 @@ export type StoredLibraries = {
 };
 
 export type ResultSort = {
-  field: "author" | "title" | "dateAdded" | "dateModified" | "duration";
+  field: "author" | "title" | "addedAt" | "publishedYear" | "duration";
   direction: "asc" | "desc";
 };
 export type SearchObject = {
@@ -92,7 +92,7 @@ export const useABSStore = create<ABSState>((set, get) => ({
       }
       const currSearchObj = get().searchObject;
       set({ searchObject: { ...currSearchObj, ...searchObject } });
-      console.log("store-abs curr search", get().searchObject);
+      //console.log("store-abs curr search", get().searchObject);
     },
   },
 }));

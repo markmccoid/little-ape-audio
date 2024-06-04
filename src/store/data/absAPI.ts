@@ -197,6 +197,7 @@ export const absGetLibraryItems = async ({
       publishedYear: item.media.metadata.publishedYear,
       narratedBy: item.media.metadata.narratorName,
       description: item.media.metadata.description,
+      duration: item.media.duration,
       addedAt: item.addedAt,
       updatedAt: item.updatedAt,
       cover: buildCoverURL(item.id),

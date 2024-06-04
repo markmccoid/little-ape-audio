@@ -2,7 +2,8 @@ import { View, Text, Button, Pressable } from "react-native";
 import React from "react";
 import { Stack, useRouter } from "expo-router";
 import { colors } from "../../../../constants/Colors";
-import { ChevronBackIcon, SearchIcon } from "@components/common/svg/Icons";
+import { ChevronBackIcon, FilterIcon, SearchIcon } from "@components/common/svg/Icons";
+import { SortMenu } from "@components/dropbox/AudiobookShelf/SortMenu";
 
 const ABSLayout = () => {
   const router = useRouter();
@@ -23,24 +24,20 @@ const ABSLayout = () => {
           ),
           presentation: "card",
           headerRight: () => (
-            <Pressable onPress={() => router.push("/audio/dropbox/audiobookshelf/advsearch")}>
-              <SearchIcon />
-            </Pressable>
+            <View className="flex-row items-center p-1 mt-1">
+              <Pressable className="mr-3">
+                <SortMenu />
+              </Pressable>
+              <Pressable onPress={() => router.push("/audio/dropbox/audiobookshelf/advsearch")}>
+                <SearchIcon color={colors.amber900} />
+              </Pressable>
+            </View>
           ),
           headerStyle: { backgroundColor: colors.amber200 },
           headerTintColor: colors.amber900,
         }}
       />
 
-      <Stack.Screen
-        name="filtered"
-        options={{
-          title: "overwrite",
-          presentation: "card",
-          headerBackTitleVisible: false,
-          headerBackVisible: false,
-        }}
-      />
       <Stack.Screen
         name="[absitem]"
         options={{
