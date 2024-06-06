@@ -93,6 +93,7 @@ export const useABSStore = create<ABSState>((set, get) => ({
       const currSearchObj = get().searchObject;
       set({ searchObject: { ...currSearchObj, ...searchObject } });
       //console.log("store-abs curr search", get().searchObject);
+      // await absSaveStore();
     },
   },
 }));
@@ -104,6 +105,5 @@ const absSaveStore = async () => {
     libraries: absState.libraries,
     activeLibraryId: absState.activeLibraryId,
     resultSort: absState.resultSort,
-    searchObject: absState.searchObject,
   });
 };

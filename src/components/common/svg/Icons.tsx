@@ -118,7 +118,7 @@ export const CollapseUpIcon = ({ size, color = undefined, style = undefined }) =
   );
 };
 export const SortIcon = ({ size = 25, color, style }: Props) => {
-  return <FontAwesome name="sort" size={size} color={color} style={style} />;
+  return <MaterialCommunityIcons name="sort" size={size} color={color} style={style} />;
 };
 export const RefreshIcon = ({ size = 25, color, style }: Props) => {
   return <FontAwesome name="refresh" size={size} color={color} style={style} />;

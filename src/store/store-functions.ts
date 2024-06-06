@@ -106,7 +106,6 @@ export const addTrack =
       const currentIno = sourceLocation.split("~")[1];
       const currentAudio = results.audioFiles.find((file) => file.ino === currentIno);
       const absChapters = absChapterConvert(currentAudio.chapters);
-      console.log("absChapters", absChapters);
       tags.chapters = absChapters;
     }
 

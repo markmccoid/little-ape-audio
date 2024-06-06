@@ -30,7 +30,6 @@ const MainFavFolders = () => {
     const isFirst = item.position === 1;
     const isLast = item.position === favFolders.length;
     // console.log(`${isFirst ? "--->" : ""} ${item.id}`);
-
     return (
       <OpacityDecorator activeOpacity={0.9}>
         <View

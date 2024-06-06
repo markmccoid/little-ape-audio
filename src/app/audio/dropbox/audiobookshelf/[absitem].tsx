@@ -8,7 +8,6 @@ import {
   absGetItemDetails,
   absGetLibraryItems,
 } from "@store/data/absAPI";
-import ABSResultsContainer from "@components/dropbox/AudiobookShelf/ABSResultsContainer";
 import { useQuery } from "@tanstack/react-query";
 import ABSBookContainer from "@components/dropbox/AudiobookShelf/book/ABSBookContainer";
 
@@ -26,6 +25,7 @@ const ABSItem = () => {
     queryFn: async () => await absGetItemDetails(absitem),
   });
 
+  console.log("absItem Route", absitem, title);
   let backTitle = title || "Back";
   if (!isLoading) {
     backTitle = data?.media?.metadata?.title || backTitle;

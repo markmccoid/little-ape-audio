@@ -13,8 +13,9 @@ import { formatBytes } from "@utils/formatUtils";
 type Props = {
   bookId: string;
   audio: AudioFile & { path_lower: string; alreadyDownload: boolean };
+  index: number;
 };
-const ABSFile = ({ bookId, audio }: Props) => {
+const ABSFile = ({ bookId, audio, index }: Props) => {
   const activeTasks = useDownloadQStore((state) => state.activeTasks);
   const completedDownloads = useDownloadQStore((state) =>
     state.completedDownloads.map((el) => el.fileId)
@@ -48,12 +49,14 @@ const ABSFile = ({ bookId, audio }: Props) => {
     };
     qActions.addToQueue(downloadItem);
   }
-
+  console.log("INDEX", index);
   return (
     <View className="flex-row flex-1 p-2">
       <View className="flex-row flex-1 justify-start items-center">
-        <Text className="pl-2 pr-4">{audio.trackNumFromMeta || audio.trackNumFromFilename}</Text>
-        <Text>{audio.metadata.filename}</Text>
+        <Text className="pl-1 pr-4">{audio.trackNumFromMeta || index + 1}</Text>
+        <Text className="flex-1 " numberOfLines={2} lineBreakMode="tail">
+          {audio.metadata.filename}
+        </Text>
       </View>
       <View className="flex-row justify-end items-center flex-shrink-0">
         <Text className="ml-3 font-ssp_regular text-base text-amber-950 mr-1">

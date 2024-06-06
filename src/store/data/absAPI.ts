@@ -14,7 +14,7 @@ import {
 import { useABSStore } from "@store/store-abs";
 import { Alert } from "react-native";
 import { btoa } from "react-native-quick-base64";
-import { buildCoverURL } from "./absUtils";
+import { buildCoverURL, getCoverURI } from "./absUtils";
 
 //~ =======
 //~ UTILS
@@ -105,7 +105,7 @@ export const absGetLibraryFilterData = async (libraryId?: string) => {
   const libraryIdToUse = libraryId || activeLibraryId;
   // console.log("libraryIdToUse", libraryIdToUse);
   // console.log("authHeader", authHeader);
-  console.log("getFilterData");
+
   const url = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/filterdata`;
 
   let response;
@@ -178,7 +178,6 @@ export const absGetLibraryItems = async ({
   // const url = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items${filterData}&sort=${sortField}&desc=${sortOrder}`;
 
   const url = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items${filterData}`;
-  console.log("URL absGetLibraryItems", url);
   try {
     response = await axios.get(url, { headers: authHeader });
   } catch (error) {
@@ -225,12 +224,12 @@ export const absGetItemDetails = async (itemId?: string) => {
     console.log("error", error);
     throw error;
   }
-
+  const coverURI = await getCoverURI(buildCoverURL(libraryItem.id));
   return {
     id: libraryItem.id,
     audioFiles: libraryItem.media.audioFiles,
     media: libraryItem.media,
-    coverURI: buildCoverURL(libraryItem.id),
+    coverURI: coverURI, //buildCoverURL(libraryItem.id),
   };
 };
 //~~ ========================================================

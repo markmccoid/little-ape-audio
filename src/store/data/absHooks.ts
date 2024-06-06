@@ -46,7 +46,8 @@ export const useGetABSBooks = ({ filterType, filterValueEncoded }) => {
 //!!    May update this to return random list of 50 books
 //~~    Initial pull of data is on app startup in main index.ts route.  Stale time is 30 minutes
 //~~ ================================================================
-export const useGetAllABSBooks = () => {
+// preload will only "run" the useQuery.  We don't want any data, just loading the data in background
+export const useGetAllABSBooks = (preload?: boolean) => {
   const { title, author, description, genres, tags } = useABSStore((state) => state.searchObject);
   const { field, direction } = useABSStore((state) => state.resultSort);
   const { data, ...rest } = useQuery({
@@ -54,27 +55,24 @@ export const useGetAllABSBooks = () => {
     queryFn: async () => await absGetLibraryItems({}),
     staleTime: 1800000,
   });
-  // If no data, return empty array
-  if (!data) {
-    return {
-      books: [],
-      totalBookCount: 0,
-      selectedBookCount: 0,
-      ...rest,
-    };
-  }
 
-  const randNums = useMemo(() => generateRandomIntegers(25, 1, data.length), []);
+  if (preload) return;
+
+  const randNums = useMemo(() => generateRandomIntegers(25, 1, data?.length), []);
   // If not filters for data, then return 25 random books
   if (!title && !author && !description && !genres?.length && !tags?.length) {
     let discoverBooks = [];
     for (const random of randNums) {
       discoverBooks.push(data[random as number]);
     }
+    discoverBooks =
+      direction === "asc"
+        ? sortBy(discoverBooks, [field])
+        : reverse(sortBy(discoverBooks, [field]));
     return {
       books: discoverBooks,
-      totalBookCount: data.length,
-      selectedBookCount: 25,
+      totalBookCount: data?.length,
+      selectedBookCount: -1,
       ...rest,
     };
   }
@@ -95,21 +93,21 @@ export const useGetAllABSBooks = () => {
     // -- Description match
     includeFlag = checkString(bookDescription, description, includeFlag);
     // -- Genre match
-    includeFlag = checkArray(book.genres, genres, includeFlag);
+    includeFlag = checkArray(book?.genres, genres, includeFlag);
     // -- Tags match
-    includeFlag = checkArray(book.tags, tags, includeFlag);
+    includeFlag = checkArray(book?.tags, tags, includeFlag);
 
     if (includeFlag) {
       filterData.push(book);
     }
   }
-  // console.log("USEGETALLBOOKS Returns -- ", filterData.length);
+
   filterData =
     direction === "asc" ? sortBy(filterData, [field]) : reverse(sortBy(filterData, [field]));
   return {
     books: filterData,
-    totalBookCount: data.length,
-    selectedBookCount: filterData.length,
+    totalBookCount: data?.length,
+    selectedBookCount: filterData?.length || 0,
     ...rest,
   };
 };

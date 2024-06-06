@@ -12,8 +12,7 @@ const RootIndex = () => {
   }, []);
 
   // Prefetch all books on startup
-  const allbooks = useGetAllABSBooks();
-
+  const allbooks = useGetAllABSBooks(true);
   return (
     <SafeAreaView>
       <Link href="/audio">

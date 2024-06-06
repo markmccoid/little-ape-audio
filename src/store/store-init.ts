@@ -65,9 +65,9 @@ export const onInitialize = async () => {
     enabled: false,
   };
   useDropboxStore.setState({
-    folderMetadata: folderMetadata,
+    folderMetadata: folderMetadata || {},
     folderAttributes: folderAttributes || [],
-    folderMetadataErrors,
+    folderMetadataErrors: folderMetadataErrors || [],
     laabMetaAggrControls: laabMetaAggrControls || laabMetaDefault,
   });
 

@@ -31,10 +31,14 @@ const ABSMainContainer = () => {
   return (
     <View className="flex-1 bg-amber-50">
       <View className="bg-amber-200">
-        <View className="m-1 flex-row justify-center">
-          <Text className="text-base">
-            Books Found - {selectedBookCount} of {totalBookCount}{" "}
-          </Text>
+        <View className="m-1 flex-row justify-center ">
+          {selectedBookCount === -1 ? (
+            <Text className="text-base">Book Discovery</Text>
+          ) : (
+            <Text className="text-base">
+              Books Found - {selectedBookCount} of {totalBookCount}{" "}
+            </Text>
+          )}
         </View>
         <View className="flex-row justify-between mx-2">
           <ABSSearchInputText updateSearch={handleUpdateSearch("title")} label="Title" />
@@ -43,9 +47,7 @@ const ABSMainContainer = () => {
         </View>
         <View style={{ borderBottomWidth: StyleSheet.hairlineWidth, paddingBottom: 10 }} />
       </View>
-      {/* <View className="flex-row mx-2">
-        <ABSSearchInputText updateSearch={handleUpdateSearch("description")} label="Description" />
-      </View> */}
+
       <ABSBookResults books={books} />
     </View>
   );

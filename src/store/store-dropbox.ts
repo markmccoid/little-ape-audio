@@ -52,13 +52,16 @@ export type FolderMetadataDetails = Record<FolderNameKey, CleanBookMetadata>;
 export type FolderAttributeItem = {
   // For Google this will be the book folder Id BUT sanitized. So DO NOT use it to go to the folder
   //   instead make sure to use the pathToFolder
+  //     same for ABS
   // For Dropbox this will be the sanitized book folder name
   id: string;
   // For Google this will be the book folder Id
   // for dropbox this will be the full path to the folder
+  // for ABS this will be the book Id
   pathToFolder: string;
   // For Google this will be the parent Folder ID
   // For Dropbox this will be the path to the parent folder
+  // For ABS there is no parentFolder
   parentFolder: string;
   isFavorite?: boolean;
   isRead?: boolean;
@@ -134,7 +137,8 @@ type DropboxState = {
       action: "add" | "remove",
       folderNameIn: string,
       audioSource: AudioSourceType,
-      parentFolderId?: string
+      parentFolderId: string,
+      imageURL?: string
     ) => Promise<void>;
     addFavorite: (favPath: string, name: string, audioSource: AudioSourceType) => Promise<void>;
     removeFavorite: (favPath: string) => Promise<void>;
@@ -214,7 +218,8 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       action,
       folderNameIn,
       audioSource,
-      parentFolderId
+      parentFolderId,
+      imageURL?: string // only to be used by ABS
     ) => {
       const id = createFolderMetadataKey(pathIn);
       const attributes = [...get().folderAttributes];
@@ -229,7 +234,7 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
             : get().folderMetadata?.[parentFolderId]?.[pathIn];
         if (!bookMetadata) {
           let folderName = "";
-          if (audioSource === "google") {
+          if (audioSource === "google" || audioSource === "abs") {
             folderName = folderNameIn;
           } else {
             folderName = pathIn.slice(pathIn.lastIndexOf("/") + 1);
@@ -239,7 +244,7 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
             id,
             pathToFolder: pathIn,
             parentFolder: parentFolderId,
-            imageURL: undefined,
+            imageURL: audioSource === "abs" ? imageURL : undefined,
             defaultImage: Image.resolveAssetSource(defaultImages[`image${getRandomNumber()}`]).uri,
             localImageName: undefined,
             title: folderName,

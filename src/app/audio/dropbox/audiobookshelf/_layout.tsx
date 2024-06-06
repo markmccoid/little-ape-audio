@@ -22,17 +22,20 @@ const ABSLayout = () => {
               <Text className="text-amber-900 text-lg font-semibold">Back</Text>
             </Pressable>
           ),
-          presentation: "card",
           headerRight: () => (
-            <View className="flex-row items-center p-1 mt-1">
-              <Pressable className="mr-3">
+            <View className="flex-row items-center">
+              <Pressable className="p-3">
                 <SortMenu />
               </Pressable>
-              <Pressable onPress={() => router.push("/audio/dropbox/audiobookshelf/advsearch")}>
+              <Pressable
+                onPress={() => router.push("/audio/dropbox/audiobookshelf/advsearch")}
+                className="p-3"
+              >
                 <SearchIcon color={colors.amber900} />
               </Pressable>
             </View>
           ),
+          presentation: "card",
           headerStyle: { backgroundColor: colors.amber200 },
           headerTintColor: colors.amber900,
         }}

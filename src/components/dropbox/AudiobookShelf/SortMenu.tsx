@@ -2,6 +2,7 @@ import * as DropdownMenu from "zeego/dropdown-menu";
 import { TouchableOpacity, Text, View } from "react-native";
 import { SortIcon } from "@components/common/svg/Icons";
 import { ResultSort, useABSStore } from "@store/store-abs";
+import { colors } from "@constants/Colors";
 
 export function SortMenu() {
   const { field, direction } = useABSStore((state) => state.resultSort);
@@ -18,7 +19,7 @@ export function SortMenu() {
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
         <TouchableOpacity>
-          <SortIcon />
+          <SortIcon color={colors.amber900} />
         </TouchableOpacity>
       </DropdownMenu.Trigger>
 

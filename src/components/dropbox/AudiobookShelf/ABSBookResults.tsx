@@ -17,7 +17,7 @@ const ABSBookResults = ({ books }: Props) => {
       contentContainerStyle={{ flexDirection: "column" }}
       data={books}
       renderItem={renderItem}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item) => item?.id}
     />
   );
 };

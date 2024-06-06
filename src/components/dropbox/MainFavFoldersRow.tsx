@@ -131,54 +131,7 @@ const MainFavFoldersRow = ({ favFolder, simultaneousHandler, currentKey, activeK
       }
     },
   });
-
-  // return (
-  //   <View className="flex-1 flex-row border h-full">
-  //     {/* <Pressable onPress={() => actions.removeFavorite(favFolder.folderPath)}>
-  //       <Animated.View
-  //         style={rIconStyle}
-  //         className={`absolute bg-red-800 h-[50] w-[${Math.floor(
-  //           SCREEN_WIDTH * 0.15
-  //         )}]
-  //           right-[0] justify-center items-center`}
-  //       >
-  //         <DeleteIcon color="white" size={18} />
-  //       </Animated.View>
-  //     </Pressable> */}
-
-  //     <PanGestureHandler
-  //       onGestureEvent={gestureHandler}
-  //       simultaneousHandlers={simultaneousHandler}
-  //       onActivated={() => setIsPanActive(true)}
-  //       onEnded={() => setIsPanActive(false)}
-  //     >
-  //       <Animated.View
-  //         style={animatedStyles}
-  //         className={`py-1 px-2 bg-white mb-0 border border-red-900 flex-1 ${
-  //           isPanActive ? "border-l" : ""
-  //         }`}
-  //       >
-  //         <Link
-  //           href={{
-  //             pathname: "/audio/dropbox/newdir",
-  //             params: { fullPath: favFolder.folderPath, backTitle: "Back" },
-  //           }}
-  //           className=""
-  //         >
-  //           <View className="flex-row  items-center ">
-  //             <Text
-  //               className="ml-3 text"
-  //               ellipsizeMode="tail"
-  //               numberOfLines={2}
-  //             >
-  //               {favFolder.folderPath}
-  //             </Text>
-  //           </View>
-  //         </Link>
-  //       </Animated.View>
-  //     </PanGestureHandler>
-  //   </View>
-  // );
+  
   console.log("favFOLDER", favFolder.folderPath);
   return (
     <View className="flex-1 flex-row h-full bg-red-800">
@@ -229,7 +182,7 @@ const MainFavFoldersRow = ({ favFolder, simultaneousHandler, currentKey, activeK
             <Pressable
               onPress={() =>
                 router.push({
-                  pathname: "/audio/dropbox/newdir",
+                  pathname: audio"/audio/dropbox/newdir",
                   params: { fullPath: favFolder.folderPath, backTitle: "Back" },
                 })
               }

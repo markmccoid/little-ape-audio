@@ -32,6 +32,28 @@ const ShowFavoritedBooks = () => {
       ? `${FileSystem.documentDirectory}${item.localImageName}`
       : item.defaultImage;
 
+    const absParams = item?.audioSource === "abs" && {};
+
+    let routerPush = () =>
+      router.push({
+        pathname: `/audio/dropbox/favBook`,
+        params: {
+          fullPath: customEncodeParens(item?.pathToFolder),
+          backTitle: "Back",
+          audioSource: item.audioSource,
+          parentFolderId: customEncodeParens(item?.parentFolder),
+        },
+      });
+
+    if (item.audioSource === "abs") {
+      routerPush = () =>
+        router.push({
+          pathname: `/audio/dropbox/audiobookshelf/${item.pathToFolder}`,
+          params: {
+            title: item.title,
+          },
+        });
+    }
     return (
       // <ScaleDecorator activeScale={0.98}>
       <View
@@ -60,19 +82,7 @@ const ShowFavoritedBooks = () => {
           </View>
         </Pressable>
 
-        <TouchableOpacity
-          onPress={() =>
-            router.push({
-              pathname: `/audio/dropbox/favBook`,
-              params: {
-                fullPath: customEncodeParens(item?.pathToFolder),
-                backTitle: "Back",
-                audioSource: item.audioSource,
-                parentFolderId: customEncodeParens(item?.parentFolder),
-              },
-            })
-          }
-        >
+        <TouchableOpacity onPress={() => routerPush()}>
           <View className="flex-row justify-start w-full mb-1">
             <View className="flex-col justify-start w-full ">
               <Text

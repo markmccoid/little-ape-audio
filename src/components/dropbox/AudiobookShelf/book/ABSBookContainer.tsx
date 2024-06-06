@@ -7,6 +7,7 @@ import {
   ScrollView,
   SafeAreaView,
   Pressable,
+  TouchableOpacity,
 } from "react-native";
 import React, { useMemo } from "react";
 import { AudioFile, Media } from "@store/data/absTypes";
@@ -18,7 +19,9 @@ import { absTagFiles } from "@store/data/absTagFile";
 import { AnimateHeight } from "@components/common/animations/AnimateHeight";
 import { colors } from "@constants/Colors";
 import { MotiView } from "moti";
-import { PowerIcon } from "@components/common/svg/Icons";
+import { EmptyMDHeartIcon, MDHeartIcon, PowerIcon } from "@components/common/svg/Icons";
+import { createFolderMetadataKey, useDropboxStore } from "@store/store-dropbox";
+import { buildCoverURL, getCoverURI } from "@store/data/absUtils";
 
 type Props = {
   audioFiles: AudioFile[];
@@ -41,6 +44,9 @@ const formatAuthors = (authorsObj: { id: string; name: string }[]) => {
  */
 const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
   // console.log("BOOKID", media.libraryItemId);
+  const dropboxActions = useDropboxStore((state) => state.actions);
+  const folderAttributes = useDropboxStore((state) => state.folderAttributes);
+
   const { width, height } = Dimensions.get("window");
   const [showDescription, setShowDescription] = React.useState(false);
   const authors = formatAuthors(media.metadata.authors);
@@ -48,6 +54,28 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
     () => absTagFiles(audioFiles, media.libraryItemId),
     [audioFiles]
   );
+
+  // Check for attributes on the folder (is it hearted or read).
+  const currFolderAttributes = useMemo(() => {
+    // NOTE: this DOES change the google folder id but that is how it is also stored
+    const id = createFolderMetadataKey(media.libraryItemId);
+    return folderAttributes?.find((el) => el.id === id);
+  }, [folderAttributes]);
+  const handleToggleFavorite = async () => {
+    const action = !!currFolderAttributes?.isFavorite ? "remove" : "add";
+    // const absCoverURL = await getCoverURI(coverURI);
+    // console.log("ABSC", absCoverURL);
+    await dropboxActions.updateFolderAttribute(
+      media.libraryItemId,
+      "isFavorite",
+      action,
+      media.metadata.title,
+      "abs",
+      "",
+      coverURI
+    );
+  };
+
   return (
     <SafeAreaView className="flex-col flex-1">
       <ABSActionBar
@@ -102,6 +130,13 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
             {media.metadata.narrators?.length > 0 &&
               "Narrated by " + media.metadata.narrators.join(", ")}
           </Text>
+          <TouchableOpacity onPress={handleToggleFavorite}>
+            {currFolderAttributes?.isFavorite ? (
+              <MDHeartIcon color="red" size={30} />
+            ) : (
+              <EmptyMDHeartIcon size={30} />
+            )}
+          </TouchableOpacity>
           {/* Description scrollview BUTTON */}
           <Pressable
             onPress={() => setShowDescription((prev) => !prev)}
@@ -120,6 +155,7 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
               >
                 {`${showDescription ? "Hide" : "Show"} Desc`}
               </Text>
+
               <MotiView
                 from={{ transform: [{ rotate: "0deg" }] }}
                 animate={{
@@ -165,7 +201,7 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
               className={`flex-1 border-b ${index % 2 === 0 ? "bg-amber-50" : "bg-white"}`}
               key={audio.ino}
             >
-              <ABSFile audio={audio} bookId={media.libraryItemId} key={audio.ino} />
+              <ABSFile audio={audio} bookId={media.libraryItemId} key={audio.ino} index={index} />
             </View>
           );
         })}
