@@ -83,5 +83,4 @@ export const onInitialize = async () => {
     // searchObject: {},
     actions: absActions,
   });
-  return;
 };

@@ -11,8 +11,6 @@ const RootIndex = () => {
     setTimeout(() => router.replace("/audio"), 1);
   }, []);
 
-  // Prefetch all books on startup
-  const allbooks = useGetAllABSBooks(true);
   return (
     <SafeAreaView>
       <Link href="/audio">
