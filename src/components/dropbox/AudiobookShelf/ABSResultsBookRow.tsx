@@ -13,6 +13,7 @@ type Props = {
 };
 const ABSResultsBookRow = ({ book, index }: Props) => {
   const router = useRouter();
+
   const { data, isLoading, error } = useQuery({
     queryKey: [`${book.id}-cover`],
     queryFn: async () => await getCoverURI(book.cover),
@@ -20,7 +21,7 @@ const ABSResultsBookRow = ({ book, index }: Props) => {
 
   return (
     <View
-      className={`flex flex-row bg-amber-50 py-1`}
+      className={`flex flex-row bg-amber-50`}
       style={{
         borderTopWidth: index === 0 ? StyleSheet.hairlineWidth : 0,
         borderBottomWidth: StyleSheet.hairlineWidth,
@@ -29,7 +30,12 @@ const ABSResultsBookRow = ({ book, index }: Props) => {
       <View className="m-2">
         <Image
           source={{ uri: data || book.cover }}
-          style={{ width: 80, height: 80, borderRadius: 10, borderWidth: StyleSheet.hairlineWidth }}
+          style={{
+            width: 80,
+            height: 80,
+            borderRadius: 10,
+            borderWidth: StyleSheet.hairlineWidth,
+          }}
         />
       </View>
 
@@ -42,27 +48,31 @@ const ABSResultsBookRow = ({ book, index }: Props) => {
         }
         className="flex-row flex-1"
       >
-        <View className="flex-col ml-2 mt-2 flex-1">
-          <View className="flex-row ">
-            <Text
-              lineBreakMode="tail"
-              numberOfLines={2}
-              className="flex-1 text-base font-semibold text-amber-950"
-            >
-              {book.title}
-            </Text>
+        <View className="flex-col ml-2 mt-1 flex-1 justify-between mb-2">
+          <View className="flex-col">
+            <View className="flex-row ">
+              <Text
+                lineBreakMode="tail"
+                numberOfLines={2}
+                className="flex-1 text-base font-semibold text-amber-950"
+              >
+                {book.title}
+              </Text>
+            </View>
+            <View className="flex-row ">
+              <Text lineBreakMode="tail" numberOfLines={2} className="flex-1 text-amber-900">
+                by {book.author}
+              </Text>
+            </View>
           </View>
-          <View className="flex-row ">
-            <Text lineBreakMode="tail" numberOfLines={2} className="flex-1 text-amber-900">
-              by {book.author}
-            </Text>
-          </View>
-          <View className="flex-row ">
-            <Text className="text-amber-900">Duration:</Text>
-            <Text className="text-amber-900 font-semibold">{formatSeconds(book.duration)}</Text>
-          </View>
-          <View className="flex-row ">
-            <Text className="font-semibold text-amber-950">{book.publishedYear}</Text>
+          <View className="flex-row justify-between mr-2">
+            <View className="flex-row ">
+              <Text className="text-amber-900 ">Duration:</Text>
+              <Text className="text-amber-800 ">
+                {` ${formatSeconds(book.duration, "verbose_no_seconds", true, false)}`}
+              </Text>
+            </View>
+            <Text className=" font-semibold text-amber-700">{book.publishedYear}</Text>
           </View>
         </View>
       </Pressable>
@@ -70,4 +80,5 @@ const ABSResultsBookRow = ({ book, index }: Props) => {
   );
 };
 
-export default ABSResultsBookRow;
+const ABSResultsBookRowMemo = React.memo(ABSResultsBookRow);
+export default ABSResultsBookRowMemo;

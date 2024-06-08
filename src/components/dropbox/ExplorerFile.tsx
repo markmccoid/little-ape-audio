@@ -7,13 +7,12 @@ import { colors } from "../../constants/Colors";
 import {
   DownloadProgress,
   downloadFileBlob,
-  downloadFileWProgress,
   getCleanFileName,
 } from "../../store/data/fileSystemAccess";
 import { usePlaybackStore, useTrackActions } from "../../store/store";
 import * as Progress from "react-native-progress";
 import { AudioSourceType } from "@app/audio/dropbox";
-import { DownloadProgressCallbackResultT } from "@dr.pogodin/react-native-fs";
+// import { DownloadProgressCallbackResultT } from "@dr.pogodin/react-native-fs";
 import useDownloadQStore, { DownloadQueueItem } from "@store/store-downloadq";
 import { MotiView } from "moti";
 import MemoAnimatedAsterisk from "@components/common/animations/AnimatedAsterisk";
@@ -127,62 +126,6 @@ const ExplorerFile = ({ file, playlistId, audioSource, pathIn, currFolderText }:
     };
     qActions.addToQueue(downloadItem);
     return;
-    //!
-    setIsDownloading(true);
-    // If playlist is loaded, reset store.  Needed because of how we pull chapter info
-    // from the metadataChapterReceived event.
-    if (playlistLoaded) {
-      await resetPlaybackStore();
-    }
-    // Progress callback
-    const onHandleProgress = (progressData: DownloadProgressCallbackResultT) => {
-      setProgress({
-        downloadProgress: progressData.bytesWritten / progressData.contentLength,
-        bytesExpected: progressData.contentLength,
-        bytesWritten: progressData.bytesWritten,
-      });
-    };
-    // based on if google or dropbox
-    const downloadLink = isGoogle ? file.id : await getDropboxFileLink(file.path_lower);
-    // Prepare to start the download
-    const {
-      cleanFileName,
-      stopDownload: cancelDownload,
-      startDownload,
-    } = await downloadFileWProgress(downloadLink, file.name, onHandleProgress, audioSource);
-    // Set the stop download function in a ref
-    stopDownloadRef.current = cancelDownload;
-    // Start the download
-    try {
-      const res = await startDownload();
-    } catch (err) {
-      console.log("ExplorerFile Download ERRROR");
-      if (err.message.toLowerCase().includes("abort")) {
-        setIsDownloaded(false);
-        setIsDownloading(false);
-        return;
-      }
-    }
-
-    try {
-      // Add new Track to store
-      await trackActions.addNewTrack({
-        fileURI: cleanFileName,
-        filename: file.name,
-        sourceLocation: file.path_lower,
-        playlistId: playlistId,
-        pathIn,
-        currFolderText,
-        audioSource,
-      });
-    } catch (e) {
-      console.log(`Error trackActions.addNewTrack for ${cleanFileName} `, e);
-    }
-    // Reset Progress and download flags
-    setProgress({ downloadProgress: 0, bytesExpected: 0, bytesWritten: 0 });
-    setIsDownloaded(true);
-    setIsDownloading(false);
-    stopDownloadRef.current = undefined;
   };
 
   return (

@@ -47,35 +47,42 @@ export const useGetABSBooks = ({ filterType, filterValueEncoded }) => {
 //~~    Initial pull of data is on app startup in main index.ts route.  Stale time is 30 minutes
 //~~ ================================================================
 // preload will only "run" the useQuery.  We don't want any data, just loading the data in background
-export const useGetAllABSBooks = (preload?: boolean) => {
+export const useGetAllABSBooks = () => {
   const { title, author, description, genres, tags } = useABSStore((state) => state.searchObject);
   const { field, direction } = useABSStore((state) => state.resultSort);
   const { data, ...rest } = useQuery({
     queryKey: ["allABSBooks"],
     queryFn: async () => await absGetLibraryItems({}),
-    staleTime: 1800000,
   });
 
-  if (preload) return;
+  // console.log("useGetAllBooks", data?.length, rest.isLoading);
 
-  const randNums = useMemo(() => generateRandomIntegers(25, 1, data?.length), []);
-  // If not filters for data, then return 25 random books
-  if (!title && !author && !description && !genres?.length && !tags?.length) {
-    let discoverBooks = [];
-    for (const random of randNums) {
-      discoverBooks.push(data[random as number]);
-    }
-    discoverBooks =
-      direction === "asc"
-        ? sortBy(discoverBooks, [field])
-        : reverse(sortBy(discoverBooks, [field]));
+  if (rest.isLoading) {
     return {
-      books: discoverBooks,
+      books: [],
       totalBookCount: data?.length,
       selectedBookCount: -1,
       ...rest,
     };
   }
+  // const randNums = useMemo(() => generateRandomIntegers(25, 1, data?.length), []);
+  // If not filters for data, then return 25 random books
+  // if (!title && !author && !description && !genres?.length && !tags?.length) {
+  //   let discoverBooks = [];
+  //   for (const random of randNums) {
+  //     discoverBooks.push(data[random as number]);
+  //   }
+  //   discoverBooks =
+  //     direction === "asc"
+  //       ? sortBy(discoverBooks, [field])
+  //       : reverse(sortBy(discoverBooks, [field]));
+  //   return {
+  //     books: discoverBooks,
+  //     totalBookCount: data?.length,
+  //     selectedBookCount: -1,
+  //     ...rest,
+  //   };
+  // }
 
   // Filter the data.
   let filterData: ABSGetLibraryItems = [];

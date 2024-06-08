@@ -84,16 +84,25 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
         filesDownloaded={taggedAudioFiles.filter((el) => el.alreadyDownload).length}
       />
       <View className="flex flex-row justify-start items-start border-b bg-amber-200 py-1 border-t">
-        <Image
-          source={{ uri: coverURI }}
-          style={{
-            width: 150,
-            height: 150,
-            borderRadius: 10,
-            borderWidth: StyleSheet.hairlineWidth,
-            marginLeft: 8,
-          }}
-        />
+        <View className="flex-col">
+          <Image
+            source={{ uri: coverURI }}
+            style={{
+              width: 150,
+              height: 150,
+              borderRadius: 10,
+              borderWidth: StyleSheet.hairlineWidth,
+              marginLeft: 8,
+            }}
+          />
+          <TouchableOpacity onPress={handleToggleFavorite} className="ml-3 mt-1">
+            {currFolderAttributes?.isFavorite ? (
+              <MDHeartIcon color="red" size={30} />
+            ) : (
+              <EmptyMDHeartIcon size={30} />
+            )}
+          </TouchableOpacity>
+        </View>
         <View className="flex flex-col flex-1 mx-2">
           <Text
             numberOfLines={2}
@@ -119,9 +128,11 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
           >
             by {authors}
           </Text>
-          <Text className="text-sm  text-amber-900 font-semibold">
-            Published {media.metadata.publishedYear}
-          </Text>
+          {media.metadata.publishedYear && (
+            <Text className="text-sm  text-amber-900 font-semibold">
+              Published {media.metadata.publishedYear}
+            </Text>
+          )}
           <Text
             className="text-sm  text-amber-900 font-semibold flex-1"
             numberOfLines={1}
@@ -130,13 +141,7 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
             {media.metadata.narrators?.length > 0 &&
               "Narrated by " + media.metadata.narrators.join(", ")}
           </Text>
-          <TouchableOpacity onPress={handleToggleFavorite}>
-            {currFolderAttributes?.isFavorite ? (
-              <MDHeartIcon color="red" size={30} />
-            ) : (
-              <EmptyMDHeartIcon size={30} />
-            )}
-          </TouchableOpacity>
+
           {/* Description scrollview BUTTON */}
           <Pressable
             onPress={() => setShowDescription((prev) => !prev)}

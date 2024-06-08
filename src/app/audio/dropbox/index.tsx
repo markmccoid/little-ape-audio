@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Dimensions, Pressable, Image } from "react-native";
 import React, { useEffect, useState } from "react";
-import { Href, Link } from "expo-router";
+import { Href, Link, useRouter } from "expo-router";
 import {
   DropboxIcon,
   FolderOpenIcon,
@@ -38,6 +38,8 @@ const DropboxScreens = () => {
   const [networkActive, setNetworkActive] = useState(true);
   const [isLoading, selectLocalFiles] = useLocalFiles();
   const qActions = useDownloadQStore((state) => state.actions);
+  const router = useRouter();
+
   // Check for network activity
   useEffect(() => {
     const checkForNetwork = async () => {

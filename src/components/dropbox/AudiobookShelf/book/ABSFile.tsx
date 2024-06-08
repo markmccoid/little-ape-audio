@@ -49,7 +49,6 @@ const ABSFile = ({ bookId, audio, index }: Props) => {
     };
     qActions.addToQueue(downloadItem);
   }
-  console.log("INDEX", index);
   return (
     <View className="flex-row flex-1 p-2">
       <View className="flex-row flex-1 justify-start items-center">

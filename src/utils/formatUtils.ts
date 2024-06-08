@@ -18,11 +18,13 @@ export const formatBytes = (bytes: number) => {
 
 export const formatSeconds = (
   secondsIn: number,
-  type?: "minimal" | "verbose",
-  showHours?: boolean
+  type?: "minimal" | "verbose" | "verbose_no_seconds",
+  showHours?: boolean,
+  showSeconds?: boolean
 ) => {
   type = type || "minimal";
   showHours = showHours ?? true;
+  showSeconds = showSeconds ?? true;
   // if (!secondsIn) return 0;
   const d = Number(secondsIn);
   if (isNaN(d)) return undefined;
@@ -32,16 +34,27 @@ export const formatSeconds = (
 
   if (type === "minimal") {
     const hours = `${h > 0 ? h + ":" : "00:"}`;
-    return `${showHours === true ? hours : ""}${
-      m > 0 ? m.toString().padStart(2, "0") + ":" : "00:"
-    }${s.toString().padStart(2, "0")}`;
+    const seconds = `${s.toString().padStart(2, "0")}`;
+    const minutes = `${m > 0 ? m.toString().padStart(2, "0") : "00"}`;
+    return `${showHours === true ? hours : ""}${minutes}${showSeconds ? ":" + seconds : ""}`;
   }
 
-  const hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
-  const mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
-  const sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
+  let hDisplay;
+  let mDisplay;
+  let sDisplay;
+  if (type === "verbose") {
+    hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
+    mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
+    sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
+  } else if (type === "verbose_no_seconds") {
+    hDisplay = h > 0 ? h + (h == 1 ? " hr " : " hrs ") : "";
+    mDisplay = m > 0 ? m + (m == 1 ? " min " : " min ") : "";
+  }
   if (!showHours) {
     return mDisplay + sDisplay;
+  }
+  if (!showSeconds) {
+    return hDisplay + mDisplay;
   }
   return hDisplay + mDisplay + sDisplay;
 };
@@ -55,9 +68,7 @@ export const timeBetween = (endDate: Date, startDate: Date) => {
   const msBetween = endDate.valueOf() - startDate.valueOf();
   const secondsBetween = Math.floor(msBetween / 1000);
   const minutesBetween = secondsBetween / 60;
-  const secondsLeft = Math.floor(
-    (minutesBetween - Math.floor(minutesBetween)) * 60
-  );
+  const secondsLeft = Math.floor((minutesBetween - Math.floor(minutesBetween)) * 60);
   return {
     secondsBetween,
     minutesBetween,

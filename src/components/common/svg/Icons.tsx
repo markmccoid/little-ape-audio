@@ -46,7 +46,7 @@ export const ToTopIcon = ({ size = 25, color, style }: Props) => {
   return <AntDesign name="totop" size={size} color={color} style={style} />;
 };
 export const EnterKeyIcon = ({ size = 25, color, style }: Props) => {
-  return <Ionicons name="ios-return-down-back" size={size} color={color} style={style} />;
+  return <Ionicons name="return-down-back" size={size} color={color} style={style} />;
 };
 export const BookmarkIcon = ({ size = 25, color, style }: Props) => {
   return <MaterialCommunityIcons name="bookmark" size={size} color={color} style={style} />;
@@ -135,7 +135,7 @@ export const IOSArrowForwardIcon = ({ size = 25, color, style }: Props) => {
 //- Drawer Icons
 //----------------------------------------------------------------
 export const DrawerMenuIcon = ({ size = 25, color, style }: Props) => {
-  return <Ionicons name="ios-menu" size={size} color={color} style={style} />;
+  return <Ionicons name="menu" size={size} color={color} style={style} />;
 };
 
 export const SignOutIcon = ({ size = 25, color, style }: Props) => {
@@ -145,20 +145,20 @@ export const HomeIcon = ({ size = 25, color, style }: Props) => {
   return <FontAwesome name="home" color={color} size={size} style={style} />;
 };
 export const SettingsIcon = ({ size = 25, color, style }: Props) => {
-  return <Ionicons name="ios-settings" color={color} size={size} style={style} />;
+  return <Ionicons name="settings" color={color} size={size} style={style} />;
 };
 export const UserIcon = ({ size = 25, color, style }: Props) => {
   return <FontAwesome name="user" color={color} size={size} style={style} />;
 };
 //Plus sign icon
 export const AddIcon = ({ size = 25, color, style }: Props) => {
-  return <Ionicons name="ios-add" color={color} size={size} style={style} />;
+  return <Ionicons name="add" color={color} size={size} style={style} />;
 };
 export const EmptyMDHeartIcon = ({ size = 25, color, style }: Props) => {
   return <MaterialCommunityIcons name="heart-outline" color={color} size={size} style={style} />;
 };
 export const MDHeartIcon = ({ size = 25, color, style }: Props) => {
-  return <Ionicons name="ios-heart" color={color} size={size} style={style} />;
+  return <Ionicons name="heart" color={color} size={size} style={style} />;
 };
 export const AsteriskIcon = ({ size = 25, color, style }: Props) => {
   return <FontAwesome5 name="asterisk" color={color} size={size} style={style} />;

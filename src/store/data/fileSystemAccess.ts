@@ -3,11 +3,6 @@
 // import { FileEntry, getDropboxFileLink } from "@utils/dropboxUtils";
 import * as FileSystem from "expo-file-system";
 // import rnfs, { DownloadProgressCallbackResult } from "react-native-fs";
-import {
-  downloadFile,
-  stopDownload as stopDownloadrnfs,
-  DownloadProgressCallbackResultT,
-} from "@dr.pogodin/react-native-fs";
 import { AudioSourceType } from "@app/audio/dropbox";
 import { getAccessToken } from "@utils/googleUtils";
 
@@ -133,40 +128,40 @@ export const downloadFileBlob = async (
 //~ react-native-fs
 //~ Works for either Google or Dropbox
 //~ ==========================================
-export const downloadFileWProgress = async (
-  downloadLink: string,
-  filename: string,
-  progress: (res: DownloadProgressCallbackResultT) => void,
-  audioSource: AudioSourceType
-) => {
-  const cleanFileName = getCleanFileName(filename);
-  const fileUri = `${FileSystem.documentDirectory}${cleanFileName}`;
-  const isGoogle = audioSource === "google";
-  const accessToken = isGoogle ? await getAccessToken() : undefined;
-  const includeHeaders = isGoogle ? { headers: { Authorization: `Bearer ${accessToken}` } } : {};
-  const downloadUri = isGoogle
-    ? `https://www.googleapis.com/drive/v3/files/${downloadLink}?alt=media`
-    : downloadLink;
+// export const downloadFileWProgress = async (
+//   downloadLink: string,
+//   filename: string,
+//   progress: (res: DownloadProgressCallbackResultT) => void,
+//   audioSource: AudioSourceType
+// ) => {
+//   const cleanFileName = getCleanFileName(filename);
+//   const fileUri = `${FileSystem.documentDirectory}${cleanFileName}`;
+//   const isGoogle = audioSource === "google";
+//   const accessToken = isGoogle ? await getAccessToken() : undefined;
+//   const includeHeaders = isGoogle ? { headers: { Authorization: `Bearer ${accessToken}` } } : {};
+//   const downloadUri = isGoogle
+//     ? `https://www.googleapis.com/drive/v3/files/${downloadLink}?alt=media`
+//     : downloadLink;
 
-  try {
-    const res = downloadFile({
-      fromUrl: downloadUri,
-      toFile: fileUri,
-      ...includeHeaders,
-      begin: (dl) => {},
-      progress: progress,
-      progressInterval: 100,
-      progressDivider: 10,
-      discretionary: true,
-    });
+//   try {
+//     const res = downloadFile({
+//       fromUrl: downloadUri,
+//       toFile: fileUri,
+//       ...includeHeaders,
+//       begin: (dl) => {},
+//       progress: progress,
+//       progressInterval: 100,
+//       progressDivider: 10,
+//       discretionary: true,
+//     });
 
-    const stopDownload = () => stopDownloadrnfs(res.jobId);
-    const startDownload = async () => await res.promise;
-    return { cleanFileName, stopDownload, startDownload };
-  } catch (err) {
-    console.log("downloadDropboxFile ERR --> ", err.code);
-  }
-};
+//     const stopDownload = () => stopDownloadrnfs(res.jobId);
+//     const startDownload = async () => await res.promise;
+//     return { cleanFileName, stopDownload, startDownload };
+//   } catch (err) {
+//     console.log("downloadDropboxFile ERR --> ", err.code);
+//   }
+// };
 
 //! -------------------------------------------------
 //! Download all EXPERIMENT

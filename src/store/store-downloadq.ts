@@ -2,12 +2,9 @@ import { getCleanFileName } from "@store/data/fileSystemAccess";
 import { create } from "zustand";
 import { usePlaybackStore, useTracksStore } from "./store";
 import { getDropboxFileLink } from "@utils/dropboxUtils";
-import {
-  downloadFileBlob as downloadFileBlobUtil,
-  downloadFileWProgress,
-} from "./data/fileSystemAccess";
+import { downloadFileBlob as downloadFileBlobUtil } from "./data/fileSystemAccess";
 import { AudioSourceType } from "@app/audio/dropbox";
-import { DownloadProgressCallbackResultT } from "@dr.pogodin/react-native-fs";
+// import { DownloadProgressCallbackResultT } from "@dr.pogodin/react-native-fs";
 import { absDownloadItem } from "./data/absAPI";
 
 type CompletedDownload = {
@@ -213,6 +210,7 @@ const downloadFile = async (downloadProps: DownloadQueueItem) => {
       break;
     case "dropbox":
       downloadLink = await getDropboxFileLink(filePathLower);
+      break;
     case "abs":
       downloadLink = absDownloadItem(pathIn, fileId).urlWithToken;
     default:

@@ -178,6 +178,8 @@ export const absGetLibraryItems = async ({
   // const url = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items${filterData}&sort=${sortField}&desc=${sortOrder}`;
 
   const url = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items${filterData}`;
+  console.log("absGetLibraryItems-HIT DB", libraryIdToUse, url);
+
   try {
     response = await axios.get(url, { headers: authHeader });
   } catch (error) {
