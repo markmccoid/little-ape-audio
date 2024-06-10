@@ -5,8 +5,10 @@ import { ABSGetLibraries, absGetLibraries, absLogin } from "@store/data/absAPI";
 import { AnimatedPressable } from "@components/common/buttons/Pressables";
 import { StoredLibraries, useABSStore, UserInfo } from "@store/store-abs";
 import { colors } from "@constants/Colors";
+import { useQueryClient } from "@tanstack/react-query";
 
 const AbsAuth = () => {
+  const queryClient = useQueryClient();
   const absUserInfo = useABSStore((state) => state.userInfo);
   const librariesStored = useABSStore((state) => state.libraries);
   const [username, setUsername] = React.useState("");
@@ -129,7 +131,11 @@ const AbsAuth = () => {
               {Object.values(libraries).map((lib, index) => (
                 <Pressable
                   key={lib.id}
-                  onPress={() => actions.saveLibraries(libraries, lib.id)}
+                  onPress={() => {
+                    // will need to reload books if a new library has been selected
+                    queryClient.invalidateQueries({ queryKey: ["allABSBooks"] });
+                    actions.saveLibraries(libraries, lib.id);
+                  }}
                   className={`flex flex-row justify-between px-2 py-1 ${
                     lib.active ? "bg-green-400" : "bg-white"
                   } ${index !== 0 && "border-t"} `}

@@ -10,14 +10,13 @@ import {
 } from "@store/data/absAPI";
 import { useQuery } from "@tanstack/react-query";
 import ABSBookContainer from "@components/dropbox/AudiobookShelf/book/ABSBookContainer";
+import ABSBookLoadingIndicator from "@components/dropbox/AudiobookShelf/book/ABSBookLoadingIndicator";
 
 export type ABSDirParams = {
   absitem: string;
   title: string;
 };
 const ABSItem = () => {
-  const router = useRouter();
-  const navigation = useNavigation();
   const { absitem, title } = useLocalSearchParams<ABSDirParams>();
 
   const { data, error, isLoading } = useQuery({
@@ -25,7 +24,6 @@ const ABSItem = () => {
     queryFn: async () => await absGetItemDetails(absitem),
   });
 
-  console.log("absItem Route", absitem, title);
   let backTitle = title || "Back";
   if (!isLoading) {
     backTitle = data?.media?.metadata?.title || backTitle;
@@ -42,9 +40,7 @@ const ABSItem = () => {
         }}
       />
       {isLoading ? (
-        <View>
-          <Text>isLoading</Text>
-        </View>
+        <ABSBookLoadingIndicator />
       ) : (
         <ABSBookContainer
           audioFiles={data.audioFiles}
