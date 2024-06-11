@@ -23,6 +23,8 @@ export const colors = {
   headerBG: "#FEC872",
   menuBG: "#FCFCFA",
   dropboxBlue: "#007ee5",
+  absHeaderBg: "#f6d395", //"#c29a5b",
+  absLightBg: "#f6d395",
   deleteRed: "#c70000",
   amber50: "#fefceb",
   amber100: "#fef3c7",

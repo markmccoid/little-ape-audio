@@ -23,7 +23,7 @@ const ABSResultSearchInputText = ({ updateSearch, label, value, showLabel }: Pro
   }, [searchText]);
 
   return (
-    <View className="flex-1">
+    <View className={`${showLabel && "flex-1"}`}>
       {showLabel && <Text className="text-base font-semibold">{label}</Text>}
       <View className="justify-center">
         <TextInput

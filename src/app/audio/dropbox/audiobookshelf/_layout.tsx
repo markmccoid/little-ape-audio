@@ -4,9 +4,15 @@ import { Stack, useRouter } from "expo-router";
 import { colors } from "../../../../constants/Colors";
 import { ChevronBackIcon, FilterIcon, SearchIcon } from "@components/common/svg/Icons";
 import { SortMenu } from "@components/dropbox/AudiobookShelf/SortMenu";
+import { useABSStore } from "@store/store-abs";
 
 const ABSLayout = () => {
   const router = useRouter();
+  const searchObject = useABSStore((state) => state.searchObject);
+  let searchActive = false;
+  if (searchObject.description || searchObject.genres || searchObject.tags) {
+    searchActive = true;
+  }
   return (
     <Stack>
       <Stack.Screen
@@ -29,15 +35,16 @@ const ABSLayout = () => {
               </Pressable>
               <Pressable
                 onPress={() => router.push("/audio/dropbox/audiobookshelf/advsearch")}
-                className="p-3"
+                className="p-3 items-center justify-center"
               >
-                <SearchIcon color={colors.amber900} />
+                <SearchIcon color={searchActive ? "green" : colors.amber900} />
+                {/* <View className="bg-green-600 w-[9] h-[9] rounded-md absolute top-[17] right-[22]" /> */}
               </Pressable>
             </View>
           ),
           presentation: "card",
-          headerStyle: { backgroundColor: colors.amber200 },
-          headerTintColor: colors.amber900,
+          headerStyle: { backgroundColor: colors.absHeaderBg },
+          headerTintColor: colors.amber950,
         }}
       />
 

@@ -71,6 +71,7 @@ export const useABSStore = create<ABSState>((set, get) => ({
         set({
           libraries: finalLibs,
           activeLibraryId,
+          searchObject: {},
         });
 
         await absSaveStore();

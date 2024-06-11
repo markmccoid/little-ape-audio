@@ -29,12 +29,18 @@ function CustomHeader({ title, backText, sessionAudioSource }) {
     // });
   };
 
+  const audioSourceColor =
+    sessionAudioSource === "dropbox"
+      ? colors.dropboxBlue
+      : sessionAudioSource === "abs"
+      ? colors.absHeaderBg
+      : colors.amber300;
   return (
     <SafeAreaView
       style={{
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: sessionAudioSource === "dropbox" ? colors.dropboxBlue : colors.amber300,
+        backgroundColor: audioSourceColor,
       }}
       className="h-12 border-b border-b-black "
     >
