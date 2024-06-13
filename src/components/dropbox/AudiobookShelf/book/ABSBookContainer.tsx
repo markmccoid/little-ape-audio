@@ -19,7 +19,14 @@ import { absTagFiles } from "@store/data/absTagFile";
 import { AnimateHeight } from "@components/common/animations/AnimateHeight";
 import { colors } from "@constants/Colors";
 import { MotiView } from "moti";
-import { EmptyMDHeartIcon, MDHeartIcon, PowerIcon } from "@components/common/svg/Icons";
+import {
+  EmptyMDHeartIcon,
+  MDHeartIcon,
+  NarratedByIcon,
+  PowerIcon,
+  PublishedDateIcon,
+  SeriesIcon,
+} from "@components/common/svg/Icons";
 import { createFolderMetadataKey, useDropboxStore } from "@store/store-dropbox";
 import { buildCoverURL, getCoverURI } from "@store/data/absUtils";
 
@@ -33,6 +40,12 @@ const formatAuthors = (authorsObj: { id: string; name: string }[]) => {
   return authorsObj.map((el) => el.name).join(", ");
 };
 
+const seriesFlags = (mediaMetadata) => {
+  const seriesExists = !!mediaMetadata.series[0]?.name;
+  const seriesText = `${mediaMetadata.series[0]?.name} ${mediaMetadata.series[0]?.sequence}`;
+  const seriesInTitle = mediaMetadata.title.includes(seriesText);
+  return { seriesExists, seriesInTitle };
+};
 /**
  * Renders a container component for an audiobook shelf, displaying the book cover, title, author, and published year, as well as a list of audio files associated with the book.
  *
@@ -75,6 +88,9 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
       coverURI
     );
   };
+  // console.log("SERIES", media.metadata.series);
+
+  const { seriesExists, seriesInTitle } = seriesFlags(media.metadata);
 
   return (
     <SafeAreaView className="flex-col flex-1">
@@ -83,7 +99,20 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
         bookId={media.libraryItemId}
         filesDownloaded={taggedAudioFiles.filter((el) => el.alreadyDownload).length}
       />
-      <View className="flex flex-row justify-start items-start border-b bg-amber-200 py-1 border-t">
+      {seriesExists && (
+        <View className="flex-row items-center p-2 bg-abs-100 border-t ">
+          <SeriesIcon size={18} color={colors.amber800} />
+          <Text className="ml-1 text-amber-800">{`${media.metadata.series[0]?.name}`}</Text>
+          <Text className="ml-2 italic text-amber-800">
+            {`${
+              media.metadata.series[0]?.sequence > 0
+                ? "Book " + media.metadata.series[0]?.sequence
+                : ""
+            }`}
+          </Text>
+        </View>
+      )}
+      <View className="flex flex-row justify-start items-start border-b bg-abs-200 py-1 border-t">
         <View className="flex-col">
           <Image
             source={{ uri: coverURI }}
@@ -107,15 +136,16 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
           <Text
             numberOfLines={2}
             lineBreakMode="tail"
-            className="text-base  text-amber-950 font-semibold"
+            className="text-base  text-abs-950 font-semibold"
           >
             {media.metadata.title}
           </Text>
-          {media.metadata.subtitle && (
+          {/* DON'T include subtitle if it exists in the title */}
+          {media.metadata.subtitle && !media.metadata.title.includes(media.metadata.subtitle) && (
             <Text
               numberOfLines={1}
               lineBreakMode="tail"
-              className="text-sm  text-amber-900 font-semibold"
+              className="text-sm font-light text-abs-900 "
             >
               {media.metadata.subtitle}
             </Text>
@@ -124,23 +154,28 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
           <Text
             numberOfLines={2}
             lineBreakMode="tail"
-            className="text-sm  text-amber-900 font-semibold"
+            className="text-sm  text-abs-900 font-semibold"
           >
             by {authors}
           </Text>
           {media.metadata.publishedYear && (
-            <Text className="text-sm  text-amber-900 font-semibold">
-              Published {media.metadata.publishedYear}
-            </Text>
+            <View className="flex-row items-center">
+              <PublishedDateIcon size={18} color={colors.abs900} />
+              <Text className="text-sm  text-abs-900 ml-1">{media.metadata.publishedYear}</Text>
+            </View>
           )}
-          <Text
-            className="text-sm  text-amber-900 font-semibold flex-1"
-            numberOfLines={1}
-            lineBreakMode="tail"
-          >
-            {media.metadata.narrators?.length > 0 &&
-              "Narrated by " + media.metadata.narrators.join(", ")}
-          </Text>
+          {media.metadata.narrators?.length > 0 && (
+            <View className="flex-row items-center mt-[2]">
+              <NarratedByIcon size={18} color={colors.abs900} />
+              <Text
+                className="text-sm ml-1 text-abs-900 flex-1"
+                numberOfLines={1}
+                lineBreakMode="tail"
+              >
+                media.metadata.narrators.join(", ")
+              </Text>
+            </View>
+          )}
 
           {/* Description scrollview BUTTON */}
           <Pressable
@@ -148,16 +183,14 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
             className="flex-row justify-center"
           >
             <MotiView
-              from={{ backgroundColor: colors.amber400, scale: 0.8 }}
+              from={{ backgroundColor: colors.abs400, scale: 0.8 }}
               animate={{
-                backgroundColor: showDescription ? colors.amber600 : colors.amber400,
+                backgroundColor: showDescription ? colors.abs600 : colors.abs400,
                 scale: showDescription ? 1 : 0.8,
               }}
               className="flex-row items-center border border-amber-800 py-1 px-2 rounded-md"
             >
-              <Text
-                className={`mr-2 font-bold ${showDescription ? "text-white" : "text-amber-900"}`}
-              >
+              <Text className={`mr-2 font-bold ${showDescription ? "text-white" : "text-abs-900"}`}>
                 {`${showDescription ? "Hide" : "Show"} Desc`}
               </Text>
 
@@ -166,9 +199,9 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
                 animate={{
                   transform: [{ rotate: showDescription ? "180deg" : "0deg" }],
                 }}
-                className={`${showDescription ? "text-amber-100" : "text-amber-900"}`}
+                className={`${showDescription ? "text-abs-100" : "text-abs-900"}`}
               >
-                <PowerIcon size={20} color={showDescription ? colors.amber100 : colors.amber900} />
+                <PowerIcon size={20} color={showDescription ? colors.abs100 : colors.abs900} />
               </MotiView>
             </MotiView>
           </Pressable>
@@ -177,7 +210,7 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
       {/* Description scrollview */}
       <AnimateHeight
         hide={!showDescription}
-        style={{ backgroundColor: colors.amber100 }}
+        style={{ backgroundColor: colors.abs100 }}
         maxHeight={height / 3.5}
       >
         <ScrollView
@@ -203,7 +236,7 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
           // console.log("INO", audio.ino, media.libraryItemId);
           return (
             <View
-              className={`flex-1 border-b ${index % 2 === 0 ? "bg-amber-50" : "bg-white"}`}
+              className={`flex-1 border-b ${index % 2 === 0 ? "bg-abs-100" : "bg-abs-50"}`}
               key={audio.ino}
             >
               <ABSFile audio={audio} bookId={media.libraryItemId} key={audio.ino} index={index} />

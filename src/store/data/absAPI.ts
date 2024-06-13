@@ -195,6 +195,7 @@ export const absGetLibraryItems = async ({
       title: item.media.metadata.title,
       author: item.media.metadata.authorName,
       series: item.media.metadata.seriesName,
+      // seriesId: item.media.metadata?.series?.id,
       publishedDate: item.media.metadata.publishedDate,
       publishedYear: item.media.metadata.publishedYear,
       narratedBy: item.media.metadata.narratorName,
@@ -206,6 +207,7 @@ export const absGetLibraryItems = async ({
       numAudioFiles: item.media.numAudioFiles,
       genres: item.media.metadata.genres,
       tags: item.media.tags,
+      asin: item.media.metadata.asin,
     };
   });
   return booksMin;
@@ -219,7 +221,7 @@ export const absGetItemDetails = async (itemId?: string) => {
   const authHeader = getAuthHeader();
 
   let libraryItem: LibraryItem;
-  const url = `https://abs.mccoidco.xyz/api/items/${itemId}?expanded=1`;
+  const url = `https://abs.mccoidco.xyz/api/items/${itemId}?expanded=1&include=progress`;
   try {
     const response = await axios.get(url, { headers: authHeader });
     libraryItem = response.data;
@@ -228,10 +230,21 @@ export const absGetItemDetails = async (itemId?: string) => {
     throw error;
   }
   const coverURI = await getCoverURI(buildCoverURL(libraryItem.id));
+  // console.log(
+  //   "TITLE FIN",
+  //   libraryItem.media.metadata.title,
+  //   new Date(libraryItem.userMediaProgress.finishedAt),
+  //   libraryItem.userMediaProgress
+  // );
+
+  if (!libraryItem?.media?.audioFiles) {
+    throw new Error("No Media or Audiofiles");
+  }
   return {
     id: libraryItem.id,
     audioFiles: libraryItem.media.audioFiles,
     media: libraryItem.media,
+    UserMediaProgress: libraryItem?.userMediaProgress,
     coverURI: coverURI, //buildCoverURL(libraryItem.id),
   };
 };

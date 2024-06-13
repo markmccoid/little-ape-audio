@@ -5,6 +5,8 @@ import { getCoverURI } from "@store/data/absUtils";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useRouter } from "expo-router";
 import { formatSeconds } from "@utils/formatUtils";
+import { DurationIcon, SeriesIcon } from "@components/common/svg/Icons";
+import { colors } from "@constants/Colors";
 
 type Unpacked<T> = T extends (infer U)[] ? U : T;
 type Props = {
@@ -18,10 +20,9 @@ const ABSResultsBookRow = ({ book, index }: Props) => {
     queryKey: [`${book.id}-cover`],
     queryFn: async () => await getCoverURI(book.cover),
   });
-
   return (
     <View
-      className={`flex flex-row bg-amber-50`}
+      className={`flex flex-row bg-abs-50`}
       style={{
         borderTopWidth: index === 0 ? StyleSheet.hairlineWidth : 0,
         borderBottomWidth: StyleSheet.hairlineWidth,
@@ -64,11 +65,23 @@ const ABSResultsBookRow = ({ book, index }: Props) => {
                 by {book.author}
               </Text>
             </View>
+            {book?.series && (
+              <View className="flex-row items-center justify-start">
+                <SeriesIcon size={16} color={colors.amber800} />
+                <Text
+                  lineBreakMode="tail"
+                  numberOfLines={2}
+                  className="flex-1 text-amber-900 ml-1 text-xs pt-[3]"
+                >
+                  {book.series}
+                </Text>
+              </View>
+            )}
           </View>
           <View className="flex-row justify-between mr-2">
             <View className="flex-row ">
-              <Text className="text-amber-900 ">Duration:</Text>
-              <Text className="text-amber-800 ">
+              <DurationIcon size={16} color={colors.amber900} />
+              <Text className="text-amber-800 ml-1">
                 {` ${formatSeconds(book.duration, "verbose_no_seconds", true, false)}`}
               </Text>
             </View>

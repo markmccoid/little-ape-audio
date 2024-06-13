@@ -19,7 +19,7 @@ export type ABSDirParams = {
 const ABSItem = () => {
   const { absitem, title } = useLocalSearchParams<ABSDirParams>();
 
-  const { data, error, isLoading } = useQuery({
+  const { data, isError, isLoading } = useQuery({
     queryKey: [absitem],
     queryFn: async () => await absGetItemDetails(absitem),
   });
@@ -27,6 +27,13 @@ const ABSItem = () => {
   let backTitle = title || "Back";
   if (!isLoading) {
     backTitle = data?.media?.metadata?.title || backTitle;
+  }
+  if (isError) {
+    return (
+      <View>
+        <Text>Error Getting Needed Data. Check book and make sure Library is online.</Text>
+      </View>
+    );
   }
   return (
     <SafeAreaView style={{ flex: 1 }}>

@@ -5,11 +5,12 @@ import ABSSearchInputText from "./search/ABSSearchInputText";
 import { useABSStore } from "@store/store-abs";
 import ABSBookResults from "./ABSBookResults";
 import { colors } from "@constants/Colors";
+import { Link, useRouter } from "expo-router";
 
 const ABSMainContainer = () => {
   const { books, totalBookCount, selectedBookCount, isError, isLoading } = useGetAllABSBooks();
   const updateSearchObject = useABSStore((state) => state.actions.updateSearchObject);
-
+  const router = useRouter();
   const handleUpdateSearch = (fieldName: string) => {
     return (fieldValue: string) => {
       updateSearchObject({ [fieldName]: fieldValue });
@@ -24,13 +25,25 @@ const ABSMainContainer = () => {
   }
   if (isError) {
     return (
-      <View>
-        <Text>Error Getting Books</Text>
+      <View className="flex-col items-center">
+        <Text className="text-lg font-semibold">Error Getting Books</Text>
+        <Text className="text-lg text-center">
+          Make sure you have setup AudiobookShelf Login Info.
+        </Text>
+        <View className="flex-row justify-center">
+          <Pressable
+            onPress={() => router.push("/settings/authroute")}
+            className="p-2 bg-abs-700 rounded-lg border border-abs-500"
+          >
+            <Text className="text-lg font-semibold text-white">Update ABS Info</Text>
+          </Pressable>
+        </View>
       </View>
     );
   }
+
   return (
-    <View className="flex-1 bg-amber-50">
+    <View className="flex-1 bg-abs-100">
       <View className="bg-amber-200" style={{ backgroundColor: colors.absLightBg }}>
         <View className="m-1 flex-row justify-center ">
           {selectedBookCount === -1 ? (

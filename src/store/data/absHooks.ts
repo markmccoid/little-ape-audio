@@ -57,10 +57,10 @@ export const useGetAllABSBooks = () => {
 
   // console.log("useGetAllBooks", data?.length, rest.isLoading);
 
-  if (rest.isLoading) {
+  if (rest.isLoading || rest.isError) {
     return {
       books: [],
-      totalBookCount: data?.length,
+      totalBookCount: data?.length || 0,
       selectedBookCount: -1,
       ...rest,
     };
@@ -113,7 +113,7 @@ export const useGetAllABSBooks = () => {
     direction === "asc" ? sortBy(filterData, [field]) : reverse(sortBy(filterData, [field]));
   return {
     books: filterData,
-    totalBookCount: data?.length,
+    totalBookCount: data?.length || 0,
     selectedBookCount: filterData?.length || 0,
     ...rest,
   };

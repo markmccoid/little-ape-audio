@@ -488,6 +488,19 @@ export type Media = {
   ebookFile: any | null;
 };
 
+export type UserMediaProgress = {
+  id: string;
+  libraryItemId: string;
+  episodeId: null;
+  duration: number;
+  progress: number;
+  currentTime: number;
+  isFinished: boolean;
+  hideFromContinueListening: boolean;
+  lastUpdate: number;
+  startedAt: number;
+  finishedAt: null;
+};
 export type LibraryItem = {
   id: string;
   ino: string;
@@ -509,4 +522,5 @@ export type LibraryItem = {
   mediaType: string;
   media: Media;
   libraryFiles: LibraryFile[];
+  userMediaProgress: UserMediaProgress;
 };

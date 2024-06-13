@@ -42,6 +42,8 @@ const AbsAuth = () => {
   };
 
   const handleLogout = () => {
+    queryClient.invalidateQueries({ queryKey: ["allABSBooks"] });
+    queryClient.invalidateQueries({ queryKey: ["absfilterdata"] });
     actions.saveUserInfo(undefined);
     actions.saveLibraries(undefined, undefined);
     setLoggedIn(false);
@@ -90,6 +92,7 @@ const AbsAuth = () => {
             placeholder="AudiobookShelf URL"
             spellCheck={false}
             autoCapitalize="none"
+            autoCorrect={false}
             value={absURL}
             className="border p-1 mr-1 mb-2 bg-white"
           />
@@ -99,6 +102,7 @@ const AbsAuth = () => {
               placeholder="Username"
               value={username}
               autoCapitalize="none"
+              autoCorrect={false}
               spellCheck={false}
               className="flex-1 border p-1 mr-1 bg-white"
             />
@@ -108,6 +112,7 @@ const AbsAuth = () => {
               spellCheck={false}
               value={password}
               autoCapitalize="none"
+              autoCorrect={false}
               secureTextEntry={true}
               className="flex-1 border p-1 ml-1 bg-white"
             />

@@ -27,16 +27,16 @@ const ABSAdvSearchContainer = () => {
     updateSearchObject({ description });
   };
   return (
-    <View className="bg-amber-50 h-full">
-      <View className="p-3 border-b border-amber-900 mb-2 flex-row justify-center bg-amber-500">
-        <Text className="text-lg font-bold text-amber-950">Advanced Search</Text>
+    <View className="bg-abs-50 h-full">
+      <View className="p-1 border-b border-abs-800 mb-2 flex-row justify-center bg-abs-400">
+        <Text className="text-lg font-semibold text-abs-950">Advanced Search</Text>
       </View>
       <View className="flex-row justify-center">
         <Text className="text-base font-semibold">
           Matched {selectedBookCount === -1 ? 0 : selectedBookCount} Books
         </Text>
       </View>
-      <ScrollView className="flex-col bg-amber-50" contentContainerStyle={{}}>
+      <ScrollView className="flex-col bg-abs-50" contentContainerStyle={{}}>
         <HiddenContainer
           title="Genres"
           style={{ height: 200 }}

@@ -275,3 +275,23 @@ export const TimerSandIcon = ({ size = 25, color, style }: Props) => {
 export const ListIcon = ({ size = 25, color, style }: Props) => {
   return <Ionicons name="list-outline" size={size} color={color} style={style} />;
 };
+
+// Audiobookshelf (abs) icons
+
+export const NarratedByIcon = ({ size = 25, color, style }: Props) => {
+  return <MaterialCommunityIcons name="account-voice" size={size} color={color} style={style} />;
+};
+
+export const PublishedDateIcon = ({ size = 25, color, style }: Props) => {
+  return (
+    <MaterialCommunityIcons name="calendar-month-outline" size={size} color={color} style={style} />
+  );
+};
+
+export const SeriesIcon = ({ size = 25, color, style }: Props) => {
+  return <Ionicons name="library-outline" size={size} color={color} style={style} />;
+};
+
+export const DurationIcon = ({ size = 25, color, style }: Props) => {
+  return <Ionicons name="timer-outline" size={size} color={color} style={style} />;
+};
