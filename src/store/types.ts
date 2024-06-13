@@ -162,6 +162,8 @@ export type AudioState = {
       // We do this for manual download of track, if process all tracks, then expect only first track
       // but this is handled by the calling function
       calculateColor,
+      // Only used for audiobookshelf (ABS) so that we know where to grab chapters from
+      totalAudioFiles,
       directory,
     }: {
       fileURI: string;
@@ -174,6 +176,7 @@ export type AudioState = {
       audioSource: AudioSourceType;
       playlistId?: string;
       calculateColor?: boolean;
+      totalAudioFiles?: number;
       directory?: string;
     }) => Promise<void>;
     updateTrackMetadata: (trackId: string, trackMetadata: Partial<AudioMetadata>) => Promise<void>;

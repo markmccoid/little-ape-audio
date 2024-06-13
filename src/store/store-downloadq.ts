@@ -33,6 +33,7 @@ export type DownloadQueueItem = {
   currFolderText: string;
   playlistId?: string;
   calculateColor?: boolean;
+  totalAudioFiles?: number;
 };
 
 type DownloadQState = {
@@ -52,6 +53,7 @@ type DownloadQState = {
       currFolderText,
       playlistId,
       calculateColor,
+      totalAudioFiles,
     }: DownloadQueueItem) => void;
     processQueue: () => Promise<void>;
     clearCompletedDownloads: () => void;
@@ -162,6 +164,7 @@ const downloadFile = async (downloadProps: DownloadQueueItem) => {
     currFolderText,
     playlistId,
     calculateColor,
+    totalAudioFiles,
   } = downloadProps;
 
   const trackActions = useTracksStore.getState().actions;
@@ -286,6 +289,7 @@ const downloadFile = async (downloadProps: DownloadQueueItem) => {
       currFolderText,
       audioSource,
       calculateColor,
+      totalAudioFiles,
     });
   try {
     // Add new Track to store

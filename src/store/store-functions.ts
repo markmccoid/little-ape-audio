@@ -1,3 +1,4 @@
+import { AudioFile } from "./data/absTypes";
 // import { SetState, StateCreator, StoreApi } from "zustand";
 import { getAudioFileTags } from "../utils/audioUtils";
 import { saveToAsyncStorage } from "./data/asyncStorage";
@@ -61,6 +62,7 @@ export const addTrack =
     audioSource, // google or dropbox or abs
     playlistId = undefined,
     calculateColor = false,
+    totalAudioFiles,
     directory = "",
   }) => {
     //!! ----------
@@ -105,8 +107,17 @@ export const addTrack =
       const results = await absGetItemDetails(pathIn);
       const currentIno = sourceLocation.split("~")[1];
       const currentAudio = results.audioFiles.find((file) => file.ino === currentIno);
-      const absChapters = absChapterConvert(currentAudio.chapters);
-      tags.chapters = absChapters;
+      if (totalAudioFiles > 1) {
+        console.log("ABS Chapters", currentAudio.duration);
+        tags.durationSeconds = currentAudio.duration;
+        const absChapters = absChapterConvert(currentAudio.chapters);
+        tags.chapters = absChapters;
+      } else {
+        const chapters = results.media.chapters;
+        const absChapters = absChapterConvert(chapters);
+        tags.chapters = absChapters;
+        tags.durationSeconds = currentAudio.duration;
+      }
     }
 
     // Get picture colors if available
@@ -168,6 +179,7 @@ export const addTrack =
       trackNum,
       totalTracks,
     };
+
     const id = `${directory}${filename}`;
     const newAudioFile: AudioTrack = {
       id,

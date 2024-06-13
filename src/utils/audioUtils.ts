@@ -144,6 +144,7 @@ const processChapters = (
 //--=================================
 export const getAudioFileDuration = async (fileURI: string) => {
   // const soundObj = new Audio.Sound();
+
   const timeout = 10000; // 10 seconds
   // Create a timeout promise to make sure our createAsync call doesn't hang forever.
   const timeoutPromise = new Promise((_, reject) =>

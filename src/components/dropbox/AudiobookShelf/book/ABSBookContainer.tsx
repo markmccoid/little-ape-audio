@@ -98,6 +98,7 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
         audio={taggedAudioFiles}
         bookId={media.libraryItemId}
         filesDownloaded={taggedAudioFiles.filter((el) => el.alreadyDownload).length}
+        totalAudioFiles={taggedAudioFiles.length}
       />
       {seriesExists && (
         <View className="flex-row items-center p-2 bg-abs-100 border-t ">
@@ -239,7 +240,13 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
               className={`flex-1 border-b ${index % 2 === 0 ? "bg-abs-100" : "bg-abs-50"}`}
               key={audio.ino}
             >
-              <ABSFile audio={audio} bookId={media.libraryItemId} key={audio.ino} index={index} />
+              <ABSFile
+                audio={audio}
+                bookId={media.libraryItemId}
+                key={audio.ino}
+                index={index}
+                totalAudioFiles={taggedAudioFiles.length}
+              />
             </View>
           );
         })}

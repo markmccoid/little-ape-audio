@@ -14,8 +14,9 @@ type Props = {
   bookId: string;
   audio: AudioFile & { path_lower: string; alreadyDownload: boolean };
   index: number;
+  totalAudioFiles: number;
 };
-const ABSFile = ({ bookId, audio, index }: Props) => {
+const ABSFile = ({ bookId, audio, index, totalAudioFiles }: Props) => {
   const activeTasks = useDownloadQStore((state) => state.activeTasks);
   const completedDownloads = useDownloadQStore((state) =>
     state.completedDownloads.map((el) => el.fileId)
@@ -46,6 +47,7 @@ const ABSFile = ({ bookId, audio, index }: Props) => {
       playlistId: bookId,
       audioSource: "abs",
       calculateColor: true,
+      totalAudioFiles,
     };
     qActions.addToQueue(downloadItem);
   }
