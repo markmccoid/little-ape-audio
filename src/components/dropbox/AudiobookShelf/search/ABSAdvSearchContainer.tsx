@@ -41,6 +41,7 @@ const ABSAdvSearchContainer = () => {
           title="Genres"
           style={{ height: 200 }}
           titleInfo={buildExtraInfo(searchObject?.genres)}
+          leftIconFunction={() => updateSearchObject({ genres: undefined })}
         >
           <ABSAdvSearchGenres />
         </HiddenContainer>
@@ -48,6 +49,7 @@ const ABSAdvSearchContainer = () => {
           title="Tags"
           style={{ height: 200 }}
           titleInfo={buildExtraInfo(searchObject?.tags)}
+          leftIconFunction={() => updateSearchObject({ tags: undefined })}
         >
           <ABSAdvSearchTags />
         </HiddenContainer>

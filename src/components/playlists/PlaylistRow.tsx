@@ -39,10 +39,11 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
   const handleTouchStart = (event) => {
     setTouchStartX(event.nativeEvent.pageX);
   };
-
   //!! Maybe need to set state in PlaylistContainer (buttonsDisabled) so that while we are "selecting"
   //!! a playlist no other button can be pressed
   const handleTouchEnd = async (event) => {
+    if (isSelected) return;
+
     const dx = Math.abs(event.nativeEvent.pageX - touchStartX);
     if (dx < 10) {
       // Handle the press event
@@ -86,6 +87,7 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
   // if (isDeleted) {
   //   return null;
   // }
+
   return (
     <AnimatePresence>
       {isDeleted && <MotiView key={2} from={{ scale: 1 }} animate={{ scale: 0 }} />}
@@ -132,12 +134,10 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
               >
                 <Pressable
                   className="flex-1 flex-row pt-2 pb-3 px-2"
-                  // onPress={async () => await onPlaylistSelect(playlist.id)}
+                  // onPress={handleSelectRow}
                   disabled={isSelected}
                   onPressIn={handleTouchStart}
-                  // onTouchMove={handleTouchMove}
-                  // onTouchEnd={handleTouchEnd}
-                  onPressOut={async (e) => await handleTouchEnd(e)}
+                  onPressOut={async (e) => handleTouchEnd(e)}
                 >
                   {/* IMAGE */}
                   <PlaylistImage style={styles.trackImage} playlistId={playlist.id} noTransition />

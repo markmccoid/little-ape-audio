@@ -108,7 +108,6 @@ export const addTrack =
       const currentIno = sourceLocation.split("~")[1];
       const currentAudio = results.audioFiles.find((file) => file.ino === currentIno);
       if (totalAudioFiles > 1) {
-        console.log("ABS Chapters", currentAudio.duration);
         tags.durationSeconds = currentAudio.duration;
         const absChapters = absChapterConvert(currentAudio.chapters);
         tags.chapters = absChapters;

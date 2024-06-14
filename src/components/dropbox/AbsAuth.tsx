@@ -20,6 +20,7 @@ const AbsAuth = () => {
 
   const handleLogin = async () => {
     if (!username || !password || !absURL) return;
+
     const loginInfo = await absLogin(absURL, username, password);
     const userInfo: UserInfo = {
       id: loginInfo.id,

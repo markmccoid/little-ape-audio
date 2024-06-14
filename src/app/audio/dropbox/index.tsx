@@ -1,12 +1,11 @@
 import { View, Text, StyleSheet, Dimensions, Pressable, Image } from "react-native";
 import React, { useEffect, useState } from "react";
-import { Href, Link, useRouter } from "expo-router";
+import { Link } from "expo-router";
 import {
   DropboxIcon,
   FolderOpenIcon,
   GoogleDriveIcon,
   SearchIcon,
-  StarFilledIcon,
 } from "../../../components/common/svg/Icons";
 import { colors } from "../../../constants/Colors";
 // import MainFavFolders from "../../../components/dropbox/MainFavFoldersOLD";
@@ -21,6 +20,7 @@ const { width, height } = Dimensions.get("window");
 import useLocalFiles from "../../../hooks/useLocalFiles";
 import * as Progress from "react-native-progress";
 import useDownloadQStore from "@store/store-downloadq";
+import { useKeepAwake } from "expo-keep-awake";
 
 export type AudioSourceType = "dropbox" | "google" | "local" | "abs";
 export type AudioSourceLinkParams = {
@@ -32,13 +32,13 @@ export type AudioSourceLinkParams = {
   parentFolderId: string;
 };
 const DropboxScreens = () => {
+  useKeepAwake();
   const [currTab, setCurrTab] = useState<"folders" | "books">("folders");
   const insets = useSafeAreaInsets();
   const folderMetadata = useDropboxStore((state) => state.folderMetadata);
   const [networkActive, setNetworkActive] = useState(true);
   const [isLoading, selectLocalFiles] = useLocalFiles();
   const qActions = useDownloadQStore((state) => state.actions);
-  const router = useRouter();
 
   // Check for network activity
   useEffect(() => {

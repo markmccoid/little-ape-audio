@@ -130,7 +130,7 @@ const PlaylistContainer = () => {
     if (prevOpenedRow.current && prevOpenedRow.current !== renderRowRefs.current[index]) {
       prevOpenedRow.current.close();
     }
-    prevOpenedRow.current = renderRowRefs[index];
+    prevOpenedRow.current = renderRowRefs.current[index];
   };
   const closeAllRows = () => {
     renderRowRefs.current.forEach((rowRef) => {
