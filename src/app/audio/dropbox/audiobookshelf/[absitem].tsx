@@ -2,12 +2,7 @@ import { View, Text, SafeAreaView, ScrollView, Image } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Stack, useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import CustomHeader from "@components/dropbox/CustomHeader";
-import {
-  ABSGetLibraryItems,
-  FilterType,
-  absGetItemDetails,
-  absGetLibraryItems,
-} from "@store/data/absAPI";
+import { absGetItemDetails } from "@store/data/absAPI";
 import { useQuery } from "@tanstack/react-query";
 import ABSBookContainer from "@components/dropbox/AudiobookShelf/book/ABSBookContainer";
 import ABSBookLoadingIndicator from "@components/dropbox/AudiobookShelf/book/ABSBookLoadingIndicator";

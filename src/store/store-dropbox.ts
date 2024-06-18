@@ -933,7 +933,8 @@ export const getSingleFolderMetadata = async (folder) => {
 //~ Get a new one, thus to access the file represented by "cleanFileName"
 //~ `${FileSystem.documentDirectory}${cleanFileName}`
 //~===========================================
-async function getLocalImage(localImage, folderName) {
+// async function getLocalImage(localImage, folderName) {
+export const getLocalImage = async (localImage, folderName) => {
   // Get extension
   const localImageExt = localImage.name.slice(localImage.name.length - 4);
   // Create full file name
@@ -953,7 +954,7 @@ async function getLocalImage(localImage, folderName) {
   }
 
   return finalCleanFileName;
-}
+};
 //~ ------------------------------
 //~ Chunk passed array into smaller arrays
 //~ ------------------------------

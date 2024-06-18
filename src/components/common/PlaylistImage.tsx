@@ -16,6 +16,7 @@ import Animated, {
   ZoomInEasyUp,
   ZoomOut,
 } from "react-native-reanimated";
+import { resolveABSImage } from "@utils/otherUtils";
 
 // Common image dims 128x164 (W * 1.28)
 
@@ -35,8 +36,9 @@ const PlaylistImage = ({ playlistId, style, noTransition = false }: Props) => {
     playlist = actions.getPlaylist(playlistId);
   }
 
+  // console.log("PlaylistImage uRI", playlist?.imageURI?.slice(0, 30));
   const aspectRatio = playlist?.imageAspectRatio || 1.28;
-
+  // console.log("PL Image", playlist.imageURI);
   return (
     <>
       {playlist && playlist.id && (
@@ -44,7 +46,10 @@ const PlaylistImage = ({ playlistId, style, noTransition = false }: Props) => {
           entering={noTransition ? undefined : ZoomInEasyUp}
           style={[styles.shadow, style]}
         >
-          <Animated.Image style={[styles.trackImage, style]} source={{ uri: playlist.imageURI }} />
+          <Animated.Image
+            style={[styles.trackImage, style]}
+            source={{ uri: resolveABSImage(playlist.imageURI) }}
+          />
         </Animated.View>
       )}
     </>

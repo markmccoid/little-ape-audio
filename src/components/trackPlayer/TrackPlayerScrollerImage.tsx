@@ -1,6 +1,7 @@
 import { View, Image, Dimensions } from "react-native";
 import React from "react";
 import { AudioTrack, Playlist } from "@store/types";
+import { resolveABSImage } from "@utils/otherUtils";
 
 const { width, height } = Dimensions.get("window");
 type Props = {
@@ -11,8 +12,13 @@ type Props = {
 const TrackPlayerScrollerImage = ({ playlist, currentTrack, compHeight }: Props) => {
   const imageURI =
     playlist?.overrideTrackImage || !currentTrack?.metadata?.pictureURI
-      ? playlist?.imageURI
-      : currentTrack?.metadata?.pictureURI;
+      ? resolveABSImage(playlist?.imageURI)
+      : resolveABSImage(currentTrack?.metadata?.pictureURI);
+  // console.log(
+  //   "TrackPlayerScrollerImage",
+  //   playlist?.imageURI?.slice(0, 30),
+  //   currentTrack?.metadata?.pictureURI?.slice(0, 30)
+  // );
   return (
     <View
       style={{

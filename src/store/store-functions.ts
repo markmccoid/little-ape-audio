@@ -4,18 +4,19 @@ import { getAudioFileTags } from "../utils/audioUtils";
 import { saveToAsyncStorage } from "./data/asyncStorage";
 import * as FileSystem from "expo-file-system";
 import { AudioMetadata, AudioState, AudioTrack } from "./types";
-import { getCleanFileName } from "@store/data/fileSystemAccess";
+import { downloadToFileSystem, getCleanFileName } from "@store/data/fileSystemAccess";
 // import { getCleanFileName } from "./data/fileSystemAccess";
 import { downloadDropboxFile } from "@utils/dropboxUtils";
 import { format } from "date-fns";
 import { getJsonData } from "@utils/googleUtils";
 import { GDrive } from "@robinbobin/react-native-google-drive-api-wrapper";
 import { PlaylistImageColors } from "@store/types";
-import { getImageColors, sanitizeString } from "@utils/otherUtils";
+import { getImageColors, resolveABSImage, sanitizeString } from "@utils/otherUtils";
 import TrackPlayer from "react-native-track-player";
 import { BookJSONMetadata, CleanBookMetadata, cleanOneBook } from "@utils/audiobookMetadata";
 import { buildCoverURL } from "./data/absUtils";
 import { absGetItemDetails } from "./data/absAPI";
+import { getLocalImage } from "./store-dropbox";
 let isCriticalSectionLocked = false;
 const gdrive = new GDrive();
 
@@ -101,9 +102,16 @@ export const addTrack =
     // If "abs" source and no metadata picture, use image from audiobookshelf
     if (audioSource === "abs") {
       if (!tags.pictureURI) {
-        tags.pictureURI = buildCoverURL(pathIn);
+        //
+        const coverLink = buildCoverURL(pathIn);
+        const { uri, cleanFileName } = await downloadToFileSystem(
+          coverLink + "&format=jpeg",
+          `abs_${pathIn}.jpeg`
+        );
+        tags.pictureURI = cleanFileName;
       }
-
+      // Get chapter details by downloading book details and finding the audio ino
+      // that we are processing.  Then grab chapters
       const results = await absGetItemDetails(pathIn);
       const currentIno = sourceLocation.split("~")[1];
       const currentAudio = results.audioFiles.find((file) => file.ino === currentIno);
@@ -121,7 +129,9 @@ export const addTrack =
 
     // Get picture colors if available
     if (tags.pictureURI && calculateColor) {
-      const colors = (await getImageColors(tags.pictureURI)) as PlaylistImageColors;
+      const colors = (await getImageColors(
+        resolveABSImage(tags.pictureURI)
+      )) as PlaylistImageColors;
       tags.pictureColors = colors;
     }
 

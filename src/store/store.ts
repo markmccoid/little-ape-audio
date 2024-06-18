@@ -30,7 +30,7 @@ import { getImageSize } from "@utils/audioUtils";
 import { router } from "expo-router";
 import { getCurrentChapter } from "@utils/chapterUtils";
 import { debounce, reverse } from "lodash";
-import { getImageColors } from "@utils/otherUtils";
+import { getImageColors, resolveABSImage } from "@utils/otherUtils";
 
 let eventPlayerTrackChange = undefined;
 let eventEndOfQueue = undefined;
@@ -247,7 +247,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
     //! Have a a playlist Id array in each track.
     removePlaylist: async (playlistId, removeAllTracks = true) => {
       const playlistToDelete = get().playlists[playlistId];
-
+      console.log("removePlaylist URI", playlistToDelete.imageURI);
       // Check to see if tracks exist in other playlists
       // if count > 1 then don't delete from the system
       const trackCounts = trackCount(get().playlists);
@@ -263,6 +263,21 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         // const x = await get().actions.removeTracks(playlistToDelete.trackIds);
         const x = await get().actions.removeTracks(tracksToDelete);
       }
+      //!!! NEEDS TO HAPPEN BEFORE WE DELETE TRACKS
+      if (removeAllTracks && tracksToDelete.length === playlistToDelete.trackIds.length) {
+        // const deletePromises = tracksToDelete.map(async (id) => {
+        //   // store trackToDelete's info
+        //   const trackToDelete = get().tracks.find((el) => el.id === id);
+        //   // return a promise
+        //   trackToDelete.metadata
+        //   return await deleteFromFileSystem(
+        //     `${FileSystem.documentDirectory}${trackToDelete?.metadata?.pictureURI}`
+        //   );
+        // });
+        // await Promise.all(deletePromises);
+        // deleteFromFileSystem()
+      }
+      //!!! END
       const updatedPlayList = get().playlists;
       delete updatedPlayList[playlistId];
       // const updatedPlayList = get().playlists.filter(
@@ -326,7 +341,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
 
         // If the aspectRatio was passed use it instead of calculating it
         if (!imageAspectRatio) {
-          const { aspectRatio: aspectCalced } = await getImageSize(imageURI);
+          const { aspectRatio: aspectCalced } = await getImageSize(resolveABSImage(imageURI));
           aspectRatio = aspectCalced;
         }
         // Only process if we get a valid aspectRatio

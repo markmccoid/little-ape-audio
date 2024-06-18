@@ -36,6 +36,18 @@ export const getImageFromWeb = async (searchString: string) => {
 };
 
 //~-=======================================
+//~ if image from audiobookshelf and didn't exist on audio file
+//~  then we downloaded and stored.  Need to resolve by adding documentDirectory
+//~-=======================================
+export const resolveABSImage = (imageURI: string) => {
+  if (!imageURI) return imageURI;
+  if (imageURI.includes("abs_")) {
+    return `${FileSystem.documentDirectory}${imageURI}`;
+  }
+  return imageURI;
+};
+
+//~-=======================================
 //~ Need to do more work for tintColor.  Need first pass to
 //~ do colorTypes
 //~ secondPass will need to look at color type and grab the darkest.

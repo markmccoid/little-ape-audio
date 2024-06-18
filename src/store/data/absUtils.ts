@@ -1,13 +1,15 @@
 import { Image } from "react-native";
 import { defaultImages, getRandomNumber } from "@store/storeUtils";
 import { getImageSize } from "@utils/otherUtils";
+import { useABSStore } from "@store/store-abs";
 //~~ =======================================================
 //~~ UTILS
 //~~ =======================================================
 
 // -- buildCoverURL
 export const buildCoverURL = (itemId: string) => {
-  return `https://abs.mccoidco.xyz/api/items/${itemId}/cover`;
+  const token = useABSStore.getState().userInfo.token;
+  return `https://abs.mccoidco.xyz/api/items/${itemId}/cover?token=${token}`;
 };
 
 // -- getCoverURI

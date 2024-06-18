@@ -187,8 +187,8 @@ export const absGetLibraryItems = async ({
     console.log("error", error);
     throw error;
   }
-  const libraryItems = response.data as GetLibraryItemsResponse;
 
+  const libraryItems = response.data as GetLibraryItemsResponse;
   const booksMin = libraryItems.results.map((item) => {
     return {
       id: item.id,
@@ -240,6 +240,7 @@ export const absGetItemDetails = async (itemId?: string) => {
   if (!libraryItem?.media?.audioFiles) {
     throw new Error("No Media or Audiofiles");
   }
+  console.log("Library ID", libraryItem.id);
   return {
     id: libraryItem.id,
     audioFiles: libraryItem.media.audioFiles,

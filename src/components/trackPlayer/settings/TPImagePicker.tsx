@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { getCurrentPlaylist, usePlaybackStore, useTracksStore } from "@store/store";
 import { colors } from "@constants/Colors";
 import { PlaylistImageColors } from "@store/types";
-import { getImageColors } from "@utils/otherUtils";
+import { getImageColors, resolveABSImage } from "@utils/otherUtils";
 
 type Props = {
   setHeight: (height: number) => void;
@@ -43,7 +43,9 @@ const TPImagePicker = ({ currPlaylistId }) => {
         if (prevTrack !== track.metadata.pictureURI) {
           let pictureColors = undefined;
 
-          const picToRead = track.metadata.pictureURI || playlistImage.pictureURI;
+          const picToRead =
+            resolveABSImage(track.metadata?.pictureURI) ||
+            resolveABSImage(playlistImage.pictureURI);
           pictureColors = (await getImageColors(picToRead)) as PlaylistImageColors;
 
           images.push({
@@ -56,12 +58,6 @@ const TPImagePicker = ({ currPlaylistId }) => {
         prevTrack = track.metadata.pictureURI;
       }
       setTracks(images);
-      //   return images as {
-      //     id: string;
-      //     pictureURI: string;
-      //     pictureAspectRatio: number;
-      //     pictureColors: IOSImageColors;
-      //   }[];
     };
     buildImageList();
   }, []);
@@ -135,7 +131,10 @@ const TPImagePicker = ({ currPlaylistId }) => {
       // }}
     >
       <View className="m-1 border-2 border-red-600">
-        <Image source={{ uri: playlistImage.pictureURI }} style={{ width: 100, height: 100 }} />
+        <Image
+          source={{ uri: resolveABSImage(playlistImage.pictureURI) }}
+          style={{ width: 100, height: 100 }}
+        />
       </View>
       {tracks.map((track) => {
         if (track?.pictureURI) {
@@ -152,7 +151,10 @@ const TPImagePicker = ({ currPlaylistId }) => {
                 setPicUpdate((prev) => !prev);
               }}
             >
-              <Image source={{ uri: track.pictureURI }} style={{ width: 100, height: 100 }} />
+              <Image
+                source={{ uri: resolveABSImage(track.pictureURI) }}
+                style={{ width: 100, height: 100 }}
+              />
             </TouchableOpacity>
           );
         }
