@@ -58,6 +58,13 @@ const ABSLayout = () => {
         }}
       />
       <Stack.Screen
+        name="series/[bookid]"
+        options={{
+          presentation: "card",
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
         name="advsearch"
         options={{
           presentation: "modal",

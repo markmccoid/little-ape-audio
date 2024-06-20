@@ -112,7 +112,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       // --------            -Minutes-
-      staleTime: 1000 * 60 * 30,
+      staleTime: 1000 * 60 * 10,
     },
   },
 });

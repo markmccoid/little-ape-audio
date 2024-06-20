@@ -1,8 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import { ABSGetLibraryItems, absGetLibraryFilterData, absGetLibraryItems } from "./absAPI";
+import {
+  ABSGetLibraryItems,
+  absGetItemDetails,
+  absGetLibraryFilterData,
+  absGetLibraryItems,
+} from "./absAPI";
 import { reverse, sortBy } from "lodash";
 import { useABSStore } from "@store/store-abs";
 import { useMemo } from "react";
+import { btoa } from "react-native-quick-base64";
 
 //~~ ================================================================
 //~~ useGetFilterData - Get the filter data for the library
@@ -17,34 +23,10 @@ export const useGetFilterData = () => {
 };
 
 //~~ ================================================================
-//~~ useGetBooks - Get list of books based on filter passed
-//~~    Also pulls sort setting from absStore and updates whenever changes made to sort
-//~~ ================================================================
-export const useGetABSBooks = ({ filterType, filterValueEncoded }) => {
-  console.log("In Use Get BOOKS Hook");
-  const { field: sortField, direction } = useABSStore((state) => state.resultSort);
-
-  console.log("Sort field", sortField, direction);
-  const { data, ...rest } = useQuery({
-    queryKey: ["ABSBooksFiltered", filterType, filterValueEncoded],
-    queryFn: async () => await absGetLibraryItems({ filterType, filterValue: filterValueEncoded }),
-    staleTime: 60000,
-  });
-  // Sort Books first
-  let books = direction === "asc" ? sortBy(data, [sortField]) : reverse(sortBy(data, [sortField]));
-
-  // If sortValue is passed then we are searching on author or title, filter the data before returning.
-  return {
-    books,
-    ...rest,
-  };
-};
-
-//~~ ================================================================
 //~~ useGetAllBooks - Returns a list of books filtered by absStore's searchObject
 //~~    If NO search criteria, nothing is return
 //!!    May update this to return random list of 50 books
-//~~    Initial pull of data is on app startup in main index.ts route.  Stale time is 30 minutes
+//~~    Stale time is 10 minutes
 //~~ ================================================================
 // preload will only "run" the useQuery.  We don't want any data, just loading the data in background
 export const useGetAllABSBooks = () => {
@@ -117,6 +99,62 @@ export const useGetAllABSBooks = () => {
   };
 };
 
+//~~ ======================================================================
+//~~ useGetSeriesBooks
+//~~   Takes an item(book) ID and gets the book details.  The details will
+//~~   will contain the series ID.
+//~~   Then we filter the Libraries books by the series ID and get back the books
+//~~   in the series
+//~~ ======================================================================
+export const useGetSeriesBooks = (bookId: string) => {
+  const { data, isError, isLoading, error } = useQuery({
+    queryKey: [bookId],
+    queryFn: async () => await absGetItemDetails(bookId),
+  });
+
+  const seriesArray = data?.media?.metadata?.series || [];
+  const { data: seriesBooks, ...rest } = useQuery({
+    queryKey: ["series", ...seriesArray.map((el) => el.id)],
+    queryFn: async () =>
+      getSeriesBooks(
+        seriesArray.map((el) => el.id),
+        seriesArray
+      ),
+    enabled: !!seriesArray[0]?.id,
+  });
+
+  // NOTE:  The seriesInfo is pulled from the Book ID that was used to get the series ID
+  //        The series object has an id, name and sequence, with sequence being the book number
+  //        that said book is in the series.  i.e. it is meaningless in the return so we don't return it.
+
+  if (rest.isLoading || isLoading) {
+    return {
+      series: [{ id: undefined, name: undefined, books: [] }],
+      ...rest,
+    };
+  }
+
+  return { series: seriesBooks || [], ...rest };
+};
+
+//~~ ---------
+//~~ Helper function that, if multiple series on book, will get info for each series
+//~~  uses Promise.all()
+//~~ ---------
+async function getSeriesBooks(seriesIds: string[], seriesInfo: { id: string; name: string }[]) {
+  const promises = seriesIds.map(async (id) => {
+    const seriesDetail = seriesInfo.find((el) => el.id === id);
+    const response = await absGetLibraryItems({
+      filterType: "series",
+      filterValue: btoa(id),
+      sortBy: "media.metadata.series.sequence",
+    });
+    return { id: seriesDetail.id, name: seriesDetail.name, books: response || [] };
+  });
+
+  const data = await Promise.all(promises);
+  return data;
+}
 //~~ ======================================================================
 //~~ checkValue - helper function that returns whether a book should be included
 //~~   in the output.

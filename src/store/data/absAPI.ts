@@ -154,6 +154,7 @@ type GetLibraryItemsParams = {
   // NOTE: for filterType "authors" and "series", the filterValue should be the ID of the author or series
   //       for filterType "genres" and "tags", the filterValue should be the base64 version of the genre or tag
   filterValue?: string;
+  sortBy?: string; // should be the output json's path -> media.metadata.title or media.metadata.series.sequence
   page?: number;
   limit?: number;
 };
@@ -161,6 +162,7 @@ export const absGetLibraryItems = async ({
   libraryId,
   filterType,
   filterValue,
+  sortBy,
   page,
   limit,
 }: GetLibraryItemsParams) => {
@@ -168,17 +170,16 @@ export const absGetLibraryItems = async ({
   const activeLibraryId = useABSStore.getState().activeLibraryId;
   const libraryIdToUse = libraryId || activeLibraryId;
   let response;
-  let filterData = "";
+  let queryParams = "";
+
   if (filterType) {
-    filterData = `?filter=${filterType}.${filterValue}`;
+    queryParams = `?filter=${filterType}.${filterValue}`;
   }
-  //! Server sort, not used
-  // const sortField = sort ? `media.metadata.${sort.field}` : "media.metadata.title";
-  // const sortOrder = sort ? sort.direction === "asc" && 0 : 1;
-  // const url = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items${filterData}&sort=${sortField}&desc=${sortOrder}`;
+  if (sortBy) {
+    queryParams = `${queryParams}${queryParams ? "&" : "?"}sort=${sortBy}`;
+  }
 
-  const url = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items${filterData}`;
-
+  const url = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items${queryParams}`;
   // console.log("absGetLibraryItems-HIT DB", libraryIdToUse, url);
 
   try {
@@ -189,6 +190,7 @@ export const absGetLibraryItems = async ({
   }
 
   const libraryItems = response.data as GetLibraryItemsResponse;
+
   const booksMin = libraryItems.results.map((item) => {
     return {
       id: item.id,
@@ -240,7 +242,7 @@ export const absGetItemDetails = async (itemId?: string) => {
   if (!libraryItem?.media?.audioFiles) {
     throw new Error("No Media or Audiofiles");
   }
-  console.log("Library ID", libraryItem.id);
+  // console.log("Library ID", libraryItem.id);
   return {
     id: libraryItem.id,
     audioFiles: libraryItem.media.audioFiles,

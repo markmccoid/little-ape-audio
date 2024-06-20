@@ -33,14 +33,14 @@ export type ABSState = {
   userInfo?: UserInfo;
   libraries?: StoredLibraries[];
   activeLibraryId?: string;
-  // This is the sort for the results from useGetABSBooks()
+  // This is the sort for the results in the absHooks.ts file functions
   resultSort: ResultSort;
   searchObject: SearchObject;
   actions: {
     saveUserInfo: (userInfo: UserInfo) => Promise<void>;
     saveLibraries: (libraries: StoredLibraries[], activeLibraryId: string) => Promise<void>;
     updateResultSort: (resultSort: ResultSort) => Promise<void>;
-    updateSearchObject: (searchObject: ABSState["searchObject"]) => Promise<void>;
+    updateSearchObject: (searchObject: ABSState["searchObject"] | undefined) => void;
   };
 };
 
@@ -82,8 +82,11 @@ export const useABSStore = create<ABSState>((set, get) => ({
 
       await absSaveStore();
     },
-    updateSearchObject: async (searchObject) => {
-      // await absSaveStore();
+    updateSearchObject: (searchObject) => {
+      if (!searchObject) {
+        set({ searchObject: {} });
+        return;
+      }
       for (const [key, value] of Object.entries(searchObject)) {
         if (typeof value === "string") {
           searchObject[key] = value.toLowerCase();
