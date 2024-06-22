@@ -1,3 +1,4 @@
+import { resolveABSImage } from "./../utils/otherUtils";
 import { SourceLocation } from "./../../node_modules/@babel/types/lib/index-legacy.d";
 import { Alert, Image } from "react-native";
 import { defaultImages, getRandomNumber } from "./storeUtils";
@@ -244,13 +245,13 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
             id,
             pathToFolder: pathIn,
             parentFolder: parentFolderId,
-            imageURL: audioSource === "abs" ? imageURL : undefined,
+            imageURL: audioSource === "abs" ? resolveABSImage(imageURL) : undefined,
             defaultImage: Image.resolveAssetSource(defaultImages[`image${getRandomNumber()}`]).uri,
             localImageName: undefined,
-            title: folderName,
-            author: "unknown",
-            categoryOne: "unknown",
-            categoryTwo: "unknown",
+            title: audioSource === "abs" ? folderName.split("~")[0] : folderName,
+            author: audioSource === "abs" ? folderName.split("~")[1] : "unknown",
+            categoryOne: audioSource === "abs" ? "AudiobookShelf" : "unknown",
+            categoryTwo: audioSource === "abs" ? "" : "unknown",
             audioSource,
           });
         } else {

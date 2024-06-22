@@ -19,6 +19,9 @@ const ABSResultSearchInputText = ({ updateSearch, label, value, showLabel }: Pro
   );
 
   useEffect(() => {
+    setSearchText(value);
+  }, [value]);
+  useEffect(() => {
     debouncedSetSearchText(searchText);
   }, [searchText]);
 

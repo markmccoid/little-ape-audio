@@ -89,8 +89,17 @@ const ShowFavoritedBooks = () => {
                 className="font-semibold text-sm pl-3"
                 style={{
                   backgroundColor:
-                    item.audioSource === "dropbox" ? colors.dropboxBlue : colors.amber500,
-                  color: item.audioSource === "dropbox" ? "white" : colors.amber900,
+                    item.audioSource === "dropbox"
+                      ? colors.dropboxBlue
+                      : item.audioSource === "google"
+                      ? colors.amber500
+                      : colors.abs700,
+                  color:
+                    item.audioSource === "dropbox"
+                      ? "white"
+                      : item.audioSource === "google"
+                      ? colors.amber900
+                      : colors.abs50,
                 }}
               >
                 {item.categoryOne} - {item.categoryTwo}

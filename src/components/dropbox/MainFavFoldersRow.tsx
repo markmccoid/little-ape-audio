@@ -131,8 +131,8 @@ const MainFavFoldersRow = ({ favFolder, simultaneousHandler, currentKey, activeK
       }
     },
   });
-  
-  console.log("favFOLDER", favFolder.folderPath);
+
+  // console.log("favFOLDER", favFolder.folderPath);
   return (
     <View className="flex-1 flex-row h-full bg-red-800">
       {/* START -- ICONS REVEALED ON SWIPE */}
@@ -182,7 +182,7 @@ const MainFavFoldersRow = ({ favFolder, simultaneousHandler, currentKey, activeK
             <Pressable
               onPress={() =>
                 router.push({
-                  pathname: audio"/audio/dropbox/newdir",
+                  pathname: "/audio/dropbox/newdir",
                   params: { fullPath: favFolder.folderPath, backTitle: "Back" },
                 })
               }

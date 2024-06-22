@@ -23,6 +23,7 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
   });
   const showSeriesLink = book?.series && includeSeriesLink;
   const showInlineSeries = book?.series;
+
   return (
     <View className="flex-col">
       <View

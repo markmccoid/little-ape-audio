@@ -218,6 +218,10 @@ export const absGetLibraryItems = async ({
 //~~ ========================================================
 //~~ absGetItemDetails
 //~~ ========================================================
+//!! Want to get the number of books for the author - sample id bd51dfda-7e9b-4f56-b61c-ab6f89461a98
+//!! USE: https://abs.mccoidco.xyz/api/authors/{authorId}?include=items
+//!! We just want count of books
+//!! -- results.libraryItems.length
 export const absGetItemDetails = async (itemId?: string) => {
   // https://abs.mccoidco.xyz/api/items/{token}&expanded=1
   const authHeader = getAuthHeader();
@@ -232,6 +236,19 @@ export const absGetItemDetails = async (itemId?: string) => {
     throw error;
   }
   const coverURI = await getCoverURI(buildCoverURL(libraryItem.id));
+
+  // Get author book count
+  const authorId = libraryItem.media.metadata.authors[0].id;
+  const authorBooksurl = `https://abs.mccoidco.xyz/api/authors/${authorId}?include=items`;
+  let authorBookCount = 0;
+  try {
+    const response = await axios.get(authorBooksurl, { headers: authHeader });
+    authorBookCount = response.data.libraryItems.length;
+  } catch (error) {
+    console.log("error", error);
+    throw error;
+  }
+
   // console.log(
   //   "TITLE FIN",
   //   libraryItem.media.metadata.title,
@@ -249,6 +266,7 @@ export const absGetItemDetails = async (itemId?: string) => {
     media: libraryItem.media,
     UserMediaProgress: libraryItem?.userMediaProgress,
     coverURI: coverURI, //buildCoverURL(libraryItem.id),
+    authorBookCount,
   };
 };
 //~~ ========================================================

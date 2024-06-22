@@ -10,6 +10,7 @@ import { Link, useRouter } from "expo-router";
 const ABSMainContainer = () => {
   const { books, totalBookCount, selectedBookCount, isError, isLoading } = useGetAllABSBooks();
   const updateSearchObject = useABSStore((state) => state.actions.updateSearchObject);
+  const searchObject = useABSStore((state) => state.searchObject);
   const router = useRouter();
   const handleUpdateSearch = (fieldName: string) => {
     return (fieldValue: string) => {
@@ -58,14 +59,22 @@ const ABSMainContainer = () => {
           <View className="flex-1">
             <View className="flex-col ">
               <Text className="text-xs text-amber-700 pl-1">Title: </Text>
-              <ABSSearchInputText updateSearch={handleUpdateSearch("title")} label="Title" />
+              <ABSSearchInputText
+                updateSearch={handleUpdateSearch("title")}
+                label="Title"
+                value={searchObject.title}
+              />
             </View>
           </View>
           <View className="w-2" />
           <View className="flex-1">
             <View className="flex-col ">
               <Text className="text-xs text-amber-700 pl-1">Author: </Text>
-              <ABSSearchInputText updateSearch={handleUpdateSearch("author")} label="Author" />
+              <ABSSearchInputText
+                updateSearch={handleUpdateSearch("author")}
+                label="Author"
+                value={searchObject.author}
+              />
             </View>
           </View>
         </View>

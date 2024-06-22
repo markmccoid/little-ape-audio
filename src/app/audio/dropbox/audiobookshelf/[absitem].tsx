@@ -48,6 +48,7 @@ const ABSItem = () => {
           audioFiles={data.audioFiles}
           media={data.media}
           coverURI={data.coverURI}
+          authorBookCount={data.authorBookCount}
           key={data.id}
         />
       )}

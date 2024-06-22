@@ -29,11 +29,14 @@ import {
 } from "@components/common/svg/Icons";
 import { createFolderMetadataKey, useDropboxStore } from "@store/store-dropbox";
 import { buildCoverURL, getCoverURI } from "@store/data/absUtils";
+import { useABSStore } from "@store/store-abs";
+import { router } from "expo-router";
 
 type Props = {
   audioFiles: AudioFile[];
   media: Media;
   coverURI: string;
+  authorBookCount: number;
 };
 
 const formatAuthors = (authorsObj: { id: string; name: string }[]) => {
@@ -55,8 +58,8 @@ const seriesFlags = (mediaMetadata) => {
  * @param {string} props.coverURI - The URI of the book cover image.
  * @returns {JSX.Element} - The rendered ABSBookContainer component.
  */
-const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
-  // console.log("BOOKID", media.libraryItemId);
+const ABSBookContainer = ({ audioFiles, media, coverURI, authorBookCount }: Props) => {
+  const updateSearchObject = useABSStore((state) => state.actions.updateSearchObject);
   const dropboxActions = useDropboxStore((state) => state.actions);
   const folderAttributes = useDropboxStore((state) => state.folderAttributes);
 
@@ -82,16 +85,16 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
       media.libraryItemId,
       "isFavorite",
       action,
-      media.metadata.title,
+      `${media.metadata.title}~${media.metadata.authors[0].name}`,
       "abs",
       "",
       coverURI
     );
   };
-  // console.log("SERIES", media.metadata.series);
 
   const { seriesExists, seriesInTitle } = seriesFlags(media.metadata);
-
+  // console.log("BOOK Auhtor", media.metadata.authors[0].id);
+  // console.log("SERIES", media.metadata.series);
   return (
     <SafeAreaView className="flex-col flex-1">
       <ABSActionBar
@@ -159,6 +162,26 @@ const ABSBookContainer = ({ audioFiles, media, coverURI }: Props) => {
           >
             by {authors}
           </Text>
+          {authorBookCount > 1 && (
+            <Pressable
+              onPress={() => {
+                const author = media.metadata.authors[0].name;
+                // Clear search first
+                updateSearchObject(undefined);
+                updateSearchObject({ author });
+                // Navigates to the page.  Looks like it moves to this page in history??
+                router.navigate("/audio/dropbox/audiobookshelf/");
+                // Push adds a new entry to history and replace replaces current page in history
+                // Probably would use push, but this could get them into crazy loop.
+                //router.push("/audio/dropbox/audiobookshelf/");
+              }}
+              className="flex-row my-1"
+            >
+              <View className="py-1 px-2 border border-l-abs-900 rounded-md bg-abs-400">
+                <Text className="text-xs">See all {authorBookCount} Books</Text>
+              </View>
+            </Pressable>
+          )}
           {media.metadata.publishedYear && (
             <View className="flex-row items-center">
               <PublishedDateIcon size={18} color={colors.abs900} />

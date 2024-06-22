@@ -13,7 +13,6 @@ type Props = {
   style?: ImageStyle;
 };
 const ExplorerImage = ({ metadata, width, style }: Props) => {
-  console.log("FILE", FileSystem.documentDirectory);
   const [imgDims, setImgDims] = React.useState({
     width: 100,
     height: 100,
