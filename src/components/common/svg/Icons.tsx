@@ -278,6 +278,9 @@ export const ListIcon = ({ size = 25, color, style }: Props) => {
 
 // Audiobookshelf (abs) icons
 
+export const KeyboardCloseIcon = ({ size = 25, color, style }: Props) => {
+  return <MaterialCommunityIcons name="keyboard-close" size={size} color={color} style={style} />;
+};
 export const NarratedByIcon = ({ size = 25, color, style }: Props) => {
   return <MaterialCommunityIcons name="account-voice" size={size} color={color} style={style} />;
 };

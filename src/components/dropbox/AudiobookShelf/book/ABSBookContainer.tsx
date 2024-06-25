@@ -60,6 +60,7 @@ const seriesFlags = (mediaMetadata) => {
  */
 const ABSBookContainer = ({ audioFiles, media, coverURI, authorBookCount }: Props) => {
   const updateSearchObject = useABSStore((state) => state.actions.updateSearchObject);
+  const clearSearchBar = useABSStore((state) => state.clearSearchBar);
   const dropboxActions = useDropboxStore((state) => state.actions);
   const folderAttributes = useDropboxStore((state) => state.folderAttributes);
 
@@ -77,6 +78,7 @@ const ABSBookContainer = ({ audioFiles, media, coverURI, authorBookCount }: Prop
     const id = createFolderMetadataKey(media.libraryItemId);
     return folderAttributes?.find((el) => el.id === id);
   }, [folderAttributes]);
+
   const handleToggleFavorite = async () => {
     const action = !!currFolderAttributes?.isFavorite ? "remove" : "add";
     // const absCoverURL = await getCoverURI(coverURI);
@@ -167,7 +169,8 @@ const ABSBookContainer = ({ audioFiles, media, coverURI, authorBookCount }: Prop
               onPress={() => {
                 const author = media.metadata.authors[0].name;
                 // Clear search first
-                updateSearchObject(undefined);
+                clearSearchBar();
+                updateSearchObject({ authorOrTitle: undefined });
                 updateSearchObject({ author });
                 // Navigates to the page.  Looks like it moves to this page in history??
                 router.navigate("/audio/dropbox/audiobookshelf/");

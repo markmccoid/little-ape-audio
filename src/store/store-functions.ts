@@ -281,7 +281,7 @@ function mergeObjects(source, target) {
     const targetValue = target?.[key];
 
     if (targetValue === undefined && target?.[key]) {
-      console.log("Replacing Target", key, targetValue);
+      // console.log("Replacing Target", key, targetValue);
       target[key] = sourceValue;
     }
   }
@@ -418,7 +418,6 @@ function verifyChapterData(chapterData: Chapter[]) {
   let chaptersMalformed = false;
 
   chapterData.forEach((chapt) => {
-    console.log("chapt", chapt);
     if (
       chapt.endSeconds === undefined ||
       chapt.endSeconds === null ||

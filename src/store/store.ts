@@ -247,7 +247,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
     //! Have a a playlist Id array in each track.
     removePlaylist: async (playlistId, removeAllTracks = true) => {
       const playlistToDelete = get().playlists[playlistId];
-      console.log("removePlaylist URI", playlistToDelete.imageURI);
+      // console.log("removePlaylist URI", playlistToDelete.imageURI);
       // Check to see if tracks exist in other playlists
       // if count > 1 then don't delete from the system
       const trackCounts = trackCount(get().playlists);

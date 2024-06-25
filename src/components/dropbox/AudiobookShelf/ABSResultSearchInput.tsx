@@ -9,7 +9,7 @@ type Props = {
 };
 const ABSResultSearchInput = ({ updateSearch }: Props) => {
   const [searchText, setSearchText] = useState("");
-  const [searchField, setSearchField] = useState("title");
+  const [searchField, setSearchField] = useState<keyof ABSState["searchObject"]>("title");
 
   const debouncedSetSearchText = useCallback(
     debounce((searchValue, searchField) => updateSearch({ searchField, searchValue }), 300),

@@ -30,7 +30,9 @@ export const useGetFilterData = () => {
 //~~ ================================================================
 // preload will only "run" the useQuery.  We don't want any data, just loading the data in background
 export const useGetAllABSBooks = () => {
-  const { title, author, description, genres, tags } = useABSStore((state) => state.searchObject);
+  const { title, author, authorOrTitle, description, genres, tags } = useABSStore(
+    (state) => state.searchObject
+  );
   const { field, direction } = useABSStore((state) => state.resultSort);
   const { data, ...rest } = useQuery({
     queryKey: ["allABSBooks"],
@@ -73,6 +75,11 @@ export const useGetAllABSBooks = () => {
 
     let includeFlag = undefined;
 
+    //-- Author Or Title match
+    if (authorOrTitle) {
+      includeFlag = checkString(bookAuthor, authorOrTitle.toLowerCase(), false, "or");
+      includeFlag = checkString(bookTitle, authorOrTitle.toLowerCase(), includeFlag, "or");
+    }
     // -- Title match
     includeFlag = checkString(bookTitle, title, includeFlag);
     // -- Author match
@@ -162,13 +169,27 @@ async function getSeriesBooks(seriesIds: string[], seriesInfo: { id: string; nam
 //~~  fieldValue is the source value from the database
 //~~  checkValue is the value we are searching for (user input)
 //~~ ======================================================================
-const checkString = (fieldValue: string, checkValue: string, currentIncludeValue: boolean) => {
+const checkString = (
+  fieldValue: string,
+  checkValue: string,
+  currentIncludeValue: boolean,
+  logicalOperator?: "and" | "or"
+) => {
   if (!checkValue || checkValue === "") return currentIncludeValue;
   if (currentIncludeValue === undefined) {
     currentIncludeValue = true;
   }
-  if (fieldValue.includes(checkValue)) {
-    return true && currentIncludeValue;
+  logicalOperator = logicalOperator ?? "and";
+  if (logicalOperator === "and") {
+    if (fieldValue.includes(checkValue)) {
+      return true && currentIncludeValue;
+    }
+    return false;
+  }
+
+  // logicalOperator is OR
+  if (fieldValue.includes(checkValue) || currentIncludeValue) {
+    return true;
   }
   return false;
 };
