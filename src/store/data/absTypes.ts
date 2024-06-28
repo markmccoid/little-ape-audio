@@ -220,17 +220,6 @@ type libraryFile = {
   fileType: string;
 };
 
-type Author = {
-  id: string;
-  name: string;
-};
-
-type Series = {
-  id: string;
-  name: string;
-  sequence: number | null;
-};
-
 type ABSMediaMetadata = {
   title: string;
   titleIgnorePrefix: string;
@@ -397,7 +386,10 @@ type Series = {
 type Metadata = {
   title: string;
   subtitle: string | null;
+  authorNameLF: string;
+  authorName: string;
   authors: Author[];
+  narratorName: string;
   narrators: string[];
   series: Series[];
   genres: string[];

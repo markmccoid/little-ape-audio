@@ -45,9 +45,6 @@ const ABSLayout = () => {
           presentation: "card",
           headerStyle: { backgroundColor: colors.absHeaderBg },
           headerTintColor: colors.amber950,
-          headerSearchBarOptions: {
-            textColor: "white",
-          },
         }}
       />
 

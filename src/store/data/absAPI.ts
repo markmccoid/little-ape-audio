@@ -233,7 +233,7 @@ export const absGetItemDetails = async (itemId?: string) => {
   const coverURI = await getCoverURI(buildCoverURL(libraryItem.id));
 
   // Get author book count
-  const authorId = libraryItem.media.metadata.authors[0].id;
+  const authorId = libraryItem.media.metadata?.authors[0].id;
   const authorBooksurl = `https://abs.mccoidco.xyz/api/authors/${authorId}?include=items`;
   let authorBookCount = 0;
   try {
@@ -254,11 +254,17 @@ export const absGetItemDetails = async (itemId?: string) => {
   if (!libraryItem?.media?.audioFiles) {
     throw new Error("No Media or Audiofiles");
   }
-  // console.log("Library ID", libraryItem.id);
+  // console.log("MEDIA", libraryItem.media.metadata);
+  // Get the books duration
+  let bookDuration = 0;
+  for (const audio of libraryItem.media.audioFiles) {
+    bookDuration += audio.duration;
+  }
   return {
     id: libraryItem.id,
     audioFiles: libraryItem.media.audioFiles,
     media: libraryItem.media,
+    bookDuration,
     userMediaProgress: libraryItem?.userMediaProgress,
     coverURI: coverURI, //buildCoverURL(libraryItem.id),
     authorBookCount,

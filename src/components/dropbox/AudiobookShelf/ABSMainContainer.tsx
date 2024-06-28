@@ -9,6 +9,8 @@ import { Link, Stack, useNavigation, useRouter } from "expo-router";
 import { KeyboardCloseIcon } from "@components/common/svg/Icons";
 import { SearchBarCommands } from "react-native-screens";
 import ABSSearchChip from "./ABSSearchChip";
+import ABSIsLoading from "./ABSIsLoading";
+import ABSErrorView from "./ABSErrorView";
 
 const parseSearchObject = (searchObject: SearchObject) => {
   return Object.entries(searchObject).reduce((acc, [key, value]) => {
@@ -25,7 +27,8 @@ const parseSearchObject = (searchObject: SearchObject) => {
   }, {} as Partial<SearchObject>);
 };
 const ABSMainContainer = () => {
-  const { books, totalBookCount, selectedBookCount, isError, isLoading } = useGetAllABSBooks();
+  const { books, totalBookCount, selectedBookCount, isError, isLoading, error } =
+    useGetAllABSBooks();
   const updateSearchObject = useABSStore((state) => state.actions.updateSearchObject);
   const setSearchBarClearFn = useABSStore((state) => state.actions.setSearchBarClearFn);
   const searchObject = useABSStore((state) => state.searchObject);
@@ -62,33 +65,30 @@ const ABSMainContainer = () => {
     };
   };
   if (isLoading) {
-    return (
-      <View>
-        <Text>Loading...</Text>
-      </View>
-    );
+    return <ABSIsLoading />;
   }
   if (isError) {
     return (
-      <View className="flex-col items-center">
-        <Stack.Screen
-          options={{
-            headerSearchBarOptions: {},
-          }}
-        />
-        <Text className="text-lg font-semibold">Error Getting Books</Text>
-        <Text className="text-lg text-center">
-          Make sure you have setup AudiobookShelf Login Info and that your ABS Server is running.
-        </Text>
-        <View className="flex-row justify-center">
-          <Pressable
-            onPress={() => router.push("/settings/authroute")}
-            className="p-2 bg-abs-700 rounded-lg border border-abs-500"
-          >
-            <Text className="text-lg font-semibold text-white">Update ABS Info</Text>
-          </Pressable>
-        </View>
-      </View>
+      <ABSErrorView error={error} />
+      // <View className="flex-col items-center">
+      //   <Stack.Screen
+      //     options={{
+      //       headerSearchBarOptions: {},
+      //     }}
+      //   />
+      //   <Text className="text-lg font-semibold">Error Getting Books</Text>
+      //   <Text className="text-lg text-center">
+      //     Make sure you have setup AudiobookShelf Login Info and that your ABS Server is running.
+      //   </Text>
+      //   <View className="flex-row justify-center">
+      //     <Pressable
+      //       onPress={() => router.push("/settings/authroute")}
+      //       className="p-2 bg-abs-700 rounded-lg border border-abs-500"
+      //     >
+      //       <Text className="text-lg font-semibold text-white">Update ABS Info</Text>
+      //     </Pressable>
+      //   </View>
+      // </View>
     );
   }
 
@@ -112,30 +112,6 @@ const ABSMainContainer = () => {
             ))}
           </View>
         )}
-        {/* <View className="flex-row justify-between mx-2 ">
-          <View className="flex-1">
-            <View className="flex-col ">
-              <Text className="text-xs text-amber-700 pl-1">Title: </Text>
-              <ABSSearchInputText
-                updateSearch={handleUpdateSearch("title")}
-                label="Title"
-                value={searchObject.title}
-              />
-            </View>
-          </View>
-          <View className="w-2" />
-          <View className="flex-1">
-            <View className="flex-col ">
-              <Text className="text-xs text-amber-700 pl-1">Author: </Text>
-              <ABSSearchInputText
-                updateSearch={handleUpdateSearch("author")}
-                label="Author"
-                value={searchObject.author}
-              />
-            </View>
-          </View>
-        </View>
-        <View style={{ borderBottomWidth: StyleSheet.hairlineWidth, paddingBottom: 10 }} /> */}
       </View>
 
       <ABSBookResults books={books} />

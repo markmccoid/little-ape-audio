@@ -21,6 +21,7 @@ import { colors } from "@constants/Colors";
 import { MotiView } from "moti";
 import {
   BookIcon,
+  DurationIcon,
   EmptyMDHeartIcon,
   MDHeartIcon,
   NarratedByIcon,
@@ -34,6 +35,7 @@ import { buildCoverURL, getCoverURI } from "@store/data/absUtils";
 import { useABSStore } from "@store/store-abs";
 import { router } from "expo-router";
 import { ABSGetItemDetails, absSetBookToFinished } from "@store/data/absAPI";
+import { formatSeconds } from "@utils/formatUtils";
 
 type Props = {
   data: ABSGetItemDetails;
@@ -53,7 +55,7 @@ const seriesFlags = (mediaMetadata) => {
  * Renders a container component for an audiobook shelf, displaying the book cover, title, author, and published year, as well as a list of audio files associated with the book.
  */
 const ABSBookContainer = ({ data }: Props) => {
-  const { audioFiles, media, coverURI, authorBookCount, userMediaProgress } = data;
+  const { audioFiles, media, coverURI, authorBookCount, userMediaProgress, bookDuration } = data;
   const { width, height } = Dimensions.get("window");
   const updateSearchObject = useABSStore((state) => state.actions.updateSearchObject);
   const clearSearchBar = useABSStore((state) => state.clearSearchBar);
@@ -61,11 +63,12 @@ const ABSBookContainer = ({ data }: Props) => {
   const folderAttributes = useDropboxStore((state) => state.folderAttributes);
 
   const [showDescription, setShowDescription] = React.useState(false);
-  const authors = formatAuthors(media.metadata.authors);
+  const authors = media?.metadata?.authorName || formatAuthors(media?.metadata?.authors);
   const taggedAudioFiles = useMemo(
     () => absTagFiles(audioFiles, media.libraryItemId),
     [audioFiles]
   );
+
   // Set the isRead flag based on the userMediaProgress info for book
   const [isRead, setIsRead] = useState(() => !!userMediaProgress?.isFinished);
   //Make sure to update is read on subsequent renders
@@ -169,7 +172,7 @@ const ABSBookContainer = ({ data }: Props) => {
             {media.metadata.title}
           </Text>
           {/* DON'T include subtitle if it exists in the title */}
-          {media.metadata.subtitle && !media.metadata.title.includes(media.metadata.subtitle) && (
+          {media.metadata?.subtitle && !media.metadata.title.includes(media.metadata.subtitle) && (
             <Text
               numberOfLines={1}
               lineBreakMode="tail"
@@ -189,7 +192,7 @@ const ABSBookContainer = ({ data }: Props) => {
           {authorBookCount > 1 && (
             <Pressable
               onPress={() => {
-                const author = media.metadata.authors[0].name;
+                const author = media.metadata?.authors[0]?.name;
                 // Clear search first
                 clearSearchBar();
                 updateSearchObject({ authorOrTitle: undefined });
@@ -207,7 +210,7 @@ const ABSBookContainer = ({ data }: Props) => {
               </View>
             </Pressable>
           )}
-          {media.metadata.publishedYear && (
+          {media.metadata?.publishedYear && (
             <View className="flex-row items-center">
               <PublishedDateIcon size={18} color={colors.abs900} />
               <Text className="text-sm  text-abs-900 ml-1">{media.metadata.publishedYear}</Text>
@@ -225,6 +228,16 @@ const ABSBookContainer = ({ data }: Props) => {
               </Text>
             </View>
           )}
+          <View className="flex-row items-center mt-[2]">
+            <DurationIcon size={18} color={colors.abs900} />
+            <Text
+              className="text-sm ml-1 text-abs-900 flex-1"
+              numberOfLines={1}
+              lineBreakMode="tail"
+            >
+              {`${formatSeconds(bookDuration, "verbose_no_seconds", true, false)}`}
+            </Text>
+          </View>
 
           {/* Description scrollview BUTTON */}
           <Pressable

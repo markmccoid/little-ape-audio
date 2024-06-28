@@ -3,7 +3,7 @@ import { AudioFile } from "./data/absTypes";
 import { getAudioFileTags } from "../utils/audioUtils";
 import { saveToAsyncStorage } from "./data/asyncStorage";
 import * as FileSystem from "expo-file-system";
-import { AudioMetadata, AudioState, AudioTrack } from "./types";
+import { AudioMetadata, AudioState, AudioTrack, ExternalMetadata } from "./types";
 import { downloadToFileSystem, getCleanFileName } from "@store/data/fileSystemAccess";
 // import { getCleanFileName } from "./data/fileSystemAccess";
 import { downloadDropboxFile } from "@utils/dropboxUtils";
@@ -104,7 +104,7 @@ export const addTrack =
     // -- externalMetadata can come from the 'title...'-metadata.json file if it exists and
     // -- store on track object in externalMetadata property.
     // -- OR in the case of ABS, it will come from abs details
-    let externalMetadata: CleanBookMetadata = undefined;
+    let externalMetadata: ExternalMetadata = undefined;
 
     if (audioSource === "abs") {
       if (!tags.pictureURI) {
@@ -144,6 +144,7 @@ export const addTrack =
         genres: results.media.metadata?.genres.join(","),
         publishedYear: results.media.metadata?.publishedYear,
         narratedBy: results.media.metadata?.narratorName,
+        ASIN: results.media.metadata?.asin,
       };
     }
 

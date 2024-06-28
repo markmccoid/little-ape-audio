@@ -37,9 +37,12 @@ export type AudioMetadata = {
   chapters?: Chapter[];
 };
 
-export type ExternalMetadata = CleanBookMetadata & {
-  dateDownloaded: string;
-};
+export type ExternalMetadata =
+  | (CleanBookMetadata & {
+      dateDownloaded: string;
+      ASIN: string;
+    })
+  | {};
 
 export type PlaylistImageColors = {
   darkestColor?: string;
