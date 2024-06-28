@@ -30,15 +30,6 @@ const TrackPlayerScrollerDesc = ({ playlist, currentTrack, compHeight }: Props) 
       }}
       contentContainerStyle={{}}
     >
-      <View className="p-1 ">
-        <Text className="font-semibold text-base" style={{ color: textColor }}>
-          Description:
-        </Text>
-      </View>
-      <View className="mr-1 ml-1 p-1 rounded-md" style={{ backgroundColor: descbgColor }}>
-        <Text style={{ color: descTextColor }}>{currentTrack?.externalMetadata?.description}</Text>
-      </View>
-      <View className="w-full h-[1] mt-1 mb-1 bg-gray-200 rounded-md" />
       <View className="p-1">
         <DescriptionTextLine
           label="Track Title:"
@@ -47,7 +38,12 @@ const TrackPlayerScrollerDesc = ({ playlist, currentTrack, compHeight }: Props) 
         />
         <DescriptionTextLine
           label="Narrated By:"
-          text={currentTrack?.metadata?.narratedBy}
+          text={currentTrack?.externalMetadata?.narratedBy}
+          textColor={textColor}
+        />
+        <DescriptionTextLine
+          label="Genre(s):"
+          text={currentTrack?.externalMetadata?.genres}
           textColor={textColor}
         />
         <DescriptionTextLine
@@ -57,9 +53,22 @@ const TrackPlayerScrollerDesc = ({ playlist, currentTrack, compHeight }: Props) 
         />
         <DescriptionTextLine
           label="Source:"
-          text={currentTrack?.externalMetadata?.audioSource}
+          text={
+            currentTrack?.externalMetadata?.audioSource === "abs"
+              ? "AudiobookShelf"
+              : currentTrack?.externalMetadata?.audioSource
+          }
           textColor={textColor}
         />
+      </View>
+      <View className="w-full h-[1] mt-1 mb-1 bg-gray-200 rounded-md" />
+      <View className="p-1 ">
+        <Text className="font-semibold text-base" style={{ color: textColor }}>
+          Description:
+        </Text>
+      </View>
+      <View className="mr-1 ml-1 p-1 rounded-md" style={{ backgroundColor: descbgColor }}>
+        <Text style={{ color: descTextColor }}>{currentTrack?.externalMetadata?.description}</Text>
       </View>
     </ScrollView>
   );
@@ -76,7 +85,7 @@ function DescriptionTextLine({
 }) {
   if (!text) return null;
   return (
-    <View className="flex-row">
+    <View className="flex-row mb-2">
       <Text className="font-semibold pr-1" style={{ color: textColor }}>
         {label}
       </Text>

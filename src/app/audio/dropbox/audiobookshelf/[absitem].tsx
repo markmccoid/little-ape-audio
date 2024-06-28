@@ -17,6 +17,7 @@ const ABSItem = () => {
   const { data, isError, isLoading } = useQuery({
     queryKey: [absitem],
     queryFn: async () => await absGetItemDetails(absitem),
+    staleTime: undefined,
   });
 
   let backTitle = title || "Back";
@@ -41,17 +42,7 @@ const ABSItem = () => {
           ),
         }}
       />
-      {isLoading ? (
-        <ABSBookLoadingIndicator />
-      ) : (
-        <ABSBookContainer
-          audioFiles={data.audioFiles}
-          media={data.media}
-          coverURI={data.coverURI}
-          authorBookCount={data.authorBookCount}
-          key={data.id}
-        />
-      )}
+      {isLoading ? <ABSBookLoadingIndicator /> : <ABSBookContainer data={data} key={data.id} />}
     </SafeAreaView>
   );
 };

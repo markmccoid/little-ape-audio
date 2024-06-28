@@ -106,7 +106,7 @@ const ABSMainContainer = () => {
             style={{ borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.abs600 }}
           >
             {Object.keys(searchKeys).map((key: keyof SearchObject) => (
-              <View className="mr-1">
+              <View className="mr-1" key={key}>
                 <ABSSearchChip activeSearchItemKey={key} activeSearchItemValue={searchKeys[key]} />
               </View>
             ))}

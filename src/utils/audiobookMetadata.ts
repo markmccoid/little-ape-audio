@@ -52,7 +52,7 @@ export type CleanBookMetadata = ReturnType<typeof cleanOneBook>;
 export function cleanOneBook(
   book: BookJSONMetadata,
   path_lower: string,
-  audioSource: "dropbox" | "google",
+  audioSource: "dropbox" | "google" | "abs",
   localImageName?: string
 ) {
   if (!book) return undefined;
@@ -67,8 +67,8 @@ export function cleanOneBook(
     `${book?.googleAPIData?.title}: ${book?.googleAPIData?.subTitle}`;
   const description = book?.infoFileData?.summary || book?.googleAPIData?.description;
   const publishedYear =
-    parseInt(book?.folderNameData?.publishedYear) ||
-    parseInt(book?.googleAPIData?.publishedDate?.slice(0, 4));
+    parseInt(book?.folderNameData?.publishedYear).toString() ||
+    parseInt(book?.googleAPIData?.publishedDate?.slice(0, 4)).toString();
   const releaseDate = book?.infoFileData?.releaseDate || book?.googleAPIData?.publishedDate;
   const imageURL = book?.googleAPIData?.imageURL; // || book.folderImages[0];
   // const imageURL = book?.googleAPIData?.imageURL || defaultImages.image01; // || book.folderImages[0];
@@ -111,6 +111,7 @@ export function cleanOneBook(
     title,
     description,
     author,
+    genres: "",
     authors: book?.googleAPIData?.authors,
     narratedBy: book?.infoFileData?.narratedBy,
     publishedYear,

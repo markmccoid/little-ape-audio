@@ -42,29 +42,23 @@ export const absLogin = async (absURL: string, username: string, password: strin
   };
 
   try {
-    const response = await axios.post(url, data);
+    const response = await axios.post(url, data, { timeout: 3000 });
+    // console.log("Response", response.status);
     const absData = response.data as ABSLoginResponse;
     return absData.user; // Return data if needed
   } catch (error) {
-    console.log("ERROR", error?.response?.status);
     if (error.response.status === 530) {
       Alert.alert("Authentication Failed", "Server May be Down");
+      throw new Error("Authentication Failed, Server may be down.");
       // return Promise.reject(new Error("Error 530"));
     }
-    if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
-      console.error("Server Error:", error.response.data);
-      console.error("Status:", error.response.status);
-      console.error("Headers:", error.response.headers);
-    } else if (error.request) {
-      // The request was made but no response was received
-      // `error.request` is an instance of XMLHttpRequest in the browser
-      console.error("Request Error:", error.request);
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      console.error("Error:", error.message);
+    if (error.response.status === 401) {
+      throw new Error("Unauthorized, Check username and password");
     }
+    if (error.response.status === 404 || error.response.status === 405) {
+      throw new Error("Server not found. Check AudiobookShelf URL");
+    }
+    throw new Error(error.message);
     //throw error; // Throw error if needed
   }
 };
@@ -222,6 +216,7 @@ export const absGetLibraryItems = async ({
 //!! USE: https://abs.mccoidco.xyz/api/authors/{authorId}?include=items
 //!! We just want count of books
 //!! -- results.libraryItems.length
+export type ABSGetItemDetails = Awaited<ReturnType<typeof absGetItemDetails>>;
 export const absGetItemDetails = async (itemId?: string) => {
   // https://abs.mccoidco.xyz/api/items/{token}&expanded=1
   const authHeader = getAuthHeader();
@@ -264,13 +259,13 @@ export const absGetItemDetails = async (itemId?: string) => {
     id: libraryItem.id,
     audioFiles: libraryItem.media.audioFiles,
     media: libraryItem.media,
-    UserMediaProgress: libraryItem?.userMediaProgress,
+    userMediaProgress: libraryItem?.userMediaProgress,
     coverURI: coverURI, //buildCoverURL(libraryItem.id),
     authorBookCount,
   };
 };
 //~~ ========================================================
-//~~ absGetItemDetails
+//~~ absDownloadItem
 //~~ ========================================================
 export const absDownloadItem = (itemId: string, fileIno: string) => {
   //  https://abs.mccoidco.xyz/api/items/<BOOK ID>/file/<FILE INO>/download
@@ -279,4 +274,20 @@ export const absDownloadItem = (itemId: string, fileIno: string) => {
   const url = `https://abs.mccoidco.xyz/api/items/${itemId}/file/${fileIno}/download`;
   const urlWithToken = `${url}?token=${token}`;
   return { url, urlWithToken, authHeader };
+};
+
+//~~ ========================================================
+//~~ absSetBookFinished
+//~~ ========================================================
+export const absSetBookToFinished = async (itemId: string, finishedFlag: boolean) => {
+  //  http://abs.mccoidco.xyz/api/me/progress/<LibraryItemID>
+  const authHeader = getAuthHeader();
+  const token = getToken();
+  const data = { isFinished: finishedFlag };
+  const url = `https://abs.mccoidco.xyz/api/me/progress/${itemId}`;
+  const resp = await axios.patch(url, data, { headers: authHeader });
+
+  if (resp.status !== 200) {
+    throw new Error("Item Not Found or Other Error setting isFinished");
+  }
 };

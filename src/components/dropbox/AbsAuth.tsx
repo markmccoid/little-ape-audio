@@ -1,11 +1,12 @@
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Pressable } from "react-native";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { MotiPressable } from "moti/interactions";
 import { ABSGetLibraries, absGetLibraries, absLogin } from "@store/data/absAPI";
 import { AnimatedPressable } from "@components/common/buttons/Pressables";
 import { StoredLibraries, useABSStore, UserInfo } from "@store/store-abs";
 import { colors } from "@constants/Colors";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { EyeOffOutlineIcon, EyeOutlineIcon } from "@components/common/svg/Icons";
 
 const AbsAuth = () => {
   const queryClient = useQueryClient();
@@ -17,11 +18,20 @@ const AbsAuth = () => {
   const [libraries, setLibraries] = React.useState<StoredLibraries[]>(librariesStored);
   const [loggedIn, setLoggedIn] = React.useState(false);
   const actions = useABSStore((state) => state.actions);
+  const [hidePassword, setHidePassword] = useState(true);
 
   const handleLogin = async () => {
-    if (!username || !password || !absURL) return;
+    if (!username || !password || !absURL) {
+      throw new Error("All fields must be filled in");
+    }
 
-    const loginInfo = await absLogin(absURL, username, password);
+    let loginInfo;
+    // try {
+    loginInfo = await absLogin(absURL, username, password);
+    // } catch (err) {
+    //   console.log("ERROR in handleLogin", err);
+    //   throw new Error(err);
+    // }
     const userInfo: UserInfo = {
       id: loginInfo.id,
       username: loginInfo.username,
@@ -40,7 +50,14 @@ const AbsAuth = () => {
     actions.saveLibraries(libs, libs[0].id);
 
     setLoggedIn(true);
+    return true;
   };
+
+  const { data, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ["absLogin"],
+    queryFn: handleLogin,
+    enabled: false,
+  });
 
   const handleLogout = () => {
     queryClient.invalidateQueries({ queryKey: ["allABSBooks"] });
@@ -79,10 +96,12 @@ const AbsAuth = () => {
               ? styles.revokeButton
               : [styles.revokeButton, { backgroundColor: colors.amber400 }]
           }
-          onPress={loggedIn ? handleLogout : handleLogin}
+          onPress={loggedIn ? handleLogout : () => refetch()}
+          // onPress={loggedIn ? handleLogout : handleLogin}
+          disabled={isLoading}
         >
           <Text style={{ color: loggedIn ? "white" : "black" }} allowFontScaling={false}>
-            {loggedIn ? "Log Out" : "Log In"}
+            {loggedIn ? "Log Out" : isLoading ? "Working..." : "Log In"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -94,30 +113,53 @@ const AbsAuth = () => {
             spellCheck={false}
             autoCapitalize="none"
             autoCorrect={false}
-            value={absURL}
-            className="border p-1 mr-1 mb-2 bg-white"
+            // value={absURL}
+            defaultValue={absUserInfo?.absURL}
+            value={isLoading ? "----------" : absURL}
+            editable={!isLoading}
+            className={`border p-1 mr-1 mb-2 ${isLoading ? "bg-gray-200" : "bg-white"}`}
           />
           <View className="flex-row items-center justify-between">
             <TextInput
               onChangeText={setUsername}
               placeholder="Username"
-              value={username}
+              value={isLoading ? "----------" : username}
+              defaultValue={absUserInfo?.username}
               autoCapitalize="none"
               autoCorrect={false}
               spellCheck={false}
-              className="flex-1 border p-1 mr-1 bg-white"
+              editable={!isLoading}
+              className={`flex-1 border p-1  mr-1 bg-white ${
+                isLoading ? "bg-gray-200" : "bg-white"
+              }`}
             />
-            <TextInput
-              onChangeText={setPassword}
-              placeholder="Password"
-              spellCheck={false}
-              value={password}
-              autoCapitalize="none"
-              autoCorrect={false}
-              secureTextEntry={true}
-              className="flex-1 border p-1 ml-1 bg-white"
-            />
+            <View className="flex-row flex-1 items-center">
+              <TextInput
+                onChangeText={setPassword}
+                placeholder="Password"
+                spellCheck={false}
+                value={password}
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={!isLoading}
+                secureTextEntry={hidePassword}
+                className={`flex-1 border p-1 pr-6 ml-1 bg-white ${
+                  isLoading ? "bg-gray-200" : "bg-white"
+                }`}
+              />
+              <TouchableOpacity
+                onPress={() => setHidePassword(() => !hidePassword)}
+                className="absolute right-1"
+              >
+                {!hidePassword ? <EyeOutlineIcon size={20} /> : <EyeOffOutlineIcon size={20} />}
+              </TouchableOpacity>
+            </View>
           </View>
+          {isError && (
+            <View className="p-2 bg-red-400 border border-red-700 rounded-md mt-1">
+              <Text className="text-base font-semibold">{error?.message}</Text>
+            </View>
+          )}
         </View>
       )}
       <View className={`${loggedIn && "border border-amber-900 bg-white mx-2"}`}>

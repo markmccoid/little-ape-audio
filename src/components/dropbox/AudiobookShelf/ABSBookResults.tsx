@@ -20,6 +20,7 @@ const ABSBookResults = ({ books }: Props) => {
       data={books}
       renderItem={renderItem}
       keyExtractor={(item) => item?.id}
+      windowSize={15}
       keyboardDismissMode="on-drag"
     />
   );

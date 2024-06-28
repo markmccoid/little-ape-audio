@@ -9,7 +9,7 @@ import {
   Pressable,
   TouchableOpacity,
 } from "react-native";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { AudioFile, Media } from "@store/data/absTypes";
 import { downloadFileBlob, getCleanFileName } from "@store/data/fileSystemAccess";
 import ABSFile from "./ABSFile";
@@ -20,23 +20,23 @@ import { AnimateHeight } from "@components/common/animations/AnimateHeight";
 import { colors } from "@constants/Colors";
 import { MotiView } from "moti";
 import {
+  BookIcon,
   EmptyMDHeartIcon,
   MDHeartIcon,
   NarratedByIcon,
   PowerIcon,
   PublishedDateIcon,
+  ReadIcon,
   SeriesIcon,
 } from "@components/common/svg/Icons";
 import { createFolderMetadataKey, useDropboxStore } from "@store/store-dropbox";
 import { buildCoverURL, getCoverURI } from "@store/data/absUtils";
 import { useABSStore } from "@store/store-abs";
 import { router } from "expo-router";
+import { ABSGetItemDetails, absSetBookToFinished } from "@store/data/absAPI";
 
 type Props = {
-  audioFiles: AudioFile[];
-  media: Media;
-  coverURI: string;
-  authorBookCount: number;
+  data: ABSGetItemDetails;
 };
 
 const formatAuthors = (authorsObj: { id: string; name: string }[]) => {
@@ -51,26 +51,27 @@ const seriesFlags = (mediaMetadata) => {
 };
 /**
  * Renders a container component for an audiobook shelf, displaying the book cover, title, author, and published year, as well as a list of audio files associated with the book.
- *
- * @param {Object} props - The component props.
- * @param {Array<Object>} props.audioFiles - An array of audio file objects associated with the book.
- * @param {Object} props.media - An object containing metadata about the book, including the library item ID, title, authors, and published year.
- * @param {string} props.coverURI - The URI of the book cover image.
- * @returns {JSX.Element} - The rendered ABSBookContainer component.
  */
-const ABSBookContainer = ({ audioFiles, media, coverURI, authorBookCount }: Props) => {
+const ABSBookContainer = ({ data }: Props) => {
+  const { audioFiles, media, coverURI, authorBookCount, userMediaProgress } = data;
+  const { width, height } = Dimensions.get("window");
   const updateSearchObject = useABSStore((state) => state.actions.updateSearchObject);
   const clearSearchBar = useABSStore((state) => state.clearSearchBar);
   const dropboxActions = useDropboxStore((state) => state.actions);
   const folderAttributes = useDropboxStore((state) => state.folderAttributes);
 
-  const { width, height } = Dimensions.get("window");
   const [showDescription, setShowDescription] = React.useState(false);
   const authors = formatAuthors(media.metadata.authors);
   const taggedAudioFiles = useMemo(
     () => absTagFiles(audioFiles, media.libraryItemId),
     [audioFiles]
   );
+  // Set the isRead flag based on the userMediaProgress info for book
+  const [isRead, setIsRead] = useState(() => !!userMediaProgress?.isFinished);
+  //Make sure to update is read on subsequent renders
+  useEffect(() => {
+    setIsRead(!!userMediaProgress?.isFinished);
+  }, [userMediaProgress?.isFinished]);
 
   // Check for attributes on the folder (is it hearted or read).
   const currFolderAttributes = useMemo(() => {
@@ -92,6 +93,15 @@ const ABSBookContainer = ({ audioFiles, media, coverURI, authorBookCount }: Prop
       "",
       coverURI
     );
+  };
+
+  const handleToggleRead = async () => {
+    try {
+      setIsRead(!isRead);
+      await absSetBookToFinished(media.libraryItemId, !isRead);
+    } catch (e) {
+      console.log("ERROR setting Isfinished", e);
+    }
   };
 
   const { seriesExists, seriesInTitle } = seriesFlags(media.metadata);
@@ -130,13 +140,25 @@ const ABSBookContainer = ({ audioFiles, media, coverURI, authorBookCount }: Prop
               marginLeft: 8,
             }}
           />
-          <TouchableOpacity onPress={handleToggleFavorite} className="ml-3 mt-1">
-            {currFolderAttributes?.isFavorite ? (
-              <MDHeartIcon color="red" size={30} />
-            ) : (
-              <EmptyMDHeartIcon size={30} />
-            )}
-          </TouchableOpacity>
+          <View className="flex-row justify-between items-center">
+            <TouchableOpacity onPress={handleToggleFavorite} className="ml-3 mt-1">
+              {currFolderAttributes?.isFavorite ? (
+                <MDHeartIcon color="red" size={30} />
+              ) : (
+                <EmptyMDHeartIcon size={30} />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleToggleRead} className="ml-4">
+              {isRead ? (
+                <View>
+                  <BookIcon color="green" size={30} />
+                  <ReadIcon style={{ position: "absolute", top: 2, left: 5 }} size={20} />
+                </View>
+              ) : (
+                <BookIcon size={30} />
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
         <View className="flex flex-col flex-1 mx-2">
           <Text
@@ -199,7 +221,7 @@ const ABSBookContainer = ({ audioFiles, media, coverURI, authorBookCount }: Prop
                 numberOfLines={1}
                 lineBreakMode="tail"
               >
-                media.metadata.narrators.join(", ")
+                {media.metadata.narrators.join(", ")}
               </Text>
             </View>
           )}

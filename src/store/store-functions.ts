@@ -100,6 +100,12 @@ export const addTrack =
     }
     // Track Raw End
     // If "abs" source and no metadata picture, use image from audiobookshelf
+
+    // -- externalMetadata can come from the 'title...'-metadata.json file if it exists and
+    // -- store on track object in externalMetadata property.
+    // -- OR in the case of ABS, it will come from abs details
+    let externalMetadata: CleanBookMetadata = undefined;
+
     if (audioSource === "abs") {
       if (!tags.pictureURI) {
         //
@@ -125,6 +131,20 @@ export const addTrack =
         tags.chapters = absChapters;
         tags.durationSeconds = currentAudio.duration;
       }
+      // Results book info
+      // console.log("results media", results?.media?.metadata);
+      //!! Fix the Typing for this.  Coming from the Clean Book function
+      //!! Not really used elsewhere, look at how it is used in other parts
+      //!! Maybe create specific type for this in types.ts
+      externalMetadata = {
+        audioSource: "abs",
+        title: results.media.metadata?.title,
+        author: results.media.metadata?.authorName,
+        description: results.media.metadata?.description,
+        genres: results.media.metadata?.genres.join(","),
+        publishedYear: results.media.metadata?.publishedYear,
+        narratedBy: results.media.metadata?.narratorName,
+      };
     }
 
     // Get picture colors if available
@@ -139,9 +159,7 @@ export const addTrack =
     // -- GET LAAB Metadata if it exists -- NO LONGER GETTING CHAPTER INFO FROM THIS FILE
     // -- Getting it from the Event.MetadataChapterReceived event in trackPlayerUtils.ts
     let LAABMeta: LAABData = undefined;
-    // -- GET externalMetadata from the 'title...'-metadata.json file if it exists and
-    // -- store on track object in externalMetadata property.
-    let externalMetadata: CleanBookMetadata = undefined;
+
     if (audioSource === "dropbox") {
       // LAABMeta = await laabMetaDropbox(sourceLocation, filename);
       externalMetadata = await getMetadataDropbox(sourceLocation, filename);
