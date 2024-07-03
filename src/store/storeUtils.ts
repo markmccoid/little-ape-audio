@@ -20,6 +20,27 @@ export function getRandomNumber() {
   return randomNumber.toString().padStart(2, "0"); // Pad number with leading zero if less than 10
 }
 
+const hashStringToNumber = (str: string) => {
+  // let hash = 0;
+  // for (let i = 0; i < str.length; i++) {
+  //   hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  //   hash = hash & hash; // Convert to 32bit integer
+  // }
+  // return Math.abs(hash);
+
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash * 33) ^ str.charCodeAt(i);
+  }
+  return Math.abs(hash);
+};
+
+export const getImageIndex = (filename: string) => {
+  const hash = hashStringToNumber(filename);
+  const num = (hash % Object.keys(defaultImages).length) + 1;
+  return num.toString().padStart(2, "0");
+};
+
 //~ -----------------------------------
 //~ analyzePlaylistTracks
 //~ Takes the current tracks for a playlist and returns

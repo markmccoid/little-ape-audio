@@ -10,9 +10,14 @@ const ABSLayout = () => {
   const router = useRouter();
   const searchObject = useABSStore((state) => state.searchObject);
   let searchActive = false;
-  if (searchObject.description || searchObject.genres || searchObject.tags) {
+  if (
+    searchObject.description ||
+    searchObject?.genres?.length > 0 ||
+    searchObject?.tags?.length > 0
+  ) {
     searchActive = true;
   }
+
   return (
     <Stack>
       <Stack.Screen

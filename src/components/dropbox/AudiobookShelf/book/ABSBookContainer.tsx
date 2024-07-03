@@ -31,7 +31,6 @@ import {
   SeriesIcon,
 } from "@components/common/svg/Icons";
 import { createFolderMetadataKey, useDropboxStore } from "@store/store-dropbox";
-import { buildCoverURL, getCoverURI } from "@store/data/absUtils";
 import { useABSStore } from "@store/store-abs";
 import { router } from "expo-router";
 import { ABSGetItemDetails, absSetBookToFinished } from "@store/data/absAPI";
@@ -85,8 +84,7 @@ const ABSBookContainer = ({ data }: Props) => {
 
   const handleToggleFavorite = async () => {
     const action = !!currFolderAttributes?.isFavorite ? "remove" : "add";
-    // const absCoverURL = await getCoverURI(coverURI);
-    // console.log("ABSC", absCoverURL);
+
     await dropboxActions.updateFolderAttribute(
       media.libraryItemId,
       "isFavorite",

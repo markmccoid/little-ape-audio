@@ -28,7 +28,6 @@ export const useGetFilterData = () => {
 //!!    May update this to return random list of 50 books
 //~~    Stale time is 10 minutes
 //~~ ================================================================
-// preload will only "run" the useQuery.  We don't want any data, just loading the data in background
 export const useGetAllABSBooks = () => {
   const { title, author, authorOrTitle, description, genres, tags } = useABSStore(
     (state) => state.searchObject
@@ -66,6 +65,14 @@ export const useGetAllABSBooks = () => {
   //   };
   // }
 
+  if (!title && !author && !description && !genres?.length && !tags?.length) {
+    return {
+      books: data,
+      totalBookCount: data?.length || 0,
+      selectedBookCount: data?.length || 0,
+      ...rest,
+    };
+  }
   // Filter the data.
   let filterData: ABSGetLibraryItems = [];
   for (const book of data) {

@@ -182,7 +182,10 @@ const AbsAuth = () => {
                   onPress={() => {
                     // will need to reload books if a new library has been selected
                     queryClient.invalidateQueries({ queryKey: ["allABSBooks"] });
+                    // clear cache also
+                    queryClient.resetQueries({ queryKey: ["allABSBooks"] });
                     queryClient.invalidateQueries({ queryKey: ["absfilterdata"] });
+                    queryClient.resetQueries({ queryKey: ["absfilterdata"] });
                     actions.saveLibraries(libraries, lib.id);
                   }}
                   className={`flex flex-row justify-between px-2 py-1 ${

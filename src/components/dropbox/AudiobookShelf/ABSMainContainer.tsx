@@ -1,6 +1,6 @@
 import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import React, { useRef, useState } from "react";
-import { useGetAllABSBooks } from "@store/data/absHooks";
+import { useGetAllABSBooks, useGetFilterData } from "@store/data/absHooks";
 import ABSSearchInputText from "./search/ABSSearchInputText";
 import { SearchObject, useABSStore } from "@store/store-abs";
 import ABSBookResults from "./ABSBookResults";
@@ -11,6 +11,7 @@ import { SearchBarCommands } from "react-native-screens";
 import ABSSearchChip from "./ABSSearchChip";
 import ABSIsLoading from "./ABSIsLoading";
 import ABSErrorView from "./ABSErrorView";
+import ABSTagContextMenu from "./search/ABSTagContextMenu";
 
 const parseSearchObject = (searchObject: SearchObject) => {
   return Object.entries(searchObject).reduce((acc, [key, value]) => {
@@ -29,6 +30,8 @@ const parseSearchObject = (searchObject: SearchObject) => {
 const ABSMainContainer = () => {
   const { books, totalBookCount, selectedBookCount, isError, isLoading, error } =
     useGetAllABSBooks();
+  // Tags, Genres, etc
+  const { filterData, isLoading: filterIsLoading, isError: filterIsError } = useGetFilterData();
   const updateSearchObject = useABSStore((state) => state.actions.updateSearchObject);
   const setSearchBarClearFn = useABSStore((state) => state.actions.setSearchBarClearFn);
   const searchObject = useABSStore((state) => state.searchObject);
@@ -99,6 +102,12 @@ const ABSMainContainer = () => {
           <Text className="text-sm text-amber-800">{selectedBookCount} books found</Text>
 
           <Text className="text-sm text-amber-800">{totalBookCount} total books</Text>
+        </View>
+        <View
+          className="flex-row justify-between px-2 py-1"
+          style={{ borderTopColor: colors.amber800, borderTopWidth: StyleSheet.hairlineWidth }}
+        >
+          <ABSTagContextMenu allTags={filterData?.tags.map((el) => el.name)} />
         </View>
         {Object.keys(searchKeys).length > 0 && (
           <View

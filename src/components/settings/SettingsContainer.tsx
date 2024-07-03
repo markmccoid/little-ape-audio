@@ -53,7 +53,7 @@ const SettingsContainer = () => {
         animate={{ opacity: 1 }}
         transition={{
           type: "timing",
-          duration: 500,
+          duration: 400,
         }}
       >
         <View className="flex-row justify-between px-2 py-3" style={[styles.borderBottom]}>

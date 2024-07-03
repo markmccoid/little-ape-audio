@@ -1,5 +1,5 @@
 import { Image } from "react-native";
-import { defaultImages, getRandomNumber } from "@store/storeUtils";
+import { defaultImages, getImageIndex, getRandomNumber } from "@store/storeUtils";
 import { getImageSize } from "@utils/otherUtils";
 import { useABSStore } from "@store/store-abs";
 //~~ =======================================================
@@ -13,16 +13,21 @@ export const buildCoverURL = (itemId: string) => {
 };
 
 // -- getCoverURI
-export const getCoverURI = async (coverURL: string): Promise<string> => {
+export const getCoverURI = async (
+  coverURL: string
+): Promise<{ coverURL: string; type: "passthrough" | "localasset" }> => {
   let cover: string;
   try {
     const coverRes = await getImageSize(coverURL);
-    return coverURL;
+    return { coverURL, type: "passthrough" };
   } catch (err) {
-    const randomNum = getRandomNumber();
-    const randomImageInfo = Image.resolveAssetSource(defaultImages[`image${randomNum}`]);
+    // Using the passed coverURL (if it doesn't exist), hash it to a a number/index
+    // This allows us to use the same image for each file (hashed on its)
+    const hashImageIndex = getImageIndex(coverURL);
+    // console.log("hashImageIndex", hashImageIndex);
+    const randomImageInfo = Image.resolveAssetSource(defaultImages[`image${hashImageIndex}`]);
     const randomImageAspect = randomImageInfo.width / randomImageInfo.height;
-    return randomImageInfo.uri;
+    return { coverURL: randomImageInfo.uri, type: "localasset" };
   }
 };
 

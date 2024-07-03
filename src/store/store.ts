@@ -259,25 +259,36 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         })
         .filter((el) => el);
 
+      //~ Get list of imageURIs from tracks that are to be deleted.
+      const trackImages = tracksToDelete.map(
+        (trackId) => get().tracks.find((el) => el.id === trackId).metadata.pictureURI
+      );
+
       if (removeAllTracks && tracksToDelete) {
         // const x = await get().actions.removeTracks(playlistToDelete.trackIds);
         const x = await get().actions.removeTracks(tracksToDelete);
       }
-      //!!! NEEDS TO HAPPEN BEFORE WE DELETE TRACKS
+      //~ Delete any images that are stored on the file system
       if (removeAllTracks && tracksToDelete.length === playlistToDelete.trackIds.length) {
-        // const deletePromises = tracksToDelete.map(async (id) => {
-        //   // store trackToDelete's info
-        //   const trackToDelete = get().tracks.find((el) => el.id === id);
-        //   // return a promise
-        //   trackToDelete.metadata
-        //   return await deleteFromFileSystem(
-        //     `${FileSystem.documentDirectory}${trackToDelete?.metadata?.pictureURI}`
-        //   );
-        // });
-        // await Promise.all(deletePromises);
-        // deleteFromFileSystem()
+        trackImages.push(playlistToDelete?.imageURI);
+
+        let prevImage = undefined;
+        for (const trackImage of trackImages) {
+          // If duplicate image skip (already deleted)
+          if (prevImage === trackImage) continue;
+          // If not stored in filesystem
+          if (trackImage.slice(0, 10).includes("data:")) continue;
+          try {
+            console.log("Delete Me", trackImage);
+            await deleteFromFileSystem(`${FileSystem.documentDirectory}${trackImage}`);
+          } catch (e) {
+            // Do nothing and continue.  probably image doesn't exist
+          }
+
+          prevImage = trackImage;
+        }
       }
-      //!!! END
+      //~ END Delete Images
       const updatedPlayList = get().playlists;
       delete updatedPlayList[playlistId];
       // const updatedPlayList = get().playlists.filter(

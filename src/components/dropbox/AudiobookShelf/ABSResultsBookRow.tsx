@@ -19,7 +19,7 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
 
   const { data, isLoading, error } = useQuery({
     queryKey: [`${book.id}-cover`],
-    queryFn: async () => await getCoverURI(book.cover),
+    queryFn: async () => (await getCoverURI(book.cover)).coverURL,
   });
   const showSeriesLink = book?.series && includeSeriesLink;
   const showInlineSeries = book?.series;
@@ -34,15 +34,28 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
         }}
       >
         <View className="m-2">
-          <Image
-            source={{ uri: data || book.cover }}
-            style={{
-              width: 80,
-              height: 80,
-              borderRadius: 10,
-              borderWidth: StyleSheet.hairlineWidth,
-            }}
-          />
+          {!isLoading && (
+            <Image
+              source={{ uri: data || book.cover }}
+              style={{
+                width: 80,
+                height: 80,
+                borderRadius: 10,
+                borderWidth: StyleSheet.hairlineWidth,
+              }}
+            />
+          )}
+          {isLoading && (
+            <Image
+              source={{ uri: data || book.cover }}
+              style={{
+                width: 80,
+                height: 80,
+                borderRadius: 10,
+                borderWidth: StyleSheet.hairlineWidth,
+              }}
+            />
+          )}
         </View>
 
         <Pressable

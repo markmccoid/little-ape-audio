@@ -230,7 +230,7 @@ export const absGetItemDetails = async (itemId?: string) => {
     console.log("error", error);
     throw error;
   }
-  const coverURI = await getCoverURI(buildCoverURL(libraryItem.id));
+  const coverURI = (await getCoverURI(buildCoverURL(libraryItem.id))).coverURL;
 
   // Get author book count
   const authorId = libraryItem.media.metadata?.authors[0].id;

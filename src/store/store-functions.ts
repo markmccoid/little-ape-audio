@@ -14,7 +14,7 @@ import { PlaylistImageColors } from "@store/types";
 import { getImageColors, resolveABSImage, sanitizeString } from "@utils/otherUtils";
 import TrackPlayer from "react-native-track-player";
 import { BookJSONMetadata, CleanBookMetadata, cleanOneBook } from "@utils/audiobookMetadata";
-import { buildCoverURL } from "./data/absUtils";
+import { buildCoverURL, getCoverURI } from "./data/absUtils";
 import { absGetItemDetails } from "./data/absAPI";
 import { getLocalImage } from "./store-dropbox";
 let isCriticalSectionLocked = false;
@@ -110,11 +110,19 @@ export const addTrack =
       if (!tags.pictureURI) {
         //
         const coverLink = buildCoverURL(pathIn);
-        const { uri, cleanFileName } = await downloadToFileSystem(
-          coverLink + "&format=jpeg",
-          `abs_${pathIn}.jpeg`
-        );
-        tags.pictureURI = cleanFileName;
+        //! NOTE: I can build a coverURL for any book even if it has no associated cover
+        //!  the getCoverURI function will return a random image (type: "localasset") if coverURL is a 404
+        const coverURIInfo = await getCoverURI(coverLink);
+        //!! If type is passthrough then NOT a local asset image, so download it
+        if (coverURIInfo.type === "passthrough") {
+          const { uri, cleanFileName } = await downloadToFileSystem(
+            coverURIInfo.coverURL + "&format=jpeg",
+            `abs_${pathIn}.jpeg`
+          );
+          tags.pictureURI = cleanFileName;
+        } else {
+          tags.pictureURI = coverURIInfo.coverURL;
+        }
       }
       // Get chapter details by downloading book details and finding the audio ino
       // that we are processing.  Then grab chapters

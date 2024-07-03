@@ -1,13 +1,44 @@
 import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { useGetFilterData } from "@store/data/absHooks";
 import { useABSStore } from "@store/store-abs";
 import { colors } from "@constants/Colors";
 
 const ABSAdvSearchGenres = () => {
   const { filterData, isLoading, isError } = useGetFilterData();
-  const { genres: selectedGenres } = useABSStore((state) => state.searchObject);
+  const { genres } = useABSStore((state) => state.searchObject);
+  const [selectedGenres, setSelectedGenres] = useState([]);
   const updateSearchObject = useABSStore((state) => state.actions.updateSearchObject);
+  const [isInit, setIsInit] = useState(false);
+
+  const addRemoveGenre = (genre) => {
+    const isSelected = selectedGenres?.includes(genre);
+    const updatedGenres =
+      isSelected && selectedGenres.length > 0
+        ? selectedGenres.filter((el) => el !== genre)
+        : [...selectedGenres, genre];
+    setSelectedGenres(updatedGenres);
+  };
+  const clearGenres = () => {
+    setSelectedGenres([]);
+  };
+
+  // Update the zustand search object for genres
+  React.useEffect(() => {
+    if (isInit) {
+      updateSearchObject({ genres: selectedGenres });
+    }
+  }, [selectedGenres, isInit]);
+
+  // Clear the genres when we see an empty genre list from Search Object
+  React.useEffect(() => {
+    if (!isInit) {
+      setSelectedGenres(genres || []);
+      setIsInit(true);
+    }
+    if (!genres) clearGenres();
+  }, [genres, isInit]);
+
   if (isLoading) return null;
   if (isError)
     return (
@@ -15,18 +46,7 @@ const ABSAdvSearchGenres = () => {
         <Text>Error Reading Filter Data</Text>
       </View>
     );
-  const addRemoveGenre = (genre: string) => {
-    const selected = selectedGenres?.includes(genre);
-    // If already selected, remove from list
-    if (selected) {
-      updateSearchObject({ genres: selectedGenres.filter((el) => el !== genre) });
-    } else {
-      updateSearchObject({ genres: [...(selectedGenres || []), genre] });
-    }
-  };
-  const clearGenres = () => {
-    updateSearchObject({ genres: undefined });
-  };
+
   return (
     <ScrollView
       contentContainerStyle={{
