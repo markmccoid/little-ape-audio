@@ -1,17 +1,16 @@
 import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import React, { useRef, useState } from "react";
 import { useGetAllABSBooks, useGetFilterData } from "@store/data/absHooks";
-import ABSSearchInputText from "./search/ABSSearchInputText";
 import { SearchObject, useABSStore } from "@store/store-abs";
 import ABSBookResults from "./ABSBookResults";
 import { colors } from "@constants/Colors";
 import { Link, Stack, useNavigation, useRouter } from "expo-router";
-import { KeyboardCloseIcon } from "@components/common/svg/Icons";
 import { SearchBarCommands } from "react-native-screens";
 import ABSSearchChip from "./ABSSearchChip";
 import ABSIsLoading from "./ABSIsLoading";
 import ABSErrorView from "./ABSErrorView";
 import ABSTagContextMenu from "./search/ABSTagContextMenu";
+import ABSGenreContextMenu from "./search/ABSGenreContextMenu";
 
 const parseSearchObject = (searchObject: SearchObject) => {
   return Object.entries(searchObject).reduce((acc, [key, value]) => {
@@ -104,10 +103,12 @@ const ABSMainContainer = () => {
           <Text className="text-sm text-amber-800">{totalBookCount} total books</Text>
         </View>
         <View
-          className="flex-row justify-between px-2 py-1"
+          className="flex-row items-center justify-center px-2 py-1"
           style={{ borderTopColor: colors.amber800, borderTopWidth: StyleSheet.hairlineWidth }}
         >
           <ABSTagContextMenu allTags={filterData?.tags.map((el) => el.name)} />
+          <View className="mr-5" />
+          <ABSGenreContextMenu allGenres={filterData?.genres.map((el) => el.name)} />
         </View>
         {Object.keys(searchKeys).length > 0 && (
           <View

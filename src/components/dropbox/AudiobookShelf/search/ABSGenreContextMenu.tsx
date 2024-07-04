@@ -7,68 +7,67 @@ import { StyleSheet, Text, View } from "react-native";
 import * as ContextMenu from "zeego/context-menu";
 
 type Props = {
-  allTags: string[];
+  allGenres: string[];
 };
 
-const mergeTags = (allTags: string[], selectedTags: string[]) => {
-  let mergedTags: { tag: string; isSelected: boolean }[] = [];
+const mergeGenres = (allGenres: string[], selectedGenres: string[]) => {
+  let mergedGenres: { genre: string; isSelected: boolean }[] = [];
   let selected = [];
   let other = [];
-  for (const tag of allTags) {
+  for (const genre of allGenres) {
     let isSelected = false;
-    if (selectedTags.includes(tag)) {
-      selected.push({ tag, isSelected: true });
+    if (selectedGenres.includes(genre)) {
+      selected.push({ genre, isSelected: true });
     } else {
-      other.push({ tag, isSelected: false });
+      other.push({ genre, isSelected: false });
     }
 
-    mergedTags.push({ tag, isSelected });
+    mergedGenres.push({ genre, isSelected });
   }
-  selected = sortBy(selected, ["tag"]);
-  other = sortBy(other, ["tag"]);
+  selected = sortBy(selected, ["genre"]);
+  other = sortBy(other, ["genre"]);
   return [...selected, ...other];
 };
 
-const ABSTagContextMenu = ({ allTags }: Props) => {
+const ABSGenreContextMenu = ({ allGenres }: Props) => {
   // Selected tags in store
-  const { tags } = useABSStore((state) => state.searchObject);
+  const { genres } = useABSStore((state) => state.searchObject);
   // Local selected tags (synced with store tags)
-  const [selectedTags, setSelectedTags] = useState([]);
+  const [selectedGenres, setSelectedGenres] = useState([]);
   // Alltags with isSelected attibute
-  const mergedTags = useMemo(() => mergeTags(allTags, selectedTags), [selectedTags]);
+  const mergedGenres = useMemo(() => mergeGenres(allGenres, selectedGenres), [selectedGenres]);
   const updateSearchObject = useABSStore((state) => state.actions.updateSearchObject);
   const [isInit, setIsInit] = useState(false);
 
-  // console.log(mergedTags);
   // When a change is made to the tag selection, update the zustand search object
   useEffect(() => {
     if (isInit) {
-      updateSearchObject({ tags: selectedTags });
+      updateSearchObject({ genres: selectedGenres });
     }
-  }, [selectedTags, isInit]);
+  }, [selectedGenres, isInit]);
 
   // When the zustand tag object is empty, make sure to clear the local tags
   useEffect(() => {
     if (!isInit) {
-      setSelectedTags(tags || []);
+      setSelectedGenres(genres || []);
       setIsInit(true);
     }
-    if (!tags) setSelectedTags([]);
+    if (!genres) setSelectedGenres([]);
     // setSelectedTags(tags);
-  }, [tags]);
+  }, [genres]);
 
-  const tagsSelected = selectedTags.length > 0 ? true : false;
+  const genresSelected = selectedGenres.length > 0 ? true : false;
   return (
     <ContextMenu.Root>
       <ContextMenu.Trigger>
         <View
           className={`py-1 px-2 ${
-            tagsSelected ? "bg-green-300" : "bg-abs-100"
-          } rounded-md w-[85] flex-row ${tagsSelected ? "justify-between" : "justify-center"}`}
+            genresSelected ? "bg-green-300" : "bg-abs-100"
+          } rounded-md w-[85] flex-row ${genresSelected ? "justify-between" : "justify-center"}`}
           style={{ borderColor: colors.abs900, borderWidth: StyleSheet.hairlineWidth }}
         >
-          <Text>{`Tags`}</Text>
-          <Text>{tagsSelected ? selectedTags.length : ""}</Text>
+          <Text>{`Genres`}</Text>
+          <Text>{genresSelected ? selectedGenres.length : ""}</Text>
         </View>
       </ContextMenu.Trigger>
       <ContextMenu.Content>
@@ -78,15 +77,14 @@ const ABSTagContextMenu = ({ allTags }: Props) => {
               className="py-2 px-2 bg-gray-200 rounded-md  flex-row w-[250] items-center justify-between"
               style={{ borderColor: colors.abs100, borderWidth: StyleSheet.hairlineWidth }}
             >
-              <Text className="text-abs-950 text-base">Select Filter Tags</Text>
+              <Text className="text-abs-950 text-base">Select Filter Genres</Text>
               <CloseIcon color={colors.abs950} />
             </View>
           )}
         </ContextMenu.Preview>
-        {/* <ContextMenu.Label>Tags</ContextMenu.Label> */}
 
-        {mergedTags &&
-          mergedTags.map((el) => {
+        {mergedGenres &&
+          mergedGenres.map((el) => {
             // const currTags = selectedTags //storeTags || [];
             const isSelected = el.isSelected;
 
@@ -95,17 +93,17 @@ const ABSTagContextMenu = ({ allTags }: Props) => {
                 value={isSelected} // or "off" or "mixed"
                 onValueChange={(next, previous) => {
                   if (next === "off") {
-                    setSelectedTags((currTags) => [...currTags.filter((tag) => tag !== el.tag)]);
-                    // updateSearchObject({ tags: [...currTags.filter((tag) => tag !== el)] });
+                    setSelectedGenres((currGenres) => [
+                      ...currGenres.filter((genre) => genre !== el.genre),
+                    ]);
                   } else {
-                    setSelectedTags((currTags) => [...currTags, el.tag]);
-                    // updateSearchObject({ tags: [...currTags, el] });
+                    setSelectedGenres((currGenres) => [...currGenres, el.genre]);
                   }
                 }}
                 shouldDismissMenuOnSelect={false}
-                key={el.tag}
+                key={el.genre}
               >
-                <ContextMenu.ItemTitle>{el.tag}</ContextMenu.ItemTitle>
+                <ContextMenu.ItemTitle>{el.genre}</ContextMenu.ItemTitle>
                 <ContextMenu.ItemIndicator />
               </ContextMenu.CheckboxItem>
             );
@@ -115,4 +113,4 @@ const ABSTagContextMenu = ({ allTags }: Props) => {
   );
 };
 
-export default ABSTagContextMenu;
+export default ABSGenreContextMenu;
