@@ -34,28 +34,8 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
         }}
       >
         <View className="m-2">
-          {!isLoading && (
-            <Image
-              source={{ uri: data || book.cover }}
-              style={{
-                width: 80,
-                height: 80,
-                borderRadius: 10,
-                borderWidth: StyleSheet.hairlineWidth,
-              }}
-            />
-          )}
-          {isLoading && (
-            <Image
-              source={{ uri: data || book.cover }}
-              style={{
-                width: 80,
-                height: 80,
-                borderRadius: 10,
-                borderWidth: StyleSheet.hairlineWidth,
-              }}
-            />
-          )}
+          {!isLoading && <Image source={{ uri: data || book.cover }} style={styles.image} />}
+          {isLoading && <Image source={{ uri: data || book.cover }} style={styles.image} />}
         </View>
 
         <Pressable
@@ -114,10 +94,7 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
         >
           <View
             className="flex-row items-center justify-start px-2 py-1"
-            style={{
-              borderBottomWidth: StyleSheet.hairlineWidth,
-              // borderTopWidth: StyleSheet.hairlineWidth,
-            }}
+            style={styles.bottomHairline}
           >
             <SeriesIcon size={16} color={colors.amber800} />
             <Text
@@ -134,5 +111,16 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
   );
 };
 
+const styles = StyleSheet.create({
+  image: {
+    width: 80,
+    height: 80,
+    borderRadius: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  bottomHairline: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+});
 const ABSResultsBookRowMemo = React.memo(ABSResultsBookRow);
 export default ABSResultsBookRowMemo;

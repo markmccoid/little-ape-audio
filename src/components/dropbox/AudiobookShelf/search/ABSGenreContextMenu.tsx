@@ -11,6 +11,9 @@ type Props = {
 };
 
 const mergeGenres = (allGenres: string[], selectedGenres: string[]) => {
+  if (allGenres.length === 0 || !allGenres) {
+    return [{ genres: "", isSelected: false }];
+  }
   let mergedGenres: { genre: string; isSelected: boolean }[] = [];
   let selected = [];
   let other = [];

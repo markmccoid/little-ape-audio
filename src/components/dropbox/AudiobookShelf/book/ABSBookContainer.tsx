@@ -273,15 +273,29 @@ const ABSBookContainer = ({ data }: Props) => {
         style={{ backgroundColor: colors.abs100 }}
         maxHeight={height / 3.5}
       >
-        <ScrollView
-          className={`p-2 flex-1 border-b`}
-          style={{ height: height / 3.5 }}
-          contentContainerStyle={{
-            paddingBottom: 20,
-          }}
-        >
-          <Text className="flex-1">{media.metadata.description}</Text>
-        </ScrollView>
+        <>
+          {media.tags.length > 0 && (
+            <View className="flex-row bg-white h-[22] border-b">
+              <Text className="font-semibold text-sm">Tags: </Text>
+              <Text className="text-sm flex-1">{media.tags.join(", ")}</Text>
+            </View>
+          )}
+          {media.metadata.genres.length > 0 && (
+            <View className="flex-row bg-white h-[22] border-b">
+              <Text className="font-semibold text-sm">Genres: </Text>
+              <Text className="text-sm flex-1">{media.metadata.genres.join(", ")}</Text>
+            </View>
+          )}
+          <ScrollView
+            className={`border-b`}
+            style={{ height: height / 3.5 - 45 }}
+            contentContainerStyle={{
+              paddingBottom: 0,
+            }}
+          >
+            <Text className="p-2 flex-1">{media.metadata.description}</Text>
+          </ScrollView>
+        </>
       </AnimateHeight>
       <ScrollView
         style={{

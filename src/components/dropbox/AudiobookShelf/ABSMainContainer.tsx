@@ -1,5 +1,5 @@
 import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
-import React, { useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { useGetAllABSBooks, useGetFilterData } from "@store/data/absHooks";
 import { SearchObject, useABSStore } from "@store/store-abs";
 import ABSBookResults from "./ABSBookResults";
@@ -11,6 +11,7 @@ import ABSIsLoading from "./ABSIsLoading";
 import ABSErrorView from "./ABSErrorView";
 import ABSTagContextMenu from "./search/ABSTagContextMenu";
 import ABSGenreContextMenu from "./search/ABSGenreContextMenu";
+import { debounce } from "lodash";
 
 const parseSearchObject = (searchObject: SearchObject) => {
   return Object.entries(searchObject).reduce((acc, [key, value]) => {
@@ -49,7 +50,7 @@ const ABSMainContainer = () => {
         barTintColor: colors.abs400,
         textColor: colors.abs900,
         hideNavigationBar: false,
-        onChangeText: (event) => handleUpdateSearch("authorOrTitle")(event.nativeEvent.text),
+        onChangeText: (event) => debouncedSetSearchText(event.nativeEvent.text),
       },
     });
   }, [navigation]);
@@ -61,11 +62,15 @@ const ABSMainContainer = () => {
     return () => setSearchBarClearFn(null);
   }, [searchBarRef?.current?.clearText]);
 
-  const handleUpdateSearch = (fieldName: string) => {
-    return (fieldValue: string) => {
-      updateSearchObject({ [fieldName]: fieldValue });
-    };
+  const debouncedSetSearchText = useCallback(
+    debounce((searchValue) => handleUpdate(searchValue), 300),
+    []
+  );
+
+  const handleUpdate = (searchValue: string) => {
+    updateSearchObject({ authorOrTitle: searchValue });
   };
+
   if (isLoading) {
     return <ABSIsLoading />;
   }

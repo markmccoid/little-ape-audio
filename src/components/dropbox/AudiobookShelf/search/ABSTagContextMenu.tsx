@@ -11,6 +11,9 @@ type Props = {
 };
 
 const mergeTags = (allTags: string[], selectedTags: string[]) => {
+  if (allTags.length === 0 || !allTags) {
+    return [{ tag: "", isSelected: false }];
+  }
   let mergedTags: { tag: string; isSelected: boolean }[] = [];
   let selected = [];
   let other = [];
@@ -94,6 +97,7 @@ const ABSTagContextMenu = ({ allTags }: Props) => {
               <ContextMenu.CheckboxItem
                 value={isSelected} // or "off" or "mixed"
                 onValueChange={(next, previous) => {
+                  // console.log("Next, Prev", next, previous);
                   if (next === "off") {
                     setSelectedTags((currTags) => [...currTags.filter((tag) => tag !== el.tag)]);
                     // updateSearchObject({ tags: [...currTags.filter((tag) => tag !== el)] });

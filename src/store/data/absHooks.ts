@@ -65,11 +65,12 @@ export const useGetAllABSBooks = () => {
   //   };
   // }
 
-  if (!title && !author && !description && !genres?.length && !tags?.length) {
+  if (!title && !author && !description && !genres?.length && !tags?.length && !authorOrTitle) {
+    const filterData = direction === "asc" ? sortBy(data, [field]) : reverse(sortBy(data, [field]));
     return {
-      books: data,
-      totalBookCount: data?.length || 0,
-      selectedBookCount: data?.length || 0,
+      books: filterData,
+      totalBookCount: filterData?.length || 0,
+      selectedBookCount: filterData?.length || 0,
       ...rest,
     };
   }
