@@ -11,7 +11,7 @@ type Props = {
 };
 
 const mergeGenres = (allGenres: string[], selectedGenres: string[]) => {
-  if (allGenres.length === 0 || !allGenres) {
+  if (!allGenres?.length || !allGenres) {
     return [{ genres: "", isSelected: false }];
   }
   let mergedGenres: { genre: string; isSelected: boolean }[] = [];
@@ -74,7 +74,7 @@ const ABSGenreContextMenu = ({ allGenres }: Props) => {
         </View>
       </ContextMenu.Trigger>
       <ContextMenu.Content>
-        <ContextMenu.Preview>
+        <ContextMenu.Preview key="preview">
           {() => (
             <View
               className="py-2 px-2 bg-gray-200 rounded-md  flex-row w-[250] items-center justify-between"
@@ -104,9 +104,9 @@ const ABSGenreContextMenu = ({ allGenres }: Props) => {
                   }
                 }}
                 shouldDismissMenuOnSelect={false}
-                key={el.genre}
+                key={el?.genre || "none"}
               >
-                <ContextMenu.ItemTitle>{el.genre}</ContextMenu.ItemTitle>
+                <ContextMenu.ItemTitle>{el?.genre || "No Genres Found"}</ContextMenu.ItemTitle>
                 <ContextMenu.ItemIndicator />
               </ContextMenu.CheckboxItem>
             );

@@ -60,14 +60,13 @@ export const downloadToFileSystem = async (
     const { exists } = await FileSystem.getInfoAsync(documentDirectoryUri);
     if (exists) {
       // file already exists, just return the name
-      console.log("Download Exists", cleanFileName);
       return { uri: documentDirectoryUri, cleanFileName };
     }
     const { uri } = await FileSystem.downloadAsync(downloadLink, documentDirectoryUri);
-    console.log("Download successful:", uri);
+    // console.log("Download successful:", uri);
     return { uri, cleanFileName };
   } catch (e) {
-    console.log("Download NOT:", e);
+    // console.log("Download NOT:", e);
     throw new Error(`error in downloadToFileSystem (image probably)-> ${e}`);
   }
 };

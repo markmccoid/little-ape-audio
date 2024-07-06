@@ -71,10 +71,10 @@ const ABSMainContainer = () => {
     updateSearchObject({ authorOrTitle: searchValue });
   };
 
-  if (isLoading) {
+  if (isLoading || filterIsLoading) {
     return <ABSIsLoading />;
   }
-  if (isError) {
+  if (isError || filterIsError) {
     return (
       <ABSErrorView error={error} />
       // <View className="flex-col items-center">

@@ -11,7 +11,7 @@ type Props = {
 };
 
 const mergeTags = (allTags: string[], selectedTags: string[]) => {
-  if (allTags.length === 0 || !allTags) {
+  if (!allTags?.length || !allTags) {
     return [{ tag: "", isSelected: false }];
   }
   let mergedTags: { tag: string; isSelected: boolean }[] = [];
@@ -75,7 +75,7 @@ const ABSTagContextMenu = ({ allTags }: Props) => {
         </View>
       </ContextMenu.Trigger>
       <ContextMenu.Content>
-        <ContextMenu.Preview>
+        <ContextMenu.Preview key="preview">
           {() => (
             <View
               className="py-2 px-2 bg-gray-200 rounded-md  flex-row w-[250] items-center justify-between"
@@ -107,9 +107,9 @@ const ABSTagContextMenu = ({ allTags }: Props) => {
                   }
                 }}
                 shouldDismissMenuOnSelect={false}
-                key={el.tag}
+                key={el?.tag || "none"}
               >
-                <ContextMenu.ItemTitle>{el.tag}</ContextMenu.ItemTitle>
+                <ContextMenu.ItemTitle>{el?.tag || ""}</ContextMenu.ItemTitle>
                 <ContextMenu.ItemIndicator />
               </ContextMenu.CheckboxItem>
             );

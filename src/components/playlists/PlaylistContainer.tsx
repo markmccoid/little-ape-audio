@@ -114,6 +114,7 @@ const PlaylistContainer = () => {
     route.push({ pathname: "/audio/player", params: { playlistId } });
     // Need to delay since should really come after setting curr playlist, but if we do it after
     // and the setCurrPlaylist gets colors, user could see blank if navigates back to playlistContainer before done
+    // setTimeout(() => setCurrPlaylist(playlistId), 1);
     setTimeout(() => setIsSelectingRow(false), 100);
     await setCurrPlaylist(playlistId);
   };

@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Pressable,
-  ImageSourcePropType,
+  Dimensions,
   Alert,
   Animated as RNAnimated,
   ActivityIndicator,
@@ -24,7 +24,8 @@ import usePlaylistColors from "hooks/usePlaylistColors";
 import { LinearGradient } from "expo-linear-gradient";
 import { AnimatePresence, MotiView } from "moti";
 import { useSettingStore } from "@store/store-settings";
-import TrackPlayer, { useProgress } from "react-native-track-player";
+
+const { width, height } = Dimensions.get("window");
 
 type Props = {
   playlist: Playlist;
@@ -39,18 +40,18 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
   const handleTouchStart = (event) => {
     setTouchStartX(event.nativeEvent.pageX);
   };
+
   //!! Maybe need to set state in PlaylistContainer (buttonsDisabled) so that while we are "selecting"
   //!! a playlist no other button can be pressed
   const handleTouchEnd = async (event) => {
     if (isSelected) return;
-
+    setIsSelected(true);
     const dx = Math.abs(event.nativeEvent.pageX - touchStartX);
     if (dx < 10) {
       // Handle the press event
-      setIsSelected(true);
       await onPlaylistSelect(playlist.id);
-      setIsSelected(false);
     }
+    setIsSelected(false);
   };
 
   //!! END TRacking
@@ -132,6 +133,14 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
                 className={`flex-row flex-1  border-r border-r-amber-800`}
                 // style={{ backgroundColor: isActive ? playlistColors.gradientTop : "" }}
               >
+                {isSelected && (
+                  <ActivityIndicator
+                    size="large"
+                    className={`absolute z-40 top-10`}
+                    style={{ left: width / 2 }}
+                    color="red"
+                  />
+                )}
                 <Pressable
                   className="flex-1 flex-row pt-2 pb-3 px-2"
                   // onPress={handleSelectRow}

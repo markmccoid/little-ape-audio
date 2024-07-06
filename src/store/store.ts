@@ -279,7 +279,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
           // If not stored in filesystem
           if (trackImage.slice(0, 10).includes("data:")) continue;
           try {
-            console.log("Delete Me", trackImage);
+            // Image is stored in filesystem.  Clean it up.
             await deleteFromFileSystem(`${FileSystem.documentDirectory}${trackImage}`);
           } catch (e) {
             // Do nothing and continue.  probably image doesn't exist
@@ -725,11 +725,13 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       set({ currentQueuePosition: prevTracksDuration });
       set({ playlistLoaded: true });
       // - Reset TrackPlayer and add the Queue
+
       await TrackPlayer.add(queue);
+
       // This was added to allow the MetadataChapterReceived event to fire with the
       // first queue entry.  Looks like if the first one had chapters it would fire but not
       // run until our skip exectured. this gave metadata from track 0 to the skipped to track.
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 1));
       // - Make sure current track is loaded and set to proper position
       await TrackPlayer.skip(currTrackIndex);
       //!

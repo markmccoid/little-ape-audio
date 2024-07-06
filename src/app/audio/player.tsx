@@ -18,6 +18,7 @@ const PlaylistScreen = () => {
   const { playlistId } = useLocalSearchParams() as PlayerRouteParams;
   const isLoaded = usePlaybackStore((state) => state.playlistLoaded);
   const playlistColors = usePlaylistColors(playlistId);
+  const { setCurrentPlaylist } = usePlaybackStore((state) => state.actions);
 
   if (!isLoaded) {
     return (
