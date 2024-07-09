@@ -5,7 +5,7 @@ import { getCoverURI } from "@store/data/absUtils";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useRouter } from "expo-router";
 import { formatSeconds } from "@utils/formatUtils";
-import { DurationIcon, SeriesIcon } from "@components/common/svg/Icons";
+import { BookIcon, DurationIcon, ReadIcon, SeriesIcon } from "@components/common/svg/Icons";
 import { colors } from "@constants/Colors";
 
 type Unpacked<T> = T extends (infer U)[] ? U : T;
@@ -27,11 +27,13 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
   return (
     <View className="flex-col">
       <View
-        className={`flex flex-row bg-abs-50`}
-        style={{
-          borderTopWidth: index === 0 ? StyleSheet.hairlineWidth : 0,
-          borderBottomWidth: !showSeriesLink && StyleSheet.hairlineWidth,
-        }}
+        className={`flex flex-row`}
+        style={[
+          styles.baseContainer,
+          index !== 0 && styles.noBorderTop,
+          showSeriesLink && styles.noBorderBottom,
+          book.isFinished && styles.finishedBook,
+        ]}
       >
         <View className="m-2">
           {!isLoading && <Image source={{ uri: data || book.cover }} style={styles.image} />}
@@ -64,7 +66,7 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
                 </Text>
               </View>
               {showInlineSeries && (
-                <View className="flex-row items-center justify-start">
+                <View className="flex-row items-center justify-start bg-red">
                   <SeriesIcon size={16} color={colors.amber800} />
                   <Text
                     lineBreakMode="tail"
@@ -76,7 +78,7 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
                 </View>
               )}
             </View>
-            <View className="flex-row justify-between mr-2">
+            <View className="flex-row justify-between mr-2 items-center">
               <View className="flex-row ">
                 <DurationIcon size={16} color={colors.amber900} />
                 <Text className="text-amber-800 ml-1">
@@ -84,6 +86,12 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
                 </Text>
               </View>
               <Text className=" font-semibold text-amber-700">{book.publishedYear}</Text>
+              {book.isFinished && (
+                <View>
+                  <BookIcon color="green" size={20} />
+                  <ReadIcon style={{ position: "absolute", top: 2, left: 5 }} size={10} />
+                </View>
+              )}
             </View>
           </View>
         </Pressable>
@@ -94,7 +102,7 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
         >
           <View
             className="flex-row items-center justify-start px-2 py-1"
-            style={styles.bottomHairline}
+            style={[styles.bottomHairline, book.isFinished && styles.finishedBook]}
           >
             <SeriesIcon size={16} color={colors.amber800} />
             <Text
@@ -120,6 +128,20 @@ const styles = StyleSheet.create({
   },
   bottomHairline: {
     borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  baseContainer: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    backgroundColor: "#faf1da",
+  },
+  finishedBook: {
+    backgroundColor: "#d7f3e3",
+  },
+  noBorderTop: {
+    borderTopWidth: 0,
+  },
+  noBorderBottom: {
+    borderBottomWidth: 0,
   },
 });
 const ABSResultsBookRowMemo = React.memo(ABSResultsBookRow);

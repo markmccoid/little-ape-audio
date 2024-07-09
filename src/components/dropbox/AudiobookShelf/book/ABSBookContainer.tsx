@@ -35,6 +35,7 @@ import { useABSStore } from "@store/store-abs";
 import { router } from "expo-router";
 import { ABSGetItemDetails, absSetBookToFinished } from "@store/data/absAPI";
 import { formatSeconds } from "@utils/formatUtils";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Props = {
   data: ABSGetItemDetails;
@@ -54,6 +55,7 @@ const seriesFlags = (mediaMetadata) => {
  * Renders a container component for an audiobook shelf, displaying the book cover, title, author, and published year, as well as a list of audio files associated with the book.
  */
 const ABSBookContainer = ({ data }: Props) => {
+  const queryClient = useQueryClient();
   const { audioFiles, media, coverURI, authorBookCount, userMediaProgress, bookDuration } = data;
   const { width, height } = Dimensions.get("window");
   const updateSearchObject = useABSStore((state) => state.actions.updateSearchObject);
@@ -100,6 +102,7 @@ const ABSBookContainer = ({ data }: Props) => {
     try {
       setIsRead(!isRead);
       await absSetBookToFinished(media.libraryItemId, !isRead);
+      queryClient.invalidateQueries({ queryKey: ["allABSBooks"] });
     } catch (e) {
       console.log("ERROR setting Isfinished", e);
     }

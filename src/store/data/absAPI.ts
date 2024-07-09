@@ -141,7 +141,7 @@ export const absGetLibraryFilterData = async (libraryId?: string) => {
 //~~  based on the passed filterType
 //~~ ========================================================
 export type ABSGetLibraryItems = Awaited<ReturnType<typeof absGetLibraryItems>>;
-export type FilterType = "genres" | "tags" | "authors" | "series";
+export type FilterType = "genres" | "tags" | "authors" | "series" | "progress";
 type GetLibraryItemsParams = {
   libraryId?: string;
   filterType?: FilterType;
@@ -164,6 +164,7 @@ export const absGetLibraryItems = async ({
   const activeLibraryId = useABSStore.getState().activeLibraryId;
   const libraryIdToUse = libraryId || activeLibraryId;
   let response;
+  let progressresponse;
   let queryParams = "";
 
   if (filterType) {
@@ -174,16 +175,22 @@ export const absGetLibraryItems = async ({
   }
 
   const url = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items${queryParams}`;
+  // URL to get progess.finished books
+  const progressurl = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items?filter=progress.ZmluaXNoZWQ=`;
   // console.log("absGetLibraryItems-HIT DB", libraryIdToUse, url);
 
   try {
     response = await axios.get(url, { headers: authHeader });
+    progressresponse = await axios.get(progressurl, { headers: authHeader });
   } catch (error) {
     console.log("error", error);
     throw error;
   }
 
   const libraryItems = response.data as GetLibraryItemsResponse;
+  // Get finished items
+  const finishedItemIds = progressresponse?.data?.results?.map((el) => el.id);
+  const finishedItemIdSet = new Set(finishedItemIds);
 
   const booksMin = libraryItems.results.map((item) => {
     return {
@@ -204,6 +211,7 @@ export const absGetLibraryItems = async ({
       genres: item.media.metadata.genres,
       tags: item.media.tags,
       asin: item.media.metadata.asin,
+      isFinished: finishedItemIdSet.has(item.id),
     };
   });
   return booksMin;

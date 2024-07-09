@@ -38,6 +38,12 @@ export const useGetAllABSBooks = () => {
     queryFn: async () => await absGetLibraryItems({}),
   });
 
+  // const { data: progressData, ...progressRest } = useQuery({
+  //   queryKey: ["allABSBooks-finished"],
+  //   queryFn: async () =>
+  //     await absGetLibraryItems({ filterType: "progress", filterValue: "ZmluaXNoZWQ=" }),
+  // });
+
   if (rest.isLoading || rest.isError) {
     return {
       books: [],
@@ -46,6 +52,7 @@ export const useGetAllABSBooks = () => {
       ...rest,
     };
   }
+
   // const randNums = useMemo(() => generateRandomIntegers(25, 1, data?.length), []);
   // If not filters for data, then return 25 random books
   // if (!title && !author && !description && !genres?.length && !tags?.length) {

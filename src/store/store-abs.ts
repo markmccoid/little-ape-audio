@@ -4,6 +4,7 @@ import { saveToAsyncStorage } from "./data/asyncStorage";
 export type UserInfo = {
   id: string;
   username: string;
+  password: string;
   email: string;
   type: string;
   token: string;

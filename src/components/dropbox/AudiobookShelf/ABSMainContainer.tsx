@@ -75,28 +75,7 @@ const ABSMainContainer = () => {
     return <ABSIsLoading />;
   }
   if (isError || filterIsError) {
-    return (
-      <ABSErrorView error={error} />
-      // <View className="flex-col items-center">
-      //   <Stack.Screen
-      //     options={{
-      //       headerSearchBarOptions: {},
-      //     }}
-      //   />
-      //   <Text className="text-lg font-semibold">Error Getting Books</Text>
-      //   <Text className="text-lg text-center">
-      //     Make sure you have setup AudiobookShelf Login Info and that your ABS Server is running.
-      //   </Text>
-      //   <View className="flex-row justify-center">
-      //     <Pressable
-      //       onPress={() => router.push("/settings/authroute")}
-      //       className="p-2 bg-abs-700 rounded-lg border border-abs-500"
-      //     >
-      //       <Text className="text-lg font-semibold text-white">Update ABS Info</Text>
-      //     </Pressable>
-      //   </View>
-      // </View>
-    );
+    return <ABSErrorView error={error} />;
   }
 
   return (
