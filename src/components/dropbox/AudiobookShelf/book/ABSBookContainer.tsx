@@ -10,8 +10,6 @@ import {
   TouchableOpacity,
 } from "react-native";
 import React, { useEffect, useMemo, useState } from "react";
-import { AudioFile, Media } from "@store/data/absTypes";
-import { downloadFileBlob, getCleanFileName } from "@store/data/fileSystemAccess";
 import ABSFile from "./ABSFile";
 import ABSActionBar from "./ABSActionBar";
 import { absTagFiles } from "@store/data/absTagFile";
@@ -33,7 +31,12 @@ import {
 import { createFolderMetadataKey, useDropboxStore } from "@store/store-dropbox";
 import { useABSStore } from "@store/store-abs";
 import { router } from "expo-router";
-import { ABSGetItemDetails, absSetBookToFinished } from "@store/data/absAPI";
+import {
+  ABSGetItemDetails,
+  absSetBookToFinished,
+  absSetFavoriteTag,
+  getUserFavoriteTagInfo,
+} from "@store/data/absAPI";
 import { formatSeconds } from "@utils/formatUtils";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -62,7 +65,7 @@ const ABSBookContainer = ({ data }: Props) => {
   const clearSearchBar = useABSStore((state) => state.clearSearchBar);
   const dropboxActions = useDropboxStore((state) => state.actions);
   const folderAttributes = useDropboxStore((state) => state.folderAttributes);
-
+  const userFavTagValue = getUserFavoriteTagInfo().favoriteUserTagValue;
   const [showDescription, setShowDescription] = React.useState(false);
   const authors = media?.metadata?.authorName || formatAuthors(media?.metadata?.authors);
   const taggedAudioFiles = useMemo(
@@ -96,6 +99,13 @@ const ABSBookContainer = ({ data }: Props) => {
       "",
       coverURI
     );
+
+    const itemId = media.libraryItemId;
+    const tags =
+      action === "remove"
+        ? media.tags.filter((el) => el !== userFavTagValue)
+        : [...media.tags, userFavTagValue];
+    await absSetFavoriteTag(itemId, tags);
   };
 
   const handleToggleRead = async () => {

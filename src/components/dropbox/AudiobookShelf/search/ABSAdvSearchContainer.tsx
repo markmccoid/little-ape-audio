@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, Pressable, ScrollView, TouchableOpacity } from "react-native";
 import React from "react";
 import { useFocusEffect } from "expo-router";
 import ABSAdvSearchGenres from "./ABSAdvSearchGenres";
@@ -7,6 +7,8 @@ import HiddenContainer from "@components/common/hiddenContainer/HiddenContainer"
 import { useABSStore } from "@store/store-abs";
 import ABSResultSearchInputText from "./ABSSearchInputText";
 import { useGetAllABSBooks } from "@store/data/absHooks";
+import { CheckCircleIcon, EmptyCircleIcon } from "@components/common/svg/Icons";
+import { colors } from "@constants/Colors";
 
 const buildExtraInfo = (selectedItems: string[]) => {
   if (!selectedItems || selectedItems?.length === 0) return "";
@@ -26,6 +28,7 @@ const ABSAdvSearchContainer = () => {
   const updateDescription = (description: string) => {
     updateSearchObject({ description });
   };
+
   return (
     <View className="bg-abs-50 h-full">
       <View className="p-1 border-b border-abs-800 mb-2 flex-row justify-center bg-abs-400">
@@ -37,6 +40,24 @@ const ABSAdvSearchContainer = () => {
         </Text>
       </View>
       <ScrollView className="flex-col bg-abs-50" contentContainerStyle={{}}>
+        <TouchableOpacity
+          className="mt-2 mb-2"
+          onPress={() => updateSearchObject({ favorites: !searchObject.favorites })}
+        >
+          <View className="ml-2 flex-row items-center">
+            {searchObject.favorites ? (
+              <>
+                <CheckCircleIcon size={20} color={colors.abs900} />
+                <Text className="ml-2 text-abs-900">Showing Favorites</Text>
+              </>
+            ) : (
+              <>
+                <EmptyCircleIcon size={20} color={colors.abs950} />
+                <Text className="ml-2 text-abs-950">Show Favorites</Text>
+              </>
+            )}
+          </View>
+        </TouchableOpacity>
         <HiddenContainer
           title="Genres"
           style={{ height: 200 }}

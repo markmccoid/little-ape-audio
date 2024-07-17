@@ -4,6 +4,7 @@ import {
   absGetItemDetails,
   absGetLibraryFilterData,
   absGetLibraryItems,
+  getUserFavoriteTagInfo,
 } from "./absAPI";
 import { reverse, sortBy } from "lodash";
 import { useABSStore } from "@store/store-abs";
@@ -29,9 +30,15 @@ export const useGetFilterData = () => {
 //~~    Stale time is 10 minutes
 //~~ ================================================================
 export const useGetAllABSBooks = () => {
-  const { title, author, authorOrTitle, description, genres, tags } = useABSStore(
-    (state) => state.searchObject
-  );
+  const {
+    title,
+    author,
+    authorOrTitle,
+    description,
+    genres,
+    tags,
+    favorites: showFavorites,
+  } = useABSStore((state) => state.searchObject);
   const { field, direction } = useABSStore((state) => state.resultSort);
   const { data, ...rest } = useQuery({
     queryKey: ["allABSBooks"],
@@ -72,7 +79,15 @@ export const useGetAllABSBooks = () => {
   //   };
   // }
 
-  if (!title && !author && !description && !genres?.length && !tags?.length && !authorOrTitle) {
+  if (
+    !title &&
+    !author &&
+    !description &&
+    !genres?.length &&
+    !tags?.length &&
+    !authorOrTitle &&
+    !showFavorites
+  ) {
     const filterData = direction === "asc" ? sortBy(data, [field]) : reverse(sortBy(data, [field]));
     return {
       books: filterData,
@@ -83,6 +98,7 @@ export const useGetAllABSBooks = () => {
   }
   // Filter the data.
   let filterData: ABSGetLibraryItems = [];
+  let favoriteTag = getUserFavoriteTagInfo().favoriteUserTagValue.toLowerCase();
   for (const book of data) {
     const bookTitle = book.title.toLowerCase() || "";
     const bookAuthor = book.author.toLowerCase() || "";
@@ -105,6 +121,10 @@ export const useGetAllABSBooks = () => {
     includeFlag = checkArray(book?.genres, genres, includeFlag);
     // -- Tags match
     includeFlag = checkArray(book?.tags, tags, includeFlag);
+    // -- showFavorite match
+    if (showFavorites) {
+      includeFlag = checkArray(book?.tags, [favoriteTag], includeFlag);
+    }
 
     if (includeFlag) {
       filterData.push(book);

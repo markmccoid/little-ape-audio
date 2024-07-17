@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { saveToAsyncStorage } from "./data/asyncStorage";
+import { btoa } from "react-native-quick-base64";
 
 export type UserInfo = {
   id: string;
@@ -9,6 +10,8 @@ export type UserInfo = {
   type: string;
   token: string;
   absURL: string;
+  // base64 of <username>-laab-favorite
+  favoriteSearchString?: string;
 };
 
 export type StoredLibraries = {
@@ -30,6 +33,7 @@ export type SearchObject = {
   description?: string;
   genres?: string[];
   tags?: string[];
+  favorites?: boolean;
 };
 
 export type ABSState = {
@@ -62,7 +66,8 @@ export const useABSStore = create<ABSState>((set, get) => ({
   clearSearchBar: () => {},
   actions: {
     saveUserInfo: async (userInfo) => {
-      set({ userInfo });
+      const favoriteSearchString = btoa(`${userInfo.username}-laab-favorite`);
+      set({ userInfo: { ...userInfo, favoriteSearchString } });
 
       await absSaveStore();
     },

@@ -5,18 +5,30 @@ import { getCoverURI } from "@store/data/absUtils";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useRouter } from "expo-router";
 import { formatSeconds } from "@utils/formatUtils";
-import { BookIcon, DurationIcon, ReadIcon, SeriesIcon } from "@components/common/svg/Icons";
+import {
+  BookIcon,
+  DurationIcon,
+  MDHeartIcon,
+  ReadIcon,
+  SeriesIcon,
+} from "@components/common/svg/Icons";
 import { colors } from "@constants/Colors";
+import { useDropboxStore } from "@store/store-dropbox";
 
 type Unpacked<T> = T extends (infer U)[] ? U : T;
 type Props = {
   book: Unpacked<ABSGetLibraryItems>;
   index: number;
+  isFavorite?: boolean;
   includeSeriesLink?: boolean;
 };
-const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => {
+const ABSResultsBookRow = ({
+  book,
+  index,
+  isFavorite = false,
+  includeSeriesLink = true,
+}: Props) => {
   const router = useRouter();
-
   const { data, isLoading, error } = useQuery({
     queryKey: [`${book.id}-cover`],
     queryFn: async () => (await getCoverURI(book.cover)).coverURL,
@@ -90,6 +102,15 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
                 <View>
                   <BookIcon color="green" size={20} />
                   <ReadIcon style={{ position: "absolute", top: 2, left: 5 }} size={10} />
+                </View>
+              )}
+              {isFavorite ? (
+                <View>
+                  <MDHeartIcon color="red" size={20} />
+                </View>
+              ) : (
+                <View>
+                  <MDHeartIcon color="red" size={20} style={{ display: "none" }} />
                 </View>
               )}
             </View>

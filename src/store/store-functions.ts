@@ -1,4 +1,3 @@
-import { AudioFile } from "./data/absTypes";
 // import { SetState, StateCreator, StoreApi } from "zustand";
 import { getAudioFileTags } from "../utils/audioUtils";
 import { saveToAsyncStorage } from "./data/asyncStorage";
@@ -16,7 +15,6 @@ import TrackPlayer from "react-native-track-player";
 import { BookJSONMetadata, CleanBookMetadata, cleanOneBook } from "@utils/audiobookMetadata";
 import { buildCoverURL, getCoverURI } from "./data/absUtils";
 import { absGetItemDetails } from "./data/absAPI";
-import { getLocalImage } from "./store-dropbox";
 let isCriticalSectionLocked = false;
 const gdrive = new GDrive();
 

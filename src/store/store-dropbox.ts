@@ -1,5 +1,4 @@
 import { resolveABSImage } from "./../utils/otherUtils";
-import { SourceLocation } from "./../../node_modules/@babel/types/lib/index-legacy.d";
 import { Alert, Image } from "react-native";
 import { defaultImages, getRandomNumber } from "./storeUtils";
 import uuid from "react-native-uuid";
@@ -20,11 +19,8 @@ import { AudioSourceType } from "@app/audio/dropbox";
 import { AUDIO_FORMATS } from "@utils/constants";
 import { ProcessedBookData, ScannedFolder } from "./types";
 import { differenceInDays, format } from "date-fns";
-import { getJsonDataByFileID } from "@utils/googleUtils";
 import { sanitizeString } from "@utils/otherUtils";
-import { router } from "expo-router";
-import { AudioFile } from "./data/absTypes";
-
+import { absUpdateLocalFavorites } from "@store/data/absAPI";
 //-- ==================================
 //-- DROPBOX STORE
 //-- ==================================
@@ -132,6 +128,8 @@ type DropboxState = {
     // Returns the dropbox path to go to when the back button is pressed.
     popFolderNavigation: () => FolderNavigation;
     clearFolderNavigation: () => void;
+    // only used by ABS to initialize folderAttributes with Favorites from ABS Database
+    initABSFolderAttribiutes: () => Promise<string>;
     updateFolderAttribute: (
       id: string,
       type: "isFavorite" | "isRead",
@@ -213,18 +211,68 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
     clearFolderNavigation: () => {
       set({ folderNavigation: [] });
     },
+    initABSFolderAttribiutes: async () => {
+      // query ABS and get current favorites
+      const attributeRecords = await absUpdateLocalFavorites();
+      //
+      const attributes = [...get().folderAttributes];
+      // Set all ABS attributes flagForDelete to true
+      // this allows us to delete favs that were removed in the ABS DB if not toggled in next step
+      const absFlaggedAttribs = [];
+      for (const attrib of attributes) {
+        if (attrib.audioSource === "abs") {
+          attrib.flagForDelete = true;
+        }
+        absFlaggedAttribs.push(attrib);
+      }
+      // Loop through passed ABS records to add
+      for (const attr of attributeRecords) {
+        const id = createFolderMetadataKey(attr.itemId);
+        // If the favorite already exists just set the flagForDelete to false
+        const foundIndex = absFlaggedAttribs.findIndex((el) => el.id === id);
+
+        if (foundIndex !== -1) {
+          absFlaggedAttribs[foundIndex].flagForDelete = false;
+          absFlaggedAttribs[foundIndex].isFavorite = true;
+          continue;
+        }
+        //
+
+        absFlaggedAttribs.push({
+          id,
+          pathToFolder: attr.itemId,
+          parentFolder: "",
+          imageURL: resolveABSImage(attr.imageURL),
+          defaultImage: Image.resolveAssetSource(defaultImages[`image${getRandomNumber()}`]).uri,
+          localImageName: undefined,
+          title: attr.folderNameIn.split("~")[0],
+          author: attr.folderNameIn.split("~")[1],
+          categoryOne: "AudiobookShelf",
+          categoryTwo: "",
+          audioSource: "abs",
+          isFavorite: true,
+        });
+      }
+      //REMOVE any items flagged for delete
+      const finalAttributes = absFlaggedAttribs.filter((el) => !el?.flagForDelete);
+
+      set({ folderAttributes: finalAttributes });
+      await saveToAsyncStorage("folderattributes", finalAttributes);
+      return "success";
+    },
     updateFolderAttribute: async (
-      pathIn,
-      type,
-      action,
-      folderNameIn,
-      audioSource,
-      parentFolderId,
+      pathIn, // for ABS this is the item id
+      type, // favorite or read
+      action, // add or remove
+      folderNameIn, // for ABS title ~ author
+      audioSource, // google, dropbox or abs
+      parentFolderId, // empty for abs
       imageURL?: string // only to be used by ABS
     ) => {
       const id = createFolderMetadataKey(pathIn);
       const attributes = [...get().folderAttributes];
       let currAttribute = attributes?.find((el) => el.id === id);
+      // -- No attribute found for passed data, must create it
       if (!currAttribute) {
         // If currAttrtibute doesn't exist, means we are creating it
         // so must grab the image from folderMetadata.
@@ -271,7 +319,7 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
           });
         }
       }
-
+      // -- Attribute WAS found for passed data, just need to update it
       for (let i = 0; i < attributes.length; i++) {
         if (attributes[i].id === id) {
           attributes[i] = { ...attributes[i], [type]: !!(action === "add") };

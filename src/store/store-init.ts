@@ -1,3 +1,4 @@
+import { absGetLibraryItems } from "./data/absAPI";
 import {
   loadFromAsyncStorage,
   removeFromAsyncStorage,
@@ -76,8 +77,8 @@ export const onInitialize = async () => {
     jumpForwardSeconds: settings?.jumpForwardSeconds || 15,
     jumpBackwardSeconds: settings?.jumpBackwardSeconds || 15,
   });
+  // Grab actions so we can reapply and not lose them when setting the other values
   const absActions = useABSStore.getState().actions;
-
   useABSStore.setState({
     ...audiobookshelfSettings,
     // searchObject: {},

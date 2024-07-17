@@ -11,7 +11,10 @@ import { customEncodeParens } from "@utils/otherUtils";
 const ShowFavoritedBooks = () => {
   const actions = useDropboxStore((state) => state.actions);
   const folderAttributes = useDropboxStore((state) => state.folderAttributes);
-
+  console.log(
+    "FOlder attributes",
+    folderAttributes.map((el) => `${el.title}==${el.isFavorite}`)
+  );
   const favBooks = folderAttributes
     .filter((el) => el.isFavorite)
     .sort((a, b) => a.favPosition - b.favPosition);

@@ -12,6 +12,7 @@ import ABSErrorView from "./ABSErrorView";
 import ABSTagContextMenu from "./search/ABSTagContextMenu";
 import ABSGenreContextMenu from "./search/ABSGenreContextMenu";
 import { debounce } from "lodash";
+import { useDropboxStore } from "@store/store-dropbox";
 
 const parseSearchObject = (searchObject: SearchObject) => {
   return Object.entries(searchObject).reduce((acc, [key, value]) => {
@@ -36,7 +37,6 @@ const ABSMainContainer = () => {
   const setSearchBarClearFn = useABSStore((state) => state.actions.setSearchBarClearFn);
   const searchObject = useABSStore((state) => state.searchObject);
   const searchBarRef = useRef<SearchBarCommands>();
-  const router = useRouter();
   const navigation = useNavigation();
   const searchKeys = parseSearchObject(searchObject);
 

@@ -4,14 +4,22 @@ import ABSResultsBookRow from "./ABSResultsBookRow";
 import { properCase } from "@utils/otherUtils";
 import { ABSGetLibraryItems } from "@store/data/absAPI";
 import { SearchBarCommands } from "react-native-screens";
+import { createFolderMetadataKey, useDropboxStore } from "@store/store-dropbox";
+import { create } from "lodash";
 
 type Props = {
   books: ABSGetLibraryItems;
 };
 const ABSBookResults = ({ books }: Props) => {
-  const [scrollY, setScrollY] = useState(0);
+  const folderAttributes = useDropboxStore((state) => state.folderAttributes).map((el) => el.id);
+
   const renderItem = ({ item, index }) => (
-    <ABSResultsBookRow book={item} index={index} key={item.id} />
+    <ABSResultsBookRow
+      book={item}
+      index={index}
+      key={item.id}
+      isFavorite={folderAttributes.includes(createFolderMetadataKey(item.id))}
+    />
   );
 
   return (

@@ -15,6 +15,7 @@ import { useABSStore } from "@store/store-abs";
 import { Alert } from "react-native";
 import { btoa } from "react-native-quick-base64";
 import { buildCoverURL, getCoverURI } from "./absUtils";
+import { useDropboxStore } from "@store/store-dropbox";
 
 //~ =======
 //~ UTILS
@@ -165,6 +166,7 @@ export const absGetLibraryItems = async ({
   const libraryIdToUse = libraryId || activeLibraryId;
   let response;
   let progressresponse;
+  let favresponse;
   let queryParams = "";
 
   if (filterType) {
@@ -177,20 +179,30 @@ export const absGetLibraryItems = async ({
   const url = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items${queryParams}`;
   // URL to get progess.finished books
   const progressurl = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items?filter=progress.ZmluaXNoZWQ=`;
-  // console.log("absGetLibraryItems-HIT DB", libraryIdToUse, url);
-
+  // URL to get tags.<user>-laab-favorite list of books
+  const favoriteSearchString = getUserFavoriteTagInfo().favoriteSearchString;
+  const favoriteurl = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items?filter=tags.${favoriteSearchString}`;
+  //~~ Query for "progress", checking if isFinished so we can set the Read/Not Read on book list
   try {
+    // Get all books
     response = await axios.get(url, { headers: authHeader });
+    // Get book progress
     progressresponse = await axios.get(progressurl, { headers: authHeader });
+    // query for <user>-laab-favorite
+    favresponse = await axios.get(favoriteurl, { headers: authHeader });
   } catch (error) {
+    // Don't throw error, maybe an alert or a log or a toast
     console.log("error", error);
-    throw error;
+    // throw error;
   }
 
   const libraryItems = response.data as GetLibraryItemsResponse;
   // Get finished items
   const finishedItemIds = progressresponse?.data?.results?.map((el) => el.id);
   const finishedItemIdSet = new Set(finishedItemIds);
+  const favoritedItemIds = favresponse?.data?.results?.map((el) => el.id);
+
+  const favoritedItemIdSet = new Set(favoritedItemIds);
 
   const booksMin = libraryItems.results.map((item) => {
     return {
@@ -212,6 +224,7 @@ export const absGetLibraryItems = async ({
       tags: item.media.tags,
       asin: item.media.metadata.asin,
       isFinished: finishedItemIdSet.has(item.id),
+      isFavorite: favoritedItemIdSet.has(item.id),
     };
   });
   return booksMin;
@@ -278,6 +291,57 @@ export const absGetItemDetails = async (itemId?: string) => {
     authorBookCount,
   };
 };
+
+//~~ ========================================================
+//~~ absUpdateLocalFavorites
+//~~ reads favorites for current user <user>-laab-favorite
+//~~ from ABS db and returns data to be used to update
+//~~ dropboxStore.folderAttributes
+//~~ called from store-dropbox.ts -> initABSFolderAttribiutes
+//~~ ========================================================
+export const absUpdateLocalFavorites = async () => {
+  let favoriteSearchString = getUserFavoriteTagInfo().favoriteSearchString;
+  // Get ABS Favorites
+  const favs = await absGetLibraryItems({
+    filterType: "tags",
+    filterValue: favoriteSearchString,
+  });
+
+  return favs.map((el) => {
+    return {
+      itemId: el.id,
+      type: "isFavorite",
+      folderNameIn: `${el.title}~${el.author}`,
+      imageURL: el.cover,
+    } as const;
+  });
+};
+
+//~~ ========================================================
+//~~ absSetFavoriteTag
+//~~ NOTE: all tags must be sent.  This will overwrite all tags
+//~~  with tags parameter
+//~~ ========================================================
+export const absSetFavoriteTag = async (itemId: string, tags: string[]) => {
+  const url = `https://abs.mccoidco.xyz/api/items/${itemId}/media`;
+  const authHeader = getAuthHeader();
+  const data = {
+    tags,
+  };
+
+  try {
+    const response = await axios.patch(url, data, {
+      headers: {
+        "Content-Type": "application/json",
+        ...authHeader,
+      },
+    });
+  } catch (error) {
+    console.log("error", error);
+    throw error;
+  }
+};
+
 //~~ ========================================================
 //~~ absDownloadItem
 //~~ ========================================================
@@ -304,4 +368,21 @@ export const absSetBookToFinished = async (itemId: string, finishedFlag: boolean
   if (resp.status !== 200) {
     throw new Error("Item Not Found or Other Error setting isFinished");
   }
+};
+
+//~~ ========================================================
+//~~ getUserFavSearchTag
+//~~ returns the <user>-laab-favorite string
+//~~ ========================================================
+export const getUserFavoriteTagInfo = () => {
+  const userInfo = useABSStore.getState().userInfo;
+  let favoriteSearchString = userInfo?.favoriteSearchString;
+  if (!favoriteSearchString) {
+    favoriteSearchString = btoa(`${userInfo.username}-laab-favorite`);
+    useABSStore.setState({ userInfo: { ...userInfo, favoriteSearchString } });
+  }
+  return {
+    favoriteSearchString,
+    favoriteUserTagValue: `${userInfo.username}-laab-favorite`,
+  };
 };
