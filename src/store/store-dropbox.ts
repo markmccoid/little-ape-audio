@@ -233,7 +233,14 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
 
         if (foundIndex !== -1) {
           absFlaggedAttribs[foundIndex].flagForDelete = false;
-          absFlaggedAttribs[foundIndex].isFavorite = true;
+          absFlaggedAttribs[foundIndex].isFavorite = false;
+          absFlaggedAttribs[foundIndex].isRead = false;
+          if (attr.type.includes("isFavorite")) {
+            absFlaggedAttribs[foundIndex].isFavorite = true;
+          }
+          if (attr.type.includes("isRead")) {
+            absFlaggedAttribs[foundIndex].isRead = true;
+          }
           continue;
         }
         //

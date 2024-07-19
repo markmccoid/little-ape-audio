@@ -10,6 +10,8 @@ import { reverse, sortBy } from "lodash";
 import { useABSStore } from "@store/store-abs";
 import { useMemo } from "react";
 import { btoa } from "react-native-quick-base64";
+import { useDropboxStore } from "@store/store-dropbox";
+import { sanitizeString } from "@utils/otherUtils";
 
 //~~ ================================================================
 //~~ useGetFilterData - Get the filter data for the library
@@ -30,6 +32,7 @@ export const useGetFilterData = () => {
 //~~    Stale time is 10 minutes
 //~~ ================================================================
 export const useGetAllABSBooks = () => {
+  const folderAttributes = useDropboxStore((state) => state.folderAttributes);
   const {
     title,
     author,
@@ -38,6 +41,7 @@ export const useGetAllABSBooks = () => {
     genres,
     tags,
     favorites: showFavorites,
+    isRead: isReadOption,
   } = useABSStore((state) => state.searchObject);
   const { field, direction } = useABSStore((state) => state.resultSort);
   const { data, ...rest } = useQuery({
@@ -86,7 +90,8 @@ export const useGetAllABSBooks = () => {
     !genres?.length &&
     !tags?.length &&
     !authorOrTitle &&
-    !showFavorites
+    !showFavorites &&
+    !isReadOption
   ) {
     const filterData = direction === "asc" ? sortBy(data, [field]) : reverse(sortBy(data, [field]));
     return {
@@ -97,12 +102,19 @@ export const useGetAllABSBooks = () => {
     };
   }
   // Filter the data.
+  // Grab the folder attributes and create an array of ids that are marked as favs
+
+  const isFavoriteIds = folderAttributes.filter((el) => el.isFavorite).map((el) => el.id);
+  const isReadIds = folderAttributes.filter((el) => el.isRead).map((el) => el.id);
   let filterData: ABSGetLibraryItems = [];
   let favoriteTag = getUserFavoriteTagInfo().favoriteUserTagValue.toLowerCase();
+
   for (const book of data) {
     const bookTitle = book.title.toLowerCase() || "";
     const bookAuthor = book.author.toLowerCase() || "";
     const bookDescription = book.description?.toLowerCase() || "";
+    const isFavorite = isFavoriteIds.includes(sanitizeString(book.id));
+    const isRead = isReadIds.includes(sanitizeString(book.id));
 
     let includeFlag = undefined;
 
@@ -123,7 +135,12 @@ export const useGetAllABSBooks = () => {
     includeFlag = checkArray(book?.tags, tags, includeFlag);
     // -- showFavorite match
     if (showFavorites) {
-      includeFlag = checkArray(book?.tags, [favoriteTag], includeFlag);
+      const currFlag = includeFlag === undefined ? true : includeFlag;
+      includeFlag = isFavorite && currFlag;
+    }
+    if (isReadOption === "exclude") {
+      const currFlag = includeFlag === undefined ? true : includeFlag;
+      includeFlag = isRead && currFlag;
     }
 
     if (includeFlag) {

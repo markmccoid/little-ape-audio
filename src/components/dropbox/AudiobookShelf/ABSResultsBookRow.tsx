@@ -19,15 +19,9 @@ type Unpacked<T> = T extends (infer U)[] ? U : T;
 type Props = {
   book: Unpacked<ABSGetLibraryItems>;
   index: number;
-  isFavorite?: boolean;
   includeSeriesLink?: boolean;
 };
-const ABSResultsBookRow = ({
-  book,
-  index,
-  isFavorite = false,
-  includeSeriesLink = true,
-}: Props) => {
+const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => {
   const router = useRouter();
   const { data, isLoading, error } = useQuery({
     queryKey: [`${book.id}-cover`],
@@ -104,7 +98,7 @@ const ABSResultsBookRow = ({
                   <ReadIcon style={{ position: "absolute", top: 2, left: 5 }} size={10} />
                 </View>
               )}
-              {isFavorite ? (
+              {book.isFavorite ? (
                 <View>
                   <MDHeartIcon color="red" size={20} />
                 </View>

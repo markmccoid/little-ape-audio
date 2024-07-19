@@ -40,24 +40,49 @@ const ABSAdvSearchContainer = () => {
         </Text>
       </View>
       <ScrollView className="flex-col bg-abs-50" contentContainerStyle={{}}>
-        <TouchableOpacity
-          className="mt-2 mb-2"
-          onPress={() => updateSearchObject({ favorites: !searchObject.favorites })}
-        >
-          <View className="ml-2 flex-row items-center">
-            {searchObject.favorites ? (
-              <>
-                <CheckCircleIcon size={20} color={colors.abs900} />
-                <Text className="ml-2 text-abs-900">Showing Favorites</Text>
-              </>
-            ) : (
-              <>
-                <EmptyCircleIcon size={20} color={colors.abs950} />
-                <Text className="ml-2 text-abs-950">Show Favorites</Text>
-              </>
-            )}
-          </View>
-        </TouchableOpacity>
+        <View className="flex-row justify-between mr-3">
+          <TouchableOpacity
+            className="mt-2 mb-2"
+            onPress={() => updateSearchObject({ favorites: !searchObject.favorites })}
+          >
+            <View className="ml-2 flex-row items-center">
+              {searchObject.favorites ? (
+                <>
+                  <CheckCircleIcon size={20} color={colors.abs900} />
+                  <Text className="ml-2 text-abs-900">Showing Favorites</Text>
+                </>
+              ) : (
+                <>
+                  <EmptyCircleIcon size={20} color={colors.abs950} />
+                  <Text className="ml-2 text-abs-950">Show Favorites</Text>
+                </>
+              )}
+            </View>
+          </TouchableOpacity>
+          {/* isRead Exclude */}
+          <TouchableOpacity
+            className="mt-2 mb-2"
+            onPress={() =>
+              updateSearchObject({
+                isRead: searchObject.isRead === "exclude" ? undefined : "exclude",
+              })
+            }
+          >
+            <View className="ml-2 flex-row items-center">
+              {searchObject.isRead === "exclude" ? (
+                <>
+                  <CheckCircleIcon size={20} color={colors.abs900} />
+                  <Text className="ml-2 text-abs-900">Exclude Read</Text>
+                </>
+              ) : (
+                <>
+                  <EmptyCircleIcon size={20} color={colors.abs950} />
+                  <Text className="ml-2 text-abs-950">Exclude Read</Text>
+                </>
+              )}
+            </View>
+          </TouchableOpacity>
+        </View>
         <HiddenContainer
           title="Genres"
           style={{ height: 200 }}

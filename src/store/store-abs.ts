@@ -34,6 +34,7 @@ export type SearchObject = {
   genres?: string[];
   tags?: string[];
   favorites?: boolean;
+  isRead?: "include" | "exclude" | undefined;
 };
 
 export type ABSState = {

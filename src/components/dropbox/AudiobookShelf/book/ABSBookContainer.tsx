@@ -87,6 +87,7 @@ const ABSBookContainer = ({ data }: Props) => {
     return folderAttributes?.find((el) => el.id === id);
   }, [folderAttributes]);
 
+  //~~ Handle Favorites
   const handleToggleFavorite = async () => {
     const action = !!currFolderAttributes?.isFavorite ? "remove" : "add";
 
@@ -107,10 +108,19 @@ const ABSBookContainer = ({ data }: Props) => {
         : [...media.tags, userFavTagValue];
     await absSetFavoriteTag(itemId, tags);
   };
-
+  //~~ Handle isRead
   const handleToggleRead = async () => {
     try {
       setIsRead(!isRead);
+      await dropboxActions.updateFolderAttribute(
+        media.libraryItemId,
+        "isRead",
+        isRead ? "remove" : "add",
+        `${media.metadata.title}~${media.metadata.authors[0].name}`,
+        "abs",
+        "",
+        coverURI
+      );
       await absSetBookToFinished(media.libraryItemId, !isRead);
       queryClient.invalidateQueries({ queryKey: ["allABSBooks"] });
     } catch (e) {

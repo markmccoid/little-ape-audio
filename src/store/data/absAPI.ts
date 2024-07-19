@@ -182,18 +182,24 @@ export const absGetLibraryItems = async ({
   // URL to get tags.<user>-laab-favorite list of books
   const favoriteSearchString = getUserFavoriteTagInfo().favoriteSearchString;
   const favoriteurl = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items?filter=tags.${favoriteSearchString}`;
-  //~~ Query for "progress", checking if isFinished so we can set the Read/Not Read on book list
   try {
     // Get all books
     response = await axios.get(url, { headers: authHeader });
+  } catch (error) {
+    // Don't throw error, maybe an alert or a log or a toast
+    console.log("absAPI-absGetLibraryItems-Main", error);
+    throw error;
+  }
+
+  //~~ Query for "progress", checking if isFinished so we can set the Read/Not Read on book list
+  try {
     // Get book progress
     progressresponse = await axios.get(progressurl, { headers: authHeader });
     // query for <user>-laab-favorite
     favresponse = await axios.get(favoriteurl, { headers: authHeader });
   } catch (error) {
     // Don't throw error, maybe an alert or a log or a toast
-    console.log("error", error);
-    // throw error;
+    console.log("absAPI-absGetLibraryItems-Progress", error);
   }
 
   const libraryItems = response.data as GetLibraryItemsResponse;
@@ -299,7 +305,13 @@ export const absGetItemDetails = async (itemId?: string) => {
 //~~ dropboxStore.folderAttributes
 //~~ called from store-dropbox.ts -> initABSFolderAttribiutes
 //~~ ========================================================
+//!!! DOCUMENT!!!
 export const absUpdateLocalFavorites = async () => {
+  const authHeader = getAuthHeader();
+  const activeLibraryId = useABSStore.getState().activeLibraryId;
+  const libraryIdToUse = activeLibraryId;
+
+  // ~~ GET Favorites
   let favoriteSearchString = getUserFavoriteTagInfo().favoriteSearchString;
   // Get ABS Favorites
   const favs = await absGetLibraryItems({
@@ -307,7 +319,19 @@ export const absUpdateLocalFavorites = async () => {
     filterValue: favoriteSearchString,
   });
 
-  return favs.map((el) => {
+  // ~~ URL to get progess.finished books
+  const progressurl = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items?filter=progress.ZmluaXNoZWQ=`;
+  let progressresponse;
+  //~~ Query for "progress", checking if isFinished so we can set the Read/Not Read on book list
+  try {
+    // Get book progress
+    progressresponse = await axios.get(progressurl, { headers: authHeader });
+  } catch (error) {
+    // Don't throw error, maybe an alert or a log or a toast
+    console.log("absAPI-absUpdateLocalFavorites-Progress", error);
+  }
+
+  const favResults = favs.map((el) => {
     return {
       itemId: el.id,
       type: "isFavorite",
@@ -315,6 +339,37 @@ export const absUpdateLocalFavorites = async () => {
       imageURL: el.cover,
     } as const;
   });
+
+  const readResults = progressresponse?.data?.results?.map((el) => {
+    return {
+      itemId: el.id,
+      type: "isRead",
+      folderNameIn: `${el.media.metadata.authorName}~${el.media.metadata.authorName}`,
+      imageURL: buildCoverURL(el.id),
+    };
+  });
+
+  // Step 1: Create a map for quick lookup
+  const resultMap = new Map();
+
+  // Helper function to merge items
+  const mergeItems = (item) => {
+    if (resultMap.has(item.itemId)) {
+      const existingItem = resultMap.get(item.itemId);
+      existingItem.type = [...new Set([...existingItem.type, item.type])];
+    } else {
+      resultMap.set(item.itemId, { ...item, type: [item.type] });
+    }
+  };
+
+  // Step 2: Merge the arrays
+  favResults.forEach(mergeItems);
+  readResults.forEach(mergeItems);
+
+  // Step 3: Convert the map back to an array
+  const combinedResults = Array.from(resultMap.values());
+  console.log(combinedResults.map((el) => `${el.folderNameIn}-${el.type}`));
+  return combinedResults;
 };
 
 //~~ ========================================================
