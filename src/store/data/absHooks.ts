@@ -136,11 +136,11 @@ export const useGetAllABSBooks = () => {
     // -- showFavorite match
     if (showFavorites) {
       const currFlag = includeFlag === undefined ? true : includeFlag;
-      includeFlag = isFavorite && currFlag;
+      includeFlag = showFavorites === "exclude" ? !isFavorite && currFlag : isFavorite && currFlag;
     }
-    if (isReadOption === "exclude") {
+    if (isReadOption) {
       const currFlag = includeFlag === undefined ? true : includeFlag;
-      includeFlag = isRead && currFlag;
+      includeFlag = isReadOption === "exclude" ? !isRead && currFlag : isRead && currFlag;
     }
 
     if (includeFlag) {

@@ -17,9 +17,13 @@ const ABSSearchChip = ({ activeSearchItemKey, activeSearchItemValue }: Props) =>
   return (
     <Pressable onPress={deselectSearchItem}>
       <View
-        className="bg-abs-100 p-1 rounded-lg flex-row items-center"
+        className="bg-abs-100 p-1 rounded-lg flex-row items-center mt-1"
         style={{ borderWidth: StyleSheet.hairlineWidth, borderColor: colors.abs950 }}
       >
+        {(activeSearchItemKey === "favorites" || activeSearchItemKey === "isRead") && (
+          <Text className="text-xs font-semibold text-amber-950">{`${activeSearchItemValue} `}</Text>
+        )}
+
         <Text className="text-xs font-semibold text-amber-950">{activeSearchItemKey}</Text>
 
         {activeSearchItemKey === "author" && (

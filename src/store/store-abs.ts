@@ -33,8 +33,8 @@ export type SearchObject = {
   description?: string;
   genres?: string[];
   tags?: string[];
-  favorites?: boolean;
-  isRead?: "include" | "exclude" | undefined;
+  favorites?: "only" | "exclude" | undefined;
+  isRead?: "only" | "exclude" | undefined;
 };
 
 export type ABSState = {

@@ -306,7 +306,7 @@ export const absGetItemDetails = async (itemId?: string) => {
 //~~ called from store-dropbox.ts -> initABSFolderAttribiutes
 //~~ ========================================================
 //!!! DOCUMENT!!!
-export const absUpdateLocalFavorites = async () => {
+export const absUpdateLocalAttributes = async () => {
   const authHeader = getAuthHeader();
   const activeLibraryId = useABSStore.getState().activeLibraryId;
   const libraryIdToUse = activeLibraryId;
@@ -368,7 +368,6 @@ export const absUpdateLocalFavorites = async () => {
 
   // Step 3: Convert the map back to an array
   const combinedResults = Array.from(resultMap.values());
-  console.log(combinedResults.map((el) => `${el.folderNameIn}-${el.type}`));
   return combinedResults;
 };
 

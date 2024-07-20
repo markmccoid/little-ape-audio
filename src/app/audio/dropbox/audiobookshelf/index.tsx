@@ -11,7 +11,8 @@ const audiobookshelf = () => {
   const initABSFolderAttribiutes = useDropboxStore(
     (state) => state.actions.initABSFolderAttribiutes
   );
-
+  // No data returned, we are reading Favorite and Read(isFinsihed) attributes
+  // from ABS database and syncing with our folderAttributes object in store-dropbox
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["initABSFavorites"],
     queryFn: async () => await initABSFolderAttribiutes(),

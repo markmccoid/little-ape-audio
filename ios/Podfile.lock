@@ -1348,6 +1348,8 @@ PODS:
     - Yoga
   - react-native-safe-area-context (4.10.1):
     - React-Core
+  - react-native-segmented-control (2.5.2):
+    - React-Core
   - react-native-slider (4.5.2):
     - DoubleConversion
     - glog
@@ -1755,6 +1757,7 @@ DEPENDENCIES:
   - react-native-pager-view (from `../node_modules/react-native-pager-view`)
   - react-native-quick-base64 (from `../node_modules/react-native-quick-base64`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
+  - "react-native-segmented-control (from `../node_modules/@react-native-segmented-control/segmented-control`)"
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
   - react-native-track-player (from `../node_modules/react-native-track-player`)
   - React-nativeconfig (from `../node_modules/react-native/ReactCommon`)
@@ -1938,6 +1941,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-quick-base64"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
+  react-native-segmented-control:
+    :path: "../node_modules/@react-native-segmented-control/segmented-control"
   react-native-slider:
     :path: "../node_modules/@react-native-community/slider"
   react-native-track-player:
@@ -2082,6 +2087,7 @@ SPEC CHECKSUMS:
   react-native-pager-view: c1e29e1a6105a02807392ba822ad322447a72f55
   react-native-quick-base64: a74c4b2607b9de016877a8edb776b6ac59785809
   react-native-safe-area-context: dcab599c527c2d7de2d76507a523d20a0b83823d
+  react-native-segmented-control: b92809e9111013dfa266e1168ba366d62898d9a4
   react-native-slider: ce295d2bf830a7990af05b0bd70ab28c133e230c
   react-native-track-player: 82ef1756ffeea61140fea17519ecd6d64ec3cf3e
   React-nativeconfig: b0073a590774e8b35192fead188a36d1dca23dec

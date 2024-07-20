@@ -20,7 +20,7 @@ import { AUDIO_FORMATS } from "@utils/constants";
 import { ProcessedBookData, ScannedFolder } from "./types";
 import { differenceInDays, format } from "date-fns";
 import { sanitizeString } from "@utils/otherUtils";
-import { absUpdateLocalFavorites } from "@store/data/absAPI";
+import { absUpdateLocalAttributes } from "@store/data/absAPI";
 //-- ==================================
 //-- DROPBOX STORE
 //-- ==================================
@@ -213,7 +213,7 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
     },
     initABSFolderAttribiutes: async () => {
       // query ABS and get current favorites
-      const attributeRecords = await absUpdateLocalFavorites();
+      const attributeRecords = await absUpdateLocalAttributes();
       //
       const attributes = [...get().folderAttributes];
       // Set all ABS attributes flagForDelete to true

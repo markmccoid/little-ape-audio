@@ -96,7 +96,7 @@ const ABSMainContainer = () => {
         </View>
         {Object.keys(searchKeys).length > 0 && (
           <View
-            className="m-1 flex-row justify-start items-center px-2 py-1"
+            className="flex-row justify-start items-center px-2 pb-1 flex-wrap"
             style={{ borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.abs600 }}
           >
             {Object.keys(searchKeys).map((key: keyof SearchObject) => (
