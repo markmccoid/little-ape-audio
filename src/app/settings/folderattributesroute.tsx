@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, Pressable, TouchableOpacity, Image } from "react-native";
 import React, { useEffect, useState } from "react";
 import { FolderAttributeItem, useDropboxStore } from "@store/store-dropbox";
-import { BookIcon, EmptyMDHeartIcon, MDHeartIcon, ReadIcon } from "@components/common/svg/Icons";
+
 import SettingsFolderAttributeItem from "@components/settings/SettingsFolderAttributeItem";
 
 type SortedAttributes = {
@@ -21,7 +21,7 @@ const folderattributesroute = () => {
     const fiction = [];
     const nonFiction = [];
     const other = [];
-    for (const attribute of folderAttributes) {
+    for (const attribute of folderAttributes.filter((el) => el.audioSource !== "abs")) {
       if (attribute.categoryOne === "Fiction") {
         fiction.push(attribute);
       } else if (attribute.categoryOne === "Nonfiction") {
@@ -39,6 +39,7 @@ const folderattributesroute = () => {
 
   return (
     <View className="flex-1">
+      <Text className="text-base text-center">Does Not Show AudiobookShelf Items</Text>
       <ScrollView style={{ margin: 10, marginBottom: 30 }}>
         <View>
           {sortedAttributes?.fiction?.length > 0 && (

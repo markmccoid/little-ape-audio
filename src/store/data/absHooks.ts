@@ -64,25 +64,14 @@ export const useGetAllABSBooks = () => {
     };
   }
 
-  // const randNums = useMemo(() => generateRandomIntegers(25, 1, data?.length), []);
-  // If not filters for data, then return 25 random books
-  // if (!title && !author && !description && !genres?.length && !tags?.length) {
-  //   let discoverBooks = [];
-  //   for (const random of randNums) {
-  //     discoverBooks.push(data[random as number]);
-  //   }
-  //   discoverBooks =
-  //     direction === "asc"
-  //       ? sortBy(discoverBooks, [field])
-  //       : reverse(sortBy(discoverBooks, [field]));
-  //   return {
-  //     books: discoverBooks,
-  //     totalBookCount: data?.length,
-  //     selectedBookCount: -1,
-  //     ...rest,
-  //   };
-  // }
+  const isFavoriteIds = new Set(folderAttributes.filter((el) => el.isFavorite).map((el) => el.id));
+  const isReadIds = new Set(folderAttributes.filter((el) => el.isRead).map((el) => el.id));
 
+  const dataWAttributes = data?.map((el) => ({
+    ...el,
+    isFavorite: isFavoriteIds.has(sanitizeString(el.id)),
+    isFinished: isReadIds.has(sanitizeString(el.id)),
+  }));
   if (
     !title &&
     !author &&
@@ -93,7 +82,10 @@ export const useGetAllABSBooks = () => {
     !showFavorites &&
     !isReadOption
   ) {
-    const filterData = direction === "asc" ? sortBy(data, [field]) : reverse(sortBy(data, [field]));
+    const filterData =
+      direction === "asc"
+        ? sortBy(dataWAttributes, [field])
+        : reverse(sortBy(dataWAttributes, [field]));
     return {
       books: filterData,
       totalBookCount: filterData?.length || 0,
@@ -103,18 +95,15 @@ export const useGetAllABSBooks = () => {
   }
   // Filter the data.
   // Grab the folder attributes and create an array of ids that are marked as favs
-
-  const isFavoriteIds = folderAttributes.filter((el) => el.isFavorite).map((el) => el.id);
-  const isReadIds = folderAttributes.filter((el) => el.isRead).map((el) => el.id);
   let filterData: ABSGetLibraryItems = [];
   let favoriteTag = getUserFavoriteTagInfo().favoriteUserTagValue.toLowerCase();
 
-  for (const book of data) {
+  for (const book of dataWAttributes) {
     const bookTitle = book.title.toLowerCase() || "";
     const bookAuthor = book.author.toLowerCase() || "";
     const bookDescription = book.description?.toLowerCase() || "";
-    const isFavorite = isFavoriteIds.includes(sanitizeString(book.id));
-    const isRead = isReadIds.includes(sanitizeString(book.id));
+    const isFavorite = isFavoriteIds.has(sanitizeString(book.id));
+    const isRead = isReadIds.has(sanitizeString(book.id));
 
     let includeFlag = undefined;
 

@@ -18,14 +18,10 @@ import { AnimateHeight } from "@components/common/animations/AnimateHeight";
 import { colors } from "@constants/Colors";
 import { MotiView } from "moti";
 import {
-  BookIcon,
   DurationIcon,
-  EmptyMDHeartIcon,
-  MDHeartIcon,
   NarratedByIcon,
   PowerIcon,
   PublishedDateIcon,
-  ReadIcon,
   SeriesIcon,
 } from "@components/common/svg/Icons";
 import { createFolderMetadataKey, useDropboxStore } from "@store/store-dropbox";
@@ -39,6 +35,7 @@ import {
 } from "@store/data/absAPI";
 import { formatSeconds } from "@utils/formatUtils";
 import { useQueryClient } from "@tanstack/react-query";
+import { SymbolView } from "expo-symbols";
 
 type Props = {
   data: ABSGetItemDetails;
@@ -91,15 +88,16 @@ const ABSBookContainer = ({ data }: Props) => {
   const handleToggleFavorite = async () => {
     const action = !!currFolderAttributes?.isFavorite ? "remove" : "add";
 
-    await dropboxActions.updateFolderAttribute(
-      media.libraryItemId,
-      "isFavorite",
+    await dropboxActions.updateFolderAttribute({
+      id: media.libraryItemId,
+      type: "isFavorite",
       action,
-      `${media.metadata.title}~${media.metadata.authors[0].name}`,
-      "abs",
-      "",
-      coverURI
-    );
+      folderNameIn: `${media.metadata.title}~${media.metadata.authors[0].name}`,
+      audioSource: "abs",
+      parentFolderId: "",
+      imageURL: coverURI,
+      absId: media.libraryItemId,
+    });
 
     const itemId = media.libraryItemId;
     const tags =
@@ -112,15 +110,16 @@ const ABSBookContainer = ({ data }: Props) => {
   const handleToggleRead = async () => {
     try {
       setIsRead(!isRead);
-      await dropboxActions.updateFolderAttribute(
-        media.libraryItemId,
-        "isRead",
-        isRead ? "remove" : "add",
-        `${media.metadata.title}~${media.metadata.authors[0].name}`,
-        "abs",
-        "",
-        coverURI
-      );
+      await dropboxActions.updateFolderAttribute({
+        id: media.libraryItemId,
+        type: "isRead",
+        action: isRead ? "remove" : "add",
+        folderNameIn: `${media.metadata.title}~${media.metadata.authors[0].name}`,
+        audioSource: "abs",
+        parentFolderId: "",
+        imageURL: coverURI,
+        absId: media.libraryItemId,
+      });
       await absSetBookToFinished(media.libraryItemId, !isRead);
       queryClient.invalidateQueries({ queryKey: ["allABSBooks"] });
     } catch (e) {
@@ -167,19 +166,40 @@ const ABSBookContainer = ({ data }: Props) => {
           <View className="flex-row justify-between items-center">
             <TouchableOpacity onPress={handleToggleFavorite} className="ml-3 mt-1">
               {currFolderAttributes?.isFavorite ? (
-                <MDHeartIcon color="red" size={30} />
+                // <MDHeartIcon color="red" size={30} />
+                <SymbolView
+                  name="heart.fill"
+                  style={{ width: 33, height: 30 }}
+                  type="monochrome"
+                  tintColor={colors.deleteRed}
+                />
               ) : (
-                <EmptyMDHeartIcon size={30} />
+                // <EmptyMDHeartIcon size={30} />
+                <SymbolView
+                  name="heart"
+                  style={{ width: 33, height: 30 }}
+                  type="monochrome"
+                  tintColor={colors.abs950}
+                />
               )}
             </TouchableOpacity>
             <TouchableOpacity onPress={handleToggleRead} className="ml-4">
               {isRead ? (
                 <View>
-                  <BookIcon color="green" size={30} />
-                  <ReadIcon style={{ position: "absolute", top: 2, left: 5 }} size={20} />
+                  <SymbolView
+                    name="checkmark.square.fill"
+                    style={{ width: 33, height: 30 }}
+                    type="hierarchical"
+                    tintColor="green"
+                  />
                 </View>
               ) : (
-                <BookIcon size={30} />
+                <SymbolView
+                  name="book.closed"
+                  style={{ width: 30, height: 30 }}
+                  type="monochrome"
+                  tintColor={colors.amber950}
+                />
               )}
             </TouchableOpacity>
           </View>

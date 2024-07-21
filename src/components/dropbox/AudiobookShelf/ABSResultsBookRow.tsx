@@ -5,15 +5,9 @@ import { getCoverURI } from "@store/data/absUtils";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useRouter } from "expo-router";
 import { formatSeconds } from "@utils/formatUtils";
-import {
-  BookIcon,
-  DurationIcon,
-  MDHeartIcon,
-  ReadIcon,
-  SeriesIcon,
-} from "@components/common/svg/Icons";
+import { SymbolView, SymbolViewProps, SFSymbol } from "expo-symbols";
+import { DurationIcon, SeriesIcon } from "@components/common/svg/Icons";
 import { colors } from "@constants/Colors";
-import { useDropboxStore } from "@store/store-dropbox";
 
 type Unpacked<T> = T extends (infer U)[] ? U : T;
 type Props = {
@@ -38,7 +32,7 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
           styles.baseContainer,
           index !== 0 && styles.noBorderTop,
           showSeriesLink && styles.noBorderBottom,
-          book.isFinished && styles.finishedBook,
+          //  book.isFinished && styles.finishedBook,
         ]}
       >
         <View className="m-2">
@@ -57,6 +51,7 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
         >
           <View className="flex-col ml-2 mt-1 flex-1 justify-between mb-2">
             <View className="flex-col">
+              {/* Book Title */}
               <View className="flex-row ">
                 <Text
                   lineBreakMode="tail"
@@ -66,11 +61,13 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
                   {book.title}
                 </Text>
               </View>
+              {/* Book Author */}
               <View className="flex-row ">
                 <Text lineBreakMode="tail" numberOfLines={2} className="flex-1 text-amber-900">
                   by {book.author}
                 </Text>
               </View>
+              {/* CONDITIONAL Series */}
               {showInlineSeries && (
                 <View className="flex-row items-center justify-start bg-red">
                   <SeriesIcon size={16} color={colors.amber800} />
@@ -84,6 +81,7 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
                 </View>
               )}
             </View>
+            {/* Duration / Year / isRead / isFavorite */}
             <View className="flex-row justify-between mr-2 items-center">
               <View className="flex-row ">
                 <DurationIcon size={16} color={colors.amber900} />
@@ -91,22 +89,36 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
                   {` ${formatSeconds(book.duration, "verbose_no_seconds", true, false)}`}
                 </Text>
               </View>
-              <Text className=" font-semibold text-amber-700">{book.publishedYear}</Text>
-              {book.isFinished && (
-                <View>
-                  <BookIcon color="green" size={20} />
-                  <ReadIcon style={{ position: "absolute", top: 2, left: 5 }} size={10} />
-                </View>
-              )}
-              {book.isFavorite ? (
-                <View>
-                  <MDHeartIcon color="red" size={20} />
-                </View>
-              ) : (
-                <View>
-                  <MDHeartIcon color="red" size={20} style={{ display: "none" }} />
-                </View>
-              )}
+              <View className="flex-row mx-2">
+                <Text className="mr-3 font-semibold text-amber-700">{book.publishedYear}</Text>
+                {book.isFinished ? (
+                  <View>
+                    <SymbolView
+                      name="checkmark.square.fill"
+                      style={{ width: 21, height: 20 }}
+                      type="hierarchical"
+                      tintColor="green"
+                    />
+                    {/* <CheckSquareIcon color="green" size={20} /> */}
+                    {/* <ReadIcon style={{ position: "absolute", top: 2, left: 5 }} size={10} /> */}
+                  </View>
+                ) : (
+                  <View className="w-[21]" />
+                )}
+                {book.isFavorite ? (
+                  <View className="ml-2">
+                    {/* <MDHeartIcon color="red" size={20} /> */}
+                    <SymbolView
+                      name="heart.fill"
+                      style={{ width: 20, height: 18 }}
+                      type="monochrome"
+                      tintColor={colors.deleteRed}
+                    />
+                  </View>
+                ) : (
+                  <View className="ml-2 w-[20]" />
+                )}
+              </View>
             </View>
           </View>
         </Pressable>

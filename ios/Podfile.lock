@@ -329,6 +329,8 @@ PODS:
     - ExpoModulesCore
   - ExpoSharing (12.0.1):
     - ExpoModulesCore
+  - ExpoSymbols (0.1.4):
+    - ExpoModulesCore
   - ExpoWebBrowser (13.0.3):
     - ExpoModulesCore
   - EXSplashScreen (0.27.4):
@@ -1718,6 +1720,7 @@ DEPENDENCIES:
   - ExpoScreenOrientation (from `../node_modules/expo-screen-orientation/ios`)
   - ExpoSecureStore (from `../node_modules/expo-secure-store/ios`)
   - ExpoSharing (from `../node_modules/expo-sharing/ios`)
+  - ExpoSymbols (from `../node_modules/expo-symbols/ios`)
   - ExpoWebBrowser (from `../node_modules/expo-web-browser/ios`)
   - EXSplashScreen (from `../node_modules/expo-splash-screen/ios`)
   - EXUpdatesInterface (from `../node_modules/expo-updates-interface/ios`)
@@ -1866,6 +1869,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-secure-store/ios"
   ExpoSharing:
     :path: "../node_modules/expo-sharing/ios"
+  ExpoSymbols:
+    :path: "../node_modules/expo-symbols/ios"
   ExpoWebBrowser:
     :path: "../node_modules/expo-web-browser/ios"
   EXSplashScreen:
@@ -2047,6 +2052,7 @@ SPEC CHECKSUMS:
   ExpoScreenOrientation: 5d6a977177dc2f904cc072b51a0d37d0983c0d6a
   ExpoSecureStore: 5f6b712785986b54d95a92bd365aabb82a52088e
   ExpoSharing: 8db05dd85081219f75989a3db2c92fe5e9741033
+  ExpoSymbols: 5adb1166f2929fc8d2497b98d5c48c4b94effe33
   ExpoWebBrowser: 7595ccac6938eb65b076385fd23d035db9ecdc8e
   EXSplashScreen: d439ca817211886dc80a00f3761e3b6d861d7205
   EXUpdatesInterface: 996527fd7d1a5d271eb523258d603f8f92038f24

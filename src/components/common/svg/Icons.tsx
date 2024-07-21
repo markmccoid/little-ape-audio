@@ -26,6 +26,7 @@ export const EmptyCircleIcon = ({ size = 25, color, style }: Props) => {
 export const CheckCircleIcon = ({ size = 25, color, style }: Props) => {
   return <Feather name="check-circle" size={size} color={color} style={style} />;
 };
+
 export const SearchIcon = ({ size = 25, color, style }: Props) => {
   return <MaterialIcons name="search" size={size} color={color} style={style} />;
 };
@@ -164,9 +165,13 @@ export const AsteriskIcon = ({ size = 25, color, style }: Props) => {
   return <FontAwesome5 name="asterisk" color={color} size={size} style={style} />;
 };
 
-export const BookIcon = ({ size = 25, color, style }: Props) => {
-  return <Feather name="book" color={color} size={size} style={style} />;
+export const CheckSquareIcon = ({ size = 25, color, style }: Props) => {
+  return <FontAwesome name="check-square-o" color={color} size={size} style={style} />;
 };
+export const EmptySquareIcon = ({ size = 25, color, style }: Props) => {
+  return <FontAwesome name="square-o" size={size} color={color} style={style} />;
+};
+
 export const ReadIcon = ({ size = 25, color, style }: Props) => {
   return <MaterialCommunityIcons name="read" color={color} size={size} style={style} />;
 };

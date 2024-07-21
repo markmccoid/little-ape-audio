@@ -77,7 +77,8 @@
     "reanimated-color-picker": "^3.0.0",
     "typescript": "~5.3.3",
     "zeego": "^1.10.0",
-    "zustand": "^4.3.8"
+    "zustand": "^4.3.8",
+    "expo-symbols": "~0.1.4"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",

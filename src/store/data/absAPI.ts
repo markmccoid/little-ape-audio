@@ -417,9 +417,9 @@ export const absSetBookToFinished = async (itemId: string, finishedFlag: boolean
   const token = getToken();
   const data = { isFinished: finishedFlag };
   const url = `https://abs.mccoidco.xyz/api/me/progress/${itemId}`;
-  const resp = await axios.patch(url, data, { headers: authHeader });
-
-  if (resp.status !== 200) {
+  try {
+    const resp = await axios.patch(url, data, { headers: authHeader });
+  } catch (e) {
     throw new Error("Item Not Found or Other Error setting isFinished");
   }
 };

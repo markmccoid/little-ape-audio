@@ -74,6 +74,7 @@ export type FolderAttributeItem = {
   genre?: string;
   flagForDelete?: boolean;
   audioSource: AudioSourceType;
+  absId?: string;
 };
 
 export type MetadataErrorObj = {
@@ -130,15 +131,25 @@ type DropboxState = {
     clearFolderNavigation: () => void;
     // only used by ABS to initialize folderAttributes with Favorites from ABS Database
     initABSFolderAttribiutes: () => Promise<string>;
-    updateFolderAttribute: (
-      id: string,
-      type: "isFavorite" | "isRead",
-      action: "add" | "remove",
-      folderNameIn: string,
-      audioSource: AudioSourceType,
-      parentFolderId: string,
-      imageURL?: string
-    ) => Promise<void>;
+    updateFolderAttribute: ({
+      id,
+      type,
+      action,
+      folderNameIn,
+      audioSource,
+      parentFolderId,
+      imageURL,
+      absId,
+    }: {
+      id: string;
+      type: "isFavorite" | "isRead";
+      action: "add" | "remove";
+      folderNameIn: string;
+      audioSource: AudioSourceType;
+      parentFolderId: string;
+      imageURL?: string;
+      absId?: string;
+    }) => Promise<void>;
     addFavorite: (favPath: string, name: string, audioSource: AudioSourceType) => Promise<void>;
     removeFavorite: (favPath: string) => Promise<void>;
     isFolderFavorited: (folders: FolderEntry[]) => FolderEntry[];
@@ -258,6 +269,7 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
           categoryTwo: "",
           audioSource: "abs",
           isFavorite: true,
+          absId: attr.itemId,
         });
       }
       //REMOVE any items flagged for delete
@@ -267,15 +279,16 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       await saveToAsyncStorage("folderattributes", finalAttributes);
       return "success";
     },
-    updateFolderAttribute: async (
-      pathIn, // for ABS this is the item id
+    updateFolderAttribute: async ({
+      id: pathIn, // for ABS this is the item id
       type, // favorite or read
       action, // add or remove
       folderNameIn, // for ABS title ~ author
       audioSource, // google, dropbox or abs
       parentFolderId, // empty for abs
-      imageURL?: string // only to be used by ABS
-    ) => {
+      imageURL, // only to be used by ABS
+      absId,
+    }) => {
       const id = createFolderMetadataKey(pathIn);
       const attributes = [...get().folderAttributes];
       let currAttribute = attributes?.find((el) => el.id === id);
@@ -308,6 +321,7 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
             categoryOne: audioSource === "abs" ? "AudiobookShelf" : "unknown",
             categoryTwo: audioSource === "abs" ? "" : "unknown",
             audioSource,
+            absId,
           });
         } else {
           // Push a new attribute into the array.  It will be process in tne for loop
@@ -323,6 +337,7 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
             categoryOne: bookMetadata.categoryOne,
             categoryTwo: bookMetadata.categoryTwo,
             audioSource,
+            absId,
           });
         }
       }

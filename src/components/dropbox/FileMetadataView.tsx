@@ -11,19 +11,10 @@ import {
 import React, { useEffect, useMemo, useState } from "react";
 import { CleanBookMetadata } from "../../utils/audiobookMetadata";
 import { colors } from "../../constants/Colors";
-import { AnimateHeight } from "../common/animations/AnimateHeight";
-import {
-  BookIcon,
-  EmptyMDHeartIcon,
-  MDHeartIcon,
-  PowerIcon,
-  ReadIcon,
-  ShareIcon,
-} from "../common/svg/Icons";
+import { PowerIcon, ShareIcon } from "../common/svg/Icons";
 import { AnimatePresence, MotiText, MotiView } from "moti";
 import ExplorerImage from "./ExplorerImage";
 import {
-  FolderMetadataDetails,
   createFolderMetadataKey,
   extractMetadataKeys,
   getSingleFolderMetadata,
@@ -32,6 +23,7 @@ import {
 import * as Linking from "expo-linking";
 import { AudioSourceType } from "@app/audio/dropbox";
 import { customEncodeParens } from "@utils/otherUtils";
+import { SymbolView } from "expo-symbols";
 // import * as Sharing from "expo-sharing";
 
 type Props = {
@@ -95,26 +87,26 @@ const FileMetadataView = ({ metadata, path_lower, audioSource, folderName }: Pro
   const handleToggleFavorite = async () => {
     const action = !!currFolderAttributes?.isFavorite ? "remove" : "add";
 
-    await dropboxActions.updateFolderAttribute(
-      path_lower,
-      "isFavorite",
+    await dropboxActions.updateFolderAttribute({
+      id: path_lower,
+      type: "isFavorite",
       action,
-      folderName,
+      folderNameIn: folderName,
       audioSource,
-      metadata?.parentFolderId
-    );
+      parentFolderId: metadata?.parentFolderId,
+    });
   };
 
   const handleToggleRead = async () => {
     const action = !!currFolderAttributes?.isRead ? "remove" : "add";
-    await dropboxActions.updateFolderAttribute(
-      path_lower,
-      "isRead",
+    await dropboxActions.updateFolderAttribute({
+      id: path_lower,
+      type: "isRead",
       action,
-      folderName,
+      folderNameIn: folderName,
       audioSource,
-      metadata?.parentFolderId
-    );
+      parentFolderId: metadata?.parentFolderId,
+    });
   };
 
   return (
@@ -123,19 +115,39 @@ const FileMetadataView = ({ metadata, path_lower, audioSource, folderName }: Pro
         <View className="flex flex-row border-b border-amber-900 py-1 mt-1 justify-end pr-5">
           <TouchableOpacity onPress={handleToggleFavorite}>
             {currFolderAttributes?.isFavorite ? (
-              <MDHeartIcon color="red" size={30} />
+              <SymbolView
+                name="heart.fill"
+                style={{ width: 31, height: 28 }}
+                type="monochrome"
+                tintColor={colors.deleteRed}
+              />
             ) : (
-              <EmptyMDHeartIcon size={30} />
+              <SymbolView
+                name="heart"
+                style={{ width: 31, height: 28 }}
+                type="monochrome"
+                tintColor={colors.abs950}
+              />
             )}
           </TouchableOpacity>
           <TouchableOpacity onPress={handleToggleRead} className="ml-4">
             {currFolderAttributes?.isRead ? (
               <View>
-                <BookIcon color="green" size={30} />
-                <ReadIcon style={{ position: "absolute", top: 2, left: 5 }} size={20} />
+                <SymbolView
+                  name="checkmark.square.fill"
+                  style={{ width: 31, height: 28 }}
+                  type="hierarchical"
+                  tintColor="green"
+                />
+                {/* <ReadIcon style={{ position: "absolute", top: 2, left: 5 }} size={20} /> */}
               </View>
             ) : (
-              <BookIcon size={30} />
+              <SymbolView
+                name="square"
+                style={{ width: 31, height: 28 }}
+                type="monochrome"
+                tintColor={colors.abs950}
+              />
             )}
           </TouchableOpacity>
           <TouchableOpacity
@@ -206,19 +218,38 @@ const FileMetadataView = ({ metadata, path_lower, audioSource, folderName }: Pro
               <View className="flex-row justify-center mt-4">
                 <TouchableOpacity onPress={handleToggleFavorite}>
                   {currFolderAttributes?.isFavorite ? (
-                    <MDHeartIcon color="red" size={30} />
+                    <SymbolView
+                      name="heart.fill"
+                      style={{ width: 31, height: 28 }}
+                      type="monochrome"
+                      tintColor={colors.deleteRed}
+                    />
                   ) : (
-                    <EmptyMDHeartIcon size={30} />
+                    <SymbolView
+                      name="heart"
+                      style={{ width: 31, height: 28 }}
+                      type="monochrome"
+                      tintColor={colors.abs950}
+                    />
                   )}
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handleToggleRead} className="ml-4">
                   {currFolderAttributes?.isRead ? (
                     <View>
-                      <BookIcon color="green" size={30} />
-                      <ReadIcon style={{ position: "absolute", top: 2, left: 5 }} size={20} />
+                      <SymbolView
+                        name="checkmark.square.fill"
+                        style={{ width: 33, height: 30 }}
+                        type="hierarchical"
+                        tintColor="green"
+                      />
                     </View>
                   ) : (
-                    <BookIcon size={30} />
+                    <SymbolView
+                      name="square"
+                      style={{ width: 30, height: 28 }}
+                      type="monochrome"
+                      tintColor={colors.amber950}
+                    />
                   )}
                 </TouchableOpacity>
                 <TouchableOpacity

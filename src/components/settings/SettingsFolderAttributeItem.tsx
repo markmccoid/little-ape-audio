@@ -1,7 +1,9 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import React from "react";
 import { FolderAttributeItem, useDropboxStore } from "@store/store-dropbox";
-import { BookIcon, MDHeartIcon, ReadIcon } from "@components/common/svg/Icons";
+import { SymbolView } from "expo-symbols";
+import { colors } from "@constants/Colors";
+import { absSetBookToFinished } from "@store/data/absAPI";
 
 type Props = { attribute: FolderAttributeItem };
 const SettingsFolderAttributeItem = ({ attribute }: Props) => {
@@ -38,17 +40,22 @@ const SettingsFolderAttributeItem = ({ attribute }: Props) => {
           {attribute?.isFavorite && (
             <TouchableOpacity
               onPress={() =>
-                updateFolderAttribute(
-                  attribute.id,
-                  "isFavorite",
-                  "remove",
-                  attribute.pathToFolder,
-                  attribute.audioSource,
-                  attribute?.parentFolder
-                )
+                updateFolderAttribute({
+                  id: attribute.id,
+                  type: "isFavorite",
+                  action: "remove",
+                  folderNameIn: attribute.pathToFolder,
+                  audioSource: attribute.audioSource,
+                  parentFolderId: attribute?.parentFolder,
+                })
               }
             >
-              <MDHeartIcon color="red" size={30} />
+              <SymbolView
+                name="heart.fill"
+                style={{ width: 30, height: 28 }}
+                type="monochrome"
+                tintColor={colors.deleteRed}
+              />
             </TouchableOpacity>
           )}
         </View>
@@ -56,20 +63,27 @@ const SettingsFolderAttributeItem = ({ attribute }: Props) => {
           {attribute?.isRead && (
             <TouchableOpacity
               className=""
-              onPress={() =>
-                updateFolderAttribute(
-                  attribute.id,
-                  "isRead",
-                  "remove",
-                  attribute.pathToFolder,
-                  attribute.audioSource,
-                  attribute?.parentFolder
-                )
-              }
+              onPress={async () => {
+                updateFolderAttribute({
+                  id: attribute.id,
+                  type: "isRead",
+                  action: "remove",
+                  folderNameIn: attribute.pathToFolder,
+                  audioSource: attribute.audioSource,
+                  parentFolderId: attribute?.parentFolder,
+                });
+
+                // await absSetBookToFinished(attribute.pathToFolder, false);
+                // queryClient.invalidateQueries({ queryKey: ["allABSBooks"] });
+              }}
             >
               <View>
-                <BookIcon color="green" size={30} />
-                <ReadIcon style={{ position: "absolute", top: 2, left: 5 }} size={20} />
+                <SymbolView
+                  name="checkmark.square.fill"
+                  style={{ width: 31, height: 30 }}
+                  type="hierarchical"
+                  tintColor="green"
+                />
               </View>
             </TouchableOpacity>
           )}
