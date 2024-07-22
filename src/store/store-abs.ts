@@ -5,10 +5,10 @@ import { btoa } from "react-native-quick-base64";
 export type UserInfo = {
   id: string;
   username: string;
-  password: string;
+  // password: string;
   email: string;
   type: string;
-  token: string;
+  token?: string;
   absURL: string;
   // base64 of <username>-laab-favorite
   favoriteSearchString?: string;
@@ -47,7 +47,7 @@ export type ABSState = {
   // This is from a ref set in the ABSMainContainer.tsx
   clearSearchBar: () => void;
   actions: {
-    saveUserInfo: (userInfo: UserInfo) => Promise<void>;
+    saveUserInfo: (userInfo: Partial<UserInfo>) => Promise<void>;
     saveLibraries: (libraries: StoredLibraries[], activeLibraryId: string) => Promise<void>;
     updateResultSort: (resultSort: ResultSort) => Promise<void>;
     updateSearchObject: (searchObject: ABSState["searchObject"] | undefined) => void;
@@ -67,8 +67,11 @@ export const useABSStore = create<ABSState>((set, get) => ({
   clearSearchBar: () => {},
   actions: {
     saveUserInfo: async (userInfo) => {
-      const favoriteSearchString = btoa(`${userInfo.username}-laab-favorite`);
-      set({ userInfo: { ...userInfo, favoriteSearchString } });
+      const currUserInfo = get().userInfo;
+      const favoriteSearchString = userInfo?.username
+        ? btoa(`${userInfo.username}-laab-favorite`)
+        : undefined;
+      set({ userInfo: { ...currUserInfo, ...userInfo, favoriteSearchString } });
 
       await absSaveStore();
     },

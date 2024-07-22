@@ -7,14 +7,18 @@ import { StoredLibraries, useABSStore, UserInfo } from "@store/store-abs";
 import { colors } from "@constants/Colors";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { EyeOffOutlineIcon, EyeOutlineIcon } from "@components/common/svg/Icons";
+import { useDropboxStore } from "@store/store-dropbox";
 
 const AbsAuth = () => {
   const queryClient = useQueryClient();
+  const initABSFolderAttribiutes = useDropboxStore(
+    (state) => state.actions.initABSFolderAttribiutes
+  );
   const absUserInfo = useABSStore((state) => state.userInfo);
   const librariesStored = useABSStore((state) => state.libraries);
-  const [username, setUsername] = React.useState("");
+  const [username, setUsername] = React.useState(absUserInfo?.username);
   const [password, setPassword] = React.useState("");
-  const [absURL, setAbsURL] = React.useState("");
+  const [absURL, setAbsURL] = React.useState(absUserInfo?.absURL);
   const [libraries, setLibraries] = React.useState<StoredLibraries[]>(librariesStored);
   const [loggedIn, setLoggedIn] = React.useState(false);
   const actions = useABSStore((state) => state.actions);
@@ -24,7 +28,6 @@ const AbsAuth = () => {
     if (!username || !password || !absURL) {
       throw new Error("All fields must be filled in");
     }
-
     let loginInfo;
     // try {
     loginInfo = await absLogin(absURL, username, password);
@@ -41,29 +44,31 @@ const AbsAuth = () => {
       absURL,
     };
     // Store UserInfo from Login
-    actions.saveUserInfo(userInfo);
+    await actions.saveUserInfo(userInfo);
 
     // Get Libraries in ABS
     const libs = await absGetLibraries();
     // set the default libray to the first one we find
 
-    actions.saveLibraries(libs, libs[0].id);
+    await actions.saveLibraries(libs, libs[0].id);
 
     setLoggedIn(true);
+    await initABSFolderAttribiutes();
     return true;
   };
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["absLogin"],
-    queryFn: handleLogin,
+    queryFn: async () => await handleLogin(),
     enabled: false,
+    staleTime: 0,
   });
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     queryClient.invalidateQueries({ queryKey: ["allABSBooks"] });
     queryClient.invalidateQueries({ queryKey: ["absfilterdata"] });
-    actions.saveUserInfo(undefined);
-    actions.saveLibraries(undefined, undefined);
+    await actions.saveUserInfo({ token: undefined });
+    await actions.saveLibraries(undefined, undefined);
     setLoggedIn(false);
   };
 
@@ -124,7 +129,6 @@ const AbsAuth = () => {
               onChangeText={setUsername}
               placeholder="Username"
               value={isLoading ? "----------" : username}
-              defaultValue={absUserInfo?.username}
               autoCapitalize="none"
               autoCorrect={false}
               spellCheck={false}

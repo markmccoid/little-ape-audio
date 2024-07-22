@@ -268,7 +268,8 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
           categoryOne: "AudiobookShelf",
           categoryTwo: "",
           audioSource: "abs",
-          isFavorite: true,
+          isFavorite: attr.type.includes("isFavorite"),
+          isRead: attr.type.includes("isRead"),
           absId: attr.itemId,
         });
       }

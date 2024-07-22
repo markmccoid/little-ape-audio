@@ -10,6 +10,7 @@ import { useGetAllABSBooks } from "@store/data/absHooks";
 import { CheckCircleIcon, EmptyCircleIcon } from "@components/common/svg/Icons";
 import { colors } from "@constants/Colors";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
+import { SymbolView } from "expo-symbols";
 
 const buildExtraInfo = (selectedItems: string[]) => {
   if (!selectedItems || selectedItems?.length === 0) return "";
@@ -47,7 +48,15 @@ const ABSAdvSearchContainer = () => {
       <ScrollView className="flex-col bg-abs-50" contentContainerStyle={{}}>
         <View className="flex-row justify-between mx-1 mt-1 mb-2 items-center">
           <View className="flex-col items-center">
-            <Text className="text-abs-950 text-xs">Books Marked as Favorite</Text>
+            <View className="flex-row items-center">
+              <SymbolView
+                name="heart.fill"
+                style={{ width: 15, height: 14 }}
+                type="monochrome"
+                tintColor={colors.deleteRed}
+              />
+              <Text className="text-abs-950 text-xs"> Books</Text>
+            </View>
             <SegmentedControl
               values={["Include", "Exclude", "Only"]}
               style={{
@@ -85,7 +94,15 @@ const ABSAdvSearchContainer = () => {
           </View>
           {/* isRead Exclude */}
           <View className="flex-col items-center">
-            <Text className="text-abs-950 text-xs">Books Marked as Read</Text>
+            <View className="flex-row items-center">
+              <SymbolView
+                name="checkmark.square.fill"
+                style={{ width: 18, height: 15 }}
+                type="hierarchical"
+                tintColor="green"
+              />
+              <Text className="text-abs-950 text-xs"> Books</Text>
+            </View>
             <SegmentedControl
               values={["Include", "Exclude", "Only"]}
               style={{

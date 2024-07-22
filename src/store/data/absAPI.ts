@@ -48,6 +48,9 @@ export const absLogin = async (absURL: string, username: string, password: strin
     const absData = response.data as ABSLoginResponse;
     return absData.user; // Return data if needed
   } catch (error) {
+    if (!error?.response) {
+      throw new Error("No Response - Check URL");
+    }
     if (error.response.status === 530) {
       Alert.alert("Authentication Failed", "Server May be Down");
       throw new Error("Authentication Failed, Server may be down.");
