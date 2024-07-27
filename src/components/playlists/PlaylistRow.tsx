@@ -24,6 +24,7 @@ import usePlaylistColors from "hooks/usePlaylistColors";
 import { LinearGradient } from "expo-linear-gradient";
 import { AnimatePresence, MotiView } from "moti";
 import { useSettingStore } from "@store/store-settings";
+import { useSharedValue } from "react-native-reanimated";
 
 const { width, height } = Dimensions.get("window");
 
@@ -35,23 +36,31 @@ type Props = {
   closeRow: (index: number) => void;
 };
 const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRow }: Props) => {
-  const [touchStartX, setTouchStartX] = useState(0);
+  const route = useRouter();
+  //  const isSelected = useSharedValue(false);
+  const touchStartX = useSharedValue(0);
+  //const [touchStartX, setTouchStartX] = useState(0);
   const [isSelected, setIsSelected] = useState(false);
   const handleTouchStart = (event) => {
-    setTouchStartX(event.nativeEvent.pageX);
+    if (isSelected) return;
+    // setTouchStartX(event.nativeEvent.pageX);
+    touchStartX.value = event.nativeEvent.pageX;
   };
 
   //!! Maybe need to set state in PlaylistContainer (buttonsDisabled) so that while we are "selecting"
   //!! a playlist no other button can be pressed
   const handleTouchEnd = async (event) => {
     if (isSelected) return;
-    setIsSelected(true);
-    const dx = Math.abs(event.nativeEvent.pageX - touchStartX);
+    // const dx = Math.abs(event.nativeEvent.pageX - touchStartX);
+    const dx = Math.abs(event.nativeEvent.pageX - touchStartX.value);
     if (dx < 10) {
+      // setIsSelected(true);
+      setIsSelected(true);
       // Handle the press event
       await onPlaylistSelect(playlist.id);
+      // setIsSelected(false);
+      setIsSelected(false);
     }
-    setIsSelected(false);
   };
 
   //!! END TRacking
@@ -145,8 +154,14 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
                   className="flex-1 flex-row pt-2 pb-3 px-2"
                   // onPress={handleSelectRow}
                   disabled={isSelected}
-                  onPressIn={handleTouchStart}
-                  onPressOut={async (e) => handleTouchEnd(e)}
+                  //onPressIn={handleTouchStart}
+                  //onPressOut={async (e) => handleTouchEnd(e)}
+                  onPress={async () => {
+                    setIsSelected(true);
+
+                    await onPlaylistSelect(playlist.id);
+                    setIsSelected(false);
+                  }}
                 >
                   {/* IMAGE */}
                   <PlaylistImage style={styles.trackImage} playlistId={playlist.id} noTransition />

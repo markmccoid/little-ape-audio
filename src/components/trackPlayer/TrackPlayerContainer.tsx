@@ -26,9 +26,10 @@ const transition = SharedTransition.custom((values) => {
 });
 
 const TrackPlayerContainer = () => {
-  const params = useLocalSearchParams();
+  const params = useLocalSearchParams<{ playlistId: string }>();
   const playlistColors = usePlaylistColors(params?.playlistId);
   const isLoaded = usePlaybackStore((state) => state.playlistLoaded);
+
   // const playlist = useTrackActions().getPlaylist(params?.playlistId);
   return (
     <MotiView className="flex-1 flex-col" from={{ opacity: 0 }} animate={{ opacity: 1 }}>

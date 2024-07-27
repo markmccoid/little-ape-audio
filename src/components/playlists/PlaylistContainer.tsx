@@ -103,20 +103,20 @@ const PlaylistContainer = () => {
   //~ Playlist select
   const handleRowSelect = async (playlistId: string) => {
     setIsSelectingRow(true);
-    const playlist = getPlaylist(playlistId);
+    route.push({ pathname: "/audio/player", params: { playlistId } });
+    // const playlist = getPlaylist(playlistId);
 
     // Check to make sure playlist has at least one track
-    if (!playlist?.trackIds || playlist?.trackIds.length === 0) {
-      alert("Playlist Still Loading");
-      setTimeout(() => setIsSelectingRow(false), 100);
-      return;
-    }
-    route.push({ pathname: "/audio/player", params: { playlistId } });
-    // Need to delay since should really come after setting curr playlist, but if we do it after
-    // and the setCurrPlaylist gets colors, user could see blank if navigates back to playlistContainer before done
-    // setTimeout(() => setCurrPlaylist(playlistId), 1);
-    setTimeout(() => setIsSelectingRow(false), 100);
+    // if (!playlist?.trackIds || playlist?.trackIds.length === 0) {
+    //   alert("Playlist Still Loading");
+    //   setTimeout(() => setIsSelectingRow(false), 100);
+    //   return;
+    // }
+
+    // setTimeout(() => setIsSelectingRow(false), 100);
+    // This is async, but don't want to await
     await setCurrPlaylist(playlistId);
+    setIsSelectingRow(false);
   };
 
   //~ --------------------------
@@ -232,7 +232,7 @@ const PlaylistContainer = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             exitTransition={{ type: "timing", duration: 250 }}
-            className="flex-1"
+            className="flex-1 "
           >
             <FlatList
               ref={scrollRef}
@@ -248,6 +248,8 @@ const PlaylistContainer = () => {
                 // console.log("onLayout", e.nativeEvent.layout.height);
                 setLayoutHeight(e.nativeEvent.layout.height);
               }}
+              // space after last entry so mini play area doesn't cover up last playlist
+              ListFooterComponent={<View className="h-10" />}
             />
           </MotiView>
         )}
