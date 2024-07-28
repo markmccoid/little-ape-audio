@@ -1,7 +1,6 @@
 import {
   View,
   Text,
-  Image,
   TouchableOpacity,
   StyleSheet,
   Pressable,
@@ -10,21 +9,20 @@ import {
   Animated as RNAnimated,
   ActivityIndicator,
 } from "react-native";
-import React, { useEffect, useMemo, useState } from "react";
-import { usePlaybackStore, useTrackActions, useTracksStore } from "../../store/store";
-import { Playlist, AudioTrack } from "../../store/types";
+import React, { useMemo, useRef, useState } from "react";
+import { usePlaybackStore, useTrackActions } from "../../store/store";
+import { Playlist } from "../../store/types";
 import { Link, router, useRouter } from "expo-router";
 import { formatSeconds } from "../../utils/formatUtils";
 import PlaylistImage from "../common/PlaylistImage";
-import { DeleteIcon, EditIcon, ImageIcon } from "../common/svg/Icons";
-import { getImageFromWeb, lightenColor } from "@utils/otherUtils";
+import { DeleteIcon, EditIcon } from "../common/svg/Icons";
+import { lightenColor } from "@utils/otherUtils";
 import { Swipeable } from "react-native-gesture-handler";
 import { colors } from "@constants/Colors";
 import usePlaylistColors from "hooks/usePlaylistColors";
 import { LinearGradient } from "expo-linear-gradient";
 import { AnimatePresence, MotiView } from "moti";
 import { useSettingStore } from "@store/store-settings";
-import { useSharedValue } from "react-native-reanimated";
 
 const { width, height } = Dimensions.get("window");
 
@@ -36,33 +34,7 @@ type Props = {
   closeRow: (index: number) => void;
 };
 const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRow }: Props) => {
-  const route = useRouter();
-  //  const isSelected = useSharedValue(false);
-  const touchStartX = useSharedValue(0);
-  //const [touchStartX, setTouchStartX] = useState(0);
   const [isSelected, setIsSelected] = useState(false);
-  const handleTouchStart = (event) => {
-    if (isSelected) return;
-    // setTouchStartX(event.nativeEvent.pageX);
-    touchStartX.value = event.nativeEvent.pageX;
-  };
-
-  //!! Maybe need to set state in PlaylistContainer (buttonsDisabled) so that while we are "selecting"
-  //!! a playlist no other button can be pressed
-  const handleTouchEnd = async (event) => {
-    if (isSelected) return;
-    // const dx = Math.abs(event.nativeEvent.pageX - touchStartX);
-    const dx = Math.abs(event.nativeEvent.pageX - touchStartX.value);
-    if (dx < 10) {
-      // setIsSelected(true);
-      setIsSelected(true);
-      // Handle the press event
-      await onPlaylistSelect(playlist.id);
-      // setIsSelected(false);
-      setIsSelected(false);
-    }
-  };
-
   //!! END TRacking
   const trackActions = useTrackActions();
   const playbackActions = usePlaybackStore((state) => state.actions);
@@ -94,114 +66,108 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
     );
   };
 
-  // if (isDeleted) {
-  //   return null;
-  // }
-
   return (
     <AnimatePresence>
       {isDeleted && <MotiView key={2} from={{ scale: 1 }} animate={{ scale: 0 }} />}
 
-      {
-        <MotiView
-          key={playlist.id}
-          // from={{ height: isDeleted && 200, opacity: 1 }}
-          // animate={{ height: isDeleted && 0, opacity: isDeleted && 0 }}
-          // transition={{ type: "timing", duration: 2000 }}
-          // exit={{ scale: 0, opacity: 0 }}
-          // exitTransition={{ type: "timing", duration: 2000 }}
+      <MotiView
+        key={playlist.id}
+        // from={{ height: isDeleted && 200, opacity: 1 }}
+        // animate={{ height: isDeleted && 0, opacity: isDeleted && 0 }}
+        // transition={{ type: "timing", duration: 2000 }}
+        // exit={{ scale: 0, opacity: 0 }}
+        // exitTransition={{ type: "timing", duration: 2000 }}
+      >
+        <Swipeable
+          ref={(ref) => (renderRowRefs[index] = ref)}
+          onSwipeableOpen={() => closeRow(index)}
+          renderRightActions={(progress, dragX) => {
+            return (
+              <RenderRight
+                handleRemovePlaylist={handleRemovePlaylist}
+                playlistId={playlist.id}
+                progress={progress}
+                dragX={dragX}
+              />
+            );
+          }}
+          rightThreshold={45}
+          leftThreshold={10}
         >
-          <Swipeable
-            ref={(ref) => (renderRowRefs[index] = ref)}
-            onSwipeableOpen={() => closeRow(index)}
-            renderRightActions={(progress, dragX) => {
-              return (
-                <RenderRight
-                  handleRemovePlaylist={handleRemovePlaylist}
-                  playlistId={playlist.id}
-                  progress={progress}
-                  dragX={dragX}
-                />
-              );
-            }}
-            rightThreshold={45}
-            leftThreshold={10}
+          <LinearGradient
+            colors={[
+              isActive ? playlistColors.gradientTop : colors.amber200,
+              isActive ? lightenColor(playlistColors.gradientTop, 30) : colors.amber200,
+              isActive ? lightenColor(playlistColors.gradientTop, 50) : colors.amber50,
+            ]}
+            style={{ flex: 1 }}
+            start={{ x: 0, y: 0 }}
+            end={isActive ? { x: 0, y: 1 } : { x: 0.5, y: 0 }}
+            locations={isActive ? [0.4, 0.7, 1] : [0.001, 0.002, 1]}
           >
-            <LinearGradient
-              colors={[
-                isActive ? playlistColors.gradientTop : colors.amber200,
-                isActive ? lightenColor(playlistColors.gradientTop, 30) : colors.amber200,
-                isActive ? lightenColor(playlistColors.gradientTop, 50) : colors.amber50,
-              ]}
-              style={{ flex: 1 }}
-              start={{ x: 0, y: 0 }}
-              end={isActive ? { x: 0, y: 1 } : { x: 0.5, y: 0 }}
-              locations={isActive ? [0.4, 0.7, 1] : [0.001, 0.002, 1]}
+            <View
+              className={`flex-row flex-1  border-r border-r-amber-800`}
+              // style={{ backgroundColor: isActive ? playlistColors.gradientTop : "" }}
             >
-              <View
-                className={`flex-row flex-1  border-r border-r-amber-800`}
-                // style={{ backgroundColor: isActive ? playlistColors.gradientTop : "" }}
+              {isSelected && (
+                <ActivityIndicator
+                  size="large"
+                  className={`absolute z-40 top-10`}
+                  style={{ left: width / 2 }}
+                  color="red"
+                />
+              )}
+              <Pressable
+                className="flex-1 flex-row pt-2 pb-3 px-2"
+                // onPress={handleSelectRow}
+                disabled={isSelected}
+                //onPressIn={handleTouchStart}
+                //onPressOut={async (e) => handleTouchEnd(e)}
+                onPress={async () => {
+                  setIsSelected(true);
+                  await onPlaylistSelect(playlist.id);
+                  setIsSelected(false);
+                }}
               >
-                {isSelected && (
-                  <ActivityIndicator
-                    size="large"
-                    className={`absolute z-40 top-10`}
-                    style={{ left: width / 2 }}
-                    color="red"
-                  />
-                )}
-                <Pressable
-                  className="flex-1 flex-row pt-2 pb-3 px-2"
-                  // onPress={handleSelectRow}
-                  disabled={isSelected}
-                  //onPressIn={handleTouchStart}
-                  //onPressOut={async (e) => handleTouchEnd(e)}
-                  onPress={async () => {
-                    setIsSelected(true);
-
-                    await onPlaylistSelect(playlist.id);
-                    setIsSelected(false);
-                  }}
-                >
-                  {/* IMAGE */}
-                  <PlaylistImage style={styles.trackImage} playlistId={playlist.id} noTransition />
-                  {/* TITLE AUTHOR LENGTH */}
-                  <View className="flex-col flex-1 ml-2 justify-between pb-1 ">
-                    <View className="flex-col flex-shrink">
-                      <Text
-                        className="text-lg font-ssp_semibold"
-                        numberOfLines={2}
-                        ellipsizeMode="tail"
-                        style={{ color: isActive ? playlistColors.gradientTopText : "black" }}
-                      >
-                        {playlist?.name}
-                      </Text>
-                      <Text
-                        className="text-sm font-ssp_regular"
-                        ellipsizeMode="tail"
-                        style={{ color: isActive ? playlistColors.gradientTopText : "black" }}
-                      >
-                        {playlist.author}
-                      </Text>
-                    </View>
+                {/* IMAGE */}
+                <PlaylistImage style={styles.trackImage} playlistId={playlist.id} noTransition />
+                {/* TITLE AUTHOR LENGTH */}
+                <View className="flex-col flex-1 ml-2 justify-between pb-1 ">
+                  <View className="flex-col flex-shrink">
                     <Text
-                      className="text-sm font-ssp_regular"
+                      className="text-lg font-ssp_semibold"
+                      numberOfLines={2}
+                      ellipsizeMode="tail"
                       style={{ color: isActive ? playlistColors.gradientTopText : "black" }}
                     >
-                      {formatSeconds(playlist.totalListenedToSeconds, "minimal")} -
-                      {formatSeconds(playlist.totalDurationSeconds, "minimal")}
+                      {playlist?.name}
+                    </Text>
+                    <Text
+                      className="text-sm font-ssp_regular"
+                      ellipsizeMode="tail"
+                      style={{ color: isActive ? playlistColors.gradientTopText : "black" }}
+                    >
+                      {playlist.author}
                     </Text>
                   </View>
-                </Pressable>
-                {/* TURN OFF COLLECTION COLOR */}
-                {showCollectionColorStrip && (
-                  <View className="w-3" style={{ backgroundColor: playlist?.collection?.color }} />
-                )}
-              </View>
-            </LinearGradient>
-          </Swipeable>
-        </MotiView>
-      }
+                  <Text
+                    className="text-sm font-ssp_regular"
+                    style={{ color: isActive ? playlistColors.gradientTopText : "black" }}
+                  >
+                    {formatSeconds(playlist.totalListenedToSeconds, "minimal")} -
+                    {formatSeconds(playlist.totalDurationSeconds, "minimal")}
+                  </Text>
+                </View>
+              </Pressable>
+
+              {/* TURN OFF COLLECTION COLOR */}
+              {showCollectionColorStrip && (
+                <View className="w-3" style={{ backgroundColor: playlist?.collection?.color }} />
+              )}
+            </View>
+          </LinearGradient>
+        </Swipeable>
+      </MotiView>
     </AnimatePresence>
   );
 };

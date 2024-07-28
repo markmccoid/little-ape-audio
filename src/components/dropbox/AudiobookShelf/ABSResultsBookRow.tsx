@@ -35,10 +35,19 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
           //  book.isFinished && styles.finishedBook,
         ]}
       >
-        <View className="m-2">
-          {!isLoading && <Image source={{ uri: data || book.cover }} style={styles.image} />}
-          {isLoading && <Image source={{ uri: data || book.cover }} style={styles.image} />}
-        </View>
+        <Pressable
+          onPress={() =>
+            router.navigate({
+              pathname: `audio/dropbox/audiobookshelf/${book.id}`,
+              params: { title: book.title },
+            })
+          }
+        >
+          <View className="m-2">
+            {!isLoading && <Image source={{ uri: data || book.cover }} style={styles.image} />}
+            {isLoading && <Image source={{ uri: data || book.cover }} style={styles.image} />}
+          </View>
+        </Pressable>
 
         <Pressable
           onPress={() =>

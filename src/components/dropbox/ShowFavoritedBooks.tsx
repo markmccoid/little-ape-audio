@@ -11,10 +11,7 @@ import { customEncodeParens } from "@utils/otherUtils";
 const ShowFavoritedBooks = () => {
   const actions = useDropboxStore((state) => state.actions);
   const folderAttributes = useDropboxStore((state) => state.folderAttributes);
-  console.log(
-    "FOlder attributes",
-    folderAttributes.map((el) => `${el.title}==${el.isFavorite}`)
-  );
+
   const favBooks = folderAttributes
     .filter((el) => el.isFavorite)
     .sort((a, b) => a.favPosition - b.favPosition);
@@ -60,7 +57,7 @@ const ShowFavoritedBooks = () => {
     return (
       // <ScaleDecorator activeScale={0.98}>
       <View
-        className="flex-row bg-white w-full"
+        className="flex-row w-full items-center border rounded-md mb-2 bg-abs-50"
         key={item.id}
         style={{
           borderWidth: StyleSheet.hairlineWidth,
@@ -80,8 +77,12 @@ const ShowFavoritedBooks = () => {
           key={item.id}
           // className="px-2 border-r border-amber-900 h-full justify-center"
         >
-          <View className="flex-col bg-white justify-start" style={styles.shadow}>
-            <Image style={{ width: 50, height: 72 }} source={{ uri: imageURI }} />
+          <View className="flex-col rounded-l-md  bg-white justify-start " style={styles.shadow}>
+            <Image
+              style={{ width: 60, height: 72 }}
+              source={{ uri: imageURI }}
+              className="rounded-l-md"
+            />
           </View>
         </Pressable>
 
@@ -137,20 +138,21 @@ const ShowFavoritedBooks = () => {
       data={favBooks}
       renderPlaceholder={() => (
         <View className="bg-amber-300 w-full h-full">
-          <Text>HOLD</Text>
+          <Text></Text>
         </View>
       )}
       onDragEnd={({ data }) => onDragEnd(data)}
       // onDragEnd={({ data }) => actions.updateFavFolderArray(data)}
       keyExtractor={(item) => item.id}
       renderItem={renderItem}
-      style={{
-        // maxHeight: 220,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: colors.amber700,
-
-        // borderRadius: 10,
-      }}
+      style={
+        {
+          // maxHeight: 220,
+          // borderWidth: StyleSheet.hairlineWidth,
+          // borderColor: colors.amber700,
+          // borderRadius: 10,
+        }
+      }
     />
   );
 };
