@@ -209,9 +209,14 @@ const PlaylistContainer = () => {
         isDropdownOpen={isDropdownOpen}
         setIsDropdownOpen={setIsDropdownOpen}
       />
+      {/* Playlist Sleep Timer */}
       {onShow && (
         <MotiView
-          className="border border-red-900 h-[40]"
+          className=" h-[40]"
+          style={{
+            borderTopWidth: StyleSheet.hairlineWidth,
+            borderBottomWidth: StyleSheet.hairlineWidth,
+          }}
           from={{ opacity: 0, height: 40 }}
           animate={{ opacity: 1 }}
           transition={{
@@ -223,7 +228,7 @@ const PlaylistContainer = () => {
           <PlaylistActionBar closeActionBar={() => setOnShow(false)} barHeight={40} />
         </MotiView>
       )}
-      {/* //! OLD Download indicator went here //! ----------------- */}
+      {/* Flatlist */}
       <AnimatePresence>
         {!isSelectingRow && (
           <MotiView
@@ -231,7 +236,7 @@ const PlaylistContainer = () => {
             from={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            exitTransition={{ type: "timing", duration: 250 }}
+            exitTransition={{ type: "timing", duration: 50 }}
             className="flex-1 "
           >
             <FlatList

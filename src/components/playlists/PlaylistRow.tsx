@@ -12,7 +12,7 @@ import {
 import React, { useMemo, useRef, useState } from "react";
 import { usePlaybackStore, useTrackActions } from "../../store/store";
 import { Playlist } from "../../store/types";
-import { Link, router, useRouter } from "expo-router";
+import { Link, router, useFocusEffect, useRouter } from "expo-router";
 import { formatSeconds } from "../../utils/formatUtils";
 import PlaylistImage from "../common/PlaylistImage";
 import { DeleteIcon, EditIcon } from "../common/svg/Icons";
@@ -35,6 +35,8 @@ type Props = {
 };
 const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRow }: Props) => {
   const [isSelected, setIsSelected] = useState(false);
+  const pressableRef = useRef();
+  const route = useRouter();
   //!! END TRacking
   const trackActions = useTrackActions();
   const playbackActions = usePlaybackStore((state) => state.actions);
@@ -44,6 +46,9 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
   const playlistColors = usePlaylistColors(playlist.id);
 
   const [isDeleted, setIsDeleteed] = useState(false);
+  useFocusEffect(() => {
+    setIsSelected(false);
+  });
 
   const handleRemovePlaylist = async () => {
     Alert.alert(
@@ -80,6 +85,8 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
       >
         <Swipeable
           ref={(ref) => (renderRowRefs[index] = ref)}
+          waitFor={pressableRef}
+          simultaneousHandlers={pressableRef}
           onSwipeableOpen={() => closeRow(index)}
           renderRightActions={(progress, dragX) => {
             return (
@@ -96,9 +103,9 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
         >
           <LinearGradient
             colors={[
-              isActive ? playlistColors.gradientTop : colors.amber200,
-              isActive ? lightenColor(playlistColors.gradientTop, 30) : colors.amber200,
-              isActive ? lightenColor(playlistColors.gradientTop, 50) : colors.amber50,
+              isActive ? playlistColors?.gradientTop : colors.amber200,
+              isActive ? lightenColor(playlistColors?.gradientTop, 30) : colors.amber200,
+              isActive ? lightenColor(playlistColors?.gradientTop, 50) : colors.amber50,
             ]}
             style={{ flex: 1 }}
             start={{ x: 0, y: 0 }}
@@ -119,14 +126,16 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
               )}
               <Pressable
                 className="flex-1 flex-row pt-2 pb-3 px-2"
+                ref={pressableRef}
                 // onPress={handleSelectRow}
                 disabled={isSelected}
                 //onPressIn={handleTouchStart}
                 //onPressOut={async (e) => handleTouchEnd(e)}
                 onPress={async () => {
+                  if (isSelected) return;
                   setIsSelected(true);
-                  await onPlaylistSelect(playlist.id);
-                  setIsSelected(false);
+                  onPlaylistSelect(playlist.id);
+                  // setting isSelected to false in useEffect unmount function
                 }}
               >
                 {/* IMAGE */}
@@ -138,21 +147,21 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
                       className="text-lg font-ssp_semibold"
                       numberOfLines={2}
                       ellipsizeMode="tail"
-                      style={{ color: isActive ? playlistColors.gradientTopText : "black" }}
+                      style={{ color: isActive ? playlistColors?.gradientTopText : "black" }}
                     >
                       {playlist?.name}
                     </Text>
                     <Text
                       className="text-sm font-ssp_regular"
                       ellipsizeMode="tail"
-                      style={{ color: isActive ? playlistColors.gradientTopText : "black" }}
+                      style={{ color: isActive ? playlistColors?.gradientTopText : "black" }}
                     >
                       {playlist.author}
                     </Text>
                   </View>
                   <Text
                     className="text-sm font-ssp_regular"
-                    style={{ color: isActive ? playlistColors.gradientTopText : "black" }}
+                    style={{ color: isActive ? playlistColors?.gradientTopText : "black" }}
                   >
                     {formatSeconds(playlist.totalListenedToSeconds, "minimal")} -
                     {formatSeconds(playlist.totalDurationSeconds, "minimal")}
