@@ -217,9 +217,9 @@ export const absGetLibraryItems = async ({
     return {
       id: item.id,
       title: item.media.metadata.title,
+      subtitle: item.media.metadata.subtitle,
       author: item.media.metadata.authorName,
       series: item.media.metadata.seriesName,
-      // seriesId: item.media.metadata?.series?.id,
       publishedDate: item.media.metadata.publishedDate,
       publishedYear: item.media.metadata.publishedYear,
       narratedBy: item.media.metadata.narratorName,

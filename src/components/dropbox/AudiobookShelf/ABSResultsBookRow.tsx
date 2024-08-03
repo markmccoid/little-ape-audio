@@ -8,6 +8,7 @@ import { formatSeconds } from "@utils/formatUtils";
 import { SymbolView, SymbolViewProps, SFSymbol } from "expo-symbols";
 import { DurationIcon, SeriesIcon } from "@components/common/svg/Icons";
 import { colors } from "@constants/Colors";
+import { LinearGradient } from "expo-linear-gradient";
 
 type Unpacked<T> = T extends (infer U)[] ? U : T;
 type Props = {
@@ -78,7 +79,7 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
               </View>
               {/* CONDITIONAL Series */}
               {showInlineSeries && (
-                <View className="flex-row items-center justify-start bg-red">
+                <View className="flex-row items-center justify-start">
                   <SeriesIcon size={16} color={colors.amber800} />
                   <Text
                     lineBreakMode="tail"
@@ -136,19 +137,25 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
         <TouchableOpacity
           onPress={() => router.push(`/audio/dropbox/audiobookshelf/series/${book.id}`)}
         >
-          <View
-            className="flex-row items-center justify-start px-2 py-1"
-            style={[styles.bottomHairline, book.isFinished && styles.finishedBook]}
+          <LinearGradient
+            colors={[colors.abs100, colors.abs300]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
           >
-            <SeriesIcon size={16} color={colors.amber800} />
-            <Text
-              lineBreakMode="tail"
-              numberOfLines={2}
-              className="flex-1 text-amber-900 ml-1 text-xs pt-[3]"
+            <View
+              className="flex-row items-center justify-start px-2 py-1"
+              style={[styles.bottomHairline, book.isFinished && styles.finishedBook]}
             >
-              {book.series}
-            </Text>
-          </View>
+              <SeriesIcon size={16} color={colors.amber800} />
+              <Text
+                lineBreakMode="tail"
+                numberOfLines={2}
+                className="flex-1 text-amber-950 ml-1 text-xs pt-[3]"
+              >
+                {book.series}
+              </Text>
+            </View>
+          </LinearGradient>
         </TouchableOpacity>
       )}
     </View>
