@@ -36,6 +36,8 @@ import {
 import { formatSeconds } from "@utils/formatUtils";
 import { useQueryClient } from "@tanstack/react-query";
 import { SymbolView } from "expo-symbols";
+import * as Linking from "expo-linking";
+import { Share } from "react-native";
 
 type Props = {
   data: ABSGetItemDetails;
@@ -163,8 +165,8 @@ const ABSBookContainer = ({ data }: Props) => {
               marginLeft: 8,
             }}
           />
-          <View className="flex-row justify-between items-center">
-            <TouchableOpacity onPress={handleToggleFavorite} className="ml-3 mt-1">
+          <View className="flex-row justify-between items-center ml-3">
+            <TouchableOpacity onPress={handleToggleFavorite} className="mt-1">
               {currFolderAttributes?.isFavorite ? (
                 // <MDHeartIcon color="red" size={30} />
                 <SymbolView
@@ -183,7 +185,34 @@ const ABSBookContainer = ({ data }: Props) => {
                 />
               )}
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleToggleRead} className="ml-4">
+            <TouchableOpacity
+              className="mt-1"
+              onPress={async () => {
+                try {
+                  const result = await Share.share({
+                    message: `${media.metadata.title} -> Open in LAAB -> ${Linking.createURL(
+                      `audio/dropbox/audiobookshelf/${data.id}`
+                    )}`,
+                    url: coverURI,
+                  });
+                } catch (e) {
+                  console.log("Error sharing", e.message);
+                }
+                // if (await Sharing.isAvailableAsync()) {
+                //   await Sharing.shareAsync(coverURI, { dialogTitle: "Book" });
+                // } else {
+                //   alert("Sharing is not available.");
+                // }
+              }}
+            >
+              <SymbolView
+                name="square.and.arrow.up"
+                style={{ width: 25, height: 30 }}
+                type="monochrome"
+                tintColor={colors.abs950}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleToggleRead} className="mt-1">
               {isRead ? (
                 <View>
                   <SymbolView
