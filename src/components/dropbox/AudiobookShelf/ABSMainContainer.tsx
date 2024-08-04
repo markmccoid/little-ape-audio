@@ -59,7 +59,7 @@ const ABSMainContainer = () => {
     if (searchBarRef?.current) {
       setSearchBarClearFn(() => searchBarRef.current.clearText());
     }
-    return () => setSearchBarClearFn(null);
+    return () => setSearchBarClearFn(() => {});
   }, [searchBarRef?.current?.clearText]);
 
   const debouncedSetSearchText = useCallback(

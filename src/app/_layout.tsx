@@ -2,7 +2,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
 import { Slot, SplashScreen, useRouter, usePathname } from "expo-router";
 import { useEffect, useLayoutEffect, useState } from "react";
-import { View, useColorScheme } from "react-native";
+import { Linking, View, useColorScheme } from "react-native";
 import { Lato_100Thin, Lato_400Regular, Lato_700Bold } from "@expo-google-fonts/lato";
 
 import TrackPlayer, { Capability, IOSCategoryMode } from "react-native-track-player";
@@ -99,6 +99,12 @@ export default function RootLayout() {
   useEffect(() => {
     if (isLoaded && loaded) {
       SplashScreen.hideAsync();
+      Linking.getInitialURL().then((url) => {
+        if (url) {
+          // Handle the deep link
+          router.navigate(url);
+        }
+      });
     }
   }, [isLoaded, loaded]);
 

@@ -71,7 +71,7 @@ const ABSBookContainer = ({ data }: Props) => {
     () => absTagFiles(audioFiles, media.libraryItemId),
     [audioFiles]
   );
-
+  // console.log("CLEAR SEARCHBAE", clearSearchBar);
   // Set the isRead flag based on the userMediaProgress info for book
   const [isRead, setIsRead] = useState(() => !!userMediaProgress?.isFinished);
   //Make sure to update is read on subsequent renders
