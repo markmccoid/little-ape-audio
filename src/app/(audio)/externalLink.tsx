@@ -15,7 +15,7 @@ const ExternalLink = () => {
   const { newdir, fullPath, backTitle, yOffset, audioSource, parentFolderId } =
     useLocalSearchParams<AudioSourceLinkParams>();
   const [prevDir, setPrevDir] = useState("");
-  console.log(fullPath, audioSource);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Stack.Screen

@@ -191,7 +191,7 @@ const ABSBookContainer = ({ data }: Props) => {
                 try {
                   const result = await Share.share({
                     message: `${media.metadata.title} -> Open in LAAB -> ${Linking.createURL(
-                      `(audio)/dropbox/audiobookshelf/${data.id}`
+                      `/dropbox/audiobookshelf/${data.id}`
                     )}`,
                     url: coverURI,
                   });

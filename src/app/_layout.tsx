@@ -105,6 +105,7 @@ export default function RootLayout() {
         // get a url object
         const url = new URL(initialUrl);
         const path = url.pathname;
+        // console.log("URL", url.pathname);
         // if there are params grab them
         // should only be for google and dropbox
         const params = new URLSearchParams(url.search);

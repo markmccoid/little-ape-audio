@@ -49,7 +49,7 @@ const FileMetadataView = ({ metadata, path_lower, audioSource, folderName }: Pro
   //!!! Create LINKING URL Example
 
   // console.log(
-  //   Linking.createURL("(audio)/dropbox/linkTest", {
+  //   Linking.createURL("/dropbox/linkTest", {
   //     queryParams: { fullPath: path_lower, backTitle: "BackT" },
   //   })
   // );
@@ -152,7 +152,7 @@ const FileMetadataView = ({ metadata, path_lower, audioSource, folderName }: Pro
           </TouchableOpacity>
           <TouchableOpacity
             onPress={async () => {
-              const shareLink = Linking.createURL("(audio)/externalLink", {
+              const shareLink = Linking.createURL("/externalLink", {
                 queryParams: { fullPath: path_lower, backTitle: "Audio Sources", audioSource },
               });
               try {
@@ -254,7 +254,7 @@ const FileMetadataView = ({ metadata, path_lower, audioSource, folderName }: Pro
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={async () => {
-                    const shareLink = Linking.createURL("(audio)/externalLink", {
+                    const shareLink = Linking.createURL("/externalLink", {
                       queryParams: {
                         fullPath: customEncodeParens(path_lower),
                         backTitle: "Audio Sources",
