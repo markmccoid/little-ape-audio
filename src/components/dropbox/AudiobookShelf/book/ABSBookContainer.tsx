@@ -191,7 +191,7 @@ const ABSBookContainer = ({ data }: Props) => {
                 try {
                   const result = await Share.share({
                     message: `${media.metadata.title} -> Open in LAAB -> ${Linking.createURL(
-                      `audio/dropbox/audiobookshelf/${data.id}`
+                      `(audio)/dropbox/audiobookshelf/${data.id}`
                     )}`,
                     url: coverURI,
                   });
@@ -268,10 +268,10 @@ const ABSBookContainer = ({ data }: Props) => {
                 updateSearchObject({ authorOrTitle: undefined });
                 updateSearchObject({ author });
                 // Navigates to the page.  Looks like it moves to this page in history??
-                router.navigate("/audio/dropbox/audiobookshelf/");
+                router.navigate("/(audio)/dropbox/audiobookshelf/");
                 // Push adds a new entry to history and replace replaces current page in history
                 // Probably would use push, but this could get them into crazy loop.
-                //router.push("/audio/dropbox/audiobookshelf/");
+                //router.push("/(audio)/dropbox/audiobookshelf/");
               }}
               className="flex-row my-1"
             >

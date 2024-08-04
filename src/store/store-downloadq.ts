@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { usePlaybackStore, useTracksStore } from "./store";
 import { getDropboxFileLink } from "@utils/dropboxUtils";
 import { downloadFileBlob as downloadFileBlobUtil } from "./data/fileSystemAccess";
-import { AudioSourceType } from "@app/audio/dropbox";
+import { AudioSourceType } from "@app/(audio)/dropbox";
 // import { DownloadProgressCallbackResultT } from "@dr.pogodin/react-native-fs";
 import { absDownloadItem } from "./data/absAPI";
 
@@ -141,7 +141,7 @@ export const useDownloadQStore = create<DownloadQState>((set, get) => ({
       }
     },
     clearCompletedDownloads: () => {
-      // Called from app/audio/dropbox/index.tsx and from ExplorerAllContainer.tsx
+      // Called from app/(audio)/dropbox/index.tsx and from ExplorerAllContainer.tsx
       set({ completedDownloads: [] });
     },
     stopAllDownloads: () => {

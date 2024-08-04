@@ -1,7 +1,7 @@
 import { Track } from "react-native-track-player";
 import { FileEntry } from "../utils/dropboxUtils";
 import { Chapter } from "./store-functions";
-import { AudioSourceType } from "@app/audio/dropbox";
+import { AudioSourceType } from "@app/(audio)/dropbox";
 import { colors } from "@constants/Colors";
 import { CleanBookMetadata } from "@utils/audiobookMetadata";
 

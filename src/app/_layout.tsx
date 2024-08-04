@@ -97,14 +97,37 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
+    const handleInitialURL = async () => {
+      if (!isLoaded || !loaded) return;
+      const initialUrl = await Linking.getInitialURL();
+      // console.log("Initial URL", initialUrl);
+      if (initialUrl) {
+        // get a url object
+        const url = new URL(initialUrl);
+        const path = url.pathname;
+        // if there are params grab them
+        // should only be for google and dropbox
+        const params = new URLSearchParams(url.search);
+        const fullPath = params.get("fullPath");
+        const backTitle = params.get("backTitle");
+        const audioSource = params.get("audioSource");
+
+        // If we don't start and the base route we have issues.
+        router.replace("/");
+        // The abs routes DON"T need the params, but they will be null and won't hurt so just pass them
+        router.push({ pathname: path, params: { fullPath, backTitle, audioSource } });
+        // }
+      } else {
+        // router.replace("/(audio)");
+      }
+    };
+
+    handleInitialURL();
+  }, [isLoaded, router, loaded]);
+
+  useEffect(() => {
     if (isLoaded && loaded) {
       SplashScreen.hideAsync();
-      Linking.getInitialURL().then((url) => {
-        if (url) {
-          // Handle the deep link
-          router.navigate(url);
-        }
-      });
     }
   }, [isLoaded, loaded]);
 

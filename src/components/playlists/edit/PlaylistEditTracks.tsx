@@ -105,7 +105,7 @@ const PlaylistEditTracks = ({ playlistId }: { playlistId: string }) => {
         text: "Move/Copy to New Playlist",
         onPress: () =>
           router.push({
-            pathname: "/audio/trackmove",
+            pathname: "/(audio)/trackmove",
             params: {
               moveType: "new",
               fromPlaylistId: playlistId,
@@ -117,7 +117,7 @@ const PlaylistEditTracks = ({ playlistId }: { playlistId: string }) => {
         text: "Move/Copy to Existing Playlist",
         onPress: () =>
           router.push({
-            pathname: "/audio/trackmove",
+            pathname: "/(audio)/trackmove",
             params: {
               moveType: "existing",
               fromPlaylistId: playlistId,

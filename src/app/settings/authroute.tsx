@@ -28,7 +28,7 @@ const DropboxAuthScreen = () => {
         />
 
         <View className="flex-row m-2">
-          <Link href="/audio/" asChild>
+          <Link href="/(audio)/" asChild>
             <Pressable className="flex-grow w-full border bg-amber-300 rounded-md px-2 py-1">
               <Text className="text-lg text-center">Home</Text>
             </Pressable>

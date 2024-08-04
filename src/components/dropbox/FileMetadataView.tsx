@@ -21,7 +21,7 @@ import {
   useDropboxStore,
 } from "../../store/store-dropbox";
 import * as Linking from "expo-linking";
-import { AudioSourceType } from "@app/audio/dropbox";
+import { AudioSourceType } from "@app/(audio)/dropbox";
 import { customEncodeParens } from "@utils/otherUtils";
 import { SymbolView } from "expo-symbols";
 // import * as Sharing from "expo-sharing";
@@ -49,7 +49,7 @@ const FileMetadataView = ({ metadata, path_lower, audioSource, folderName }: Pro
   //!!! Create LINKING URL Example
 
   // console.log(
-  //   Linking.createURL("audio/dropbox/linkTest", {
+  //   Linking.createURL("(audio)/dropbox/linkTest", {
   //     queryParams: { fullPath: path_lower, backTitle: "BackT" },
   //   })
   // );
@@ -152,8 +152,8 @@ const FileMetadataView = ({ metadata, path_lower, audioSource, folderName }: Pro
           </TouchableOpacity>
           <TouchableOpacity
             onPress={async () => {
-              const shareLink = Linking.createURL("audio/externalLink", {
-                queryParams: { fullPath: path_lower, backTitle: "Audio Sources" },
+              const shareLink = Linking.createURL("(audio)/externalLink", {
+                queryParams: { fullPath: path_lower, backTitle: "Audio Sources", audioSource },
               });
               try {
                 const res = await Share.share({
@@ -254,7 +254,7 @@ const FileMetadataView = ({ metadata, path_lower, audioSource, folderName }: Pro
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={async () => {
-                    const shareLink = Linking.createURL("audio/externalLink", {
+                    const shareLink = Linking.createURL("(audio)/externalLink", {
                       queryParams: {
                         fullPath: customEncodeParens(path_lower),
                         backTitle: "Audio Sources",

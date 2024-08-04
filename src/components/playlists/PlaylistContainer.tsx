@@ -103,7 +103,7 @@ const PlaylistContainer = () => {
   //~ Playlist select
   const handleRowSelect = async (playlistId: string) => {
     setIsSelectingRow(true);
-    route.push({ pathname: "/audio/player", params: { playlistId } });
+    route.push({ pathname: "/(audio)/player", params: { playlistId } });
     // const playlist = getPlaylist(playlistId);
 
     // Check to make sure playlist has at least one track
@@ -183,7 +183,7 @@ const PlaylistContainer = () => {
         />
 
         <Link
-          href="/audio/dropbox/"
+          href="/(audio)/dropbox/"
           asChild
           className="flex items-center justify-center flex-1 mb-[200]"
         >

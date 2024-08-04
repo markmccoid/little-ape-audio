@@ -87,7 +87,7 @@ const DropboxScreens = () => {
           {networkActive ? (
             <Link
               href={{
-                pathname: "audio/dropbox/dropboxstart",
+                pathname: "(audio)/dropbox/dropboxstart",
                 params: {
                   fullPath: "",
                   backTitle: "Back",
@@ -118,7 +118,7 @@ const DropboxScreens = () => {
           {networkActive ? (
             <Link
               href={{
-                pathname: "audio/dropbox/googlestart",
+                pathname: "(audio)/dropbox/googlestart",
                 params: {
                   fullPath: "",
                   backTitle: "Back",
@@ -149,7 +149,7 @@ const DropboxScreens = () => {
           {networkActive ? (
             <Link
               href={{
-                pathname: "audio/dropbox/audiobookshelf",
+                pathname: "(audio)/dropbox/audiobookshelf",
                 params: {
                   fullPath: "",
                   backTitle: "Back",
@@ -213,7 +213,7 @@ const DropboxScreens = () => {
           >
             <Link
               href={{
-                pathname: "audio/dropbox/searchBooks",
+                pathname: "(audio)/dropbox/searchBooks",
                 params: { fullPath: "", backTitle: "Back" },
               }}
             >

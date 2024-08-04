@@ -36,7 +36,7 @@ const ShowFavoritedBooks = () => {
 
     let routerPush = () =>
       router.push({
-        pathname: `/audio/dropbox/favBook`,
+        pathname: `/(audio)/dropbox/favBook`,
         params: {
           fullPath: customEncodeParens(item?.pathToFolder),
           backTitle: "Back",
@@ -48,7 +48,7 @@ const ShowFavoritedBooks = () => {
     if (item.audioSource === "abs") {
       routerPush = () =>
         router.push({
-          pathname: `/audio/dropbox/audiobookshelf/${item.pathToFolder}`,
+          pathname: `/(audio)/dropbox/audiobookshelf/${item.pathToFolder}`,
           params: {
             title: item.title,
           },

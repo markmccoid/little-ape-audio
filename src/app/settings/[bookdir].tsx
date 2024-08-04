@@ -5,7 +5,7 @@ import ExplorerAllContainer from "@components/dropbox/ExplorerAllContainer";
 import { useNavigation } from "expo-router";
 import CustomHeader from "@components/dropbox/CustomHeader";
 import { useDropboxStore } from "@store/store-dropbox";
-import { AudioSourceLinkParams, AudioSourceType } from "@app/audio/dropbox";
+import { AudioSourceLinkParams, AudioSourceType } from "@app/(audio)/dropbox";
 import { customEncodeParens } from "@utils/otherUtils";
 
 type SearchParms = { fullPath: string; backTitle: string; yOffset: string };

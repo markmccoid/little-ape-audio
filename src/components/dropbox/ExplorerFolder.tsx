@@ -22,7 +22,7 @@ import { colors } from "../../constants/Colors";
 import ExplorerFolderRow from "./ExplorerFolderRow";
 import { MotiView } from "moti";
 import { CleanBookMetadata } from "@utils/audiobookMetadata";
-import { AudioSourceType } from "@app/audio/dropbox";
+import { AudioSourceType } from "@app/(audio)/dropbox";
 
 type Props = {
   folder: FolderEntry;

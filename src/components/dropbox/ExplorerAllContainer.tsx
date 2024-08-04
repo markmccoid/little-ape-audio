@@ -17,7 +17,7 @@ import {
   useDropboxStore,
 } from "../../store/store-dropbox";
 import FileMetadataView from "./FileMetadataView";
-import { AudioSourceType } from "@app/audio/dropbox";
+import { AudioSourceType } from "@app/(audio)/dropbox";
 import { listGoogleDriveFiles } from "@utils/googleUtils";
 import { useSettingStore } from "@store/store-settings";
 

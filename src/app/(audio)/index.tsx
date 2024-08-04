@@ -1,4 +1,4 @@
-import { StyleSheet, View, SafeAreaView, ActivityIndicator } from "react-native";
+import { StyleSheet, View, SafeAreaView, ActivityIndicator, Linking } from "react-native";
 import PlaylistContainer from "../../components/playlists/PlaylistContainer";
 import { usePlaybackStore } from "../../store/store";
 import PlaylistTrackControl from "../../components/playlists/PlaylistTrackControl";
@@ -18,9 +18,8 @@ import { useIsFocused } from "@react-navigation/native";
 export default function AudioScreen() {
   const isPlaylistLoaded = usePlaybackStore((state) => state.playlistLoaded);
   const isFocused = useIsFocused();
+  const router = useRouter();
 
-  // useFocusEffect(() => setFocused((r) => !r));
-  // console.log("FOC", focused);
   return (
     <SafeAreaView className={`flex-1 ${isPlaylistLoaded ? "bg-amber-200" : "bg-amber-50"} `}>
       <View className="flex-col flex-1 justify-start flex-grow bg-amber-50">

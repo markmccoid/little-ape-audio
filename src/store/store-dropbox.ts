@@ -15,7 +15,7 @@ import {
 import { CleanBookMetadata, BookJSONMetadata, cleanOneBook } from "./../utils/audiobookMetadata";
 import { downloadToFileSystem } from "./data/fileSystemAccess";
 import { useTracksStore } from "./store";
-import { AudioSourceType } from "@app/audio/dropbox";
+import { AudioSourceType } from "@app/(audio)/dropbox";
 import { AUDIO_FORMATS } from "@utils/constants";
 import { ProcessedBookData, ScannedFolder } from "./types";
 import { differenceInDays, format } from "date-fns";

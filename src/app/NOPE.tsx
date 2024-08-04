@@ -6,14 +6,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const RootIndex = () => {
   const router = useRouter();
 
-  useEffect(() => {
-    setTimeout(() => router.replace("/audio"), 1);
-  }, []);
+  // useEffect(() => {
+  //   setTimeout(() => router.replace("/audio"), 1);
+  // }, []);
 
   return (
     <SafeAreaView>
       <Link href="/audio">
-        <Text></Text>
+        <Text>HI</Text>
       </Link>
     </SafeAreaView>
   );

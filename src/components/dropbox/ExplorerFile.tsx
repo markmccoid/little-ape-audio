@@ -11,7 +11,7 @@ import {
 } from "../../store/data/fileSystemAccess";
 import { usePlaybackStore, useTrackActions } from "../../store/store";
 import * as Progress from "react-native-progress";
-import { AudioSourceType } from "@app/audio/dropbox";
+import { AudioSourceType } from "@app/(audio)/dropbox";
 // import { DownloadProgressCallbackResultT } from "@dr.pogodin/react-native-fs";
 import useDownloadQStore, { DownloadQueueItem } from "@store/store-downloadq";
 import { MotiView } from "moti";

@@ -39,7 +39,7 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
         <Pressable
           onPress={() =>
             router.navigate({
-              pathname: `audio/dropbox/audiobookshelf/${book.id}`,
+              pathname: `(audio)/dropbox/audiobookshelf/${book.id}`,
               params: { title: book.title },
             })
           }
@@ -53,7 +53,7 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
         <Pressable
           onPress={() =>
             router.navigate({
-              pathname: `audio/dropbox/audiobookshelf/${book.id}`,
+              pathname: `(audio)/dropbox/audiobookshelf/${book.id}`,
               params: { title: book.title },
             })
           }
@@ -135,7 +135,7 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
       </View>
       {showSeriesLink && (
         <TouchableOpacity
-          onPress={() => router.push(`/audio/dropbox/audiobookshelf/series/${book.id}`)}
+          onPress={() => router.push(`/(audio)/dropbox/audiobookshelf/series/${book.id}`)}
         >
           <LinearGradient
             colors={[colors.abs100, colors.abs300]}

@@ -15,7 +15,7 @@ const ExternalLink = () => {
   const { newdir, fullPath, backTitle, yOffset, audioSource, parentFolderId } =
     useLocalSearchParams<AudioSourceLinkParams>();
   const [prevDir, setPrevDir] = useState("");
-
+  console.log(fullPath, audioSource);
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Stack.Screen
@@ -23,7 +23,7 @@ const ExternalLink = () => {
           title: "Book Recommendation",
           headerLeft: () => {
             return (
-              <TouchableOpacity onPress={() => router.replace("/audio/")}>
+              <TouchableOpacity onPress={() => router.replace("/(audio)/")}>
                 <View className="flex-row items-center  ml-[-15] pr-3">
                   <ChevronBackIcon size={25} />
                   <Text className="text-base font-semibold">Done</Text>

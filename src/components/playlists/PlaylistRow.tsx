@@ -233,7 +233,7 @@ function RenderRight({
           onPress={() => {
             // router.setParams({ playlistId: playlist.id });
             router.push({
-              pathname: "/audio/playlistedit",
+              pathname: "/(audio)/playlistedit",
               params: { playlistId: playlistId },
             });
           }}

@@ -46,7 +46,7 @@ const SearchBookResults = ({ resultData }: Props) => {
           className="rounded-r-lg flex-grow"
           onPress={() =>
             router.push({
-              pathname: customEncodeParens(`/audio/dropbox/${item.title}`),
+              pathname: customEncodeParens(`/(audio)/dropbox/${item.title}`),
               params: {
                 fullPath: customEncodeParens(item.dropboxPathLower),
                 backTitle: "Back",

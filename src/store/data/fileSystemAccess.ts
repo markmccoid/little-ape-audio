@@ -3,7 +3,7 @@
 // import { FileEntry, getDropboxFileLink } from "@utils/dropboxUtils";
 import * as FileSystem from "expo-file-system";
 // import rnfs, { DownloadProgressCallbackResult } from "react-native-fs";
-import { AudioSourceType } from "@app/audio/dropbox";
+import { AudioSourceType } from "@app/(audio)/dropbox";
 import { getAccessToken } from "@utils/googleUtils";
 
 import ReactNativeBlobUtil from "react-native-blob-util";

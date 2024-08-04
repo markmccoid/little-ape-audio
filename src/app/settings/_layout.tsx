@@ -33,7 +33,7 @@ const SettingsLayout = () => {
           },
           headerTintColor: colors.amber900,
           headerLeft: () => (
-            <Link replace href="/audio/" className="p-[10] ml-[-10]">
+            <Link replace href="/(audio)/" className="p-[10] ml-[-10]">
               <HomeIcon />
             </Link>
           ),

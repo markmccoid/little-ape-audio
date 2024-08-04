@@ -58,7 +58,7 @@ const MainFavFolders = () => {
           <Link
             push
             href={{
-              pathname: "/audio/dropbox/newdir",
+              pathname: "/(audio)/dropbox/newdir",
               params: {
                 fullPath: item.folderPath,
                 backTitle: "Back",

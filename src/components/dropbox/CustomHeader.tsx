@@ -19,7 +19,7 @@ function CustomHeader({ title, backText, sessionAudioSource }) {
     return;
     //   }
     // router.push({
-    //   pathname: `/audio/dropbox/${newPathInfo.backTitle}`,
+    //   pathname: `/(audio)/dropbox/${newPathInfo.backTitle}`,
     //   params: {
     //     fullPath: newPathInfo.fullPath,
     //     backTitle: newPathInfo.backTitle,

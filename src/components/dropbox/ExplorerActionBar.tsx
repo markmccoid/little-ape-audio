@@ -9,7 +9,7 @@ import {
 } from "../common/svg/Icons";
 import { MotiView } from "moti";
 import { useDropboxStore } from "@store/store-dropbox";
-import { AudioSourceType } from "@app/audio/dropbox";
+import { AudioSourceType } from "@app/(audio)/dropbox";
 import useDownloadQStore, {
   useDownloadQDownloadCounts,
   useDownloadQStatus,

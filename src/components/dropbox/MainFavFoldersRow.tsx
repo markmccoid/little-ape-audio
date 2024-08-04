@@ -182,7 +182,7 @@ const MainFavFoldersRow = ({ favFolder, simultaneousHandler, currentKey, activeK
             <Pressable
               onPress={() =>
                 router.push({
-                  pathname: "/audio/dropbox/newdir",
+                  pathname: "/(audio)/dropbox/newdir",
                   params: { fullPath: favFolder.folderPath, backTitle: "Back" },
                 })
               }

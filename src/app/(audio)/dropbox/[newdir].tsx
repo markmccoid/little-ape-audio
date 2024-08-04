@@ -39,7 +39,7 @@ const NewDirectory = () => {
 
   const onPathChange = (newPath: string, folderName: string) => {
     router.push({
-      pathname: `/audio/dropbox/${customEncodeParens(folderName)}`,
+      pathname: `/(audio)/dropbox/${customEncodeParens(folderName)}`,
       params: {
         fullPath: customEncodeParens(newPath),
         backTitle: customEncodeParens(folderName),

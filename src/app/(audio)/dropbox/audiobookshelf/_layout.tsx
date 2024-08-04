@@ -39,7 +39,7 @@ const ABSLayout = () => {
                 <SortMenu />
               </Pressable>
               <Pressable
-                onPress={() => router.push("/audio/dropbox/audiobookshelf/advsearch")}
+                onPress={() => router.push("/(audio)/dropbox/audiobookshelf/advsearch")}
                 className="p-3 items-center justify-center"
               >
                 <SearchIcon color={searchActive ? "green" : colors.amber900} />

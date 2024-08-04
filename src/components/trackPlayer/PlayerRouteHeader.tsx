@@ -47,7 +47,7 @@ const PlayerHeaderComponent = ({ playlistId }: { playlistId: string }) => {
 
       {/* Settings Icon */}
       <View className="">
-        <Link href="/audio/playersettings" asChild>
+        <Link href="/(audio)/playersettings" asChild>
           <Pressable className="p-[10] mr-[-10]">
             <SettingsIcon size={25} color={playlistColors?.secondary?.tintColor} />
           </Pressable>

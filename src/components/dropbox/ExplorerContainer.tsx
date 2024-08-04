@@ -34,7 +34,7 @@ import {
   useDropboxStore,
 } from "../../store/store-dropbox";
 import FileMetadataView from "./FileMetadataView";
-import { AudioSourceType } from "@app/audio/dropbox";
+import { AudioSourceType } from "@app/(audio)/dropbox";
 // import { startDownloadAll } from "@store/data/fileSystemAccess";
 
 type Props = {
