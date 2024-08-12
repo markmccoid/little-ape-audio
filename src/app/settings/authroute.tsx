@@ -20,7 +20,7 @@ const DropboxAuthScreen = () => {
         <Stack.Screen
           options={{
             headerRight: () => (
-              <Link href="/audio">
+              <Link href="/(audio)">
                 <HomeIcon />
               </Link>
             ),

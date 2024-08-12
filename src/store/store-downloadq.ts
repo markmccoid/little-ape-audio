@@ -176,20 +176,6 @@ const downloadFile = async (downloadProps: DownloadQueueItem) => {
   if (playlistLoaded) {
     await resetPlaybackStore();
   }
-  // Progress callback if using react-native-fs
-  const onHandleProgressRNFS = (progressData: DownloadProgressCallbackResultT) => {
-    useDownloadQStore.setState((state) => ({
-      activeTasks: state.activeTasks.map((task) => {
-        if (task.fileId === fileId) {
-          task.downloadProgress = progressData.bytesWritten / progressData.contentLength;
-          task.bytesExpected = progressData.contentLength;
-          task.bytesWritten = progressData.bytesWritten;
-          return task;
-        }
-        return task;
-      }),
-    }));
-  };
 
   // Progress callback for react-native-blob-util
   const onHandleProgress = (received: number, total: number) => {
@@ -219,15 +205,8 @@ const downloadFile = async (downloadProps: DownloadQueueItem) => {
     default:
       break;
   }
-  // const downloadLink = audioSource === "google" ? fileId : await getDropboxFileLink(filePathLower);
+
   // Prepare to start the download
-  //! react-native-fs CODE
-  // const { cleanFileName, stopDownload, startDownload } = await downloadFileWProgress(
-  //   downloadLink,
-  //   fileName,
-  //   onHandleProgress,
-  //   audioSource
-  // );
   // We only await the downloadFileBlobUtil because of google auth token get
   // the "task" variable is the actual promise that will be awaited below.
   const { task, cleanFileName, cancelDownload } = await downloadFileBlobUtil(
