@@ -361,3 +361,15 @@ export const isDropboxTokenValid = async (token: string): Promise<TokenReturn> =
     return { valid: false, error: errorMessage };
   }
 };
+
+//~-=======================================
+//~ Check Network state
+//~-=======================================
+export const checkNetworkState = async () => {
+  try {
+    const resp = await axios.get("https://api.dropboxapi.com/2/");
+    console.log("RESP", resp.response);
+  } catch (e) {
+    console.log("Network Error", e);
+  }
+};

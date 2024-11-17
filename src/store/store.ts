@@ -675,10 +675,12 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       }
 
       //----------
-      // Pause the player before loading the new track.  Even though
-      // store existing playlist information in TrackStore -> playlists
-      // before loading new playlist
-      await saveCurrentTrackInfo();
+      // Pause the player before loading the new track.
+      //! Used to saved playlist info(one being removed) before loading new.
+      //! Was not doing anything since I am only running the saveCurrentInfo if playlistLoaded is true
+      //! and we set to false at beginning of this function.
+      //! if needed maybe another variable
+      // await saveCurrentTrackInfo();
       await TrackPlayer.pause();
       await get().actions.resetPlaybackStore();
 
@@ -723,7 +725,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       const prevTracksDuration = usePlaybackStore.getState().actions.getPrevTrackDuration();
       // usePlaybackStore.setState({ currentQueuePosition: prevTracksDuration });
       set({ currentQueuePosition: prevTracksDuration });
-      set({ playlistLoaded: true });
+      // set({ playlistLoaded: true });
       // - Reset TrackPlayer and add the Queue
 
       await TrackPlayer.add(queue);
@@ -738,7 +740,8 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       await TrackPlayer.seekTo(currTrackPosition);
       await TrackPlayer.setRate(currPlaylist.currentRate);
       // await new Promise((resolve) => setTimeout(resolve, 100));
-
+      set({ playlistLoaded: true });
+      await saveCurrentTrackInfo();
       if (!currPlaylist?.imageColors) {
         const colors = (await getImageColors(currPlaylist.imageURI)) as PlaylistImageColors;
         useTracksStore.getState().actions.updatePlaylistFields(playlistId, { imageColors: colors });
@@ -1106,7 +1109,10 @@ const buildTrackPlayerQueue = async (trackIds: string[]): Promise<ApeTrack[]> =>
 // Debounce the saving function so that we don't get multiple saves if not needed.
 const saveCurrentTrackInfo = debounce(async () => await saveCurrentTrackInfoBase(), 500);
 const saveCurrentTrackInfoBase = async () => {
+  // Check to make sure the playlist has finished loading.  If not we would get zero for position
+  if (!usePlaybackStore.getState().playlistLoaded) return;
   const trackIndex = await TrackPlayer.getActiveTrackIndex();
+
   if (trackIndex !== null && trackIndex !== undefined) {
     //! Instead of polling TrackPlayer for position, get it from PlaybackStore
     //! We are updating this field every second in the PlaybackProgressUpdate listener

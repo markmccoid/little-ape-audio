@@ -21,6 +21,7 @@ import useLocalFiles from "../../../hooks/useLocalFiles";
 import * as Progress from "react-native-progress";
 import useDownloadQStore from "@store/store-downloadq";
 import { useKeepAwake } from "expo-keep-awake";
+import { checkNetworkState } from "@utils/dropboxUtils";
 
 export type AudioSourceType = "dropbox" | "google" | "local" | "abs";
 export type AudioSourceLinkParams = {
@@ -36,17 +37,13 @@ const DropboxScreens = () => {
   const [currTab, setCurrTab] = useState<"folders" | "books">("folders");
   const insets = useSafeAreaInsets();
   const folderMetadata = useDropboxStore((state) => state.folderMetadata);
-  const [networkActive, setNetworkActive] = useState(true);
+  // const [networkActive, setNetworkActive] = useState(true);
   const [isLoading, selectLocalFiles] = useLocalFiles();
   const qActions = useDownloadQStore((state) => state.actions);
-
   // Check for network activity
+  const { isConnected: networkActive } = Network.useNetworkState();
+
   useEffect(() => {
-    const checkForNetwork = async () => {
-      const { isInternetReachable } = await Network.getNetworkStateAsync();
-      setNetworkActive(isInternetReachable);
-    };
-    checkForNetwork();
     // When mounting clear the completed downloads
     // CANT do it on unmounting as items can download in the background
     qActions.clearCompletedDownloads();
