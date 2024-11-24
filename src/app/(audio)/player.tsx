@@ -20,9 +20,34 @@ const PlaylistScreen = () => {
   const { playlistId } = useLocalSearchParams() as PlayerRouteParams;
   const isLoaded = usePlaybackStore((state) => state.playlistLoaded);
   const playlistColors = usePlaylistColors(playlistId);
-  const { setCurrentPlaylist } = usePlaybackStore((state) => state.actions);
+  // const { setCurrentPlaylist } = usePlaybackStore((state) => state.actions);
+  const [shouldRender, setShouldRender] = React.useState(false);
+
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      setShouldRender(true);
+    });
+    return () => {
+      setShouldRender(false);
+    };
+  }, [playlistId]);
 
   //~
+  if (!shouldRender || !isLoaded) {
+    return (
+      <LinearGradient
+        colors={[
+          `${playlistColors?.secondary?.color}`,
+          `${playlistColors?.background?.color}`,
+          colors.amber50,
+        ]}
+        style={{ flex: 1 }}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 0.95 }}
+        locations={[0.3, 0.6, 1]}
+      ></LinearGradient>
+    );
+  }
   return (
     <AnimatePresence>
       {!isLoaded && (

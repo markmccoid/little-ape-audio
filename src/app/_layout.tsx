@@ -1,6 +1,7 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
-import { Slot, SplashScreen, useRouter, usePathname } from "expo-router";
+import { Slot, useRouter, usePathname } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { Linking, View, useColorScheme } from "react-native";
 import { Lato_100Thin, Lato_400Regular, Lato_700Bold } from "@expo-google-fonts/lato";
@@ -17,6 +18,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { laabMetaAggrRecurseBegin, useDropboxStore } from "@store/store-dropbox";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 
+SplashScreen.preventAutoHideAsync();
 let isTPSetup = false;
 export {
   // Catch any errors thrown by the Layout component.
@@ -128,7 +130,9 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (isLoaded && loaded) {
-      SplashScreen.hideAsync();
+      console.log("LOADED");
+      // SplashScreen.hideAsync();
+      // SplashScreen.hide();
     }
   }, [isLoaded, loaded]);
 

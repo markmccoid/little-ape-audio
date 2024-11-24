@@ -51,7 +51,7 @@ const AudioLayout = () => {
       <Stack.Screen
         name="player"
         options={{
-          headerShown: true,
+          headerShown: false,
           // headerStyle: {
           //   backgroundColor: countdownActive ? "#feb9b9" : bgColors.bg,
           // },

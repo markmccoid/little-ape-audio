@@ -115,8 +115,10 @@ const PlaylistContainer = () => {
 
     // setTimeout(() => setIsSelectingRow(false), 100);
     // This is async, but don't want to await
-    await setCurrPlaylist(playlistId);
-    setIsSelectingRow(false);
+    requestAnimationFrame(async () => {
+      await setCurrPlaylist(playlistId);
+      setIsSelectingRow(false);
+    });
   };
 
   //~ --------------------------

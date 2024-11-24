@@ -13,14 +13,14 @@ export default {
   scheme: "littleapeaudio",
   privacy: "unlisted",
   platforms: ["ios"],
-  version: "1.1.9",
+  version: "1.1.91",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "automatic",
   splash: {
     image: "./assets/splash.png",
     resizeMode: "contain",
-    backgroundColor: "#ffffff",
+    backgroundColor: "#fef9B0",
   },
   updates: {
     fallbackToCacheTimeout: 0,
@@ -35,7 +35,7 @@ export default {
     },
     supportsTablet: false,
     bundleIdentifier: "com.markmccoid.little-ape-audio",
-    buildNumber: "1.1.9",
+    buildNumber: "1.1.91",
     infoPlist: {
       RCTAsyncStorageExcludeFromBackup: false,
       NSMicrophoneUsageDescription:
@@ -61,6 +61,14 @@ export default {
       },
     ],
     ["@react-native-google-signin/google-signin"],
+    [
+      "expo-splash-screen",
+      {
+        backgroundColor: "#ffffff",
+        image: "./assets/splash.png",
+        imageWidth: 1284,
+      },
+    ],
   ],
   experiments: {
     tsconfigPaths: true,
