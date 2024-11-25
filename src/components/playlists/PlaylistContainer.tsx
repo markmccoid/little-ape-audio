@@ -12,7 +12,7 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "re
 import { usePlaybackStore, usePlaylists, useTrackActions, useTracksStore } from "../../store/store";
 import { Link, useFocusEffect, useNavigation, useRouter } from "expo-router";
 import PlaylistRow from "./PlaylistRow";
-import { ScrollView, Swipeable } from "react-native-gesture-handler";
+import { SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
 import { AnimatePresence, MotiImage, MotiText, MotiView, useAnimationState } from "moti";
 import PlaylistActionBar from "./PlaylistActionBar";
 import { colors } from "@constants/Colors";
@@ -126,8 +126,8 @@ const PlaylistContainer = () => {
   //~ --------------------------
   // let prevOpenedRow: Swipeable = undefined;
   // let renderRowRefs: Swipeable[] = [];
-  const prevOpenedRow = useRef<Swipeable>(undefined);
-  const renderRowRefs = useRef<Swipeable[]>([]);
+  const prevOpenedRow = useRef<SwipeableMethods>(undefined);
+  const renderRowRefs = useRef<SwipeableMethods[]>([]);
 
   const closeRow = (index) => {
     if (prevOpenedRow.current && prevOpenedRow.current !== renderRowRefs.current[index]) {

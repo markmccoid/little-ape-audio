@@ -17,20 +17,13 @@ import { formatSeconds } from "../../utils/formatUtils";
 import PlaylistImage from "../common/PlaylistImage";
 import { DeleteIcon, EditIcon } from "../common/svg/Icons";
 import { lightenColor } from "@utils/otherUtils";
-// import { Swipeable } from "react-native-gesture-handler";
-import Swipeable, { SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
+import { Swipeable } from "react-native-gesture-handler";
+// import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { colors } from "@constants/Colors";
 import usePlaylistColors from "hooks/usePlaylistColors";
 import { LinearGradient } from "expo-linear-gradient";
 import { AnimatePresence, MotiView } from "moti";
 import { useSettingStore } from "@store/store-settings";
-import Animated, {
-  Extrapolation,
-  SharedValue,
-  interpolate,
-  useAnimatedStyle,
-  withTiming,
-} from "react-native-reanimated";
 
 const { width, height } = Dimensions.get("window");
 
@@ -38,12 +31,12 @@ type Props = {
   playlist: Playlist;
   onPlaylistSelect: (playlistId: string) => Promise<void>;
   index: number;
-  renderRowRefs: SwipeableMethods[];
+  renderRowRefs: Swipeable[];
   closeRow: (index: number) => void;
 };
 const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRow }: Props) => {
   const [isSelected, setIsSelected] = useState(false);
-  const pressableRef = useRef<typeof Pressable>();
+  const pressableRef = useRef();
   const route = useRouter();
   //!! END TRacking
   const trackActions = useTrackActions();
@@ -66,14 +59,12 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
         {
           text: "Yes",
           onPress: async () => {
-            requestAnimationFrame(() => setIsDeleteed(true));
+            setIsDeleteed(true);
             if (currentPlaylistId === playlist.id) {
               await playbackActions.resetPlaybackStore();
             }
-
-            requestAnimationFrame(async () => {
-              await trackActions.removePlaylist(playlist.id);
-            });
+            setIsDeleteed(true);
+            await trackActions.removePlaylist(playlist.id);
           },
         },
         { text: "No", style: "cancel" },
@@ -95,17 +86,16 @@ const PlaylistRow = ({ playlist, onPlaylistSelect, index, renderRowRefs, closeRo
       >
         <Swipeable
           ref={(ref) => (renderRowRefs[index] = ref)}
-          // waitFor={pressableRef}
+          waitFor={pressableRef}
           simultaneousHandlers={pressableRef}
-          minDist={10}
-          onSwipeableWillOpen={() => closeRow(index)}
-          renderRightActions={(progress, translation) => {
+          onSwipeableOpen={() => closeRow(index)}
+          renderRightActions={(progress, dragX) => {
             return (
               <RenderRight
                 handleRemovePlaylist={handleRemovePlaylist}
                 playlistId={playlist.id}
                 progress={progress}
-                dragX={translation}
+                dragX={dragX}
               />
             );
           }}
@@ -213,25 +203,23 @@ function RenderRight({
 }: {
   handleRemovePlaylist;
   playlistId: string;
-  progress: SharedValue<number>;
-  dragX: SharedValue<number>;
+  progress: RNAnimated.AnimatedInterpolation<string | number>;
+  dragX: RNAnimated.AnimatedInterpolation<string | number>;
 }) {
-  const animStyle = useAnimatedStyle(() => {
-    const drag = interpolate(dragX.value, [-400, -82, 0], [82 - 400, 0, 82], Extrapolation.CLAMP);
-    return {
-      opacity: progress.value,
-      transform: [{ translateX: drag }],
-    };
+  const drag = dragX.interpolate({
+    inputRange: [-400, -82, 0],
+    outputRange: [82 - 400, 0, 82],
+    extrapolate: "clamp",
   });
-  const iconStyle = useAnimatedStyle(() => {
-    const iconScale = interpolate(progress.value, [0, 1, 2], [0, 1.1, 1.8], Extrapolation.CLAMP);
-    return { transform: [{ scale: iconScale }] };
+  const iconScale = progress.interpolate({
+    inputRange: [0, 1, 2],
+    outputRange: [0, 1.1, 1.8],
+    extrapolate: "clamp",
   });
   return (
-    <Animated.View
+    <RNAnimated.View
       className="flex-row items-center justify-center w-[82] bg-amber-200 "
-      // style={{ opacity: progress, transform: [{ translateX: drag }] }}
-      style={[animStyle]}
+      style={{ opacity: progress, transform: [{ translateX: drag }] }}
     >
       {/* EDIT BUTTON */}
       <View className="flex-col items-center justify-end">
@@ -251,9 +239,12 @@ function RenderRight({
             });
           }}
         >
-          <Animated.View className="w-full items-center" style={[iconStyle]}>
+          <RNAnimated.View
+            className="w-full items-center"
+            style={{ transform: [{ scale: iconScale }] }}
+          >
             <EditIcon />
-          </Animated.View>
+          </RNAnimated.View>
         </TouchableOpacity>
         {/* DELETE BUTTON */}
         <TouchableOpacity
@@ -267,11 +258,14 @@ function RenderRight({
           }}
         >
           {/* <DeleteIcon /> */}
-          <Animated.View className="w-full items-center" style={[iconStyle]}>
+          <RNAnimated.View
+            className="w-full items-center"
+            style={{ transform: [{ scale: iconScale }] }}
+          >
             <DeleteIcon color={colors.deleteRed} />
-          </Animated.View>
+          </RNAnimated.View>
         </TouchableOpacity>
       </View>
-    </Animated.View>
+    </RNAnimated.View>
   );
 }

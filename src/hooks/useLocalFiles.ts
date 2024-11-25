@@ -1,4 +1,4 @@
-import { View, Text, Button } from "react-native";
+import { View, Text, Button, Alert } from "react-native";
 import React from "react";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system";
@@ -24,11 +24,13 @@ const useLocalFiles = () => {
         // Create playlist (all files will go in same playlist)
         const playlistId = uuid.v4() as string;
         // User picked a file(s)
+
         setIsLoading(true);
         for (let file of result.assets) {
           const cleanFileName = getCleanFileName(file.name);
           const fileUri = `${FileSystem.documentDirectory}${cleanFileName}`;
           const exsistingTrack = trackActions.getTrack(file.name);
+
           // If track Exists use existing track (location) for playlist
           if (Boolean(exsistingTrack)) {
             //!!! Playlist won't exist if this track was processed first
@@ -60,10 +62,12 @@ const useLocalFiles = () => {
             });
           }
         }
-        setIsLoading(false);
       }
     } catch (error) {
       console.log("Error in Apple files", error);
+      Alert.alert("Error in Local file download", error);
+    } finally {
+      setIsLoading(false);
     }
   };
   return [isLoading, selectLocalFiles] as [boolean, () => Promise<void>];
