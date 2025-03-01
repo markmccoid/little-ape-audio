@@ -19,7 +19,7 @@
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.1.91</string>
+	<string>1.1.92</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
@@ -28,6 +28,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>littleapeaudio</string>
+				<string>com.googleusercontent.apps.7341344916-s7s48gfijshrnjjh60koigq33b32dn4d</string>
 				<string>com.markmccoid.little-ape-audio</string>
 			</array>
 		</dict>
@@ -39,7 +40,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>1.1.91</string>
+	<string>1.1.92</string>
 	<key>EXDefaultScreenOrientationMask</key>
 	<string>UIInterfaceOrientationMaskPortrait</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
