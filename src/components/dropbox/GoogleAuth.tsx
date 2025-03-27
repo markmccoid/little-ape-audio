@@ -18,7 +18,8 @@ import { useSettingStore } from "@store/store-settings";
 const GOOGLE_CLIENT_ID = Constants?.expoConfig?.extra?.googleClientId;
 
 GoogleSignin.configure({
-  scopes: ["https://www.googleapis.com/auth/drive.readonly"], // what API you want to access on behalf of the user, default is email and profile
+  scopes: ["https://www.googleapis.com/auth/drive.file"], // what API you want to access on behalf of the user, default is email and profile
+  // scopes: ["https://www.googleapis.com/auth/drive.readonly"], // what API you want to access on behalf of the user, default is email and profile
   iosClientId: GOOGLE_CLIENT_ID, // [iOS] if you want to specify the client ID of type iOS (otherwise, it is taken from GoogleService-Info.plist)
   forceCodeForRefreshToken: true,
 });
