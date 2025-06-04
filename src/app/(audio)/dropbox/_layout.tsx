@@ -41,9 +41,10 @@ const DropboxLayout = () => {
         options={{
           title: "overwrite",
           presentation: "card",
-          headerBackTitleVisible: false,
+          // headerBackTitleVisible: false,
           headerBackVisible: false,
         }}
+        getId={({ params }) => params.newdir}
       />
     </Stack>
   );

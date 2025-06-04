@@ -18,6 +18,11 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { laabMetaAggrRecurseBegin, useDropboxStore } from "@store/store-dropbox";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 
+import { configureReanimatedLogger, ReanimatedLogLevel } from "react-native-reanimated";
+configureReanimatedLogger({
+  level: ReanimatedLogLevel.error,
+  strict: false,
+});
 SplashScreen.preventAutoHideAsync();
 let isTPSetup = false;
 export {
@@ -131,7 +136,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (isLoaded && loaded) {
       console.log("LOADED");
-      // SplashScreen.hideAsync();
+      SplashScreen.hideAsync();
       // SplashScreen.hide();
     }
   }, [isLoaded, loaded]);

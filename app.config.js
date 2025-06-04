@@ -60,7 +60,12 @@ export default {
         initialOrientation: "PORTRAIT",
       },
     ],
-    ["@react-native-google-signin/google-signin"],
+    [
+      "@react-native-google-signin/google-signin",
+      {
+        iosUrlScheme: "com.googleusercontent.apps.7341344916-s7s48gfijshrnjjh60koigq33b32dn4d",
+      },
+    ],
     [
       "expo-splash-screen",
       {

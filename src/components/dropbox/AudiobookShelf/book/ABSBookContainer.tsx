@@ -38,6 +38,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { SymbolView } from "expo-symbols";
 import * as Linking from "expo-linking";
 import { Share } from "react-native";
+import HTMLToMarkdown from "./HTMLToMarkdown";
 
 type Props = {
   data: ABSGetItemDetails;
@@ -363,9 +364,11 @@ const ABSBookContainer = ({ data }: Props) => {
             style={{ height: height / 3.5 - 45 }}
             contentContainerStyle={{
               paddingBottom: 0,
+              paddingHorizontal: 8,
             }}
           >
-            <Text className="p-2 flex-1">{media.metadata.description}</Text>
+            {/* <Text className="p-2 flex-1">{media.metadata.description}</Text> */}
+            <HTMLToMarkdown html={media.metadata.description} />
           </ScrollView>
         </>
       </AnimateHeight>

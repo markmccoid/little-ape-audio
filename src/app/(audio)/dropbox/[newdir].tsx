@@ -27,9 +27,8 @@ const NewDirectory = () => {
         audioSource: audioSourceIn,
       });
     }
-    setPrevDir(newdir);
+    setPrevDir((prev) => prev + "/" + newdir);
   }, [newdir]);
-  // console.log("NEWDIR-newdir", newdir);
   // console.log("NEWDIR-fulPath BackTitle", fullPath, backTitle);
   // Need a listener that will clear the dropbox store folderNavigation array
   // This is when the modal is dismissed
@@ -38,8 +37,15 @@ const NewDirectory = () => {
   });
 
   const onPathChange = (newPath: string, folderName: string) => {
+    console.log(
+      "NEWDIR-newdir",
+      customEncodeParens(newPath.replaceAll("/", "-")),
+      newPath,
+      folderName
+    );
     router.push({
-      pathname: `/(audio)/dropbox/${customEncodeParens(folderName)}`,
+      pathname: `/(audio)/dropbox/${customEncodeParens(newPath.replaceAll("/", "-"))}`,
+      // pathname: `/(audio)/dropbox/${customEncodeParens(folderName)}`,
       params: {
         fullPath: customEncodeParens(newPath),
         backTitle: customEncodeParens(folderName),
@@ -53,7 +59,7 @@ const NewDirectory = () => {
     <SafeAreaView style={{ flex: 1 }}>
       <Stack.Screen
         options={{
-          headerBackTitleVisible: false,
+          // headerBackTitleVisible: false,
           headerBackVisible: false,
           header: () => (
             <CustomHeader

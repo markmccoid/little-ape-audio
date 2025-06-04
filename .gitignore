@@ -53,7 +53,7 @@ local.properties
 .cxx/
 *.keystore
 !debug.keystore
-
+android/
 # node.js
 #
 node_modules/

@@ -12,10 +12,15 @@ function CustomHeader({ title, backText, sessionAudioSource }) {
   const { width, height } = useWindowDimensions();
 
   // Use folderNavigation info stored in dropbox store to navigate back
+  // Expo router 4 broke the goBack for dynamic paths like this [newdir], however
+  // I've added the `getId={({ params }) => params.newdir}`
+  // Be aware this has been depricated in expo router 5.  Looks like it works without, but test
   const onNavigateBack = () => {
     //const newPathInfo = actions.popFolderNavigation();
     // if (!newPathInfo) {
     navigation.goBack();
+    // router.push(backPath);
+
     return;
     //   }
     // router.push({

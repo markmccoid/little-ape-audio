@@ -35,7 +35,6 @@ const ABSItem = () => {
     <SafeAreaView style={{ flex: 1 }}>
       <Stack.Screen
         options={{
-          headerBackTitleVisible: false,
           headerBackVisible: false,
           header: () => (
             <CustomHeader title={"BOOK"} backText={backTitle} sessionAudioSource={"abs"} />
