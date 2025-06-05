@@ -19,7 +19,7 @@ export default {
   userInterfaceStyle: "automatic",
   splash: {
     image: "./assets/splash.png",
-    resizeMode: "contain",
+    resizeMode: "cover",
     backgroundColor: "#fef9B0",
   },
   updates: {
@@ -66,14 +66,14 @@ export default {
         iosUrlScheme: "com.googleusercontent.apps.7341344916-s7s48gfijshrnjjh60koigq33b32dn4d",
       },
     ],
-    [
-      "expo-splash-screen",
-      {
-        backgroundColor: "#ffffff",
-        image: "./assets/splash.png",
-        imageWidth: 1284,
-      },
-    ],
+    // [
+    //   "expo-splash-screen",
+    //   {
+    //     backgroundColor: "#ffffff",
+    //     image: "./assets/splash.png",
+    //     imageWidth: 1284,
+    //   },
+    // ],
   ],
   experiments: {
     tsconfigPaths: true,

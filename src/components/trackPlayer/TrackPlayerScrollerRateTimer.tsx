@@ -101,7 +101,7 @@ const TrackPlayerScrollerRateTimer = ({ playlist, currentTrack, compHeight }: Pr
             animate={{
               scale: isSliding ? 1.5 : 1,
               translateX: isSliding ? -10 : 0,
-              translateY: isSliding ? 10 : 0,
+              translateY: isSliding ? -60 : 0,
               backgroundColor: isSliding ? colors.amber300 : "white",
             }}
             exit={{ scale: 1 }}

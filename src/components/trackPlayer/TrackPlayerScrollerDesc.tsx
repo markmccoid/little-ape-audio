@@ -3,6 +3,7 @@ import React from "react";
 import { usePlaybackStore, useTracksStore } from "@store/store";
 import { AudioTrack, Playlist } from "@store/types";
 import usePlaylistColors from "hooks/usePlaylistColors";
+import HTMLToMarkdown from "@components/dropbox/AudiobookShelf/book/HTMLToMarkdown";
 
 type Props = {
   playlist: Playlist;
@@ -68,7 +69,8 @@ const TrackPlayerScrollerDesc = ({ playlist, currentTrack, compHeight }: Props) 
         </Text>
       </View>
       <View className="mr-1 ml-1 p-1 rounded-md" style={{ backgroundColor: descbgColor }}>
-        <Text style={{ color: descTextColor }}>{currentTrack?.externalMetadata?.description}</Text>
+        {/* <Text style={{ color: descTextColor }}>{currentTrack?.externalMetadata?.description}</Text> */}
+        <HTMLToMarkdown html={currentTrack?.externalMetadata?.description} />
       </View>
     </ScrollView>
   );
