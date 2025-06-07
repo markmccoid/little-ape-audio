@@ -55,6 +55,10 @@ const TrackPlayerContainer = () => {
             >
               <TrackPlayerProgressBar />
               <TrackPlayerChaptProgressBar />
+
+              <View className="border h-[50] mt-5">
+                <Text>HERE</Text>
+              </View>
             </MotiView>
           </View>
         ) : null}

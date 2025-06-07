@@ -15,7 +15,6 @@ import { useABSStore } from "@store/store-abs";
 import { Alert } from "react-native";
 import { btoa } from "react-native-quick-base64";
 import { buildCoverURL, getCoverURI } from "./absUtils";
-import { useDropboxStore } from "@store/store-dropbox";
 
 //~ =======
 //~ UTILS
@@ -31,6 +30,9 @@ const getAuthHeader = () => {
   return {
     Authorization: `Bearer ${token}`,
   };
+};
+export const getAbsURL = () => {
+  return useABSStore.getState()?.userInfo?.absURL;
 };
 //~~ ========================================================
 //~~ absLogin -
@@ -74,7 +76,7 @@ export type ABSGetLibraries = Awaited<ReturnType<typeof absGetLibraries>>;
 export const absGetLibraries = async () => {
   const authHeader = getAuthHeader();
   let response;
-  const url = `https://abs.mccoidco.xyz/api/libraries`;
+  const url = `${getAbsURL()}/api/libraries`;
   try {
     response = await axios.get(url, { headers: authHeader });
   } catch (error) {
@@ -104,7 +106,7 @@ export const absGetLibraryFilterData = async (libraryId?: string) => {
   // console.log("libraryIdToUse", libraryIdToUse);
   // console.log("authHeader", authHeader);
 
-  const url = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/filterdata`;
+  const url = `${getAbsURL()}/api/libraries/${libraryIdToUse}/filterdata`;
 
   let response;
   try {
@@ -179,12 +181,12 @@ export const absGetLibraryItems = async ({
     queryParams = `${queryParams}${queryParams ? "&" : "?"}sort=${sortBy}`;
   }
 
-  const url = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items${queryParams}`;
+  const url = `${getAbsURL()}/api/libraries/${libraryIdToUse}/items${queryParams}`;
   // URL to get progess.finished books
-  const progressurl = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items?filter=progress.ZmluaXNoZWQ=`;
+  const progressurl = `${getAbsURL()}/api/libraries/${libraryIdToUse}/items?filter=progress.ZmluaXNoZWQ=`;
   // URL to get tags.<user>-laab-favorite list of books
   const favoriteSearchString = getUserFavoriteTagInfo().favoriteSearchString;
-  const favoriteurl = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items?filter=tags.${favoriteSearchString}`;
+  const favoriteurl = `${getAbsURL()}/api/libraries/${libraryIdToUse}/items?filter=tags.${favoriteSearchString}`;
   try {
     // Get all books
     response = await axios.get(url, { headers: authHeader });
@@ -252,7 +254,7 @@ export const absGetItemDetails = async (itemId?: string) => {
   const authHeader = getAuthHeader();
 
   let libraryItem: LibraryItem;
-  const url = `https://abs.mccoidco.xyz/api/items/${itemId}?expanded=1&include=progress`;
+  const url = `${getAbsURL()}/api/items/${itemId}?expanded=1&include=progress`;
   try {
     const response = await axios.get(url, { headers: authHeader });
     libraryItem = response.data;
@@ -264,7 +266,7 @@ export const absGetItemDetails = async (itemId?: string) => {
 
   // Get author book count
   const authorId = libraryItem.media.metadata?.authors[0].id;
-  const authorBooksurl = `https://abs.mccoidco.xyz/api/authors/${authorId}?include=items`;
+  const authorBooksurl = `${getAbsURL()}/api/authors/${authorId}?include=items`;
   let authorBookCount = 0;
   try {
     const response = await axios.get(authorBooksurl, { headers: authHeader });
@@ -323,7 +325,7 @@ export const absUpdateLocalAttributes = async () => {
   });
 
   // ~~ URL to get progess.finished books
-  const progressurl = `https://abs.mccoidco.xyz/api/libraries/${libraryIdToUse}/items?filter=progress.ZmluaXNoZWQ=`;
+  const progressurl = `${getAbsURL()}/api/libraries/${libraryIdToUse}/items?filter=progress.ZmluaXNoZWQ=`;
   let progressresponse;
   //~~ Query for "progress", checking if isFinished so we can set the Read/Not Read on book list
   try {
@@ -380,7 +382,7 @@ export const absUpdateLocalAttributes = async () => {
 //~~  with tags parameter
 //~~ ========================================================
 export const absSetFavoriteTag = async (itemId: string, tags: string[]) => {
-  const url = `https://abs.mccoidco.xyz/api/items/${itemId}/media`;
+  const url = `${getAbsURL()}/api/items/${itemId}/media`;
   const authHeader = getAuthHeader();
   const data = {
     tags,
@@ -406,7 +408,7 @@ export const absDownloadItem = (itemId: string, fileIno: string) => {
   //  https://abs.mccoidco.xyz/api/items/<BOOK ID>/file/<FILE INO>/download
   const authHeader = getAuthHeader();
   const token = getToken();
-  const url = `https://abs.mccoidco.xyz/api/items/${itemId}/file/${fileIno}/download`;
+  const url = `${getAbsURL()}/api/items/${itemId}/file/${fileIno}/download`;
   const urlWithToken = `${url}?token=${token}`;
   return { url, urlWithToken, authHeader };
 };
@@ -419,7 +421,7 @@ export const absSetBookToFinished = async (itemId: string, finishedFlag: boolean
   const authHeader = getAuthHeader();
   const token = getToken();
   const data = { isFinished: finishedFlag };
-  const url = `https://abs.mccoidco.xyz/api/me/progress/${itemId}`;
+  const url = `${getAbsURL()}/api/me/progress/${itemId}`;
   try {
     const resp = await axios.patch(url, data, { headers: authHeader });
   } catch (e) {
