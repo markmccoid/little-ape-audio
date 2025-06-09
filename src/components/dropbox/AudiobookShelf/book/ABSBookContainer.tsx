@@ -28,20 +28,23 @@ import { createFolderMetadataKey, useDropboxStore } from "@store/store-dropbox";
 import { useABSStore } from "@store/store-abs";
 import { router } from "expo-router";
 import {
-  ABSGetItemDetails,
   absSetBookToFinished,
   absSetFavoriteTag,
   getUserFavoriteTagInfo,
 } from "@store/data/absAPI";
-import { formatSeconds } from "@utils/formatUtils";
+import { formatBytes, formatSeconds } from "@utils/formatUtils";
 import { useQueryClient } from "@tanstack/react-query";
 import { SymbolView } from "expo-symbols";
 import * as Linking from "expo-linking";
 import { Share } from "react-native";
 import HTMLToMarkdown from "./HTMLToMarkdown";
+import ABSEBookRow from "./ABSEBookRow";
+import { BookDetails, useBookDetails } from "@store/data/absHooks";
 
 type Props = {
-  data: ABSGetItemDetails;
+  data: Awaited<ReturnType<typeof useBookDetails>["data"]>;
+  isLoading?: boolean;
+  isError?: boolean;
 };
 
 const formatAuthors = (authorsObj: { id: string; name: string }[]) => {
@@ -57,7 +60,7 @@ const seriesFlags = (mediaMetadata) => {
 /**
  * Renders a container component for an audiobook shelf, displaying the book cover, title, author, and published year, as well as a list of audio files associated with the book.
  */
-const ABSBookContainer = ({ data }: Props) => {
+const ABSBookContainer = ({ data, isLoading, isError }: Props) => {
   const queryClient = useQueryClient();
   const { audioFiles, media, coverURI, authorBookCount, userMediaProgress, bookDuration } = data;
   const { width, height } = Dimensions.get("window");
@@ -106,7 +109,7 @@ const ABSBookContainer = ({ data }: Props) => {
     const tags =
       action === "remove"
         ? media.tags.filter((el) => el !== userFavTagValue)
-        : [...media.tags, userFavTagValue];
+        : Array.from(new Set([...media.tags, userFavTagValue]));
     await absSetFavoriteTag(itemId, tags);
   };
   //~~ Handle isRead
@@ -383,6 +386,7 @@ const ABSBookContainer = ({ data }: Props) => {
       >
         {taggedAudioFiles.map((audio, index) => {
           // console.log("INO", audio.ino, media.libraryItemId);
+          console.log("INO", media.ebookFile?.ino, media.ebookFile?.metadata.filename);
           return (
             <View
               className={`flex-1 border-b ${index % 2 === 0 ? "bg-abs-100" : "bg-abs-50"}`}
@@ -398,6 +402,8 @@ const ABSBookContainer = ({ data }: Props) => {
             </View>
           );
         })}
+        {data?.ebooks &&
+          data.ebooks.map((ebook) => <ABSEBookRow ebookFile={ebook} key={ebook.ino} />)}
       </ScrollView>
       {/* <Text>{audio.ino}</Text>
       <Text>{audio.metadata.filename}</Text> */}

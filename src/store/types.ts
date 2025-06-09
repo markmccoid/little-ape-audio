@@ -200,6 +200,8 @@ export type AudioState = {
     getTrack: (trackId: string) => AudioTrack | undefined;
     // Given a playlist ID, will return an array of tracks (with metadata,etc)
     getPlaylistTracks: (playlistId: string) => AudioTrack[];
+    // Given a track, will return the bookId.  Also verifies track is from ABS
+    getABSBookId: (track: AudioTrack) => string;
     updatePlaylistRate: (playlistId: string, newRate: number) => void;
     updatePlaylistFields: (playlistId: string, updateObj: PlaylistUpdateObj) => Promise<void>;
     updatePlaylistTracks: (playlistId: string, newTracksArray: string[]) => Promise<void>;

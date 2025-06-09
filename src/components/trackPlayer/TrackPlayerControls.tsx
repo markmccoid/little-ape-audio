@@ -35,13 +35,7 @@ const TrackPlayerControls = ({ style }: Props) => {
 
   const playerState = usePlaybackStore((state) => state.playerState);
   const isPlaylistLoaded = usePlaybackStore((state) => state.playlistLoaded);
-  //!
-  const playlistId = usePlaybackStore((state) => state.currentPlaylistId);
-  const x = useTracksStore((state) => state.actions.getPlaylist(playlistId));
-  const track = useTracksStore((state) => state.tracks.find((track) => track.id === x.trackIds[0]));
-  console.log(Object.keys(track), track.sourceLocation);
 
-  //!
   // set isPlaying boolean based on playerState stored in Playback Store
   const isPlaying = playerState === State.Playing;
 

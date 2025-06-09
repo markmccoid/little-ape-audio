@@ -469,6 +469,14 @@ type LibraryFile = {
   fileType: string;
 };
 
+export type EbookFile = {
+  ino: string;
+  metadata: LibraryFileMetadata;
+  ebookFormat: string;
+  addedAt: number;
+  updatedAt: number;
+};
+
 export type Media = {
   id: string;
   libraryItemId: string;
@@ -477,7 +485,7 @@ export type Media = {
   tags: string[];
   audioFiles: AudioFile[];
   chapters: Chapter[];
-  ebookFile: any | null;
+  ebookFile: EbookFile | null;
 };
 
 export type UserMediaProgress = {

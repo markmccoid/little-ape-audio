@@ -4,6 +4,12 @@ import { usePlaybackStore, useTracksStore } from "@store/store";
 import { AudioTrack, Playlist } from "@store/types";
 import usePlaylistColors from "hooks/usePlaylistColors";
 import HTMLToMarkdown from "@components/dropbox/AudiobookShelf/book/HTMLToMarkdown";
+import ABSToggleBookRead from "@components/common/ABSToggleBookRead";
+import ABSToggleBookFavorite from "@components/common/ABSToggleBookFavorite";
+import ABSLinkToBook from "@components/common/ABSLinkToBook";
+import { ShareIcon } from "@components/common/svg/Icons";
+import ABSShareBook from "@components/common/ABSShareBook";
+import { SymbolView } from "expo-symbols";
 
 type Props = {
   playlist: Playlist;
@@ -15,7 +21,7 @@ const TrackPlayerScrollerDesc = ({ playlist, currentTrack, compHeight }: Props) 
   // const track = useTracksStore().actions.getTrack(currTrack.id);
   // console.log(currTrack.id);
   const plColors = usePlaylistColors();
-
+  const actions = useTracksStore((state) => state.actions);
   const textColor = plColors.background.tintColor;
   const bgColor = plColors.background.color;
   const descTextColor = plColors.secondary.tintColor;
@@ -32,6 +38,33 @@ const TrackPlayerScrollerDesc = ({ playlist, currentTrack, compHeight }: Props) 
       contentContainerStyle={{}}
     >
       <View className="p-1">
+        {currentTrack?.externalMetadata?.audioSource === "abs" && (
+          <View className="flex-row gap-2 border-b pb-2 mb-1 justify-between px-2">
+            <View className="flex-col justify-center items-center">
+              <Text>Read?</Text>
+              <ABSToggleBookRead />
+            </View>
+            <View className="flex-col justify-center items-center">
+              <Text>Favorite?</Text>
+              <ABSToggleBookFavorite />
+            </View>
+            <View className="flex-col justify-center items-center">
+              <Text>Share</Text>
+              <ABSShareBook track={currentTrack} />
+            </View>
+            <View className="flex-col justify-center items-center">
+              <Text>Open</Text>
+              <ABSLinkToBook bookId={actions.getABSBookId(currentTrack)}>
+                <SymbolView
+                  name="book.and.wrench"
+                  type="monochrome"
+                  style={{ width: 30, height: 30, marginTop: 8 }}
+                  tintColor="black"
+                />
+              </ABSLinkToBook>
+            </View>
+          </View>
+        )}
         <DescriptionTextLine
           label="Track Title:"
           text={currentTrack?.metadata?.title}

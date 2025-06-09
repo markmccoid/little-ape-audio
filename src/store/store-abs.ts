@@ -55,6 +55,10 @@ export type ABSState = {
   };
 };
 
+export const getAbsURL = () => {
+  return useABSStore.getState()?.userInfo?.absURL;
+};
+
 export const useABSStore = create<ABSState>((set, get) => ({
   userInfo: undefined,
   libraries: undefined,

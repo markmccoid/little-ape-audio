@@ -12,6 +12,8 @@ import { useMemo } from "react";
 import { btoa } from "react-native-quick-base64";
 import { useDropboxStore } from "@store/store-dropbox";
 import { sanitizeString } from "@utils/otherUtils";
+import { el } from "date-fns/locale";
+import { EbookFile } from "./absTypes";
 
 //~~ ================================================================
 //~~ useGetFilterData - Get the filter data for the library
@@ -64,14 +66,25 @@ export const useGetAllABSBooks = () => {
     };
   }
 
+  //~ -----------------------------------------
+  //~ Get the local favorites and read ids from folderAttributes
+  //~ NOTE: Even though the absGetLibraryItems call returns isFavorite and isFinished,
+  //~ from the ABS Server, we need to do this to keep updated because we don't always
+  //~ update pull from the ABS server everytime this query is run. This keeps us in sync without quering the server all the time.
   const isFavoriteIds = new Set(folderAttributes.filter((el) => el.isFavorite).map((el) => el.id));
   const isReadIds = new Set(folderAttributes.filter((el) => el.isRead).map((el) => el.id));
 
+  // For abs, sanitizeString takes the uuid (el.id) and returns a string with the hypens turned to underscores
+  // abdfef-4fef-4fef-4fef-4fe -> abdfef_4fef_4fef_4fef_4fe
+  // This map will apply the local favorites and read ids to each book.
   const dataWAttributes = data?.map((el) => ({
     ...el,
     isFavorite: isFavoriteIds.has(sanitizeString(el.id)),
     isFinished: isReadIds.has(sanitizeString(el.id)),
   }));
+  //~ -----------------------------------------
+
+  // If no search criteria, return the data
   if (
     !title &&
     !author &&
@@ -98,6 +111,7 @@ export const useGetAllABSBooks = () => {
   let filterData: ABSGetLibraryItems = [];
   let favoriteTag = getUserFavoriteTagInfo().favoriteUserTagValue.toLowerCase();
 
+  // Loop through the data and apply the search criteria
   for (const book of dataWAttributes) {
     const bookTitle = book.title.toLowerCase() || "";
     const bookAuthor = book.author.toLowerCase() || "";
@@ -145,6 +159,41 @@ export const useGetAllABSBooks = () => {
     selectedBookCount: filterData?.length || 0,
     ...rest,
   };
+};
+
+//~~ ======================================================================
+//~~ useBookDetails
+//~~ ======================================================================
+export type BookDetails = ReturnType<typeof useBookDetails>;
+export const useBookDetails = (bookId: string) => {
+  return useQuery({
+    queryKey: ["book_details", bookId],
+    queryFn: async () => {
+      const data = await absGetItemDetails(bookId);
+      // create a key with ALL of the ebooks for this book
+      // the primary ebook will be the first in the array.
+      const ebookIno = data.media.ebookFile.ino;
+      const otherEbookLibraryFiles = data.libraryFiles
+        .filter((el) => el.ino !== ebookIno && el.fileType === "ebook")
+        .map(
+          (el) =>
+            ({
+              ino: el.ino,
+              metadata: el.metadata,
+              ebookFormat: el.metadata.ext,
+              addedAt: el.addedAt,
+              updatedAt: el.updatedAt,
+            } as EbookFile)
+        );
+      const allEbooks = [data.media.ebookFile, ...otherEbookLibraryFiles];
+      // console.log("otherEbookLibraryFiles", Object.keys(otherEbookLibraryFiles[0]));
+      return { ...data, ebooks: allEbooks };
+    },
+    // 30 second stale time
+    // the thought being that I call this from multiple places and don't want to keep refetching
+    // when loading components.
+    staleTime: 3 * 1 * 1000,
+  });
 };
 
 //~~ ======================================================================

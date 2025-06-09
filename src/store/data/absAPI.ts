@@ -1,4 +1,3 @@
-import { AudioFile } from "./absTypes";
 //~~ ========================================================
 //~~ AudioBookShelf APIs                                    -
 //~~ ========================================================
@@ -11,10 +10,12 @@ import {
   Library,
   LibraryItem,
 } from "./absTypes";
-import { useABSStore } from "@store/store-abs";
+import { useABSStore, getAbsURL } from "@store/store-abs";
 import { Alert } from "react-native";
 import { btoa } from "react-native-quick-base64";
 import { buildCoverURL, getCoverURI } from "./absUtils";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
 
 //~ =======
 //~ UTILS
@@ -30,9 +31,6 @@ const getAuthHeader = () => {
   return {
     Authorization: `Bearer ${token}`,
   };
-};
-export const getAbsURL = () => {
-  return useABSStore.getState()?.userInfo?.absURL;
 };
 //~~ ========================================================
 //~~ absLogin -
@@ -258,6 +256,7 @@ export const absGetItemDetails = async (itemId?: string) => {
   try {
     const response = await axios.get(url, { headers: authHeader });
     libraryItem = response.data;
+    // libraryItem?.userMediaProgress?.isFinished;
   } catch (error) {
     console.log("error", error);
     throw error;
@@ -300,6 +299,7 @@ export const absGetItemDetails = async (itemId?: string) => {
     userMediaProgress: libraryItem?.userMediaProgress,
     coverURI: coverURI, //buildCoverURL(libraryItem.id),
     authorBookCount,
+    libraryFiles: libraryItem.libraryFiles,
   };
 };
 
@@ -318,7 +318,7 @@ export const absUpdateLocalAttributes = async () => {
 
   // ~~ GET Favorites
   let favoriteSearchString = getUserFavoriteTagInfo().favoriteSearchString;
-  // Get ABS Favorites
+  // Get ABS Favorites for current user
   const favs = await absGetLibraryItems({
     filterType: "tags",
     filterValue: favoriteSearchString,
@@ -411,6 +411,64 @@ export const absDownloadItem = (itemId: string, fileIno: string) => {
   const url = `${getAbsURL()}/api/items/${itemId}/file/${fileIno}/download`;
   const urlWithToken = `${url}?token=${token}`;
   return { url, urlWithToken, authHeader };
+};
+
+//~~ ========================================================
+//~~ absDownloadEbook ## EBOOKDL
+//~~ ========================================================
+interface DownloadFileProps {
+  url: string;
+  filenameWExt: string;
+  // fileExtension: "epub" | "pdf";
+}
+
+export const absDownloadEbook = async ({ url, filenameWExt }: DownloadFileProps) => {
+  let tempFileUri: string | null = null;
+
+  try {
+    console.log("Starting download...");
+
+    // Create a temporary directory for downloads
+    const tempDir = `${FileSystem.cacheDirectory}temp_downloads/`;
+    await FileSystem.makeDirectoryAsync(tempDir, { intermediates: true });
+
+    // Create file URI in the temporary directory
+    tempFileUri = `${tempDir}${filenameWExt}`;
+
+    // Download the file
+    const downloadResult = await FileSystem.downloadAsync(url, tempFileUri);
+
+    if (downloadResult.status === 200) {
+      console.log("Download completed:", downloadResult.uri);
+
+      const isAvailable = await Sharing.isAvailableAsync();
+
+      if (isAvailable) {
+        await Sharing.shareAsync(downloadResult.uri);
+        console.log("Sharing completed or cancelled");
+      } else {
+        Alert.alert("Download Complete", `File downloaded successfully`);
+      }
+    } else {
+      throw new Error(`Download failed with status: ${downloadResult.status}`);
+    }
+  } catch (error) {
+    console.error("Download error:", error);
+    Alert.alert("Download Failed", "Unable to download the file. Please try again.");
+  } finally {
+    // Clean up the temporary file
+    if (tempFileUri) {
+      try {
+        const fileInfo = await FileSystem.getInfoAsync(tempFileUri);
+        if (fileInfo.exists) {
+          await FileSystem.deleteAsync(tempFileUri);
+          console.log("Temporary file cleaned up:", tempFileUri);
+        }
+      } catch (cleanupError) {
+        console.warn("Failed to clean up temporary file:", cleanupError);
+      }
+    }
+  }
 };
 
 //~~ ========================================================

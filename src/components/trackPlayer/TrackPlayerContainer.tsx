@@ -5,16 +5,24 @@ import TrackPlayerControls from "./TrackPlayerControls";
 import TrackPlayerProgressBar from "./TrackPlayerProgressBar";
 import TrackPlayerImage from "./TrackPlayerImage";
 import BottomSheetContainer from "./bottomSheet/BottomSheetContainer";
-import { useCurrentPlaylist, usePlaybackStore, useTrackActions } from "@store/store";
+import {
+  useCurrentPlaylist,
+  usePlaybackStore,
+  useTrackActions,
+  useTracksStore,
+} from "@store/store";
 import { colors } from "@constants/Colors";
 import { LinearGradient } from "expo-linear-gradient";
-import { PlaylistImageColors } from "@store/types";
 import usePlaylistColors from "hooks/usePlaylistColors";
 import TrackPlayerChaptProgressBar from "./TrackPlayerChaptProgressBar";
-import TrackPlayerBottomSheet from "./bottomSheet/TrackPlayerBottomSheet";
-import { useGlobalSearchParams, useLocalSearchParams } from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 import { MotiView } from "moti";
 import Animated, { SharedTransition, withSpring } from "react-native-reanimated";
+import { useDropboxStore } from "@store/store-dropbox";
+import ABSToggleBookRead from "@components/common/ABSToggleBookRead";
+import ABSToggleBookFavorite from "@components/common/ABSToggleBookFavorite";
+import ABSLinkToBook from "@components/common/ABSLinkToBook";
+import { ShareIcon } from "@components/common/svg/Icons";
 
 const { width, height } = Dimensions.get("window");
 const transition = SharedTransition.custom((values) => {
@@ -29,6 +37,25 @@ const TrackPlayerContainer = () => {
   const params = useLocalSearchParams<{ playlistId: string }>();
   const playlistColors = usePlaylistColors(params?.playlistId);
   const isLoaded = usePlaybackStore((state) => state.playlistLoaded);
+  const playlistTracks = useTracksStore((state) =>
+    state.actions.getPlaylistTracks(params?.playlistId)
+  );
+  const audioSource = playlistTracks[0].externalMetadata.audioSource;
+  //! Get Info needed to mark as favorite and read for ABS books
+  // const playlistId = usePlaybackStore((state) => state.currentPlaylistId);
+  // const playList = useTracksStore((state) => state.actions.getPlaylist(playlistId));
+  // const track = useTracksStore((state) =>
+  //   state.tracks.find((track) => track.id === playList.trackIds[0])
+  // );
+
+  // const bookId = track?.sourceLocation.split("~")[0];
+  // const audioSource = track.externalMetadata.audioSource;
+  // const folderAttributes = useDropboxStore((state) => state.folderAttributes);
+  // console.log(
+  //   "Folder Attributes",
+  //   folderAttributes.filter((el) => el.audioSource === "abs" && el.id === bookId)
+  // );
+  //!
 
   // const playlist = useTrackActions().getPlaylist(params?.playlistId);
   return (
@@ -55,10 +82,6 @@ const TrackPlayerContainer = () => {
             >
               <TrackPlayerProgressBar />
               <TrackPlayerChaptProgressBar />
-
-              <View className="border h-[50] mt-5">
-                <Text>HERE</Text>
-              </View>
             </MotiView>
           </View>
         ) : null}

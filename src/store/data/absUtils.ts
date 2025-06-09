@@ -1,8 +1,7 @@
 import { Image } from "react-native";
 import { defaultImages, getImageIndex, getRandomNumber } from "@store/storeUtils";
 import { getImageSize } from "@utils/otherUtils";
-import { useABSStore } from "@store/store-abs";
-import { getAbsURL } from "./absAPI";
+import { useABSStore, getAbsURL } from "@store/store-abs";
 //~~ =======================================================
 //~~ UTILS
 //~~ =======================================================

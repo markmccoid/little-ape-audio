@@ -427,6 +427,13 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       }
       return trackArray;
     },
+    getABSBookId: (track) => {
+      // Make sure track is from AudiobookShelf
+      const isAbs = track.externalMetadata.audioSource === "abs";
+      if (!isAbs) return undefined;
+      // Return the bookId
+      return track.sourceLocation.split("~")[0];
+    },
     updatePlaylistPostionHistory: async (playlistId, position, trackIndex) => {
       const playlists = useTracksStore.getState().playlists;
       let newPosition = position;
