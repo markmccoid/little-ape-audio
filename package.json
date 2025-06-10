@@ -6,7 +6,6 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@craftzdog/react-native-buffer": "^6.0.5",
     "@dr.pogodin/react-native-fs": "^2.30.0",
     "@expo-google-fonts/lato": "^0.2.3",
     "@gorhom/bottom-sheet": "^4",
@@ -23,8 +22,6 @@
     "@types/react": "~18.3.12",
     "axios": "^1.4.0",
     "base-64": "^1.0.0",
-    "base64-js": "^1.5.1",
-    "buffer": "^6.0.3",
     "date-fns": "^2.30.0",
     "dotenv": "^16.0.3",
     "expo": "~52.0.46",
@@ -64,7 +61,7 @@
     "react-native-draggable-flatlist": "^4.0.1",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-image-colors": "^2.3.0",
-    "react-native-ios-context-menu": "^3.1.0",
+    "react-native-ios-context-menu": "^3.1.2",
     "react-native-ios-utilities": "^5.1.2",
     "react-native-markdown-display": "^7.0.2",
     "react-native-pager-view": "6.5.1",

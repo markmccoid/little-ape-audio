@@ -19,18 +19,27 @@
       },
       "ios": {
         "buildConfiguration": "Debug",
-        "resourceClass": "m-medium"
+        "resourceClass": "m-medium",
+        "cache": {
+          "disabled": true
+        }
       }
     },
     "preview": {
       "distribution": "internal",
       "ios": {
-        "resourceClass": "m-medium"
+        "resourceClass": "m-medium",
+        "cache": {
+          "disabled": true
+        }
       }
     },
     "production": {
       "ios": {
-        "resourceClass": "m-medium"
+        "resourceClass": "m-medium",
+        "cache": {
+          "disabled": true
+        }
       }
     }
   },
