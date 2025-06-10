@@ -1639,7 +1639,7 @@ PODS:
     - React-Core
   - react-native-blob-util (0.19.11):
     - React-Core
-  - react-native-ios-context-menu (3.1.2):
+  - react-native-ios-context-menu (3.1.0):
     - ContextMenuAuxiliaryPreview (~> 0.5)
     - DGSwiftUtilities
     - DoubleConversion
@@ -2617,7 +2617,7 @@ SPEC CHECKSUMS:
   React-microtasksnativemodule: 8732b71aa66045da4bb341ddee1bb539f71e5f38
   react-native-app-auth: 63fa4e58c5bd29aeb974d3a06a23c5858322d533
   react-native-blob-util: 39a20f2ef11556d958dc4beb0aa07d1ef2690745
-  react-native-ios-context-menu: 1352ceedcd6684e2fcac0060b793908791cec28e
+  react-native-ios-context-menu: ca6023403b3c28c304d7ff01fa67d22b64645cb5
   react-native-ios-utilities: 778c1216289b4d8b7aa631f486472a705c9c7bdf
   react-native-menu: 27f634374481525b27e2123611aa4c6477324f92
   react-native-pager-view: 9ef31c5b9641bac037733d17471cd70b3f478ff5
