@@ -415,15 +415,11 @@ export const absDownloadItem = (itemId: string, fileIno: string) => {
 
 //~~ ========================================================
 //~~ absDownloadEbook ## EBOOKDL
-//~~ ========================================================
-interface DownloadFileProps {
-  url: string;
-  filenameWExt: string;
-  // fileExtension: "epub" | "pdf";
-}
+//~~ ========================================
 
-export const absDownloadEbook = async ({ url, filenameWExt }: DownloadFileProps) => {
+export const absDownloadEbook = async (itemId: string, fileIno: string, filenameWExt: string) => {
   let tempFileUri: string | null = null;
+  const { url, urlWithToken, authHeader } = absDownloadItem(itemId, fileIno);
 
   try {
     console.log("Starting download...");

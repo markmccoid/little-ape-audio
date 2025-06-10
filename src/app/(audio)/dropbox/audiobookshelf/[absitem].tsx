@@ -33,7 +33,7 @@ const ABSItem = () => {
     );
   }
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}>
       <Stack.Screen
         options={{
           headerBackVisible: false,
@@ -47,7 +47,7 @@ const ABSItem = () => {
       ) : (
         <ABSBookContainer data={data} isLoading={isLoading} isError={isError} />
       )}
-    </SafeAreaView>
+    </View>
   );
 };
 

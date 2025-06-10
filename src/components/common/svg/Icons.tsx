@@ -20,6 +20,12 @@ type Props = {
 export const ImageIcon = ({ size = 25, color, style }: Props) => {
   return <Entypo name="image" size={size} color={color} style={style} />;
 };
+export const PDFIcon = ({ size = 25, color, style }: Props) => {
+  return <FontAwesome name="file-pdf-o" size={size} color={color} style={style} />;
+};
+export const EpubIcon = ({ size = 25, color, style }: Props) => {
+  return <Entypo name="open-book" size={size} color={color} style={style} />;
+};
 export const EmptyCircleIcon = ({ size = 25, color, style }: Props) => {
   return <Entypo name="circle" size={size} color={color} style={style} />;
 };

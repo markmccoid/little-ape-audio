@@ -172,21 +172,24 @@ export const useBookDetails = (bookId: string) => {
       const data = await absGetItemDetails(bookId);
       // create a key with ALL of the ebooks for this book
       // the primary ebook will be the first in the array.
-      const ebookIno = data.media.ebookFile.ino;
-      const otherEbookLibraryFiles = data.libraryFiles
-        .filter((el) => el.ino !== ebookIno && el.fileType === "ebook")
-        .map(
-          (el) =>
-            ({
-              ino: el.ino,
-              metadata: el.metadata,
-              ebookFormat: el.metadata.ext,
-              addedAt: el.addedAt,
-              updatedAt: el.updatedAt,
-            } as EbookFile)
-        );
-      const allEbooks = [data.media.ebookFile, ...otherEbookLibraryFiles];
-      // console.log("otherEbookLibraryFiles", Object.keys(otherEbookLibraryFiles[0]));
+      let allEbooks: EbookFile[] = [];
+      if (data.media?.ebookFile) {
+        const ebookIno = data.media.ebookFile.ino;
+        const otherEbookLibraryFiles = data.libraryFiles
+          .filter((el) => el.ino !== ebookIno && el.fileType === "ebook")
+          .map(
+            (el) =>
+              ({
+                ino: el.ino,
+                metadata: el.metadata,
+                ebookFormat: el.metadata.ext,
+                addedAt: el.addedAt,
+                updatedAt: el.updatedAt,
+              } as EbookFile)
+          );
+        allEbooks = [data.media.ebookFile, ...otherEbookLibraryFiles];
+        // console.log("otherEbookLibraryFiles", Object.keys(otherEbookLibraryFiles[0]));
+      }
       return { ...data, ebooks: allEbooks };
     },
     // 30 second stale time

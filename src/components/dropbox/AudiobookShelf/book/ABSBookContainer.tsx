@@ -137,7 +137,7 @@ const ABSBookContainer = ({ data, isLoading, isError }: Props) => {
   // console.log("BOOK Auhtor", media.metadata.authors[0].id);
   // console.log("SERIES", media.metadata.series);
   return (
-    <SafeAreaView className="flex-col flex-1">
+    <View className="flex-col flex-1">
       <ABSActionBar
         audio={taggedAudioFiles}
         bookId={media.libraryItemId}
@@ -386,7 +386,6 @@ const ABSBookContainer = ({ data, isLoading, isError }: Props) => {
       >
         {taggedAudioFiles.map((audio, index) => {
           // console.log("INO", audio.ino, media.libraryItemId);
-          console.log("INO", media.ebookFile?.ino, media.ebookFile?.metadata.filename);
           return (
             <View
               className={`flex-1 border-b ${index % 2 === 0 ? "bg-abs-100" : "bg-abs-50"}`}
@@ -402,12 +401,20 @@ const ABSBookContainer = ({ data, isLoading, isError }: Props) => {
             </View>
           );
         })}
-        {data?.ebooks &&
-          data.ebooks.map((ebook) => <ABSEBookRow ebookFile={ebook} key={ebook.ino} />)}
+        {data?.ebooks?.length > 0 && (
+          <View className="">
+            <View className="border-b">
+              <Text className="text-base text-center font-semibold">Ebooks</Text>
+            </View>
+            {data.ebooks.map((ebook) => (
+              <ABSEBookRow bookId={media.libraryItemId} ebookFile={ebook} key={ebook.ino} />
+            ))}
+          </View>
+        )}
       </ScrollView>
       {/* <Text>{audio.ino}</Text>
       <Text>{audio.metadata.filename}</Text> */}
-    </SafeAreaView>
+    </View>
   );
 };
 
