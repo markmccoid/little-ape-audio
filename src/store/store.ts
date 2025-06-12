@@ -144,7 +144,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
 
       return taggedFiles;
     },
-    addNewPlaylist: (name, author = "Unknown", playlistId) => {
+    addNewPlaylist: (name, author = "Unknown", playlistId, source) => {
       //!const playlists = [...get().playlists];
       // If playlist ID is passed, check to see if the playlist exists
       if (playlistId) {
@@ -189,6 +189,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         totalListenedToSeconds: 0,
         currentRate: 1,
         collection: defaultCollection,
+        source,
       };
 
       const newPlaylistObj = { ...get().playlists, [id]: newPlaylist };

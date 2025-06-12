@@ -9,6 +9,7 @@ import {
   GetLibraryItemsResponse,
   Library,
   LibraryItem,
+  User,
 } from "./absTypes";
 import { useABSStore, getAbsURL } from "@store/store-abs";
 import { Alert } from "react-native";
@@ -65,6 +66,23 @@ export const absLogin = async (absURL: string, username: string, password: strin
     throw new Error(error.message);
     //throw error; // Throw error if needed
   }
+};
+
+//~~ ========================================================
+//~~ absGetUserInfo -
+//~~ Gets user information like bookmarks, mediaProgress, etc
+//~~ ========================================================
+export const absGetUserInfo = async () => {
+  const authHeader = getAuthHeader();
+  let response;
+  const url = `${getAbsURL()}/api/authorize`;
+  try {
+    response = await axios.get(url, { headers: authHeader });
+  } catch (error) {
+    console.log("error", error);
+  }
+  const userInfo = response.data as User;
+  return userInfo;
 };
 
 //~~ ========================================================

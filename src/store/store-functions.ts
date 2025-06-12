@@ -126,6 +126,8 @@ export const addTrack =
       // that we are processing.  Then grab chapters
       const results = await absGetItemDetails(pathIn);
       const currentIno = sourceLocation.split("~")[1];
+      // if ABS, then our playlistId is the bookId
+      playlistId = sourceLocation.split("~")[0];
       const currentAudio = results.audioFiles.find((file) => file.ino === currentIno);
       if (totalAudioFiles > 1) {
         tags.durationSeconds = currentAudio.duration;
@@ -281,7 +283,12 @@ export const addTrack =
       const plName =
         newAudioFile.metadata?.album || newAudioFile.metadata?.title || newAudioFile.filename;
       const plAuthor = newAudioFile.metadata?.artist || "Unknown";
-      const finalPlaylistId = get().actions.addNewPlaylist(plName, plAuthor, playlistId);
+      const finalPlaylistId = get().actions.addNewPlaylist(
+        plName,
+        plAuthor,
+        playlistId,
+        audioSource
+      );
       try {
         await get().actions.addTracksToPlaylist(finalPlaylistId, [newAudioFile.id]);
 

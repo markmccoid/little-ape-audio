@@ -10,6 +10,75 @@ import { useDropboxStore } from "./store-dropbox";
 import { useSettingStore } from "./store-settings";
 import { Playlist, defaultCollections } from "./types";
 
+// Current store version - increment this when making breaking changes
+const STORE_VERSION = 1;
+
+//~ ----------------------------------
+//~ MIGRATIONS
+//~ ----------------------------------
+
+/**
+ * Migrates playlists to the current version
+ * @param playlists Current playlists object
+ * @param tracks All tracks
+ * @returns Object with migrated playlists and whether any changes were made
+ */
+const migratePlaylists = (playlists: Record<string, Playlist>, tracks: any[]) => {
+  if (!playlists) return { playlists, changed: false };
+
+  let changed = false;
+  const migratedPlaylists = { ...playlists };
+  const trackMap = new Map(tracks?.map((track) => [track.id, track]) || []);
+
+  for (const [playlistId, playlist] of Object.entries(migratedPlaylists)) {
+    // Skip if no tracks in playlist
+    if (!playlist.trackIds?.length) continue;
+
+    const firstTrackId = playlist.trackIds[0];
+    const track = trackMap.get(firstTrackId);
+
+    // Skip if track not found or missing audioSource
+    if (!track?.externalMetadata?.audioSource) continue;
+
+    const audioSource = track.externalMetadata.audioSource;
+    const needsSourceUpdate = !("source" in playlist) || playlist.source !== audioSource;
+
+    // Special handling for ABS playlists
+    if (audioSource === "abs" && track.sourceLocation?.includes("~")) {
+      const newId = track.sourceLocation.split("~")[0];
+      const idWillChange = playlist.id !== newId;
+
+      if (idWillChange || needsSourceUpdate) {
+        const updatedPlaylist = {
+          ...playlist,
+          id: idWillChange ? newId : playlist.id,
+          source: audioSource,
+        };
+
+        // If the ID changed, we need to delete the old entry
+        if (idWillChange) {
+          delete migratedPlaylists[playlistId];
+          migratedPlaylists[newId] = updatedPlaylist;
+        } else {
+          migratedPlaylists[playlistId] = updatedPlaylist;
+        }
+
+        changed = true;
+      }
+    }
+    // For non-ABS playlists, just update the source if needed
+    else if (needsSourceUpdate) {
+      migratedPlaylists[playlistId] = {
+        ...playlist,
+        source: audioSource,
+      };
+      changed = true;
+    }
+  }
+
+  return { playlists: migratedPlaylists, changed };
+};
+
 //~ ----------------------------------
 //~ ON INITIALIZE
 //~ ----------------------------------
@@ -23,7 +92,12 @@ export const onInitialize = async () => {
   //   ...el,
   //   metadata: { ...el.metadata, chapters: undefined },
   // }));
-  const playlists = await loadFromAsyncStorage("playlists");
+  let playlists = await loadFromAsyncStorage("playlists");
+  // In onInitialize, before migration:
+  // console.log(
+  //   "Before migration:",
+  //   playlists.map((el) => `${el.id}: ${el.source}`)
+  // );
   const favFolders = await loadFromAsyncStorage("favfolders");
   const folderMetadata = await loadFromAsyncStorage("foldermetadata");
   const folderAttributes = await loadFromAsyncStorage("folderattributes");
@@ -32,6 +106,29 @@ export const onInitialize = async () => {
   const collections = await loadFromAsyncStorage("collections");
   const settings = await loadFromAsyncStorage("settings");
   const audiobookshelfSettings = await loadFromAsyncStorage("absSettings");
+  const storeVersion = (await loadFromAsyncStorage("storeVersion")) || 0;
+
+  // Run migrations if needed
+  if (storeVersion < STORE_VERSION) {
+    console.log(`Running store migrations... (from v${storeVersion} to v${STORE_VERSION})`);
+
+    // Migration for playlists
+    if (storeVersion < 1) {
+      const { playlists: migratedPlaylists, changed } = migratePlaylists(
+        playlists || {},
+        tracks || []
+      );
+      if (changed) {
+        console.log("Playlists migrated successfully");
+        playlists = migratedPlaylists;
+        // Save the migrated playlists
+        await saveToAsyncStorage("playlists", playlists);
+      }
+    }
+
+    // Update store version
+    await saveToAsyncStorage("storeVersion", STORE_VERSION);
+  }
 
   useTracksStore.setState({
     tracks: tracks || [],

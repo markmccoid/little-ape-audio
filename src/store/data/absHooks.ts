@@ -4,6 +4,7 @@ import {
   absGetItemDetails,
   absGetLibraryFilterData,
   absGetLibraryItems,
+  absGetUserInfo,
   getUserFavoriteTagInfo,
 } from "./absAPI";
 import { reverse, sortBy } from "lodash";
@@ -159,6 +160,20 @@ export const useGetAllABSBooks = () => {
     selectedBookCount: filterData?.length || 0,
     ...rest,
   };
+};
+
+//~~ ======================================================================
+//~~ useABSBookmarks
+//~~ ======================================================================
+export type ABSBookmarks = ReturnType<typeof useABSBookmarks>;
+export const useABSBookmarks = () => {
+  return useQuery({
+    queryKey: ["bookmarks"],
+    queryFn: async () => {
+      const userInfo = await absGetUserInfo();
+      return userInfo?.bookmarks;
+    },
+  });
 };
 
 //~~ ======================================================================

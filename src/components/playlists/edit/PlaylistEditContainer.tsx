@@ -1,6 +1,6 @@
-import { View, Text, Alert, StyleSheet, Switch, TextInput, Pressable } from "react-native";
+import { View, Text, Alert, StyleSheet, Switch } from "react-native";
 import React, { useState } from "react";
-import { Link, Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { usePlaybackStore, useTrackActions, useTracksStore } from "@store/store";
 import { Playlist } from "@store/types";
 import { getImageFromWeb } from "@utils/otherUtils";

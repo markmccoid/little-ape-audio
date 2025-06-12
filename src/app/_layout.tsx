@@ -7,7 +7,7 @@ import { Linking, View, useColorScheme } from "react-native";
 import { Lato_100Thin, Lato_400Regular, Lato_700Bold } from "@expo-google-fonts/lato";
 
 import TrackPlayer, { Capability, IOSCategoryMode } from "react-native-track-player";
-import { onInitialize } from "../store/store-init";
+import { checkMigration, onInitialize } from "../store/store-init";
 import { useSettingStore } from "../store/store-settings";
 
 import { deactivateKeepAwake } from "expo-keep-awake";
@@ -51,7 +51,6 @@ export default function RootLayout() {
   useEffect(() => {
     const setupTP = async () => {
       await onInitialize();
-
       const jumpForwardSeconds = useSettingStore.getState().jumpForwardSeconds;
       const jumpBackwardSeconds = useSettingStore.getState().jumpBackwardSeconds;
 

@@ -86,7 +86,8 @@ export type CollectionItem = {
 
 export type PlaylistId = string;
 export type Playlist = {
-  id: string;
+  id: string; //For ABS, this is the libraryItemId for a book, for google and dropbox, this is a uuid
+  source?: string; // Added to track the audio source (e.g., "abs")
   name: string;
   author: string;
   lastPlayedDateTime: number;
@@ -192,7 +193,12 @@ export type AudioState = {
     // to the "tracks" array.  Returns the same array with a "alreadyDownload" key set to true or false
     isTrackDownloaded: (tracksToCheck: FileEntry[]) => FileEntry[];
     // creates playlist with the passed name and returns the playlistId
-    addNewPlaylist: (title: string, author?: string, playlistId?: string) => string;
+    addNewPlaylist: (
+      title: string,
+      author?: string,
+      playlistId?: string,
+      source?: AudioSourceType //"dropbox" | "google" | "abs"
+    ) => string;
     // Add track(s) to playlist ID
     addTracksToPlaylist: (playlistId: string, trackIds: string[]) => Promise<void>;
     removePlaylist: (playlistId: string, removeAllTracks?: boolean) => Promise<void>;

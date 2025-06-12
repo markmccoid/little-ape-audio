@@ -1,6 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Dictionary } from "lodash";
 
+type Data = any; // eslint-disable-line @typescript-eslint/no-explicit-any
+
 type StorageKeys =
   | "images"
   | "tracks"
@@ -13,7 +15,8 @@ type StorageKeys =
   | "laabmetaaggrcontrols"
   | "collections"
   | "quickActionsList"
-  | "absSettings";
+  | "absSettings"
+  | "storeVersion";
 
 // --------------------------------------------
 // -- LOAD passed key from Local Storage
@@ -119,12 +122,13 @@ export const removeFromAsyncStorage = async (key: StorageKeys) => {
 // --------------------------------------------
 // -- Gets all keys for the app currently in AsyncStorage
 // --------------------------------------------
-export const getAllKeys = async () => {
-  let keys: StorageKeys[] = [];
+export const getAllKeys = async (): Promise<StorageKeys[]> => {
   try {
-    keys = await AsyncStorage.getAllKeys();
-    return keys;
+    const keys = await AsyncStorage.getAllKeys();
+    // Type assertion since we know these are our storage keys
+    return keys as StorageKeys[];
   } catch (e) {
     console.log("Error in asyncStorage.js getAllKeys", e);
+    return [];
   }
 };
