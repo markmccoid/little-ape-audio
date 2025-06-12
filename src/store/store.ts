@@ -31,6 +31,8 @@ import { router } from "expo-router";
 import { getCurrentChapter } from "@utils/chapterUtils";
 import { debounce, reverse } from "lodash";
 import { getImageColors, resolveABSImage } from "@utils/otherUtils";
+import { absDeleteBookmark, absGetUserInfo, absSaveBookmark } from "./data/absAPI";
+import { ABSBookmark } from "./data/absTypes";
 
 let eventPlayerTrackChange = undefined;
 let eventEndOfQueue = undefined;
@@ -455,13 +457,17 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       const bookmarks = playlist?.bookmarks || [];
       const newBookmark = {
         id: uuid.v4(),
+        absBookId: playlist.source === "abs" ? playlist.id : undefined,
         name: bookmarkName,
         trackId,
         positionSeconds,
       } as Bookmark;
       const newBookmarks = [...bookmarks, newBookmark];
       playlist.bookmarks = newBookmarks;
-      // set({ playlists });
+      // If the bookmark is from ABS, save it to the ABS server
+      if (playlist.source === "abs") {
+        await absSaveBookmark(newBookmark);
+      }
       saveToAsyncStorage("playlists", playlists);
     },
     deleteBookmarkFromPlaylist: async (playlistId, bookmarkId) => {
@@ -472,6 +478,69 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       playlist.bookmarks = bookmarks.filter((el) => el.id !== bookmarkId);
       playlist.bookmarks = playlist.bookmarks.length === 0 ? undefined : playlist.bookmarks;
       set({ playlists });
+      // If the bookmark is from ABS, delete it from the ABS server
+      if (playlist.source === "abs") {
+        await absDeleteBookmark(bookmarkId);
+      }
+      saveToAsyncStorage("playlists", playlists);
+    },
+    mergeABSBookmarks: async (absBookmarks) => {
+      const playlists = { ...get().playlists };
+      console.log("IN MERGE BOOKMARKS");
+      // Group ABS bookmarks by libraryItemId (which matches playlist.id)
+      // {playlistId: [bookmark1, bookmark2, ...], playlistId2: [bookmark1, bookmark2, ...]}
+      const bookmarksByPlaylistId = absBookmarks.reduce((acc, absBm) => {
+        //Initialize the array if it doesn't exist
+        if (!acc[absBm.libraryItemId]) {
+          acc[absBm.libraryItemId] = [];
+        }
+        acc[absBm.libraryItemId].push(absBm);
+        return acc;
+      }, {});
+
+      // Process each playlist that has ABS bookmarks
+      for (const [playlistId, absBmList] of Object.entries(bookmarksByPlaylistId)) {
+        const playlist = playlists[playlistId];
+        if (!playlist) continue; // Skip if no matching playlist found
+
+        // Convert playlist bookmarks to a Set of positionSeconds for quick lookup
+        const existingPositions = new Set(
+          (playlist.bookmarks || []).map((bm) => bm.positionSeconds)
+        );
+
+        // Add any missing ABS bookmarks to the playlist
+        for (const absBm of absBmList as ABSBookmark[]) {
+          if (!existingPositions.has(absBm.time)) {
+            // Use first track in playlist for trackId, or empty string if no tracks
+            const trackId = playlist.trackIds?.[0] || "";
+            await get().actions.addBookmarkToPlaylist(absBm.title, playlistId, trackId, absBm.time);
+          }
+        }
+      }
+      // Find any local bookmarks that don't exist in ABS and save them
+      for (const playlist of Object.values(playlists)) {
+        if (playlist.source === "abs" && playlist.bookmarks?.length) {
+          // Get ABS Bookmarks for current Playlist Id
+          const currABSBookmarks = bookmarksByPlaylistId[playlist.id];
+          const absPositions = new Set(currABSBookmarks.map((bm) => bm.time));
+          // Loop through playlist bookmarks and check to see if ABS has each one
+          // if not, then add it
+          for (const localBm of playlist.bookmarks) {
+            if (!absPositions.has(localBm.positionSeconds)) {
+              try {
+                await absSaveBookmark({
+                  ...localBm,
+                  absBookId: playlist.id,
+                });
+              } catch (error) {
+                // Ignore errors saving to server as per requirements
+                console.warn("Failed to save bookmark to ABS:", error);
+              }
+            }
+          }
+        }
+      }
+      // Save any changes to storage
       saveToAsyncStorage("playlists", playlists);
     },
     getBookmarksForPlaylist: (playlistId) => {

@@ -8,7 +8,7 @@ export type ABSLoginResponse = {
   Source: string;
 };
 
-export interface Bookmark {
+export interface ABSBookmark {
   libraryItemId: string;
   time: number;
   title: string;
@@ -23,7 +23,7 @@ export type User = {
   token: string;
   mediaProgress: MediaProgress[];
   seriesHideFromContinueListening: string[];
-  bookmarks: Bookmark[];
+  bookmarks: ABSBookmark[];
   isActive: boolean;
   isLocked: boolean;
   lastSeen: number;

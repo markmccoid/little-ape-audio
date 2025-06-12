@@ -1,4 +1,4 @@
-import { absGetLibraryItems } from "./data/absAPI";
+import { absGetLibraryItems, absGetUserInfo } from "./data/absAPI";
 import {
   loadFromAsyncStorage,
   removeFromAsyncStorage,
@@ -108,10 +108,8 @@ export const onInitialize = async () => {
   const audiobookshelfSettings = await loadFromAsyncStorage("absSettings");
   const storeVersion = (await loadFromAsyncStorage("storeVersion")) || 0;
 
-  // Run migrations if needed
+  //# Run migrations if needed
   if (storeVersion < STORE_VERSION) {
-    console.log(`Running store migrations... (from v${storeVersion} to v${STORE_VERSION})`);
-
     // Migration for playlists
     if (storeVersion < 1) {
       const { playlists: migratedPlaylists, changed } = migratePlaylists(
@@ -119,13 +117,11 @@ export const onInitialize = async () => {
         tracks || []
       );
       if (changed) {
-        console.log("Playlists migrated successfully");
         playlists = migratedPlaylists;
         // Save the migrated playlists
         await saveToAsyncStorage("playlists", playlists);
       }
     }
-
     // Update store version
     await saveToAsyncStorage("storeVersion", STORE_VERSION);
   }
@@ -181,4 +177,10 @@ export const onInitialize = async () => {
     // searchObject: {},
     actions: absActions,
   });
+
+  //# Load All bookmarks from ABS and merge with local bookmarks
+  const userInfo = await absGetUserInfo();
+  if (userInfo.bookmarks) {
+    await useTracksStore.getState().actions.mergeABSBookmarks(userInfo.bookmarks);
+  }
 };

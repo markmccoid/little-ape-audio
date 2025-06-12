@@ -4,6 +4,7 @@ import { Chapter } from "./store-functions";
 import { AudioSourceType } from "@app/(audio)/dropbox";
 import { colors } from "@constants/Colors";
 import { CleanBookMetadata } from "@utils/audiobookMetadata";
+import { ABSBookmark } from "./data/absTypes";
 
 //~ ================================
 //~ AudioTrack Type
@@ -115,10 +116,12 @@ export type Playlist = {
 
 export type Bookmark = {
   id: string;
+  absBookId?: string;
   name: string;
   trackId: string;
   positionSeconds: number;
 };
+
 type PlaylistUpdateObj = {
   name?: string;
   author?: string;
@@ -231,6 +234,7 @@ export type AudioState = {
     ) => Promise<void>;
     getBookmarksForPlaylist: (playlistId) => Bookmark[];
     deleteBookmarkFromPlaylist: (playlistId: string, bookmarkId: string) => Promise<void>;
+    mergeABSBookmarks: (absBookmarks: ABSBookmark[]) => Promise<void>;
     addOrUpdateCollection: (collection: CollectionItem) => Promise<void>;
     deleteCollection: (collectionId: string) => Promise<void>;
     clearAll: () => Promise<void>;

@@ -18,7 +18,6 @@ interface ABSShareBookPropsProps {
 const ABSShareBook: React.FC<ABSShareBookPropsProps> = ({ track, style }) => {
   const actions = useTracksStore((state) => state.actions);
   const bookId = actions.getABSBookId(track);
-  console.log("BookId", bookId);
   return (
     <TouchableOpacity
       className="mt-1"

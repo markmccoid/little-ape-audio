@@ -5,6 +5,7 @@
 import axios from "axios";
 import {
   ABSLoginResponse,
+  Bookmark,
   FilterData,
   GetLibraryItemsResponse,
   Library,
@@ -69,6 +70,46 @@ export const absLogin = async (absURL: string, username: string, password: strin
 };
 
 //~~ ========================================================
+//~~ absSaveBookmark -
+//~~ Saves a bookmark to the abs server
+//~~ ========================================================
+export const absSaveBookmark = async (bookmark: Bookmark) => {
+  const authHeader = getAuthHeader();
+  const data = {
+    time: bookmark.positionSeconds,
+    title: bookmark.name,
+  };
+  let response;
+  const url = `${getAbsURL()}/api/me/item/${bookmark.absBookId}/bookmark`;
+
+  try {
+    response = await axios.post(url, data, { headers: authHeader });
+  } catch (error) {
+    console.log("error", error);
+  }
+
+  // return response.data;
+};
+
+//~~ ========================================================
+//~~ absDeleteBookmark -
+//~~ Deletes a bookmark from the abs server
+//~~ ========================================================
+export const absDeleteBookmark = async (bookmark: Bookmark) => {
+  const authHeader = getAuthHeader();
+  let response;
+  const url = `${getAbsURL()}/api/me/item/${bookmark.absBookId}/bookmark/${
+    bookmark.positionSeconds
+  }`;
+  try {
+    response = await axios.delete(url, { headers: authHeader });
+  } catch (error) {
+    console.log("error deleting bookmark", error);
+  }
+  // return response.data;
+};
+
+//~~ ========================================================
 //~~ absGetUserInfo -
 //~~ Gets user information like bookmarks, mediaProgress, etc
 //~~ ========================================================
@@ -77,11 +118,11 @@ export const absGetUserInfo = async () => {
   let response;
   const url = `${getAbsURL()}/api/authorize`;
   try {
-    response = await axios.get(url, { headers: authHeader });
+    response = await axios.post(url, {}, { headers: authHeader });
   } catch (error) {
     console.log("error", error);
   }
-  const userInfo = response.data as User;
+  const userInfo = response.data.user as User;
   return userInfo;
 };
 
