@@ -234,7 +234,8 @@ export type AudioState = {
     ) => Promise<void>;
     getBookmarksForPlaylist: (playlistId) => Bookmark[];
     deleteBookmarkFromPlaylist: (playlistId: string, bookmarkId: string) => Promise<void>;
-    mergeABSBookmarks: (absBookmarks: ABSBookmark[]) => Promise<void>;
+    // reads from the ABS server and merges bookmarks into local and if local not in server, saves to server.
+    mergeABSBookmarks: () => Promise<void>;
     addOrUpdateCollection: (collection: CollectionItem) => Promise<void>;
     deleteCollection: (collectionId: string) => Promise<void>;
     clearAll: () => Promise<void>;

@@ -301,8 +301,8 @@ export const addTrack =
       isCriticalSectionLocked = false;
       // If the audio source is abs, then get the user info and merge any abs server bookmarks
       if (audioSource === "abs") {
-        const userInfo = await absGetUserInfo();
-        get().actions.mergeABSBookmarks(userInfo.bookmarks);
+        // const userInfo = await absGetUserInfo();
+        get().actions.mergeABSBookmarks();
       }
     }
     // console.log(`${filename}-ADD TRACK DONE`, Date.now());

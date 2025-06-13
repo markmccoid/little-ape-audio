@@ -464,6 +464,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       } as Bookmark;
       const newBookmarks = [...bookmarks, newBookmark];
       playlist.bookmarks = newBookmarks;
+      set({ playlistUpdated: new Date() });
       // If the bookmark is from ABS, save it to the ABS server
       if (playlist.source === "abs") {
         await absSaveBookmark(newBookmark);
@@ -477,16 +478,17 @@ export const useTracksStore = create<AudioState>((set, get) => ({
 
       playlist.bookmarks = bookmarks.filter((el) => el.id !== bookmarkId);
       playlist.bookmarks = playlist.bookmarks.length === 0 ? undefined : playlist.bookmarks;
-      set({ playlists });
+      set({ playlists, playlistUpdated: new Date() });
       // If the bookmark is from ABS, delete it from the ABS server
       if (playlist.source === "abs") {
         await absDeleteBookmark(bookmarkId);
       }
       saveToAsyncStorage("playlists", playlists);
     },
-    mergeABSBookmarks: async (absBookmarks) => {
+    mergeABSBookmarks: async () => {
       const playlists = { ...get().playlists };
-      console.log("IN MERGE BOOKMARKS");
+      const userInfo = await absGetUserInfo();
+      const absBookmarks = userInfo.bookmarks;
       // Group ABS bookmarks by libraryItemId (which matches playlist.id)
       // {playlistId: [bookmark1, bookmark2, ...], playlistId2: [bookmark1, bookmark2, ...]}
       const bookmarksByPlaylistId = absBookmarks.reduce((acc, absBm) => {
@@ -507,7 +509,6 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         const existingPositions = new Set(
           (playlist.bookmarks || []).map((bm) => bm.positionSeconds)
         );
-
         // Add any missing ABS bookmarks to the playlist
         for (const absBm of absBmList as ABSBookmark[]) {
           if (!existingPositions.has(absBm.time)) {
@@ -522,10 +523,11 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         if (playlist.source === "abs" && playlist.bookmarks?.length) {
           // Get ABS Bookmarks for current Playlist Id
           const currABSBookmarks = bookmarksByPlaylistId[playlist.id];
-          const absPositions = new Set(currABSBookmarks.map((bm) => bm.time));
+          const absPositions = new Set((currABSBookmarks || []).map((bm) => bm.time));
           // Loop through playlist bookmarks and check to see if ABS has each one
           // if not, then add it
           for (const localBm of playlist.bookmarks) {
+            // console.log("localBM", localBm.positionSeconds);
             if (!absPositions.has(localBm.positionSeconds)) {
               try {
                 await absSaveBookmark({

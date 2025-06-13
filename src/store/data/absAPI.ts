@@ -87,7 +87,6 @@ export const absSaveBookmark = async (bookmark: Bookmark) => {
   } catch (error) {
     console.log("error", error);
   }
-
   // return response.data;
 };
 

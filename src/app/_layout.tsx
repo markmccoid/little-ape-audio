@@ -134,7 +134,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (isLoaded && loaded) {
-      console.log("LOADED");
+      // console.log("LOADED");
       SplashScreen.hideAsync();
       // SplashScreen.hide();
     }

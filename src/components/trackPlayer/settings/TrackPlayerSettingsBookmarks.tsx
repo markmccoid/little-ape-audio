@@ -9,6 +9,7 @@ import { colors } from "../../../constants/Colors";
 import { useSharedValue } from "react-native-reanimated";
 import BookmarkRow from "./TrackPlayerSettingsBookmarkRow";
 import { useSettingStore } from "@store/store-settings";
+import { useTracksStore } from "@store/store";
 
 const TrackPlayerSettingsBookmarks = () => {
   //-- Setup for swipe left gestures
@@ -19,6 +20,7 @@ const TrackPlayerSettingsBookmarks = () => {
   // I'm sure there is a better way BUT....
   // This forces a rerender when a bookmark is deleted
   const didUpdate = usePlaybackStore((state) => state.didUpdate);
+  const playlistUpdated = useTracksStore((state) => state.playlistUpdated);
   const router = useRouter();
   const bookmarks = playbackActions.getBookmarks();
   const segments = useSegments();

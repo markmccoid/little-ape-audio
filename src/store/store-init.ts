@@ -179,8 +179,8 @@ export const onInitialize = async () => {
   });
 
   //# Load All bookmarks from ABS and merge with local bookmarks
-  const userInfo = await absGetUserInfo();
-  if (userInfo.bookmarks) {
-    await useTracksStore.getState().actions.mergeABSBookmarks(userInfo.bookmarks);
-  }
+  // const userInfo = await absGetUserInfo();
+  // if (userInfo.bookmarks) {
+  await useTracksStore.getState().actions.mergeABSBookmarks();
+  // }
 };
