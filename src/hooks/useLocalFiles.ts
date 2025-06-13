@@ -37,7 +37,12 @@ const useLocalFiles = () => {
             //!! Need to run-> tractActions.addNewPlaylist(plName, plAuthor, playlistId)
             // sending in undefined for name and author so that we DON'T find any existing playlist and use
             // the passed id.
-            const finalPlaylistId = trackActions.addNewPlaylist(undefined, undefined, playlistId);
+            const finalPlaylistId = trackActions.addNewPlaylist(
+              undefined,
+              undefined,
+              playlistId,
+              "local"
+            );
             // update the name and author.  Realize if multiple tracks are selected with different metadata,
             // this will update for each and we are left with the last one. NOTE: undefined values don't update.
             await trackActions.updatePlaylistFields(finalPlaylistId, {

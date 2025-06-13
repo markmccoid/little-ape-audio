@@ -11,7 +11,7 @@ import { useSettingStore } from "./store-settings";
 import { Playlist, defaultCollections } from "./types";
 
 // Current store version - increment this when making breaking changes
-const STORE_VERSION = 1;
+const STORE_VERSION = 1.1;
 
 //~ ----------------------------------
 //~ MIGRATIONS
@@ -37,10 +37,11 @@ const migratePlaylists = (playlists: Record<string, Playlist>, tracks: any[]) =>
     const firstTrackId = playlist.trackIds[0];
     const track = trackMap.get(firstTrackId);
 
-    // Skip if track not found or missing audioSource
-    if (!track?.externalMetadata?.audioSource) continue;
+    // Skip if track not found OR if playlist already has audioSource
+    if (!track || playlist?.source) continue;
 
-    const audioSource = track.externalMetadata.audioSource;
+    // Get audioSource from track or default to "local"
+    const audioSource = track.externalMetadata?.audioSource || "local";
     const needsSourceUpdate = !("source" in playlist) || playlist.source !== audioSource;
 
     // Special handling for ABS playlists
