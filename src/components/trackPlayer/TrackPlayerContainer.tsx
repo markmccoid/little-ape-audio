@@ -40,7 +40,7 @@ const TrackPlayerContainer = () => {
   const playlistTracks = useTracksStore((state) =>
     state.actions.getPlaylistTracks(params?.playlistId)
   );
-  const audioSource = playlistTracks[0].externalMetadata.audioSource;
+  // const audioSource = playlistTracks[0].externalMetadata.audioSource;
   //! Get Info needed to mark as favorite and read for ABS books
   // const playlistId = usePlaybackStore((state) => state.currentPlaylistId);
   // const playList = useTracksStore((state) => state.actions.getPlaylist(playlistId));
