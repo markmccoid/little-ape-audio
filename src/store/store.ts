@@ -481,7 +481,10 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       set({ playlists, playlistUpdated: new Date() });
       // If the bookmark is from ABS, delete it from the ABS server
       if (playlist.source === "abs") {
-        await absDeleteBookmark(bookmarkId);
+        await absDeleteBookmark(
+          playlistId,
+          bookmarks.find((el) => el.id === bookmarkId)?.positionSeconds
+        );
       }
       saveToAsyncStorage("playlists", playlists);
     },

@@ -94,12 +94,11 @@ export const absSaveBookmark = async (bookmark: Bookmark) => {
 //~~ absDeleteBookmark -
 //~~ Deletes a bookmark from the abs server
 //~~ ========================================================
-export const absDeleteBookmark = async (bookmark: Bookmark) => {
+export const absDeleteBookmark = async (playlistId: string, positionSeconds: number) => {
   const authHeader = getAuthHeader();
   let response;
-  const url = `${getAbsURL()}/api/me/item/${bookmark.absBookId}/bookmark/${
-    bookmark.positionSeconds
-  }`;
+  const url = `${getAbsURL()}/api/me/item/${playlistId}/bookmark/${positionSeconds}`;
+
   try {
     response = await axios.delete(url, { headers: authHeader });
   } catch (error) {

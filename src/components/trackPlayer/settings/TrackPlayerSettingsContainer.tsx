@@ -66,30 +66,39 @@ const TrackPlayerSettingsContainer = () => {
                 </TouchableOpacity>
 
                 {plSource === "abs" && (
-                  <Pressable
-                    className={`flex-row items-center active:scale-95 ${
-                      showItem === "bookmarks" ? "opacity-100" : "opacity-40"
-                    }`}
-                    disabled={showItem !== "bookmarks"}
-                    onPress={async () => {
-                      await actions.mergeABSBookmarks();
-                      Alert.alert("Synced", "Bookmarks synced successfully");
+                  <MotiView
+                    from={{ opacity: 0, scale: 0.5 }}
+                    animate={{
+                      opacity: showItem === "bookmarks" ? 1 : 0,
+                      scale: showItem === "bookmarks" ? 1 : 0.5,
                     }}
+                    transition={{ type: "timing", duration: 300 }}
                   >
-                    <SymbolView
-                      name="arrow.trianglehead.2.clockwise.rotate.90.circle.fill"
-                      tintColor={playlistColors.gradientTopText}
-                      size={25}
-                    />
-                    <Text
-                      className="text-xs"
-                      style={{
-                        color: playlistColors.gradientTopText,
+                    <Pressable
+                      className={`flex-row items-center active:scale-95 ${
+                        showItem === "bookmarks" ? "opacity-100" : "opacity-40"
+                      }`}
+                      disabled={showItem !== "bookmarks"}
+                      onPress={async () => {
+                        await actions.mergeABSBookmarks();
+                        Alert.alert("Synced", "Bookmarks synced successfully");
                       }}
                     >
-                      Sync
-                    </Text>
-                  </Pressable>
+                      <SymbolView
+                        name="arrow.trianglehead.2.clockwise.rotate.90.circle.fill"
+                        tintColor={playlistColors.gradientTopText}
+                        size={25}
+                      />
+                      <Text
+                        className="text-xs"
+                        style={{
+                          color: playlistColors.gradientTopText,
+                        }}
+                      >
+                        Sync
+                      </Text>
+                    </Pressable>
+                  </MotiView>
                 )}
               </View>
               {/* TRACKS Button */}
