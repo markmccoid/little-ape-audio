@@ -491,7 +491,9 @@ export const useTracksStore = create<AudioState>((set, get) => ({
     mergeABSBookmarks: async () => {
       const playlists = { ...get().playlists };
       const userInfo = await absGetUserInfo();
+      if (!userInfo || !userInfo.token) return;
       const absBookmarks = userInfo.bookmarks;
+      if (!absBookmarks || absBookmarks.length === 0) return;
       // Group ABS bookmarks by libraryItemId (which matches playlist.id)
       // {playlistId: [bookmark1, bookmark2, ...], playlistId2: [bookmark1, bookmark2, ...]}
       const bookmarksByPlaylistId = absBookmarks.reduce((acc, absBm) => {

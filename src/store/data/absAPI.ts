@@ -115,6 +115,7 @@ export const absGetUserInfo = async () => {
   const authHeader = getAuthHeader();
   let response;
   const url = `${getAbsURL()}/api/authorize`;
+
   try {
     response = await axios.post(url, {}, { headers: authHeader });
   } catch (error) {

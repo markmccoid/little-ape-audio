@@ -24,8 +24,8 @@ const STORE_VERSION = 1.1;
  * @returns Object with migrated playlists and whether any changes were made
  */
 const migratePlaylists = (playlists: Record<string, Playlist>, tracks: any[]) => {
-  if (!playlists) return { playlists, changed: false };
-
+  if (!playlists || Object.keys(playlists).length === 0) return { playlists, changed: false };
+  console.log("In Migrate Playlists");
   let changed = false;
   const migratedPlaylists = { ...playlists };
   const trackMap = new Map(tracks?.map((track) => [track.id, track]) || []);
@@ -110,6 +110,7 @@ export const onInitialize = async () => {
   const storeVersion = (await loadFromAsyncStorage("storeVersion")) || 0;
 
   //# Run migrations if needed
+
   if (storeVersion < STORE_VERSION) {
     // Migration for playlists
     if (storeVersion < 1) {
@@ -132,7 +133,6 @@ export const onInitialize = async () => {
     playlists: playlists || {},
     collections: collections || defaultCollections,
   });
-
   // ******************
   // * patch favFolders
   if (favFolders) {
@@ -179,9 +179,9 @@ export const onInitialize = async () => {
     actions: absActions,
   });
 
-  //# Load All bookmarks from ABS and merge with local bookmarks
-  // const userInfo = await absGetUserInfo();
-  // if (userInfo.bookmarks) {
-  await useTracksStore.getState().actions.mergeABSBookmarks();
-  // }
+  const absToken = useABSStore.getState()?.userInfo?.token;
+  if (absToken) {
+    //# Load All bookmarks from ABS and merge with local bookmarks
+    await useTracksStore.getState().actions.mergeABSBookmarks();
+  }
 };
