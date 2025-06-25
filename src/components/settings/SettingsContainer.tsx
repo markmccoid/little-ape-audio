@@ -72,6 +72,17 @@ const SettingsContainer = () => {
           </Link>
         </View>
         {/* ------------------ */}
+        {/* ABS Settings       */}
+        {/* ------------------ */}
+        <View style={[styles.borderBottom, { paddingRight: 10 }]}>
+          <Link href="/settings/abssettings" asChild>
+            <Pressable className="pl-2 py-3 w-full flex-row justify-between">
+              <Text className="text-sm">AudiobookShelf Settings</Text>
+              <IOSArrowForwardIcon color="#36454F" size={20} />
+            </Pressable>
+          </Link>
+        </View>
+        {/* ------------------ */}
         {/* SEEK FORWARD/BACKWARD */}
         {/* ------------------ */}
         <View className="px-2" style={[styles.borderBottom]}>

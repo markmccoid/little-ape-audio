@@ -180,7 +180,8 @@ export const onInitialize = async () => {
   });
 
   const absToken = useABSStore.getState()?.userInfo?.token;
-  if (absToken) {
+  const absSyncBookmarks = useSettingStore.getState().absSyncBookmarks;
+  if (absToken && absSyncBookmarks) {
     //# Load All bookmarks from ABS and merge with local bookmarks
     await useTracksStore.getState().actions.mergeABSBookmarks();
   }

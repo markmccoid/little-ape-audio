@@ -146,7 +146,7 @@ export default function RootLayout() {
 
   return <RootLayoutNav />;
 }
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       // --------            -Minutes-

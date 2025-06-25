@@ -11,18 +11,44 @@ import usePlaylistColors from "hooks/usePlaylistColors";
 import TrackPlayerSettingsHeader from "./TrackPlayerSettingsHeader";
 import { SymbolView } from "expo-symbols";
 import { usePlaybackStore, useTrackActions, useTracksStore } from "@store/store";
+import { absGetBookProgress } from "@store/data/absAPI";
+import { useQuery } from "@tanstack/react-query";
+import { formatSeconds } from "@utils/formatUtils";
+import { queryClient } from "@app/_layout";
+import { useRouter } from "expo-router";
+import { useSettingStore } from "@store/store-settings";
 
 const { width, height } = Dimensions.get("window");
 const COMPONENT_WIDTH = width - 20;
 const COMPONENT_PADDING = 10;
 
 const TrackPlayerSettingsContainer = () => {
+  const absSyncProgress = useSettingStore((state) => state.absSyncProgress);
+  const absSyncBookmarks = useSettingStore((state) => state.absSyncBookmarks);
   const [showItem, setShowItem] = useState<"bookmarks" | "tracks">("bookmarks");
   const { gradientTop, gradientMiddle, gradientLast } = usePlaylistColors();
   const plId = usePlaybackStore((state) => state.currentPlaylistId);
+  const router = useRouter();
+
   const plSource = useTracksStore((state) => state.playlists[plId].source);
+  const plTotalPosition = useTracksStore((state) =>
+    formatSeconds(state.playlists[plId].totalListenedToSeconds)
+  );
   const playlistColors = usePlaylistColors();
   const actions = useTrackActions();
+
+  const alignServerProgress = usePlaybackStore((state) => state.actions.alignServerProgress);
+  const { data, isLoading } = useQuery({
+    queryKey: ["progress", plId],
+    queryFn: async () => await absGetBookProgress(plId),
+  });
+  // Need to invalidate query when plTotalPosition changes so that we requery
+  // the server for the progress.
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["progress", plId] });
+  }, [plTotalPosition]);
+
+  const formattedServerSeconds = isLoading ? "Loading..." : formatSeconds(data);
 
   return (
     <>
@@ -39,6 +65,37 @@ const TrackPlayerSettingsContainer = () => {
           <View className="flex-row">
             <TPSettingsScroller />
           </View>
+          {/* Show Server Progress if playlist is from ABS */}
+          {/* Allows user to sync with server */}
+          {plSource === "abs" && absSyncProgress && (
+            <View className="px-3 w-full">
+              <View className="flex-row bg-white border rounded-lg p-2 mt-2 justify-between">
+                <View className="flex-col">
+                  <View className="flex-row">
+                    <Text className="w-[120] font-bold">Server Progress:</Text>
+                    <Text className="ml-2">{formattedServerSeconds}</Text>
+                  </View>
+                  <View className="flex-row">
+                    <Text className="w-[120] font-bold">Local Progress:</Text>
+                    <Text className="ml-2">{plTotalPosition}</Text>
+                  </View>
+                </View>
+                <Pressable
+                  onPress={() => {
+                    alignServerProgress(data);
+                    router.back();
+                  }}
+                  className="flex-row items-center"
+                >
+                  <SymbolView
+                    name="arrow.trianglehead.2.clockwise.rotate.90.circle.fill"
+                    tintColor="black"
+                    size={25}
+                  />
+                </Pressable>
+              </View>
+            </View>
+          )}
           {/* TRACKS and BOOKMARKS Buttons */}
           <View className="flex-1 flex-col items-center justify-start w-full">
             <View className="flex-row justify-between w-full mt-3 mb-2 pr-4">
@@ -65,7 +122,7 @@ const TrackPlayerSettingsContainer = () => {
                   />
                 </TouchableOpacity>
 
-                {plSource === "abs" && (
+                {plSource === "abs" && absSyncBookmarks && (
                   <MotiView
                     from={{ opacity: 0, scale: 0.5 }}
                     animate={{

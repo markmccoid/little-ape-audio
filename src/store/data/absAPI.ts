@@ -3,9 +3,9 @@
 //~~ ========================================================
 
 import axios from "axios";
+import { Bookmark } from "@store/types";
 import {
   ABSLoginResponse,
-  Bookmark,
   FilterData,
   GetLibraryItemsResponse,
   Library,
@@ -525,6 +525,36 @@ export const absDownloadEbook = async (itemId: string, fileIno: string, filename
   }
 };
 
+//~~ ========================================================
+//~~ absUpdateBookProgress
+//~~ ========================================================
+export const absUpdateBookProgress = async (itemId: string, currentTimeInSeconds: number) => {
+  //  http://abs.mccoidco.xyz/api/me/progress/<LibraryItemID>
+  const authHeader = getAuthHeader();
+  const token = getToken();
+  const data = { currentTime: currentTimeInSeconds };
+  const url = `${getAbsURL()}/api/me/progress/${itemId}`;
+  try {
+    const resp = await axios.patch(url, data, { headers: authHeader });
+  } catch (e) {
+    throw new Error("Item Not Found or Other Error setting absUpdateBookProgress");
+  }
+};
+//~~ ========================================================
+//~~ absGetBookProgress
+//~~ ========================================================
+export const absGetBookProgress = async (itemId: string) => {
+  //  https://abs.mccoidco.xyz/api/me/progress/<LibraryItemID>
+  const authHeader = getAuthHeader();
+  const token = getToken();
+  const url = `${getAbsURL()}/api/me/progress/${itemId}`;
+  try {
+    const resp = await axios.get(url, { headers: authHeader });
+    return resp.data.currentTime;
+  } catch (e) {
+    throw new Error("Item Not Found or Other Error setting absGetBookProgress");
+  }
+};
 //~~ ========================================================
 //~~ absSetBookFinished
 //~~ ========================================================

@@ -48,6 +48,14 @@ const SettingsLayout = () => {
         }}
       />
       <Stack.Screen
+        name="abssettings"
+        options={{
+          title: "AudiobookShelf Settings",
+          // headerStyle: { backgroundColor: colors.amber200 },
+          headerTintColor: colors.amber900,
+        }}
+      />
+      <Stack.Screen
         name="managetracksroute"
         options={{
           title: "Manage Tracks",

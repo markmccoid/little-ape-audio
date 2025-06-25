@@ -29,9 +29,14 @@ import * as FileSystem from "expo-file-system";
 import { getImageSize } from "@utils/audioUtils";
 import { router } from "expo-router";
 import { getCurrentChapter } from "@utils/chapterUtils";
-import { debounce, reverse } from "lodash";
+import { debounce, reverse, toInteger } from "lodash";
 import { getImageColors, resolveABSImage } from "@utils/otherUtils";
-import { absDeleteBookmark, absGetUserInfo, absSaveBookmark } from "./data/absAPI";
+import {
+  absDeleteBookmark,
+  absGetUserInfo,
+  absSaveBookmark,
+  absUpdateBookProgress,
+} from "./data/absAPI";
 import { ABSBookmark } from "./data/absTypes";
 
 let eventPlayerTrackChange = undefined;
@@ -466,7 +471,8 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       playlist.bookmarks = newBookmarks;
       set({ playlistUpdated: new Date() });
       // If the bookmark is from ABS, save it to the ABS server
-      if (playlist.source === "abs") {
+      const absSyncBookmarks = useSettingStore.getState().absSyncBookmarks;
+      if (playlist.source === "abs" && absSyncBookmarks) {
         await absSaveBookmark(newBookmark);
       }
       saveToAsyncStorage("playlists", playlists);
@@ -480,7 +486,8 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       playlist.bookmarks = playlist.bookmarks.length === 0 ? undefined : playlist.bookmarks;
       set({ playlists, playlistUpdated: new Date() });
       // If the bookmark is from ABS, delete it from the ABS server
-      if (playlist.source === "abs") {
+      const absSyncBookmarks = useSettingStore.getState().absSyncBookmarks;
+      if (playlist.source === "abs" && absSyncBookmarks) {
         await absDeleteBookmark(
           playlistId,
           bookmarks.find((el) => el.id === bookmarkId)?.positionSeconds
@@ -696,6 +703,8 @@ type PlaybackState = {
       trackIdToDelete: string,
       trackIndex: number
     ) => Promise<void>;
+    // Called from TrackPlayerSettingsContainer to sync server progress to local book.
+    alignServerProgress: (serverSeconds: number) => Promise<void>;
     getPrevTrackDuration: () => number;
     setCurrentTrackPosition: (positionSeconds: number) => void;
     getCurrentTrackPosition: () => number;
@@ -984,8 +993,36 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       await TrackPlayer.skip(trackIndex);
       await get().actions.seekTo(positionSeconds);
     },
+    alignServerProgress: async (serverSeconds: number) => {
+      // Aligns the current track position to the server progress
+      // serverSeconds is the total seconds listened to on the server
+      // since our queue can have multiple tracks we need to calculate
+      // the total seconds as we progress through tracks and then find out
+      // which track we are on and where we are in that track using the serverSeconds
+      const queue = get().trackPlayerQueue;
+      let totalSeconds = 0;
+      let currTrackNum = 0;
+      let positionInTrack = 0;
+      serverSeconds = Math.round(serverSeconds);
+      let index = 0;
+      for (let el of queue) {
+        totalSeconds += Math.round(el.duration);
+        if (totalSeconds > serverSeconds) {
+          currTrackNum = index;
+          const previousTracksTime = totalSeconds - Math.round(el.duration);
+          positionInTrack = serverSeconds - previousTracksTime;
+          break;
+        }
+        index++;
+      }
+
+      await get().actions.goToTrack(currTrackNum);
+      // await get().actions.seekTo(positionInTrack);
+      await TrackPlayer.seekTo(positionInTrack);
+      await saveCurrentTrackInfoBase();
+    },
     getPrevTrackDuration: () => {
-      // used is calculating progress acroos all tracks in playlist
+      // used is calculating progress across all tracks in playlist
       const queue = get().trackPlayerQueue;
       let final = 0;
       let index = 0;
@@ -1131,6 +1168,7 @@ export const getCurrentPlaylist = () => {
   const plId = usePlaybackStore.getState().currentPlaylistId;
   return useTracksStore.getState().actions.getPlaylist(plId);
 };
+
 //! - This gets the current queue in TrackPlayer
 //! - BUT, we also store this in the PlaybackStore in currentQueue
 //!! - NOT SURE IF WE NEED THIS
@@ -1220,8 +1258,10 @@ const saveCurrentTrackInfoBase = async () => {
       trackIndex: trackIndex,
       position,
     };
-    playlist.totalListenedToSeconds =
+    const newTotalListenedTo =
       usePlaybackStore.getState().actions.getPrevTrackDuration() + position;
+    playlist.totalListenedToSeconds = newTotalListenedTo;
+
     // Create update list of playlists
     const updatedPlaylists = {
       ...useTracksStore.getState().playlists,
@@ -1229,6 +1269,7 @@ const saveCurrentTrackInfoBase = async () => {
     };
     useTracksStore.setState({ playlists: updatedPlaylists });
     await saveToAsyncStorage("playlists", updatedPlaylists);
+    return newTotalListenedTo;
   }
 };
 
@@ -1418,6 +1459,12 @@ const mountTrackPlayerListeners = () => {
     // on PlaybackStore AND TrackStore
 
     const { position } = await TrackPlayer.getProgress();
+
+    const currPlaylist = usePlaybackStore.getState().actions.getCurrentPlaylist();
+    const absSyncProgress = useSettingStore.getState().absSyncProgress;
+    const absBookId = currPlaylist.id;
+    const bookType = currPlaylist.source; // will be "abs" if from AudioboosShelf
+
     //! NOTE: in trackPlayerUtils.ts, I setup another state change event listener
     //! its only job is to update teh playerState in the Playback Store
     //! I found some issues when the listeners were unmounted and state change happeneed not being recorded
@@ -1425,15 +1472,31 @@ const mountTrackPlayerListeners = () => {
     // usePlaybackStore.setState({ playerState: event.state });
     if (event.state === State.Stopped) {
       clearAutoSaveInterval(saveIntervalId);
+      // Save the currrent position of the book to the ABS Server
+      // The returned newTotalPosition will take into account if the book has multiple tracks
+      const newTotalPosition = await saveCurrentTrackInfoBase();
+      if (bookType === "abs" && absSyncProgress) {
+        await absUpdateBookProgress(absBookId, toInteger(newTotalPosition));
+      }
     }
     if (event.state === State.Paused) {
       clearAutoSaveInterval(saveIntervalId);
-      await saveCurrentTrackInfo();
+      // saveCurrentTrackInfoBase returns the newTotalPosition for us
+      // The returned newTotalPosition will take into account if the book has multiple tracks
+      const newTotalPosition = await saveCurrentTrackInfoBase();
+      if (bookType === "abs" && absSyncProgress) {
+        await absUpdateBookProgress(absBookId, toInteger(newTotalPosition));
+      }
       return;
     }
     if (event.state === State.Playing) {
       clearAutoSaveInterval(saveIntervalId);
       saveIntervalId = setInterval(async () => await saveCurrentTrackInfo(), 10000);
+      // The returned newTotalPosition will take into account if the book has multiple tracks
+      const newTotalPosition = await saveCurrentTrackInfoBase();
+      if (bookType === "abs" && absSyncProgress) {
+        await absUpdateBookProgress(absBookId, toInteger(newTotalPosition));
+      }
     }
   });
   //-- =================

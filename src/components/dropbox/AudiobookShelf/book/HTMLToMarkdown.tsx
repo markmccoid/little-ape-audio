@@ -4,7 +4,10 @@ import { NodeHtmlMarkdown } from "node-html-markdown";
 
 // const turndownService = new TurndownService();
 
-const HtmlToMarkdown: React.FC<{ html: string }> = ({ html }) => {
+const HtmlToMarkdown: React.FC<{ html: string; textColor?: string }> = ({
+  html,
+  textColor = "black",
+}) => {
   // const markdown = turndownService.turndown(html);
   const validHtmlInput = typeof html === "string" ? html : "";
 
@@ -20,7 +23,7 @@ const HtmlToMarkdown: React.FC<{ html: string }> = ({ html }) => {
   return (
     <Markdown
       style={{
-        body: { color: "#000", fontSize: 16 },
+        body: { color: textColor, fontSize: 16 },
         heading1: { fontSize: 24, fontWeight: "bold" },
         heading2: { fontSize: 20, fontWeight: "bold" },
         link: { color: "#007AFF" },
@@ -37,7 +40,7 @@ const HtmlToMarkdown: React.FC<{ html: string }> = ({ html }) => {
         },
         bullet_list_icon: {
           fontSize: 36, // Match body fontSize or make it slightly smaller/larger
-          color: "black", // Example: Blue bullets
+          color: textColor, // Example: Blue bullets
           marginRight: 8, // Space between the bullet and the text
 
           // lineHeight: 20, // Match body lineHeight for vertical alignment

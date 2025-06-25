@@ -402,7 +402,7 @@ const ABSBookContainer = ({ data, isLoading, isError }: Props) => {
           );
         })}
         {data?.ebooks?.length > 0 && (
-          <View className="">
+          <View className="flex-1">
             <View className="border-b">
               <Text className="text-base text-center font-semibold">Ebooks</Text>
             </View>

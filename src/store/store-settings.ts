@@ -16,6 +16,9 @@ type SettingsState = {
   // Sleep Timer ----
   sleepTimeMinutes: number;
   sleepStartDateTime: Date;
+  // ABS Settings
+  absSyncProgress: boolean;
+  absSyncBookmarks: boolean;
   cancelSleepTimeout: () => void;
   countdownActive: boolean;
   intervalActive: boolean;
@@ -50,6 +53,8 @@ type SettingsState = {
     setBottomSheetRef: (BottomSheetRef: BottomSheetImpRef) => void;
     setCloudAuth: (service: "dropbox" | "google", authStatus: boolean) => Promise<void>;
     toggleDynamicColors: () => Promise<void>;
+    toggleSyncProgress: () => Promise<void>;
+    toggleSyncBookmarks: () => Promise<void>;
     toggleAutoPlay: () => Promise<void>;
     toggleCollectionColorStrip: () => Promise<void>;
     setDefaultCollectionId: (collectionId: string) => Promise<void>;
@@ -61,6 +66,8 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
   jumpBackwardSeconds: 15,
   sleepTimeMinutes: 0,
   sleepStartDateTime: undefined,
+  absSyncProgress: false,
+  absSyncBookmarks: false,
   countdownActive: false,
   intervalActive: false,
   sleepCountDown: {
@@ -82,6 +89,20 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
   actions: {
     toggleDynamicColors: async () => {
       set({ isUsingDynamicColors: !get().isUsingDynamicColors });
+      const newSettingsData = { ...get() };
+      delete newSettingsData.actions;
+
+      await saveToAsyncStorage("settings", newSettingsData);
+    },
+    toggleSyncProgress: async () => {
+      set({ absSyncProgress: !get().absSyncProgress });
+      const newSettingsData = { ...get() };
+      delete newSettingsData.actions;
+
+      await saveToAsyncStorage("settings", newSettingsData);
+    },
+    toggleSyncBookmarks: async () => {
+      set({ absSyncBookmarks: !get().absSyncBookmarks });
       const newSettingsData = { ...get() };
       delete newSettingsData.actions;
 

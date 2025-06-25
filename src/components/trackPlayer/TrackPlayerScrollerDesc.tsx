@@ -103,7 +103,10 @@ const TrackPlayerScrollerDesc = ({ playlist, currentTrack, compHeight }: Props) 
       </View>
       <View className="mr-1 ml-1 p-1 rounded-md" style={{ backgroundColor: descbgColor }}>
         {/* <Text style={{ color: descTextColor }}>{currentTrack?.externalMetadata?.description}</Text> */}
-        <HTMLToMarkdown html={currentTrack?.externalMetadata?.description} />
+        <HTMLToMarkdown
+          html={currentTrack?.externalMetadata?.description}
+          textColor={descTextColor}
+        />
       </View>
     </ScrollView>
   );
