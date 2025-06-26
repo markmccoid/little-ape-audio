@@ -38,7 +38,7 @@ const InfoPopup = ({ title, infoText }: Props) => {
               </Pressable>
             </View>
             <View className="h-[1] w-full bg-black" />
-            <ScrollView className="px-3 py-2">
+            <ScrollView className="px-3 py-2" contentContainerStyle={{ paddingBottom: 50 }}>
               <Text className="" style={{ fontSize: 16 }}>
                 {infoText}
               </Text>

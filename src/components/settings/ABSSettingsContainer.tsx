@@ -29,8 +29,12 @@ const ABSSettingsContainer = () => {
           <Text className="text-sm mr-4">Sync Progress To ABS</Text>
           <InfoPopup
             title="Sync Progress To ABS"
-            infoText={`Syncs the progress of your audiobooks to the ABS server. The server time is updated three ways: 1) When hit the Play button, 2) When you hit the Pause button, 3) Every 60 seconds as you are listening to the book.
-          If you want to sync from the Server to LAAB, you can manually do this from the Track Settings page in each book.`}
+            infoText={`Syncs the progress of your audiobooks to the ABS server. The server time is updated three ways: 
+1) When hit the Play button 
+2) When you hit the Pause button
+3) Every 60 seconds as you are listening to the book.
+
+If you want to sync FROM the Server TO LAAB, you can manually do this from the Track Settings page in each book.`}
           />
         </View>
         <Switch
@@ -50,7 +54,9 @@ const ABSSettingsContainer = () => {
           <Text className="text-sm mr-4">Sync Bookmarks To ABS</Text>
           <InfoPopup
             title="Sync Bookmarks To ABS"
-            infoText={`- Automatic Sync: When this setting is on, your bookmarks sync with the ABS server whenever you open LAAB. Bookmarks from your phone and the server are combined/merged for each book.
+            infoText={`When this setting is on,Bookmarks are synced as follows:
+
+- Automatic Sync: Bookmarks sync with the ABS server whenever you open LAAB. Bookmarks from your phone and the server are combined/merged for each book.
 
 - Manual Sync: To update LAAB with bookmarks from the ABS server, go to the Track Settings page for each book.
 

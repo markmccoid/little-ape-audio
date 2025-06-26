@@ -12,7 +12,7 @@ import { getTextColor } from "@utils/otherUtils";
 const { width, height } = Dimensions.get("window");
 const leftOffset = (width - width / 2.25) / 2;
 
-const TrackPlayerProgressBar = () => {
+const TrackPlayerChaptProgressBar = () => {
   const currTrack = usePlaybackStore((state) => state.currentTrack);
   const queuePos = usePlaybackStore((state) => state.currentQueuePosition);
   const queueDuration = getCurrentPlaylist()?.totalDurationSeconds;
@@ -21,12 +21,16 @@ const TrackPlayerProgressBar = () => {
   const [seeking, setSeeking] = useState<number>();
   const [isSeeking, setIsSeeking] = useState(false);
   const [currPos, setCurrPos] = useState(position);
+  const currChapterIndex = usePlaybackStore((state) => state.currentChapterIndex);
   const currChapterInfo = usePlaybackStore((state) => state.currentChapterInfo);
+  // This is the TOTAL seconds into the book so that we can calculate the current chapter progress
+  // If we are on chapter 2 and chapter 1 was 60 seconds long
+  // and we are 10 seconds into chapter 2 our position would be 70, but we only want to show 10
+  // so we need to subtract the chapterProgressOffset from the position
   const chapterProgressOffset = usePlaybackStore((state) => state.chapterProgressOffset);
   const [showPercent, togglePercent] = useReducer((state) => !state, false);
   const playlistColors = usePlaylistColors();
   const textColor = getTextColor(playlistColors.background.colorLuminance);
-
   // console.log(
   //   "cl",
   //   cl.background.colorLuminance,
@@ -101,7 +105,7 @@ const TrackPlayerProgressBar = () => {
         >
           {`${currTrack?.trackNum || ""} ${currTrack.title}`}
         </Text>
-        {currChapterInfo?.title && (
+        {currChapterInfo?.title ? (
           <View className="flex-row justify-center w-full">
             {/* <Text className="absolute left-0 font-semibold">Chapter</Text> */}
             <Text
@@ -112,6 +116,19 @@ const TrackPlayerProgressBar = () => {
               ellipsizeMode="tail"
             >
               {currChapterInfo?.title}
+            </Text>
+          </View>
+        ) : (
+          <View className="flex-row justify-center w-full">
+            {/* <Text className="absolute left-0 font-semibold">Chapter</Text> */}
+            <Text
+              allowFontScaling={false}
+              className="text-sm text-center font-semibold"
+              style={{ color: textColor }}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {"Chapter " + (currChapterIndex + 1)}
             </Text>
           </View>
         )}
@@ -166,4 +183,4 @@ const TrackPlayerProgressBar = () => {
   );
 };
 
-export default TrackPlayerProgressBar;
+export default TrackPlayerChaptProgressBar;
