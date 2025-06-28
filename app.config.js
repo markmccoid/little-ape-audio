@@ -13,13 +13,13 @@ export default {
   scheme: "littleapeaudio",
   privacy: "unlisted",
   platforms: ["ios"],
-  version: "1.1.99",
+  version: "1.2.0",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "automatic",
   splash: {
     image: "./assets/splash.png",
-    resizeMode: "cover",
+    resizeMode: "contain",
     backgroundColor: "#fef9B0",
   },
   updates: {
@@ -35,7 +35,7 @@ export default {
     },
     supportsTablet: false,
     bundleIdentifier: "com.markmccoid.little-ape-audio",
-    buildNumber: "1.1.99",
+    buildNumber: "1.2.0",
     infoPlist: {
       RCTAsyncStorageExcludeFromBackup: false,
       NSMicrophoneUsageDescription:
