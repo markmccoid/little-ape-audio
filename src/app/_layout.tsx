@@ -7,7 +7,7 @@ import { Linking, View, useColorScheme } from "react-native";
 import { Lato_100Thin, Lato_400Regular, Lato_700Bold } from "@expo-google-fonts/lato";
 
 import TrackPlayer, { Capability, IOSCategoryMode } from "react-native-track-player";
-import { checkMigration, onInitialize } from "../store/store-init";
+import { onInitialize } from "../store/store-init";
 import { useSettingStore } from "../store/store-settings";
 
 import { deactivateKeepAwake } from "expo-keep-awake";
@@ -19,6 +19,10 @@ import { laabMetaAggrRecurseBegin, useDropboxStore } from "@store/store-dropbox"
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 
 import { configureReanimatedLogger, ReanimatedLogLevel } from "react-native-reanimated";
+import axios from "axios";
+
+axios.defaults.timeout = 3000;
+
 configureReanimatedLogger({
   level: ReanimatedLogLevel.error,
   strict: false,

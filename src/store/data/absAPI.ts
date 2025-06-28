@@ -119,7 +119,8 @@ export const absGetUserInfo = async () => {
   try {
     response = await axios.post(url, {}, { headers: authHeader });
   } catch (error) {
-    console.log("error", error);
+    console.log("absGetUserInfo error", error);
+    return undefined;
   }
   const userInfo = response.data.user as User;
   return userInfo;
@@ -531,13 +532,13 @@ export const absDownloadEbook = async (itemId: string, fileIno: string, filename
 export const absUpdateBookProgress = async (itemId: string, currentTimeInSeconds: number) => {
   //  http://abs.mccoidco.xyz/api/me/progress/<LibraryItemID>
   const authHeader = getAuthHeader();
-  const token = getToken();
+  // const token = getToken();
   const data = { currentTime: currentTimeInSeconds };
   const url = `${getAbsURL()}/api/me/progress/${itemId}`;
   try {
     const resp = await axios.patch(url, data, { headers: authHeader });
   } catch (e) {
-    throw new Error("Item Not Found or Other Error setting absUpdateBookProgress");
+    console.log("absUpdateBookProgress Error", e.message);
   }
 };
 //~~ ========================================================
