@@ -86,17 +86,30 @@ export const downloadFileBlob = async (
   const cleanFileName = getCleanFileName(filename);
   // Need to use react-native-blob-utils documentDir.  rnblobUtil does NOT want the "file:///"
   // that FileSystem from expo provides.
+  // let absAuthHeader = undefined
+  let absLink = undefined;
+  if (audioSource === "abs") {
+    // absAuthHeader = downloadLink.authheader
+    absLink = downloadLink.url;
+  }
   const fileUri = `${dirs.DocumentDir}/${cleanFileName}`;
   const isGoogle = audioSource === "google";
   const accessToken = isGoogle ? await getAccessToken() : undefined;
-  const includeHeaders = isGoogle ? { Authorization: `Bearer ${accessToken}` } : {};
+  let includeHeaders = undefined;
+  if (isGoogle) {
+    includeHeaders = { Authorization: `Bearer ${accessToken}` };
+  } else if (audioSource === "abs") {
+    includeHeaders = downloadLink.authHeader;
+  }
+
+  const finalDownloadLink = audioSource === "abs" ? downloadLink.url : downloadLink;
 
   const downloadUri = isGoogle
-    ? `https://www.googleapis.com/drive/v3/files/${downloadLink}?alt=media`
-    : downloadLink;
+    ? `https://www.googleapis.com/drive/v3/files/${finalDownloadLink}?alt=media`
+    : finalDownloadLink;
 
   let downloadTask: ReactNativeBlobUtil;
-
+  console.log("DL URI", downloadUri, includeHeaders);
   const config = {
     path: fileUri,
   };

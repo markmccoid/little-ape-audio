@@ -1,22 +1,13 @@
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  Pressable,
-  Alert,
-} from "react-native";
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Pressable } from "react-native";
 import React, { useEffect, useState } from "react";
 import { MotiPressable } from "moti/interactions";
+import { ABSGetLibraries, absGetLibraries, absLogin } from "@store/data/absAPI";
 import { AnimatedPressable } from "@components/common/buttons/Pressables";
 import { StoredLibraries, useABSStore, UserInfo } from "@store/store-abs";
 import { colors } from "@constants/Colors";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { EyeOffOutlineIcon, EyeOutlineIcon } from "@components/common/svg/Icons";
 import { useDropboxStore } from "@store/store-dropbox";
-import { ABSAuthService } from "@store/data/absAuthService";
-import { absGetLibraryFilterData } from "@store/data/absAPI";
 
 const AbsAuth = () => {
   const queryClient = useQueryClient();
@@ -24,7 +15,6 @@ const AbsAuth = () => {
     (state) => state.actions.initABSFolderAttribiutes
   );
   const absUserInfo = useABSStore((state) => state.userInfo);
-
   const librariesStored = useABSStore((state) => state.libraries);
   const [username, setUsername] = React.useState(absUserInfo?.username);
   const [password, setPassword] = React.useState("");
@@ -36,19 +26,30 @@ const AbsAuth = () => {
 
   const handleLogin = async () => {
     if (!username || !password || !absURL) {
-      // Alert.alert("All Fields Must be Filled in");
-      const error = new Error("All fields must be filled in");
-      error.isMissingFields = true;
-      throw error;
+      throw new Error("All fields must be filled in");
     }
-
-    // Use the new authentication service
-    const userInfo = await ABSAuthService.login(absURL, username, password);
-    console.log("USERINFO-AbsAuth.tsx", userInfo);
+    let loginInfo;
+    // try {
+    loginInfo = await absLogin(absURL, username, password);
+    // } catch (err) {
+    //   console.log("ERROR in handleLogin", err);
+    //   throw new Error(err);
+    // }
+    const userInfo: UserInfo = {
+      id: loginInfo.id,
+      username: loginInfo.username,
+      email: loginInfo.email,
+      type: loginInfo.type,
+      absURL,
+      isAuthenticated: true,
+    };
+    // Store UserInfo from Login
     await actions.saveUserInfo(userInfo);
 
-    // Get libraries using the new service
-    const libs = await ABSAuthService.getLibraries();
+    // Get Libraries in ABS
+    const libs = await absGetLibraries();
+    // set the default libray to the first one we find
+
     await actions.saveLibraries(libs, libs[0].id);
 
     setLoggedIn(true);
@@ -61,23 +62,14 @@ const AbsAuth = () => {
     queryFn: async () => await handleLogin(),
     enabled: false,
     staleTime: 0,
-    retry: (failureCount, error) => {
-      if (error.isMissingFields) {
-        return false;
-      }
-      return failureCount < 3;
-    },
   });
 
   const handleLogout = async () => {
-    // Use the new authentication service
-    await ABSAuthService.logout();
-
     queryClient.invalidateQueries({ queryKey: ["allABSBooks"] });
     queryClient.invalidateQueries({ queryKey: ["absfilterdata"] });
+    await actions.saveUserInfo({ isAuthenticated: false });
+    await actions.saveLibraries(undefined, undefined);
     setLoggedIn(false);
-    setUsername(undefined);
-    setPassword(undefined);
   };
 
   useEffect(() => {
@@ -91,21 +83,6 @@ const AbsAuth = () => {
   useEffect(() => {
     setLibraries(librariesStored);
   }, [librariesStored]);
-
-  //~ Initialize authentication on component mount
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const isAuth = await ABSAuthService.initializeAuth();
-        setLoggedIn(isAuth);
-      } catch (error) {
-        console.error("Failed to initialize authentication:", error);
-        setLoggedIn(false);
-      }
-    };
-
-    initAuth();
-  }, []);
   //!! -----------------------------------------
   //!! Based on Logged in hide the username/pw fields
   //!! change login to LOGOUT

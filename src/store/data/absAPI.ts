@@ -18,55 +18,44 @@ import { btoa } from "react-native-quick-base64";
 import { buildCoverURL, getCoverURI } from "./absUtils";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
+import { ABSAuthService } from "./absAuthService";
+import { AudiobookshelfAPI } from "@components/dropbox/AudiobookShelf/ABSAuthentication/absAPInew";
 
 //~ =======
-//~ UTILS
+//~ UTILS - DEPRECATED - Use ABSAuthService instead
 //~ =======
-const getToken = () => {
-  return useABSStore.getState()?.userInfo?.token;
+const getToken = async () => {
+  const authClient = useABSStore.getState().authClient;
+  return await authClient.auth.getValidAccessToken();
 };
-const getAuthHeader = () => {
-  const token = getToken();
+const getAuthHeader = async () => {
+  const authClient = useABSStore.getState().authClient;
+  const token = await authClient.auth.getValidAccessToken();
+
   if (!token) {
     throw new Error("No ABS token found");
   }
   return {
     Authorization: `Bearer ${token}`,
   };
+  // DEPRECATED: Use ABSAuthService methods instead
+  // console.warn("getAuthHeader() is deprecated. Use ABSAuthService methods instead.");
+  // throw new Error("getAuthHeader() is deprecated. Use ABSAuthService methods instead.");
 };
 //~~ ========================================================
-//~~ absLogin -
+//~~ absLogin - DEPRECATED - Use ABSAuthService.login instead
 //~~ ========================================================
 export const absLogin = async (absURL: string, username: string, password: string) => {
-  const url = `${absURL}/login`;
-  const data = {
-    username: username,
-    password: password,
+  console.warn("absLogin() is deprecated. Use ABSAuthService.login() instead.");
+  // For backward compatibility, delegate to new service
+  const userInfo = await ABSAuthService.login(absURL, username, password);
+  return {
+    id: userInfo.id,
+    username: userInfo.username,
+    email: userInfo.email,
+    type: userInfo.type,
+    token: "deprecated", // For backward compatibility
   };
-
-  try {
-    const response = await axios.post(url, data, { timeout: 3000 });
-    // console.log("Response", response.status);
-    const absData = response.data as ABSLoginResponse;
-    return absData.user; // Return data if needed
-  } catch (error) {
-    if (!error?.response) {
-      throw new Error("No Response - Check URL");
-    }
-    if (error.response.status === 530) {
-      Alert.alert("Authentication Failed", "Server May be Down");
-      throw new Error("Authentication Failed, Server may be down.");
-      // return Promise.reject(new Error("Error 530"));
-    }
-    if (error.response.status === 401) {
-      throw new Error("Unauthorized, Check username and password");
-    }
-    if (error.response.status === 404 || error.response.status === 405) {
-      throw new Error("Server not found. Check AudiobookShelf URL");
-    }
-    throw new Error(error.message);
-    //throw error; // Throw error if needed
-  }
 };
 
 //~~ ========================================================
@@ -74,20 +63,12 @@ export const absLogin = async (absURL: string, username: string, password: strin
 //~~ Saves a bookmark to the abs server
 //~~ ========================================================
 export const absSaveBookmark = async (bookmark: Bookmark) => {
-  const authHeader = getAuthHeader();
-  const data = {
-    time: bookmark.positionSeconds,
-    title: bookmark.name,
-  };
-  let response;
-  const url = `${getAbsURL()}/api/me/item/${bookmark.absBookId}/bookmark`;
-
+  console.warn("absSaveBookmark() is deprecated. Use ABSAuthService.saveBookmark() instead.");
   try {
-    response = await axios.post(url, data, { headers: authHeader });
+    await ABSAuthService.saveBookmark(bookmark.absBookId, bookmark.positionSeconds, bookmark.name);
   } catch (error) {
     console.log("error", error);
   }
-  // return response.data;
 };
 
 //~~ ========================================================
@@ -95,16 +76,12 @@ export const absSaveBookmark = async (bookmark: Bookmark) => {
 //~~ Deletes a bookmark from the abs server
 //~~ ========================================================
 export const absDeleteBookmark = async (playlistId: string, positionSeconds: number) => {
-  const authHeader = getAuthHeader();
-  let response;
-  const url = `${getAbsURL()}/api/me/item/${playlistId}/bookmark/${positionSeconds}`;
-
+  console.warn("absDeleteBookmark() is deprecated. Use ABSAuthService.deleteBookmark() instead.");
   try {
-    response = await axios.delete(url, { headers: authHeader });
+    await ABSAuthService.deleteBookmark(playlistId, positionSeconds);
   } catch (error) {
     console.log("error deleting bookmark", error);
   }
-  // return response.data;
 };
 
 //~~ ========================================================
@@ -112,56 +89,35 @@ export const absDeleteBookmark = async (playlistId: string, positionSeconds: num
 //~~ Gets user information like bookmarks, mediaProgress, etc
 //~~ ========================================================
 export const absGetUserInfo = async () => {
-  const authHeader = getAuthHeader();
-  let response;
-  const url = `${getAbsURL()}/api/authorize`;
-
+  console.warn("absGetUserInfo() is deprecated. Use ABSAuthService.getUserInfo() instead.");
   try {
-    response = await axios.post(url, {}, { headers: authHeader });
+    const response = await ABSAuthService.getUserInfo();
+    return response.user as User;
   } catch (error) {
     console.log("absGetUserInfo error", error);
     return undefined;
   }
-  const userInfo = response.data.user as User;
-  return userInfo;
 };
 
 //~~ ========================================================
-//~~ absGetLibraries - Get the Libraries in the ABS Server (many times just one exists)
+//~~ absGetLibraries - UPDATED to use new authentication service
 //~~ ========================================================
 export type ABSGetLibraries = Awaited<ReturnType<typeof absGetLibraries>>;
 export const absGetLibraries = async () => {
-  const authHeader = getAuthHeader();
-  let response;
-  const url = `${getAbsURL()}/api/libraries`;
-  try {
-    response = await axios.get(url, { headers: authHeader });
-  } catch (error) {
-    console.log("error", error);
-  }
-  const libs = response.data.libraries as Library[];
-  const libraryList = libs.map((lib) => {
-    return {
-      id: lib.id,
-      name: lib.name,
-      displayOrder: lib.displayOrder,
-      active: false,
-    };
-  });
-  return libraryList;
+  console.warn("absGetLibraries() is deprecated. Use ABSAuthService.getLibraries() instead.");
+  return await ABSAuthService.getLibraries();
 };
 
 //~~ ========================================================
 //~~ absGetLibraryFilterData - Get the filterdata
 //~~ genres, tags, authors and series
 //~~ include the base64 encoded versions needed for search
+//!! UPDATED
 //~~ ========================================================
 export const absGetLibraryFilterData = async (libraryId?: string) => {
-  const authHeader = getAuthHeader();
+  const authHeader = await getAuthHeader();
   const activeLibraryId = useABSStore.getState().activeLibraryId;
   const libraryIdToUse = libraryId || activeLibraryId;
-  // console.log("libraryIdToUse", libraryIdToUse);
-  // console.log("authHeader", authHeader);
 
   const url = `${getAbsURL()}/api/libraries/${libraryIdToUse}/filterdata`;
 
@@ -171,7 +127,6 @@ export const absGetLibraryFilterData = async (libraryId?: string) => {
   } catch (error) {
     throw new Error(`absGetLibraryFilterData - ${error}`);
   }
-
   const libararyData = response.data as FilterData;
   // create encodings that can be used in filter query param in "Get a Library's Items"
   const genres = libararyData.genres.map((genre) => ({
@@ -223,7 +178,7 @@ export const absGetLibraryItems = async ({
   page,
   limit,
 }: GetLibraryItemsParams) => {
-  const authHeader = getAuthHeader();
+  const authHeader = await getAuthHeader();
   const activeLibraryId = useABSStore.getState().activeLibraryId;
   const libraryIdToUse = libraryId || activeLibraryId;
   let response;
@@ -308,7 +263,7 @@ export const absGetLibraryItems = async ({
 export type ABSGetItemDetails = Awaited<ReturnType<typeof absGetItemDetails>>;
 export const absGetItemDetails = async (itemId?: string) => {
   // https://abs.mccoidco.xyz/api/items/{token}&expanded=1
-  const authHeader = getAuthHeader();
+  const authHeader = await getAuthHeader();
 
   let libraryItem: LibraryItem;
   const url = `${getAbsURL()}/api/items/${itemId}?expanded=1&include=progress`;
@@ -371,7 +326,7 @@ export const absGetItemDetails = async (itemId?: string) => {
 //~~ ========================================================
 //!!! DOCUMENT!!!
 export const absUpdateLocalAttributes = async () => {
-  const authHeader = getAuthHeader();
+  const authHeader = await getAuthHeader();
   const activeLibraryId = useABSStore.getState().activeLibraryId;
   const libraryIdToUse = activeLibraryId;
 
@@ -441,19 +396,9 @@ export const absUpdateLocalAttributes = async () => {
 //~~  with tags parameter
 //~~ ========================================================
 export const absSetFavoriteTag = async (itemId: string, tags: string[]) => {
-  const url = `${getAbsURL()}/api/items/${itemId}/media`;
-  const authHeader = getAuthHeader();
-  const data = {
-    tags,
-  };
-
+  console.warn("absSetFavoriteTag() is deprecated. Use ABSAuthService.setFavoriteTag() instead.");
   try {
-    const response = await axios.patch(url, data, {
-      headers: {
-        "Content-Type": "application/json",
-        ...authHeader,
-      },
-    });
+    await ABSAuthService.setFavoriteTag(itemId, tags);
   } catch (error) {
     console.log("error", error);
     throw error;
@@ -463,12 +408,13 @@ export const absSetFavoriteTag = async (itemId: string, tags: string[]) => {
 //~~ ========================================================
 //~~ absDownloadItem
 //~~ ========================================================
-export const absDownloadItem = (itemId: string, fileIno: string) => {
+export const absDownloadItem = async (itemId: string, fileIno: string) => {
   //  https://abs.mccoidco.xyz/api/items/<BOOK ID>/file/<FILE INO>/download
-  const authHeader = getAuthHeader();
-  const token = getToken();
+  const authHeader = await getAuthHeader();
+  const token = await getToken();
   const url = `${getAbsURL()}/api/items/${itemId}/file/${fileIno}/download`;
   const urlWithToken = `${url}?token=${token}`;
+
   return { url, urlWithToken, authHeader };
 };
 
@@ -478,10 +424,10 @@ export const absDownloadItem = (itemId: string, fileIno: string) => {
 
 export const absDownloadEbook = async (itemId: string, fileIno: string, filenameWExt: string) => {
   let tempFileUri: string | null = null;
-  const { url, urlWithToken, authHeader } = absDownloadItem(itemId, fileIno);
+  const { url, urlWithToken, authHeader } = await absDownloadItem(itemId, fileIno);
 
   try {
-    console.log("Starting download...");
+    // console.log("Starting download...");
 
     // Create a temporary directory for downloads
     const tempDir = `${FileSystem.cacheDirectory}temp_downloads/`;
@@ -491,16 +437,18 @@ export const absDownloadEbook = async (itemId: string, fileIno: string, filename
     tempFileUri = `${tempDir}${filenameWExt}`;
 
     // Download the file
-    const downloadResult = await FileSystem.downloadAsync(url, tempFileUri);
+    const downloadResult = await FileSystem.downloadAsync(url, tempFileUri, {
+      headers: authHeader,
+    });
 
     if (downloadResult.status === 200) {
-      console.log("Download completed:", downloadResult.uri);
+      // console.log("Download completed:", downloadResult.uri);
 
       const isAvailable = await Sharing.isAvailableAsync();
 
       if (isAvailable) {
         await Sharing.shareAsync(downloadResult.uri);
-        console.log("Sharing completed or cancelled");
+        // console.log("Sharing completed or cancelled");
       } else {
         Alert.alert("Download Complete", `File downloaded successfully`);
       }
@@ -530,13 +478,11 @@ export const absDownloadEbook = async (itemId: string, fileIno: string, filename
 //~~ absUpdateBookProgress
 //~~ ========================================================
 export const absUpdateBookProgress = async (itemId: string, currentTimeInSeconds: number) => {
-  //  http://abs.mccoidco.xyz/api/me/progress/<LibraryItemID>
-  const authHeader = getAuthHeader();
-  // const token = getToken();
-  const data = { currentTime: currentTimeInSeconds };
-  const url = `${getAbsURL()}/api/me/progress/${itemId}`;
+  console.warn(
+    "absUpdateBookProgress() is deprecated. Use ABSAuthService.updateBookProgress() instead."
+  );
   try {
-    const resp = await axios.patch(url, data, { headers: authHeader });
+    await ABSAuthService.updateBookProgress(itemId, currentTimeInSeconds);
   } catch (e) {
     console.log("absUpdateBookProgress Error", e.message);
   }
@@ -545,13 +491,10 @@ export const absUpdateBookProgress = async (itemId: string, currentTimeInSeconds
 //~~ absGetBookProgress
 //~~ ========================================================
 export const absGetBookProgress = async (itemId: string) => {
-  //  https://abs.mccoidco.xyz/api/me/progress/<LibraryItemID>
-  const authHeader = getAuthHeader();
-  const token = getToken();
-  const url = `${getAbsURL()}/api/me/progress/${itemId}`;
+  console.warn("absGetBookProgress() is deprecated. Use ABSAuthService.getBookProgress() instead.");
   try {
-    const resp = await axios.get(url, { headers: authHeader });
-    return resp.data.currentTime;
+    const resp = await ABSAuthService.getBookProgress(itemId);
+    return resp.currentTime;
   } catch (e) {
     throw new Error("Item Not Found or Other Error setting absGetBookProgress");
   }
@@ -560,13 +503,11 @@ export const absGetBookProgress = async (itemId: string) => {
 //~~ absSetBookFinished
 //~~ ========================================================
 export const absSetBookToFinished = async (itemId: string, finishedFlag: boolean) => {
-  //  http://abs.mccoidco.xyz/api/me/progress/<LibraryItemID>
-  const authHeader = getAuthHeader();
-  const token = getToken();
-  const data = { isFinished: finishedFlag };
-  const url = `${getAbsURL()}/api/me/progress/${itemId}`;
+  console.warn(
+    "absSetBookToFinished() is deprecated. Use ABSAuthService.setBookFinished() instead."
+  );
   try {
-    const resp = await axios.patch(url, data, { headers: authHeader });
+    await ABSAuthService.setBookFinished(itemId, finishedFlag);
   } catch (e) {
     throw new Error("Item Not Found or Other Error setting isFinished");
   }

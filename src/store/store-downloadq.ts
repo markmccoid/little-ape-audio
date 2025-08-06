@@ -201,10 +201,11 @@ const downloadFile = async (downloadProps: DownloadQueueItem) => {
       downloadLink = await getDropboxFileLink(filePathLower);
       break;
     case "abs":
-      downloadLink = absDownloadItem(pathIn, fileId).urlWithToken;
+      downloadLink = await absDownloadItem(pathIn, fileId);
     default:
       break;
   }
+  console.log("DL LInk store-downloadq", downloadLink);
 
   // Prepare to start the download
   // We only await the downloadFileBlobUtil because of google auth token get

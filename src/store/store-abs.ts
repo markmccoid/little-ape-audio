@@ -1,17 +1,18 @@
 import { create } from "zustand";
 import { saveToAsyncStorage } from "./data/asyncStorage";
 import { btoa } from "react-native-quick-base64";
+import { AudiobookshelfClient } from "../components/dropbox/AudiobookShelf/ABSAuthentication/absClient";
 
 export type UserInfo = {
   id: string;
   username: string;
-  // password: string;
   email: string;
   type: string;
-  token?: string;
   absURL: string;
   // base64 of <username>-laab-favorite
   favoriteSearchString?: string;
+  // Remove token - authentication is now handled by the client
+  isAuthenticated?: boolean;
 };
 
 export type StoredLibraries = {
@@ -41,6 +42,8 @@ export type ABSState = {
   userInfo?: UserInfo;
   libraries?: StoredLibraries[];
   activeLibraryId?: string;
+  // Authentication client instance
+  authClient?: AudiobookshelfClient;
   // This is the sort for the results in the absHooks.ts file functions
   resultSort: ResultSort;
   searchObject: SearchObject;
@@ -52,6 +55,10 @@ export type ABSState = {
     updateResultSort: (resultSort: ResultSort) => Promise<void>;
     updateSearchObject: (searchObject: ABSState["searchObject"] | undefined) => void;
     setSearchBarClearFn: (clearFn: () => void) => void;
+    // New authentication actions
+    setAuthClient: (client: AudiobookshelfClient | undefined) => void;
+    initializeAuth: () => Promise<boolean>;
+    logout: () => Promise<void>;
   };
 };
 
@@ -59,10 +66,21 @@ export const getAbsURL = () => {
   return useABSStore.getState()?.userInfo?.absURL;
 };
 
+// Helper function to get the authenticated client
+export const getAuthClient = () => {
+  return useABSStore.getState()?.authClient;
+};
+
+// Helper function to check if user is authenticated
+export const isAuthenticated = () => {
+  return useABSStore.getState()?.userInfo?.isAuthenticated ?? false;
+};
+
 export const useABSStore = create<ABSState>((set, get) => ({
   userInfo: undefined,
   libraries: undefined,
   activeLibraryId: undefined,
+  authClient: undefined,
   resultSort: {
     field: "author",
     direction: "desc",
@@ -122,6 +140,79 @@ export const useABSStore = create<ABSState>((set, get) => ({
     },
     setSearchBarClearFn: (searchFn) => {
       set({ clearSearchBar: searchFn });
+    },
+    // New authentication actions
+    setAuthClient: (client) => {
+      set({ authClient: client });
+    },
+    initializeAuth: async () => {
+      const { userInfo } = get();
+      if (!userInfo?.absURL) {
+        return false;
+      }
+
+      try {
+        // Create client instance
+        const client = new AudiobookshelfClient(userInfo.absURL);
+
+        // Check if user is authenticated (this will try to refresh tokens if needed)
+        const isAuthenticated = await client.isAuthenticated();
+
+        if (isAuthenticated) {
+          set({
+            authClient: client,
+            userInfo: { ...userInfo, isAuthenticated: true },
+          });
+          return true;
+        } else {
+          set({
+            authClient: undefined,
+            userInfo: { ...userInfo, isAuthenticated: false },
+          });
+          return false;
+        }
+      } catch (error) {
+        console.error("Failed to initialize authentication:", error);
+        set({
+          authClient: undefined,
+          userInfo: userInfo ? { ...userInfo, isAuthenticated: false } : undefined,
+        });
+        return false;
+      }
+    },
+    logout: async () => {
+      const { authClient } = get();
+      const { userInfo } = get();
+
+      try {
+        if (authClient) {
+          await authClient.logout();
+        }
+      } catch (error) {
+        console.error("Logout error:", error);
+      }
+
+      // Clear authentication state
+      const userInfoKeep = "absURL";
+      const userInfoWorking = { ...userInfo };
+      Object.keys(userInfo).forEach((key) => {
+        if (key !== userInfoKeep) delete userInfoWorking[key];
+      });
+      set({
+        authClient: undefined,
+        userInfo: { ...userInfoWorking, isAuthenticated: false },
+        libraries: undefined,
+        activeLibraryId: undefined,
+        searchObject: {},
+      });
+
+      // Clear stored data
+      await saveToAsyncStorage("absSettings", {
+        userInfo: { ...userInfoWorking, isAuthenticated: false },
+        libraries: undefined,
+        activeLibraryId: undefined,
+        resultSort: get().resultSort,
+      });
     },
   },
 }));
