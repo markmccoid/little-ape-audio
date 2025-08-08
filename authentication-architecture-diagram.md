@@ -7,41 +7,32 @@ graph TB
     %% User Interface Layer
     UI[AbsAuth.tsx<br/>User Interface]
 
-    %% Service Layer
-    Service[ABSAuthService<br/>Authentication Service<br/>Static Methods]
-
-    %% Client Layer
-    Client[AudiobookshelfClient<br/>Wrapper Class]
+    %% Core Classes
     Auth[AudiobookshelfAuth<br/>Core Auth Logic]
     API[AudiobookshelfAPI<br/>API Methods]
 
     %% Storage Layer
-    Store[Zustand Store<br/>store-abs.ts]
+    Store[Zustand Store<br/>store-abs.ts<br/>AuthInstances: {auth, api}]
     SecureStore[Expo SecureStore<br/>Token Storage]
     AsyncStorage[AsyncStorage<br/>User Data]
 
     %% Server
     Server[AudiobookShelf Server<br/>Authentication Endpoints]
 
-    %% User interactions
-    UI -->|login(url, username, password)| Service
-    UI -->|logout()| Service
-    UI -->|initializeAuth()| Service
+    %% Direct UI to Core interactions
+    UI -->|new AudiobookshelfAuth(url)| Auth
+    UI -->|new AudiobookshelfAPI(url, auth)| API
+    UI -->|auth.login(credentials)| Auth
+    UI -->|auth.logout()| Auth
+    UI -->|api.getLibraries()| API
+    UI -->|setAuthClient({auth, api})| Store
+    UI -->|getAuthClient()| Store
 
-    %% Service layer orchestration
-    Service -->|new AudiobookshelfClient(url)| Client
-    Service -->|client.login(credentials)| Client
-    Service -->|client.logout()| Client
-    Service -->|client.isAuthenticated()| Client
-    Service -->|setAuthClient(client)| Store
-    Service -->|getAuthClient()| Store
-
-    %% Client composition
-    Client -->|contains| Auth
-    Client -->|contains| API
-    Client -->|delegates login| Auth
-    Client -->|delegates logout| Auth
-    Client -->|delegates isAuthenticated| Auth
+    %% Store interactions
+    Store -->|initializeAuth()| Auth
+    Store -->|logout()| Auth
+    Store -->|saveUserInfo()| AsyncStorage
+    Store -->|saveLibraries()| AsyncStorage
 
     %% Authentication flow
     Auth -->|POST /login<br/>x-return-tokens: true| Server
@@ -58,12 +49,6 @@ graph TB
     API -->|makeAuthenticatedRequest()| Server
     API -->|auto-refresh on 401| Auth
 
-    %% Store management
-    Store -->|saveUserInfo()| AsyncStorage
-    Store -->|saveLibraries()| AsyncStorage
-    Store -->|initializeAuth()| Client
-    Store -->|logout()| Client
-
     %% Server responses
     Server -->|LoginResponse<br/>accessToken, refreshToken| Auth
     Server -->|API Data| API
@@ -71,14 +56,12 @@ graph TB
 
     %% Styling
     classDef uiLayer fill:#e1f5fe
-    classDef serviceLayer fill:#f3e5f5
-    classDef clientLayer fill:#e8f5e8
+    classDef coreLayer fill:#e8f5e8
     classDef storageLayer fill:#fff3e0
     classDef serverLayer fill:#ffebee
 
     class UI uiLayer
-    class Service serviceLayer
-    class Client,Auth,API clientLayer
+    class Auth,API coreLayer
     class Store,SecureStore,AsyncStorage storageLayer
     class Server serverLayer
 ```
@@ -115,7 +98,7 @@ graph TB
   - Automatic token refresh on API calls
   - Secure token storage using Expo SecureStore
 
-### 4. **Authentication Core (AudiobookshelfAuth)**
+### 3. **Authentication Core (AudiobookshelfAuth)**
 
 - **Purpose**: Core authentication logic with refresh token support
 - **Key Methods**:
@@ -129,7 +112,7 @@ graph TB
   - Uses Expo SecureStore for secure token persistence
   - Automatically calculates token expiry from JWT
 
-### 5. **API Layer (AudiobookshelfAPI)**
+### 4. **API Layer (AudiobookshelfAPI)**
 
 - **Purpose**: Handles all authenticated API requests
 - **Key Features**:
@@ -138,7 +121,7 @@ graph TB
   - Specific methods: `getLibraries()`, `getMe()`, etc.
 - **Error Handling**: Automatically retries failed requests with refreshed tokens
 
-### 6. **State Management (Zustand Store)**
+### 5. **State Management (Zustand Store)**
 
 - **Purpose**: Central state management for authentication and app data
 - **Key State**:
@@ -150,7 +133,7 @@ graph TB
   - `initializeAuth()`: Restores authentication on app startup
   - `logout()`: Clears all authentication state
 
-### 7. **Storage Layers**
+### 6. **Storage Layers**
 
 - **Expo SecureStore**: Secure storage for sensitive tokens
 - **AsyncStorage**: Regular storage for user preferences and library data
@@ -203,3 +186,27 @@ graph TB
 - **Persistent Authentication**: Users stay logged in between app sessions
 - **Error Recovery**: Automatic retry with fresh tokens on authentication failures
 - **Clean Separation**: Clear boundaries between UI, service, auth, and storage layers
+
+## 🎯 **Benefits of Removing Both AudiobookshelfClient AND ABSAuthService:**
+
+- **Maximum Simplicity**: Eliminated ALL unnecessary wrapper layers
+- **Direct Access**: UI components work directly with core classes
+- **Cleaner Architecture**: Minimal abstractions, crystal clear data flow
+- **Better Performance**: No layers of indirection
+- **Easier Maintenance**: Fewer files and dependencies to manage
+- **Easier Debugging**: Direct call stack from UI to core functionality
+- **Better Understanding**: Clear relationship between UI actions and authentication logic
+
+## 🏗️ **Final Simplified Architecture:**
+
+```
+User Interface (AbsAuth.tsx)
+         ↓ (direct instantiation)
+AudiobookshelfAuth + AudiobookshelfAPI
+         ↓ (direct storage)
+Zustand Store (AuthInstances: {auth, api})
+         ↓ (secure storage)
+Expo SecureStore + AsyncStorage
+```
+
+The ultra-simplified architecture maintains all the same functionality while being as straightforward as possible. Components directly create and use the core authentication classes without any intermediate layers, making the code easier to understand, debug, and maintain.

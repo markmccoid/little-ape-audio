@@ -14,7 +14,7 @@ import { getImageColors, resolveABSImage, sanitizeString } from "@utils/otherUti
 import TrackPlayer from "react-native-track-player";
 import { BookJSONMetadata, CleanBookMetadata, cleanOneBook } from "@utils/audiobookMetadata";
 import { buildCoverURL, getCoverURI } from "./data/absUtils";
-import { absGetItemDetails, absGetUserInfo } from "./data/absAPI";
+import { absGetItemDetails } from "./data/absAPI";
 let isCriticalSectionLocked = false;
 const gdrive = new GDrive();
 
@@ -301,7 +301,6 @@ export const addTrack =
       isCriticalSectionLocked = false;
       // If the audio source is abs, then get the user info and merge any abs server bookmarks
       if (audioSource === "abs") {
-        // const userInfo = await absGetUserInfo();
         get().actions.mergeABSBookmarks();
       }
     }

@@ -1,65 +1,58 @@
 // services/AudiobookshelfAPI.ts
-import { Library } from "@store/data/absTypes";
+import { ABSLoginResponse, Library, User } from "@store/data/absTypes";
 import { AudiobookshelfAuth } from "./absAuthClass";
 import { AuthenticationError, NetworkError, AudiobookshelfError } from "./abstypes";
+import axios, { AxiosRequestConfig } from "axios";
+import { Bookmark } from "@store/types";
 
 export class AudiobookshelfAPI {
   constructor(private serverUrl: string, private auth: AudiobookshelfAuth) {}
 
   // Generic authenticated request method
+
   private async makeAuthenticatedRequest<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: AxiosRequestConfig = {}
   ): Promise<T> {
     const accessToken = await this.auth.getValidAccessToken();
 
     if (!accessToken) {
       throw new AuthenticationError("Please login to continue");
     }
-    console.log("SERVDER URL", `${this.serverUrl}${endpoint}`);
-    try {
-      const response = await fetch(`${this.serverUrl}${endpoint}`, {
-        ...options,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`, // Use standard Bearer token for API calls
-          ...options.headers,
-        },
-      });
 
-      if (response.status === 401) {
-        // Token might be invalid, try one more time with refresh
+    const url = `${this.serverUrl}${endpoint}`;
+    const headers = {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      ...options.headers,
+    };
+
+    try {
+      const response = await axios({ url, headers, ...options });
+      return response.data;
+    } catch (error) {
+      if (error.response?.status === 401) {
         try {
           const newToken = await this.auth.refreshAccessToken();
-          const retryResponse = await fetch(`${this.serverUrl}${endpoint}`, {
-            ...options,
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${newToken}`,
-              ...options.headers,
-            },
-          });
-
-          if (!retryResponse.ok) {
-            throw new AuthenticationError("Authentication failed");
+          if (!newToken) {
+            throw new AuthenticationError("Session expired. Please login again.");
           }
 
-          return await retryResponse.json();
+          const retryResponse = await axios({
+            url,
+            headers: { ...headers, Authorization: `Bearer ${newToken}` },
+            ...options,
+          });
+
+          return retryResponse.data;
         } catch (refreshError) {
           throw new AuthenticationError("Session expired. Please login again.");
         }
       }
 
-      if (!response.ok) {
-        throw new NetworkError(`Request failed: ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      if (error instanceof AudiobookshelfError) {
-        throw error;
-      }
-      throw new NetworkError("Network request failed");
+      const statusText = error.response?.statusText || "Unknown error";
+      const statusCode = error.response?.status || "Unknown status";
+      throw new NetworkError(`Request failed: ${statusText} (${statusCode})`);
     }
   }
 
@@ -94,10 +87,13 @@ export class AudiobookshelfAPI {
     return this.makeAuthenticatedRequest(`/api/items/${itemId}?expanded=1&include=progress`);
   }
 
-  async saveBookmark(itemId: string, data: { time: number; title: string }) {
+  async saveBookmark(bookmark: Bookmark) {
+    // (bookmark.absBookId, bookmark.positionSeconds, bookmark.name)
+    const { absBookId: itemId, positionSeconds, name } = bookmark;
+    const data = { time: positionSeconds, title: name };
     return this.makeAuthenticatedRequest(`/api/me/item/${itemId}/bookmark`, {
       method: "POST",
-      body: JSON.stringify(data),
+      data: JSON.stringify(data),
     });
   }
 
@@ -110,32 +106,35 @@ export class AudiobookshelfAPI {
   async updateBookProgress(itemId: string, currentTime: number) {
     return this.makeAuthenticatedRequest(`/api/me/progress/${itemId}`, {
       method: "PATCH",
-      body: JSON.stringify({ currentTime }),
+      data: JSON.stringify({ currentTime }),
     });
   }
 
   async getBookProgress(itemId: string) {
-    return this.makeAuthenticatedRequest(`/api/me/progress/${itemId}`);
+    const resp = await this.makeAuthenticatedRequest(`/api/me/progress/${itemId}`);
+    return resp.currentTime;
   }
 
   async setBookFinished(itemId: string, isFinished: boolean) {
     return this.makeAuthenticatedRequest(`/api/me/progress/${itemId}`, {
       method: "PATCH",
-      body: JSON.stringify({ isFinished }),
+      data: JSON.stringify({ isFinished }),
     });
   }
 
   async setFavoriteTag(itemId: string, tags: string[]) {
     return this.makeAuthenticatedRequest(`/api/items/${itemId}/media`, {
       method: "PATCH",
-      body: JSON.stringify({ tags }),
+      data: JSON.stringify({ tags }),
     });
   }
 
-  async getUserInfo() {
-    return this.makeAuthenticatedRequest("/api/authorize", {
+  async getUserInfo(): Promise<ABSLoginResponse["user"]> {
+    const resp: ABSLoginResponse = await this.makeAuthenticatedRequest("/api/authorize", {
       method: "POST",
     });
+
+    return resp.user;
   }
 
   // Add more API methods here as needed...

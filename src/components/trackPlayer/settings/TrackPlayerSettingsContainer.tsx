@@ -11,12 +11,12 @@ import usePlaylistColors from "hooks/usePlaylistColors";
 import TrackPlayerSettingsHeader from "./TrackPlayerSettingsHeader";
 import { SymbolView } from "expo-symbols";
 import { usePlaybackStore, useTrackActions, useTracksStore } from "@store/store";
-import { absGetBookProgress } from "@store/data/absAPI";
 import { useQuery } from "@tanstack/react-query";
 import { formatSeconds } from "@utils/formatUtils";
 import { queryClient } from "@app/_layout";
 import { useRouter } from "expo-router";
 import { useSettingStore } from "@store/store-settings";
+import { absAPIClient } from "@store/store-abs";
 
 const { width, height } = Dimensions.get("window");
 const COMPONENT_WIDTH = width - 20;
@@ -40,7 +40,7 @@ const TrackPlayerSettingsContainer = () => {
   const alignServerProgress = usePlaybackStore((state) => state.actions.alignServerProgress);
   const { data, isLoading } = useQuery({
     queryKey: ["progress", plId],
-    queryFn: async () => await absGetBookProgress(plId),
+    queryFn: async () => await absAPIClient.getBookProgress(plId),
   });
   // Need to invalidate query when plTotalPosition changes so that we requery
   // the server for the progress.

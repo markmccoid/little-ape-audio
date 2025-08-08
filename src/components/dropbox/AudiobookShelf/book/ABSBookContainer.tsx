@@ -25,13 +25,9 @@ import {
   SeriesIcon,
 } from "@components/common/svg/Icons";
 import { createFolderMetadataKey, useDropboxStore } from "@store/store-dropbox";
-import { useABSStore } from "@store/store-abs";
+import { absAPIClient, useABSStore } from "@store/store-abs";
 import { router } from "expo-router";
-import {
-  absSetBookToFinished,
-  absSetFavoriteTag,
-  getUserFavoriteTagInfo,
-} from "@store/data/absAPI";
+import { getUserFavoriteTagInfo } from "@store/data/absAPI";
 import { formatBytes, formatSeconds } from "@utils/formatUtils";
 import { useQueryClient } from "@tanstack/react-query";
 import { SymbolView } from "expo-symbols";
@@ -110,7 +106,8 @@ const ABSBookContainer = ({ data, isLoading, isError }: Props) => {
       action === "remove"
         ? media.tags.filter((el) => el !== userFavTagValue)
         : Array.from(new Set([...media.tags, userFavTagValue]));
-    await absSetFavoriteTag(itemId, tags);
+
+    await absAPIClient.setFavoriteTag(itemId, tags);
   };
   //~~ Handle isRead
   const handleToggleRead = async () => {
@@ -126,7 +123,8 @@ const ABSBookContainer = ({ data, isLoading, isError }: Props) => {
         imageURL: coverURI,
         absId: media.libraryItemId,
       });
-      await absSetBookToFinished(media.libraryItemId, !isRead);
+
+      await absAPIClient.setBookFinished(media.libraryItemId, !isRead);
       queryClient.invalidateQueries({ queryKey: ["allABSBooks"] });
     } catch (e) {
       console.log("ERROR setting Isfinished", e);

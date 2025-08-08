@@ -15,7 +15,9 @@ import { colors } from "@constants/Colors";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { EyeOffOutlineIcon, EyeOutlineIcon } from "@components/common/svg/Icons";
 import { useDropboxStore } from "@store/store-dropbox";
-import { ABSAuthService } from "@store/data/absAuthService";
+import { AudiobookshelfAuth } from "./AudiobookShelf/ABSAuthentication/absAuthClass";
+import { AudiobookshelfAPI } from "./AudiobookShelf/ABSAuthentication/absAPInew";
+import { AuthCredentials } from "./AudiobookShelf/ABSAuthentication/abstypes";
 import { absGetLibraryFilterData } from "@store/data/absAPI";
 
 const AbsAuth = () => {
@@ -37,18 +39,36 @@ const AbsAuth = () => {
   const handleLogin = async () => {
     if (!username || !password || !absURL) {
       // Alert.alert("All Fields Must be Filled in");
-      const error = new Error("All fields must be filled in");
+      const error = new Error("All fields must be filled in") as any;
       error.isMissingFields = true;
       throw error;
     }
 
-    // Use the new authentication service
-    const userInfo = await ABSAuthService.login(absURL, username, password);
-    console.log("USERINFO-AbsAuth.tsx", userInfo);
+    // Create auth instances directly
+    const auth = new AudiobookshelfAuth(absURL);
+    const api = new AudiobookshelfAPI(absURL, auth);
+    const credentials: AuthCredentials = { username, password };
+
+    // Login directly
+    const loginResponse = await auth.login(credentials);
+
+    // Store auth instances in store
+    actions.setAuthClient({ auth, api });
+
+    // Create and save user info
+    const userInfo: UserInfo = {
+      id: loginResponse.user.id,
+      username: loginResponse.user.username,
+      email: loginResponse.user.email,
+      type: loginResponse.user.type,
+      absURL,
+      isAuthenticated: true,
+    };
+    // console.log("USERINFO-AbsAuth.tsx", userInfo);
     await actions.saveUserInfo(userInfo);
 
-    // Get libraries using the new service
-    const libs = await ABSAuthService.getLibraries();
+    // Get libraries directly
+    const libs = await api.getLibraries();
     await actions.saveLibraries(libs, libs[0].id);
 
     setLoggedIn(true);
@@ -61,7 +81,7 @@ const AbsAuth = () => {
     queryFn: async () => await handleLogin(),
     enabled: false,
     staleTime: 0,
-    retry: (failureCount, error) => {
+    retry: (failureCount, error: any) => {
       if (error.isMissingFields) {
         return false;
       }
@@ -70,8 +90,18 @@ const AbsAuth = () => {
   });
 
   const handleLogout = async () => {
-    // Use the new authentication service
-    await ABSAuthService.logout();
+    // Get auth instances and logout directly
+    const authInstances = useABSStore.getState().authClient;
+    if (authInstances) {
+      try {
+        await authInstances.auth.logout();
+      } catch (error) {
+        console.error("Logout error:", error);
+      }
+    }
+
+    // Use store logout action
+    await actions.logout();
 
     queryClient.invalidateQueries({ queryKey: ["allABSBooks"] });
     queryClient.invalidateQueries({ queryKey: ["absfilterdata"] });
@@ -96,7 +126,7 @@ const AbsAuth = () => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const isAuth = await ABSAuthService.initializeAuth();
+        const isAuth = await actions.initializeAuth();
         setLoggedIn(isAuth);
       } catch (error) {
         console.error("Failed to initialize authentication:", error);

@@ -4,17 +4,12 @@ import {
   ApeTrack,
   Bookmark,
   PlaylistImageColors,
-  CollectionItem,
   defaultCollections,
 } from "./types";
 import { create } from "zustand";
 import { Alert, Image, Platform } from "react-native";
 import uuid from "react-native-uuid";
-import {
-  loadFromAsyncStorage,
-  removeFromAsyncStorage,
-  saveToAsyncStorage,
-} from "./data/asyncStorage";
+import { removeFromAsyncStorage, saveToAsyncStorage } from "./data/asyncStorage";
 import { analyzePlaylistTracks } from "./storeUtils";
 import sortBy from "lodash/sortBy";
 import orderBy from "lodash/orderBy";
@@ -29,15 +24,11 @@ import * as FileSystem from "expo-file-system";
 import { getImageSize } from "@utils/audioUtils";
 import { router } from "expo-router";
 import { getCurrentChapter } from "@utils/chapterUtils";
-import { debounce, reverse, toInteger } from "lodash";
+import { debounce, toInteger } from "lodash";
 import { getImageColors, resolveABSImage } from "@utils/otherUtils";
-import {
-  absDeleteBookmark,
-  absGetUserInfo,
-  absSaveBookmark,
-  absUpdateBookProgress,
-} from "./data/absAPI";
+import { absUpdateBookProgress } from "./data/absAPI";
 import { ABSBookmark } from "./data/absTypes";
+import { absAPIClient } from "./store-abs";
 
 let eventPlayerTrackChange = undefined;
 let eventEndOfQueue = undefined;
@@ -473,7 +464,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       // If the bookmark is from ABS, save it to the ABS server
       const absSyncBookmarks = useSettingStore.getState().absSyncBookmarks;
       if (playlist.source === "abs" && absSyncBookmarks) {
-        await absSaveBookmark(newBookmark);
+        await absAPIClient.saveBookmark(newBookmark);
       }
       saveToAsyncStorage("playlists", playlists);
     },
@@ -488,7 +479,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       // If the bookmark is from ABS, delete it from the ABS server
       const absSyncBookmarks = useSettingStore.getState().absSyncBookmarks;
       if (playlist.source === "abs" && absSyncBookmarks) {
-        await absDeleteBookmark(
+        await absAPIClient.deleteBookmark(
           playlistId,
           bookmarks.find((el) => el.id === bookmarkId)?.positionSeconds
         );
@@ -497,7 +488,7 @@ export const useTracksStore = create<AudioState>((set, get) => ({
     },
     mergeABSBookmarks: async () => {
       const playlists = { ...get().playlists };
-      const userInfo = await absGetUserInfo();
+      const userInfo = await absAPIClient.getUserInfo();
 
       if (!userInfo || !userInfo.token) return;
       const absBookmarks = userInfo.bookmarks;
@@ -543,7 +534,11 @@ export const useTracksStore = create<AudioState>((set, get) => ({
             // console.log("localBM", localBm.positionSeconds);
             if (!absPositions.has(localBm.positionSeconds)) {
               try {
-                await absSaveBookmark({
+                // await absSaveBookmark({
+                //   ...localBm,
+                //   absBookId: playlist.id,
+                // });
+                await absAPIClient.saveBookmark({
                   ...localBm,
                   absBookId: playlist.id,
                 });
@@ -1477,7 +1472,8 @@ const mountTrackPlayerListeners = () => {
       // The returned newTotalPosition will take into account if the book has multiple tracks
       const newTotalPosition = await saveCurrentTrackInfoBase();
       if (bookType === "abs" && absSyncProgress) {
-        await absUpdateBookProgress(absBookId, toInteger(newTotalPosition));
+        // await absUpdateBookProgress(absBookId, toInteger(newTotalPosition));
+        await absAPIClient.updateBookProgress(absBookId, toInteger(newTotalPosition));
       }
     }
     if (event.state === State.Paused) {
@@ -1486,7 +1482,8 @@ const mountTrackPlayerListeners = () => {
       // The returned newTotalPosition will take into account if the book has multiple tracks
       const newTotalPosition = await saveCurrentTrackInfoBase();
       if (bookType === "abs" && absSyncProgress) {
-        await absUpdateBookProgress(absBookId, toInteger(newTotalPosition));
+        // await absUpdateBookProgress(absBookId, toInteger(newTotalPosition));
+        await absAPIClient.updateBookProgress(absBookId, toInteger(newTotalPosition));
       }
       return;
     }
@@ -1496,7 +1493,8 @@ const mountTrackPlayerListeners = () => {
       // The returned newTotalPosition will take into account if the book has multiple tracks
       const newTotalPosition = await saveCurrentTrackInfoBase();
       if (bookType === "abs" && absSyncProgress) {
-        await absUpdateBookProgress(absBookId, toInteger(newTotalPosition));
+        // await absUpdateBookProgress(absBookId, toInteger(newTotalPosition));
+        await absAPIClient.updateBookProgress(absBookId, toInteger(newTotalPosition));
       }
     }
   });

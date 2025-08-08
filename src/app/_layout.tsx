@@ -17,7 +17,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { laabMetaAggrRecurseBegin, useDropboxStore } from "@store/store-dropbox";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
-import { ABSAuthService } from "@store/data/absAuthService";
+import { useABSStore } from "@store/store-abs";
 
 import { configureReanimatedLogger, ReanimatedLogLevel } from "react-native-reanimated";
 import axios from "axios";
@@ -59,7 +59,7 @@ export default function RootLayout() {
 
       // Initialize authentication system
       try {
-        await ABSAuthService.initializeAuth();
+        await useABSStore.getState().actions.initializeAuth();
         console.log("Authentication system initialized");
       } catch (error) {
         console.error("Failed to initialize authentication:", error);

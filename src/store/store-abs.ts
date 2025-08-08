@@ -1,7 +1,14 @@
 import { create } from "zustand";
 import { saveToAsyncStorage } from "./data/asyncStorage";
 import { btoa } from "react-native-quick-base64";
-import { AudiobookshelfClient } from "../components/dropbox/AudiobookShelf/ABSAuthentication/absClient";
+import { AudiobookshelfAuth } from "../components/dropbox/AudiobookShelf/ABSAuthentication/absAuthClass";
+import { AudiobookshelfAPI } from "../components/dropbox/AudiobookShelf/ABSAuthentication/absAPInew";
+
+// Type for storing auth instances directly
+export type AuthInstances = {
+  auth: AudiobookshelfAuth;
+  api: AudiobookshelfAPI;
+};
 
 export type UserInfo = {
   id: string;
@@ -42,8 +49,8 @@ export type ABSState = {
   userInfo?: UserInfo;
   libraries?: StoredLibraries[];
   activeLibraryId?: string;
-  // Authentication client instance
-  authClient?: AudiobookshelfClient;
+  // Authentication instances
+  authClient?: AuthInstances;
   // This is the sort for the results in the absHooks.ts file functions
   resultSort: ResultSort;
   searchObject: SearchObject;
@@ -56,7 +63,7 @@ export type ABSState = {
     updateSearchObject: (searchObject: ABSState["searchObject"] | undefined) => void;
     setSearchBarClearFn: (clearFn: () => void) => void;
     // New authentication actions
-    setAuthClient: (client: AudiobookshelfClient | undefined) => void;
+    setAuthClient: (authInstances: AuthInstances | undefined) => void;
     initializeAuth: () => Promise<boolean>;
     logout: () => Promise<void>;
   };
@@ -142,8 +149,8 @@ export const useABSStore = create<ABSState>((set, get) => ({
       set({ clearSearchBar: searchFn });
     },
     // New authentication actions
-    setAuthClient: (client) => {
-      set({ authClient: client });
+    setAuthClient: (authInstances) => {
+      set({ authClient: authInstances });
     },
     initializeAuth: async () => {
       const { userInfo } = get();
@@ -152,15 +159,17 @@ export const useABSStore = create<ABSState>((set, get) => ({
       }
 
       try {
-        // Create client instance
-        const client = new AudiobookshelfClient(userInfo.absURL);
+        // Create auth instances
+        const auth = new AudiobookshelfAuth(userInfo.absURL);
+        const api = new AudiobookshelfAPI(userInfo.absURL, auth);
+        const authInstances: AuthInstances = { auth, api };
 
         // Check if user is authenticated (this will try to refresh tokens if needed)
-        const isAuthenticated = await client.isAuthenticated();
+        const isAuthenticated = await auth.isAuthenticated();
 
         if (isAuthenticated) {
           set({
-            authClient: client,
+            authClient: authInstances,
             userInfo: { ...userInfo, isAuthenticated: true },
           });
           return true;
@@ -186,7 +195,7 @@ export const useABSStore = create<ABSState>((set, get) => ({
 
       try {
         if (authClient) {
-          await authClient.logout();
+          await authClient.auth.logout();
         }
       } catch (error) {
         console.error("Logout error:", error);
@@ -226,3 +235,26 @@ const absSaveStore = async () => {
     resultSort: absState.resultSort,
   });
 };
+
+// Create a global variable that can be imported and used to
+// access the APIs for ABS
+// Create a proxy that forwards all calls to the actual client when it's ready
+export const absAPIClient: AudiobookshelfAPI = new Proxy(
+  {},
+  {
+    get(target, prop) {
+      const actualClient = useABSStore.getState().authClient.api;
+      if (!actualClient) {
+        throw new Error("API client not yet loaded");
+        // Or return a promise, or queue the call, etc.
+      }
+      const value = actualClient[prop as keyof AudiobookshelfAPI];
+
+      // Bind methods to preserve 'this' context
+      if (typeof value === "function") {
+        return value.bind(actualClient);
+      }
+      return value;
+    },
+  }
+) as AudiobookshelfAPI;

@@ -4,11 +4,10 @@ import {
   absGetItemDetails,
   absGetLibraryFilterData,
   absGetLibraryItems,
-  absGetUserInfo,
   getUserFavoriteTagInfo,
 } from "./absAPI";
 import { reverse, sortBy } from "lodash";
-import { useABSStore } from "@store/store-abs";
+import { absAPIClient, useABSStore } from "@store/store-abs";
 import { useMemo } from "react";
 import { btoa } from "react-native-quick-base64";
 import { useDropboxStore } from "@store/store-dropbox";
@@ -170,7 +169,7 @@ export const useABSBookmarks = () => {
   return useQuery({
     queryKey: ["bookmarks"],
     queryFn: async () => {
-      const userInfo = await absGetUserInfo();
+      const userInfo = await absAPIClient.getUserInfo();
       return userInfo?.bookmarks;
     },
   });

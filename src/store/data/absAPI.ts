@@ -12,17 +12,16 @@ import {
   LibraryItem,
   User,
 } from "./absTypes";
-import { useABSStore, getAbsURL } from "@store/store-abs";
+import { useABSStore, getAbsURL, absAPIClient } from "@store/store-abs";
 import { Alert } from "react-native";
 import { btoa } from "react-native-quick-base64";
 import { buildCoverURL, getCoverURI } from "./absUtils";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
-import { ABSAuthService } from "./absAuthService";
-import { AudiobookshelfAPI } from "@components/dropbox/AudiobookShelf/ABSAuthentication/absAPInew";
+// import { ABSAuthService } from "./absAuthService";
 
 //~ =======
-//~ UTILS - DEPRECATED - Use ABSAuthService instead
+//~ UTILS
 //~ =======
 const getToken = async () => {
   const authClient = useABSStore.getState().authClient;
@@ -45,67 +44,84 @@ const getAuthHeader = async () => {
 //~~ ========================================================
 //~~ absLogin - DEPRECATED - Use ABSAuthService.login instead
 //~~ ========================================================
-export const absLogin = async (absURL: string, username: string, password: string) => {
-  console.warn("absLogin() is deprecated. Use ABSAuthService.login() instead.");
-  // For backward compatibility, delegate to new service
-  const userInfo = await ABSAuthService.login(absURL, username, password);
-  return {
-    id: userInfo.id,
-    username: userInfo.username,
-    email: userInfo.email,
-    type: userInfo.type,
-    token: "deprecated", // For backward compatibility
-  };
-};
+// export const absLogin = async (absURL: string, username: string, password: string) => {
+//   console.warn("absLogin() is deprecated. Use ABSAuthService.login() instead.");
+//   // For backward compatibility, delegate to new service
+//   const userInfo = await ABSAuthService.login(absURL, username, password);
+//   return {
+//     id: userInfo.id,
+//     username: userInfo.username,
+//     email: userInfo.email,
+//     type: userInfo.type,
+//     token: "deprecated", // For backward compatibility
+//   };
+// };
 
 //~~ ========================================================
 //~~ absSaveBookmark -
 //~~ Saves a bookmark to the abs server
 //~~ ========================================================
-export const absSaveBookmark = async (bookmark: Bookmark) => {
-  console.warn("absSaveBookmark() is deprecated. Use ABSAuthService.saveBookmark() instead.");
-  try {
-    await ABSAuthService.saveBookmark(bookmark.absBookId, bookmark.positionSeconds, bookmark.name);
-  } catch (error) {
-    console.log("error", error);
-  }
-};
+// export const absSaveBookmark = async (bookmark: Bookmark) => {
+//   console.warn("absSaveBookmark() is deprecated. Use ABSAuthService.saveBookmark() instead.");
+
+//   try {
+//     console.log("absSaveBookmark", bookmark);
+
+//     // await absAPIClient.saveBookmark(bookmark.absBookId, bookmark.positionSeconds, bookmark.name);
+//     await absAPIClient.saveBookmark(bookmark);
+//   } catch (error) {
+//     console.log("error", error);
+//   }
+// };
 
 //~~ ========================================================
 //~~ absDeleteBookmark -
 //~~ Deletes a bookmark from the abs server
 //~~ ========================================================
-export const absDeleteBookmark = async (playlistId: string, positionSeconds: number) => {
-  console.warn("absDeleteBookmark() is deprecated. Use ABSAuthService.deleteBookmark() instead.");
-  try {
-    await ABSAuthService.deleteBookmark(playlistId, positionSeconds);
-  } catch (error) {
-    console.log("error deleting bookmark", error);
-  }
-};
+// export const absDeleteBookmark = async (playlistId: string, positionSeconds: number) => {
+//   // const authHeader = await getAuthHeader();
+//   // let response;
+//   // const url = `${getAbsURL()}/api/me/item/${playlistId}/bookmark/${positionSeconds}`;
+
+//   // try {
+//   //   response = await axios.delete(url, { headers: authHeader });
+//   // } catch (error) {
+//   //   console.log("error deleting bookmark", error);
+//   // }
+//   // return;
+//   // console.warn("absDeleteBookmark() is deprecated. Use ABSAuthService.deleteBookmark() instead.");
+//   // const absAPI = useABSStore.getState().authClient.api;
+//   try {
+//     await absAPIClient.deleteBookmark(playlistId, positionSeconds);
+//   } catch (error) {
+//     console.log("error deleting bookmark", error);
+//   }
+// };
 
 //~~ ========================================================
 //~~ absGetUserInfo -
 //~~ Gets user information like bookmarks, mediaProgress, etc
 //~~ ========================================================
-export const absGetUserInfo = async () => {
-  console.warn("absGetUserInfo() is deprecated. Use ABSAuthService.getUserInfo() instead.");
-  try {
-    const response = await ABSAuthService.getUserInfo();
-    return response.user as User;
-  } catch (error) {
-    console.log("absGetUserInfo error", error);
-    return undefined;
-  }
-};
+// export const absGetUserInfo = async () => {
+//   console.warn("absGetUserInfo() is deprecated. Use ABSAuthService.getUserInfo() instead.");
+//   const absAPI = useABSStore.getState().authClient.api;
+//   try {
+//     const response = await absAPI.getUserInfo();
+//     return response.user as User;
+//   } catch (error) {
+//     console.log("absGetUserInfo error", error);
+//     return undefined;
+//   }
+// };
 
 //~~ ========================================================
 //~~ absGetLibraries - UPDATED to use new authentication service
 //~~ ========================================================
 export type ABSGetLibraries = Awaited<ReturnType<typeof absGetLibraries>>;
 export const absGetLibraries = async () => {
+  const absAPI = useABSStore.getState().authClient.api;
   console.warn("absGetLibraries() is deprecated. Use ABSAuthService.getLibraries() instead.");
-  return await ABSAuthService.getLibraries();
+  return await absAPI.getLibraries();
 };
 
 //~~ ========================================================
@@ -395,15 +411,16 @@ export const absUpdateLocalAttributes = async () => {
 //~~ NOTE: all tags must be sent.  This will overwrite all tags
 //~~  with tags parameter
 //~~ ========================================================
-export const absSetFavoriteTag = async (itemId: string, tags: string[]) => {
-  console.warn("absSetFavoriteTag() is deprecated. Use ABSAuthService.setFavoriteTag() instead.");
-  try {
-    await ABSAuthService.setFavoriteTag(itemId, tags);
-  } catch (error) {
-    console.log("error", error);
-    throw error;
-  }
-};
+// export const absSetFavoriteTag = async (itemId: string, tags: string[]) => {
+//   console.warn("absSetFavoriteTag() is deprecated. Use ABSAuthService.setFavoriteTag() instead.");
+//   const absAPI = useABSStore.getState().authClient.api;
+//   try {
+//     await absAPI.setFavoriteTag(itemId, tags);
+//   } catch (error) {
+//     console.log("error", error);
+//     throw error;
+//   }
+// };
 
 //~~ ========================================================
 //~~ absDownloadItem
@@ -477,28 +494,30 @@ export const absDownloadEbook = async (itemId: string, fileIno: string, filename
 //~~ ========================================================
 //~~ absUpdateBookProgress
 //~~ ========================================================
-export const absUpdateBookProgress = async (itemId: string, currentTimeInSeconds: number) => {
-  console.warn(
-    "absUpdateBookProgress() is deprecated. Use ABSAuthService.updateBookProgress() instead."
-  );
-  try {
-    await ABSAuthService.updateBookProgress(itemId, currentTimeInSeconds);
-  } catch (e) {
-    console.log("absUpdateBookProgress Error", e.message);
-  }
-};
+// export const absUpdateBookProgress = async (itemId: string, currentTimeInSeconds: number) => {
+//   console.warn(
+//     "absUpdateBookProgress() is deprecated. Use ABSAuthService.updateBookProgress() instead."
+//   );
+//   const absAPI = useABSStore.getState().authClient.api;
+//   try {
+//     await absAPI.updateBookProgress(itemId, currentTimeInSeconds);
+//   } catch (e) {
+//     console.log("absUpdateBookProgress Error", e.message);
+//   }
+// };
 //~~ ========================================================
 //~~ absGetBookProgress
 //~~ ========================================================
-export const absGetBookProgress = async (itemId: string) => {
-  console.warn("absGetBookProgress() is deprecated. Use ABSAuthService.getBookProgress() instead.");
-  try {
-    const resp = await ABSAuthService.getBookProgress(itemId);
-    return resp.currentTime;
-  } catch (e) {
-    throw new Error("Item Not Found or Other Error setting absGetBookProgress");
-  }
-};
+// export const absGetBookProgress = async (itemId: string) => {
+//   console.warn("absGetBookProgress() is deprecated. Use ABSAuthService.getBookProgress() instead.");
+//   const absAPI = useABSStore.getState().authClient.api;
+//   try {
+//     const resp = await absAPI.getBookProgress(itemId);
+//     return resp;
+//   } catch (e) {
+//     throw new Error("Item Not Found or Other Error setting absGetBookProgress");
+//   }
+// };
 //~~ ========================================================
 //~~ absSetBookFinished
 //~~ ========================================================
@@ -506,8 +525,9 @@ export const absSetBookToFinished = async (itemId: string, finishedFlag: boolean
   console.warn(
     "absSetBookToFinished() is deprecated. Use ABSAuthService.setBookFinished() instead."
   );
+  const absAPI = useABSStore.getState().authClient.api;
   try {
-    await ABSAuthService.setBookFinished(itemId, finishedFlag);
+    await absAPI.setBookFinished(itemId, finishedFlag);
   } catch (e) {
     throw new Error("Item Not Found or Other Error setting isFinished");
   }

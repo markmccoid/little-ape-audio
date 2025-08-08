@@ -5,9 +5,10 @@ import { useBookDetails } from "@store/data/absHooks";
 import { useDropboxStore } from "@store/store-dropbox";
 import { sanitizeString } from "@utils/otherUtils";
 import { useState } from "react";
-import { absSetFavoriteTag, getUserFavoriteTagInfo } from "@store/data/absAPI";
+import { getUserFavoriteTagInfo } from "@store/data/absAPI";
 import { SymbolView } from "expo-symbols";
 import { colors } from "@constants/Colors";
+import { absAPIClient } from "@store/store-abs";
 
 const ABSToggleBookFavorite = () => {
   //! Get Info needed to mark as favorite and read for ABS books
@@ -53,7 +54,7 @@ const ABSToggleBookFavorite = () => {
       action === "remove"
         ? bookDetails?.media?.tags.filter((el) => el !== userFavTagValue)
         : Array.from(new Set([...bookDetails?.media?.tags, userFavTagValue]));
-    await absSetFavoriteTag(itemId, tags);
+    await absAPIClient.setFavoriteTag(itemId, tags);
   };
 
   return (
