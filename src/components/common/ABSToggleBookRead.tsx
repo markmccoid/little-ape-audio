@@ -4,9 +4,9 @@ import { SymbolView } from "expo-symbols";
 import { colors } from "@constants/Colors";
 import { usePlaybackStore, useTracksStore } from "@store/store";
 import { useDropboxStore } from "@store/store-dropbox";
-import { absGetItemDetails, absSetBookToFinished } from "@store/data/absAPI";
 import { sanitizeString } from "@utils/otherUtils";
 import { useBookDetails } from "@store/data/absHooks";
+import { absAPIClient } from "@store/store-abs";
 
 export interface ABSToggleBookReadProps {
   onToggle?: () => void;
@@ -48,7 +48,8 @@ const ABSToggleBookRead = ({ onToggle }: ABSToggleBookReadProps) => {
         imageURL: track.metadata.pictureURI,
         absId: bookId,
       });
-      await absSetBookToFinished(bookId, !isRead);
+      // await absSetBookToFinished(bookId, !isRead);
+      await absAPIClient.setBookFinished(bookId, !isRead);
       // queryClient.invalidateQueries({ queryKey: ["allABSBooks"] });
     } catch (e) {
       console.log("ERROR setting Isfinished", e);

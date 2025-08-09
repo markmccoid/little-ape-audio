@@ -239,22 +239,35 @@ const absSaveStore = async () => {
 // Create a global variable that can be imported and used to
 // access the APIs for ABS
 // Create a proxy that forwards all calls to the actual client when it's ready
+// export const absAPIClient: AudiobookshelfAPI = new Proxy(
+//   {},
+//   {
+//     get(target, prop) {
+//       const actualClient = useABSStore.getState().authClient.api;
+//       if (!actualClient) {
+//         throw new Error("API client not yet loaded");
+//         // Or return a promise, or queue the call, etc.
+//       }
+//       const value = actualClient[prop as keyof AudiobookshelfAPI];
+
+//       // Bind methods to preserve 'this' context
+//       if (typeof value === "function") {
+//         return value.bind(actualClient);
+//       }
+//       return value;
+//     },
+//   }
+// ) as AudiobookshelfAPI;
 export const absAPIClient: AudiobookshelfAPI = new Proxy(
   {},
-  {
-    get(target, prop) {
+  Object.freeze({
+    get(_: unknown, prop: keyof AudiobookshelfAPI, receiver: unknown) {
       const actualClient = useABSStore.getState().authClient.api;
       if (!actualClient) {
         throw new Error("API client not yet loaded");
-        // Or return a promise, or queue the call, etc.
       }
-      const value = actualClient[prop as keyof AudiobookshelfAPI];
-
-      // Bind methods to preserve 'this' context
-      if (typeof value === "function") {
-        return value.bind(actualClient);
-      }
-      return value;
+      const value = Reflect.get(actualClient, prop, receiver);
+      return typeof value === "function" ? value.bind(actualClient) : value;
     },
-  }
+  })
 ) as AudiobookshelfAPI;

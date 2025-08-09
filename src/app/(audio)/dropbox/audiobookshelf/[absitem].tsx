@@ -2,8 +2,6 @@ import { View, Text, SafeAreaView, ScrollView, Image } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Stack, useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import CustomHeader from "@components/dropbox/CustomHeader";
-import { absGetItemDetails } from "@store/data/absAPI";
-import { useQuery } from "@tanstack/react-query";
 import ABSBookContainer from "@components/dropbox/AudiobookShelf/book/ABSBookContainer";
 import ABSBookLoadingIndicator from "@components/dropbox/AudiobookShelf/book/ABSBookLoadingIndicator";
 import { BookDetails, useBookDetails } from "@store/data/absHooks";
@@ -15,11 +13,6 @@ export type ABSDirParams = {
 const ABSItem = () => {
   const { absitem, title } = useLocalSearchParams<ABSDirParams>();
   const { data, isError, isLoading } = useBookDetails(absitem);
-  // const { data, isError, isLoading } = useQuery({
-  //   queryKey: [absitem],
-  //   queryFn: async () => await absGetItemDetails(absitem),
-  //   staleTime: undefined,
-  // });
 
   let backTitle = title || "Back";
   if (!isLoading) {

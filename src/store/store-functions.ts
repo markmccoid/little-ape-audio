@@ -1,3 +1,4 @@
+import { absAPIClient } from "@store/store-abs";
 // import { SetState, StateCreator, StoreApi } from "zustand";
 import { getAudioFileTags } from "../utils/audioUtils";
 import { saveToAsyncStorage } from "./data/asyncStorage";
@@ -124,7 +125,8 @@ export const addTrack =
       }
       // Get chapter details by downloading book details and finding the audio ino
       // that we are processing.  Then grab chapters
-      const results = await absGetItemDetails(pathIn);
+      const results = await absAPIClient.getItemDetails(pathIn);
+      // const results = await absGetItemDetails(pathIn);
       const currentIno = sourceLocation.split("~")[1];
       // if ABS, then our playlistId is the bookId
       playlistId = sourceLocation.split("~")[0];

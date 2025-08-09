@@ -276,62 +276,62 @@ export const absGetLibraryItems = async ({
 //!! USE: https://abs.mccoidco.xyz/api/authors/{authorId}?include=items
 //!! We just want count of books
 //!! -- results.libraryItems.length
-export type ABSGetItemDetails = Awaited<ReturnType<typeof absGetItemDetails>>;
-export const absGetItemDetails = async (itemId?: string) => {
-  // https://abs.mccoidco.xyz/api/items/{token}&expanded=1
-  const authHeader = await getAuthHeader();
+// export type ABSGetItemDetails = Awaited<ReturnType<typeof absGetItemDetails>>;
+// export const absGetItemDetails = async (itemId?: string) => {
+//   // https://abs.mccoidco.xyz/api/items/{token}&expanded=1
+//   const authHeader = await getAuthHeader();
 
-  let libraryItem: LibraryItem;
-  const url = `${getAbsURL()}/api/items/${itemId}?expanded=1&include=progress`;
-  try {
-    const response = await axios.get(url, { headers: authHeader });
-    libraryItem = response.data;
-    // libraryItem?.userMediaProgress?.isFinished;
-  } catch (error) {
-    console.log("error", error);
-    throw error;
-  }
-  const coverURI = (await getCoverURI(buildCoverURL(libraryItem.id))).coverURL;
+//   let libraryItem: LibraryItem;
+//   const url = `${getAbsURL()}/api/items/${itemId}?expanded=1&include=progress`;
+//   try {
+//     const response = await axios.get(url, { headers: authHeader });
+//     libraryItem = response.data;
+//     // libraryItem?.userMediaProgress?.isFinished;
+//   } catch (error) {
+//     console.log("error", error);
+//     throw error;
+//   }
+//   const coverURI = (await getCoverURI(buildCoverURL(libraryItem.id))).coverURL;
 
-  // Get author book count
-  const authorId = libraryItem.media.metadata?.authors[0].id;
-  const authorBooksurl = `${getAbsURL()}/api/authors/${authorId}?include=items`;
-  let authorBookCount = 0;
-  try {
-    const response = await axios.get(authorBooksurl, { headers: authHeader });
-    authorBookCount = response.data.libraryItems.length;
-  } catch (error) {
-    console.log("error", error);
-    throw error;
-  }
+//   // Get author book count
+//   const authorId = libraryItem.media.metadata?.authors[0].id;
+//   const authorBooksurl = `${getAbsURL()}/api/authors/${authorId}?include=items`;
+//   let authorBookCount = 0;
+//   try {
+//     const response = await axios.get(authorBooksurl, { headers: authHeader });
+//     authorBookCount = response.data.libraryItems.length;
+//   } catch (error) {
+//     console.log("error", error);
+//     throw error;
+//   }
 
-  // console.log(
-  //   "TITLE FIN",
-  //   libraryItem.media.metadata.title,
-  //   new Date(libraryItem.userMediaProgress.finishedAt),
-  //   libraryItem.userMediaProgress
-  // );
+//   // console.log(
+//   //   "TITLE FIN",
+//   //   libraryItem.media.metadata.title,
+//   //   new Date(libraryItem.userMediaProgress.finishedAt),
+//   //   libraryItem.userMediaProgress
+//   // );
 
-  if (!libraryItem?.media?.audioFiles) {
-    throw new Error("No Media or Audiofiles");
-  }
-  // console.log("MEDIA", libraryItem.media.metadata);
-  // Get the books duration
-  let bookDuration = 0;
-  for (const audio of libraryItem.media.audioFiles) {
-    bookDuration += audio.duration;
-  }
-  return {
-    id: libraryItem.id,
-    audioFiles: libraryItem.media.audioFiles,
-    media: libraryItem.media,
-    bookDuration,
-    userMediaProgress: libraryItem?.userMediaProgress,
-    coverURI: coverURI, //buildCoverURL(libraryItem.id),
-    authorBookCount,
-    libraryFiles: libraryItem.libraryFiles,
-  };
-};
+//   if (!libraryItem?.media?.audioFiles) {
+//     throw new Error("No Media or Audiofiles");
+//   }
+//   // console.log("MEDIA", libraryItem.media.metadata);
+//   // Get the books duration
+//   let bookDuration = 0;
+//   for (const audio of libraryItem.media.audioFiles) {
+//     bookDuration += audio.duration;
+//   }
+//   return {
+//     id: libraryItem.id,
+//     audioFiles: libraryItem.media.audioFiles,
+//     media: libraryItem.media,
+//     bookDuration,
+//     userMediaProgress: libraryItem?.userMediaProgress,
+//     coverURI: coverURI, //buildCoverURL(libraryItem.id),
+//     authorBookCount,
+//     libraryFiles: libraryItem.libraryFiles,
+//   };
+// };
 
 //~~ ========================================================
 //~~ absUpdateLocalFavorites
@@ -387,7 +387,8 @@ export const absUpdateLocalAttributes = async () => {
   // Step 1: Create a map for quick lookup
   const resultMap = new Map();
 
-  // Helper function to merge items
+  // Helper function to merge items.  If we have an item that is both read and favorited
+  // type will contain ["isFavorite", "isRead"]
   const mergeItems = (item) => {
     if (resultMap.has(item.itemId)) {
       const existingItem = resultMap.get(item.itemId);
@@ -397,7 +398,7 @@ export const absUpdateLocalAttributes = async () => {
     }
   };
 
-  // Step 2: Merge the arrays
+  // Step 2: Merge the arrays -- fav and read in a single array with type differentiating
   favResults.forEach(mergeItems);
   readResults.forEach(mergeItems);
 
@@ -521,17 +522,17 @@ export const absDownloadEbook = async (itemId: string, fileIno: string, filename
 //~~ ========================================================
 //~~ absSetBookFinished
 //~~ ========================================================
-export const absSetBookToFinished = async (itemId: string, finishedFlag: boolean) => {
-  console.warn(
-    "absSetBookToFinished() is deprecated. Use ABSAuthService.setBookFinished() instead."
-  );
-  const absAPI = useABSStore.getState().authClient.api;
-  try {
-    await absAPI.setBookFinished(itemId, finishedFlag);
-  } catch (e) {
-    throw new Error("Item Not Found or Other Error setting isFinished");
-  }
-};
+// export const absSetBookToFinished = async (itemId: string, finishedFlag: boolean) => {
+//   console.warn(
+//     "absSetBookToFinished() is deprecated. Use ABSAuthService.setBookFinished() instead."
+//   );
+//   const absAPI = useABSStore.getState().authClient.api;
+//   try {
+//     await absAPI.setBookFinished(itemId, finishedFlag);
+//   } catch (e) {
+//     throw new Error("Item Not Found or Other Error setting isFinished");
+//   }
+// };
 
 //~~ ========================================================
 //~~ getUserFavSearchTag

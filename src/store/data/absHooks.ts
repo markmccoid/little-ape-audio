@@ -183,7 +183,8 @@ export const useBookDetails = (bookId: string) => {
   return useQuery({
     queryKey: ["book_details", bookId],
     queryFn: async () => {
-      const data = await absGetItemDetails(bookId);
+      const data = await absAPIClient.getItemDetails(bookId);
+      // const data = await absGetItemDetails(bookId);
       // create a key with ALL of the ebooks for this book
       // the primary ebook will be the first in the array.
       let allEbooks: EbookFile[] = [];
@@ -223,7 +224,8 @@ export const useBookDetails = (bookId: string) => {
 export const useGetSeriesBooks = (bookId: string) => {
   const { data, isError, isLoading, error } = useQuery({
     queryKey: [bookId],
-    queryFn: async () => await absGetItemDetails(bookId),
+    queryFn: async () => await absAPIClient.getItemDetails(bookId),
+    // queryFn: async () => await absGetItemDetails(bookId),
   });
 
   const seriesArray = data?.media?.metadata?.series || [];

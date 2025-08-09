@@ -1,12 +1,9 @@
 import { View, Text, Pressable, StyleSheet, ScrollView, SafeAreaView } from "react-native";
 import React from "react";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
-import { absGetItemDetails } from "@store/data/absAPI";
 import ABSErrorView from "@components/dropbox/AudiobookShelf/ABSErrorView";
 import { useGetSeriesBooks } from "@store/data/absHooks";
 import { colors } from "@constants/Colors";
-import { BackIcon, IOSArrowForwardIcon } from "@components/common/svg/Icons";
 import IOSBack from "@components/common/svg/IOSBack";
 import ABSResultsBookRow from "@components/dropbox/AudiobookShelf/ABSResultsBookRow";
 import { AnimatedPressable } from "@components/common/buttons/Pressables";
@@ -17,10 +14,6 @@ const SeriesRoute = () => {
   const bookid = dynamicParam.bookid as string;
 
   const { series, isError, isLoading, error } = useGetSeriesBooks(bookid);
-  // const { data, isError, isLoading, error } = useQuery({
-  //   queryKey: [bookid],
-  //   queryFn: async () => await absGetItemDetails(bookid),
-  // });
 
   if (isError) {
     return <ABSErrorView error={error} />;

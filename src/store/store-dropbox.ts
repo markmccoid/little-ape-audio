@@ -229,6 +229,7 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       const attributes = [...get().folderAttributes];
       // Set all ABS attributes flagForDelete to true
       // this allows us to delete favs that were removed in the ABS DB if not toggled in next step
+      // "attributes" are the favs stored in the app
       const absFlaggedAttribs = [];
       for (const attrib of attributes) {
         if (attrib.audioSource === "abs") {
@@ -236,7 +237,8 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
         }
         absFlaggedAttribs.push(attrib);
       }
-      // Loop through passed ABS records to add
+      // Loop through passed ABS records from abs web database
+      // to either set the flagForDelete to false or add a new fav record
       for (const attr of attributeRecords) {
         const id = createFolderMetadataKey(attr.itemId);
         // If the favorite already exists just set the flagForDelete to false

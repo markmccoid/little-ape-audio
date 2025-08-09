@@ -1,9 +1,10 @@
 // services/AudiobookshelfAPI.ts
-import { ABSLoginResponse, Library, User } from "@store/data/absTypes";
+import { ABSLoginResponse, Library, LibraryItem, User } from "@store/data/absTypes";
 import { AudiobookshelfAuth } from "./absAuthClass";
 import { AuthenticationError, NetworkError, AudiobookshelfError } from "./abstypes";
 import axios, { AxiosRequestConfig } from "axios";
 import { Bookmark } from "@store/types";
+import { buildCoverURL, getCoverURI } from "@store/data/absUtils";
 
 export class AudiobookshelfAPI {
   constructor(private serverUrl: string, private auth: AudiobookshelfAuth) {}
@@ -83,9 +84,9 @@ export class AudiobookshelfAPI {
     return this.makeAuthenticatedRequest(`/api/libraries/${libraryId}/items${queryParams}`);
   }
 
-  async getItemDetails(itemId: string) {
-    return this.makeAuthenticatedRequest(`/api/items/${itemId}?expanded=1&include=progress`);
-  }
+  // async getItemDetails(itemId: string) {
+  //   return this.makeAuthenticatedRequest(`/api/items/${itemId}?expanded=1&include=progress`);
+  // }
 
   async saveBookmark(bookmark: Bookmark) {
     // (bookmark.absBookId, bookmark.positionSeconds, bookmark.name)
@@ -137,5 +138,73 @@ export class AudiobookshelfAPI {
     return resp.user;
   }
 
-  // Add more API methods here as needed...
+  //~~ ========================================================
+  //~~ absGetItemDetails
+  //~~ ========================================================
+  //!! Want to get the number of books for the author - sample id bd51dfda-7e9b-4f56-b61c-ab6f89461a98
+  //!! USE: https://abs.mccoidco.xyz/api/authors/{authorId}?include=items
+  //!! We just want count of books
+  //!! -- results.libraryItems.length
+  // export type ABSGetItemDetails = Awaited<ReturnType<typeof absGetItemDetails>>;
+  async getItemDetails(itemId?: string) {
+    // https://abs.mccoidco.xyz/api/items/{token}&expanded=1
+    // const authHeader = await getAuthHeader();
+
+    let libraryItem: LibraryItem;
+    try {
+      const response = await this.makeAuthenticatedRequest(
+        `/api/items/${itemId}?expanded=1&include=progress`
+      );
+      // const response = await axios.get(url, { headers: authHeader });
+      libraryItem = response as LibraryItem;
+      // libraryItem?.userMediaProgress?.isFinished;
+    } catch (error) {
+      console.log("error", error);
+      throw error;
+    }
+    const coverURI = (await getCoverURI(buildCoverURL(libraryItem.id))).coverURL;
+
+    // Get author book count
+    const authorId = libraryItem.media.metadata?.authors[0].id;
+    // const authorBooksurl = `${getAbsURL()}/api/authors/${authorId}?include=items`;
+    let authorBookCount = 0;
+    try {
+      // const response = await axios.get(authorBooksurl, { headers: authHeader });
+      const authorBookCountResp = await this.makeAuthenticatedRequest(
+        `/api/authors/${authorId}?include=items`
+      );
+      authorBookCount = authorBookCountResp.libraryItems.length;
+    } catch (error) {
+      console.log("error", error);
+      throw error;
+    }
+
+    // console.log(
+    //   "TITLE FIN",
+    //   libraryItem.media.metadata.title,
+    //   new Date(libraryItem.userMediaProgress.finishedAt),
+    //   libraryItem.userMediaProgress
+    // );
+
+    if (!libraryItem?.media?.audioFiles) {
+      throw new Error("No Media or Audiofiles");
+    }
+    // console.log("MEDIA", libraryItem.media.metadata);
+    // Get the books duration
+    let bookDuration = 0;
+    for (const audio of libraryItem.media.audioFiles) {
+      bookDuration += audio.duration;
+    }
+
+    return {
+      id: libraryItem.id,
+      audioFiles: libraryItem.media.audioFiles,
+      media: libraryItem.media,
+      bookDuration,
+      userMediaProgress: libraryItem?.userMediaProgress,
+      coverURI: coverURI, //buildCoverURL(libraryItem.id),
+      authorBookCount,
+      libraryFiles: libraryItem.libraryFiles,
+    };
+  }
 }
