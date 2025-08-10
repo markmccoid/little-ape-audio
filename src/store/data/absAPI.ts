@@ -243,30 +243,61 @@ export const absGetLibraryItems = async ({
 
   const favoritedItemIdSet = new Set(favoritedItemIds);
 
-  const booksMin = libraryItems.results.map((item) => {
-    return {
-      id: item.id,
-      title: item.media.metadata.title,
-      subtitle: item.media.metadata.subtitle,
-      author: item.media.metadata.authorName,
-      series: item.media.metadata.seriesName,
-      publishedDate: item.media.metadata.publishedDate,
-      publishedYear: item.media.metadata.publishedYear,
-      narratedBy: item.media.metadata.narratorName,
-      description: item.media.metadata.description,
-      duration: item.media.duration,
-      addedAt: item.addedAt,
-      updatedAt: item.updatedAt,
-      cover: buildCoverURL(item.id),
-      numAudioFiles: item.media.numAudioFiles,
-      genres: item.media.metadata.genres,
-      tags: item.media.tags,
-      asin: item.media.metadata.asin,
-      isFinished: finishedItemIdSet.has(item.id),
-      isFavorite: favoritedItemIdSet.has(item.id),
-    };
-  });
+  const booksMin = await Promise.all(
+    libraryItems.results.map(async (item) => {
+      const coverURL = await absAPIClient.buildCoverURL(item.id);
+
+      return {
+        id: item.id,
+        title: item.media.metadata.title,
+        subtitle: item.media.metadata.subtitle,
+        author: item.media.metadata.authorName,
+        series: item.media.metadata.seriesName,
+        publishedDate: item.media.metadata.publishedDate,
+        publishedYear: item.media.metadata.publishedYear,
+        narratedBy: item.media.metadata.narratorName,
+        description: item.media.metadata.description,
+        duration: item.media.duration,
+        addedAt: item.addedAt,
+        updatedAt: item.updatedAt,
+        cover: coverURL,
+        numAudioFiles: item.media.numAudioFiles,
+        genres: item.media.metadata.genres,
+        tags: item.media.tags,
+        asin: item.media.metadata.asin,
+        isFinished: finishedItemIdSet.has(item.id),
+        isFavorite: favoritedItemIdSet.has(item.id),
+      };
+    })
+  );
   return booksMin;
+  // const booksMin = libraryItems.results.map((item) => {
+  //   // const coverURL = await absAPIClient.buildCoverURL(item.id);
+  //   // const coverURL = buildCoverURL(item.id);
+  //   // console.log("COVin-getlibitems", coverURL);
+  //   return {
+  //     id: item.id,
+  //     title: item.media.metadata.title,
+  //     subtitle: item.media.metadata.subtitle,
+  //     author: item.media.metadata.authorName,
+  //     series: item.media.metadata.seriesName,
+  //     publishedDate: item.media.metadata.publishedDate,
+  //     publishedYear: item.media.metadata.publishedYear,
+  //     narratedBy: item.media.metadata.narratorName,
+  //     description: item.media.metadata.description,
+  //     duration: item.media.duration,
+  //     addedAt: item.addedAt,
+  //     updatedAt: item.updatedAt,
+  //     cover: buildCoverURL(item.id),
+  //     numAudioFiles: item.media.numAudioFiles,
+  //     genres: item.media.metadata.genres,
+  //     tags: item.media.tags,
+  //     asin: item.media.metadata.asin,
+  //     isFinished: finishedItemIdSet.has(item.id),
+  //     isFavorite: favoritedItemIdSet.has(item.id),
+  //   };
+  // });
+  // return booksMin;
 };
 
 //~~ ========================================================
@@ -374,13 +405,13 @@ export const absUpdateLocalAttributes = async () => {
       imageURL: el.cover,
     } as const;
   });
-
-  const readResults = progressresponse?.data?.results?.map((el) => {
+  const readResults = progressresponse?.data?.results?.map(async (el) => {
+    const coverURL = await absAPIClient.buildCoverURL(el.id);
     return {
       itemId: el.id,
       type: "isRead",
       folderNameIn: `${el.media.metadata.authorName}~${el.media.metadata.authorName}`,
-      imageURL: buildCoverURL(el.id),
+      imageURL: coverURL,
     };
   });
 
@@ -426,23 +457,22 @@ export const absUpdateLocalAttributes = async () => {
 //~~ ========================================================
 //~~ absDownloadItem
 //~~ ========================================================
-export const absDownloadItem = async (itemId: string, fileIno: string) => {
-  //  https://abs.mccoidco.xyz/api/items/<BOOK ID>/file/<FILE INO>/download
-  const authHeader = await getAuthHeader();
-  const token = await getToken();
-  const url = `${getAbsURL()}/api/items/${itemId}/file/${fileIno}/download`;
-  const urlWithToken = `${url}?token=${token}`;
+// export const absDownloadItem = async (itemId: string, fileIno: string) => {
+//   //  https://abs.mccoidco.xyz/api/items/<BOOK ID>/file/<FILE INO>/download
+//   const authHeader = await getAuthHeader();
+//   const token = await getToken();
+//   const url = `${getAbsURL()}/api/items/${itemId}/file/${fileIno}/download`;
+//   const urlWithToken = `${url}?token=${token}`;
 
-  return { url, urlWithToken, authHeader };
-};
+//   return { url, urlWithToken, authHeader };
+// };
 
 //~~ ========================================================
 //~~ absDownloadEbook ## EBOOKDL
 //~~ ========================================
-
 export const absDownloadEbook = async (itemId: string, fileIno: string, filenameWExt: string) => {
   let tempFileUri: string | null = null;
-  const { url, urlWithToken, authHeader } = await absDownloadItem(itemId, fileIno);
+  const { url, urlWithToken, authHeader } = await absAPIClient.absDownloadItem(itemId, fileIno);
 
   try {
     // console.log("Starting download...");

@@ -14,8 +14,8 @@ import { PlaylistImageColors } from "@store/types";
 import { getImageColors, resolveABSImage, sanitizeString } from "@utils/otherUtils";
 import TrackPlayer from "react-native-track-player";
 import { BookJSONMetadata, CleanBookMetadata, cleanOneBook } from "@utils/audiobookMetadata";
-import { buildCoverURL, getCoverURI } from "./data/absUtils";
-import { absGetItemDetails } from "./data/absAPI";
+import { getCoverURI } from "./data/absUtils";
+
 let isCriticalSectionLocked = false;
 const gdrive = new GDrive();
 
@@ -108,7 +108,7 @@ export const addTrack =
     if (audioSource === "abs") {
       if (!tags.pictureURI) {
         //
-        const coverLink = buildCoverURL(pathIn);
+        const coverLink = await absAPIClient.buildCoverURL(pathIn);
         //! NOTE: I can build a coverURL for any book even if it has no associated cover
         //!  the getCoverURI function will return a random image (type: "localasset") if coverURL is a 404
         const coverURIInfo = await getCoverURI(coverLink);

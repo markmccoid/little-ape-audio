@@ -6,6 +6,7 @@ import { downloadFileBlob as downloadFileBlobUtil } from "./data/fileSystemAcces
 import { AudioSourceType } from "@app/(audio)/dropbox";
 // import { DownloadProgressCallbackResultT } from "@dr.pogodin/react-native-fs";
 import { absDownloadItem } from "./data/absAPI";
+import { absAPIClient } from "./store-abs";
 
 type CompletedDownload = {
   fileId: string;
@@ -201,11 +202,10 @@ const downloadFile = async (downloadProps: DownloadQueueItem) => {
       downloadLink = await getDropboxFileLink(filePathLower);
       break;
     case "abs":
-      downloadLink = await absDownloadItem(pathIn, fileId);
+      downloadLink = await absAPIClient.absDownloadItem(pathIn, fileId);
     default:
       break;
   }
-  console.log("DL LInk store-downloadq", downloadLink);
 
   // Prepare to start the download
   // We only await the downloadFileBlobUtil because of google auth token get

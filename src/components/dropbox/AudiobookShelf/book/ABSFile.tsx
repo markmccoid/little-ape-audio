@@ -35,7 +35,7 @@ const ABSFile = ({ bookId, audio, index, totalAudioFiles }: Props) => {
   async function downloadFile(audioIno: string) {
     // const cleanFileName1 = await downloadFileBlob(downloadLink1, file.name, () => {}, audioSource);
     const filename = audio.metadata.filename;
-    const downloadLink = absDownloadItem(bookId, audioIno);
+    // const downloadLink = absDownloadItem(bookId, audioIno);
     // console.log("DownloadLink", downloadLink);
 
     const downloadItem: DownloadQueueItem = {

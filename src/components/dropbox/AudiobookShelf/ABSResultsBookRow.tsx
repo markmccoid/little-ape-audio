@@ -18,6 +18,7 @@ type Props = {
 };
 const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => {
   const router = useRouter();
+
   const { data, isLoading, error } = useQuery({
     queryKey: [`${book.id}-cover`],
     queryFn: async () => (await getCoverURI(book.cover)).coverURL,

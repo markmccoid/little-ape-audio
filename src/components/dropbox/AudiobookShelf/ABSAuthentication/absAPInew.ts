@@ -4,7 +4,7 @@ import { AudiobookshelfAuth } from "./absAuthClass";
 import { AuthenticationError, NetworkError, AudiobookshelfError } from "./abstypes";
 import axios, { AxiosRequestConfig } from "axios";
 import { Bookmark } from "@store/types";
-import { buildCoverURL, getCoverURI } from "@store/data/absUtils";
+import { getCoverURI } from "@store/data/absUtils";
 
 export class AudiobookshelfAPI {
   constructor(private serverUrl: string, private auth: AudiobookshelfAuth) {}
@@ -138,6 +138,11 @@ export class AudiobookshelfAPI {
     return resp.user;
   }
 
+  async buildCoverURL(itemId: string) {
+    const token = await this.auth.getValidAccessToken();
+    return `${this.serverUrl}/api/items/${itemId}/cover?token=${token}`;
+  }
+
   //~~ ========================================================
   //~~ absGetItemDetails
   //~~ ========================================================
@@ -149,7 +154,6 @@ export class AudiobookshelfAPI {
   async getItemDetails(itemId?: string) {
     // https://abs.mccoidco.xyz/api/items/{token}&expanded=1
     // const authHeader = await getAuthHeader();
-
     let libraryItem: LibraryItem;
     try {
       const response = await this.makeAuthenticatedRequest(
@@ -162,7 +166,8 @@ export class AudiobookshelfAPI {
       console.log("error", error);
       throw error;
     }
-    const coverURI = (await getCoverURI(buildCoverURL(libraryItem.id))).coverURL;
+    const coverURL = await this.buildCoverURL(libraryItem.id);
+    const coverURI = (await getCoverURI(coverURL)).coverURL;
 
     // Get author book count
     const authorId = libraryItem.media.metadata?.authors[0].id;
@@ -206,5 +211,21 @@ export class AudiobookshelfAPI {
       authorBookCount,
       libraryFiles: libraryItem.libraryFiles,
     };
+  }
+
+  //~~ ========================================================
+  //~~ absDownloadItem
+  //~~ ========================================================
+  async absDownloadItem(itemId: string, fileIno: string) {
+    //  https://abs.mccoidco.xyz/api/items/<BOOK ID>/file/<FILE INO>/download
+    const token = await this.auth.getValidAccessToken();
+    const authHeader = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    const url = `${this.serverUrl}/api/items/${itemId}/file/${fileIno}/download`;
+    const urlWithToken = `${url}?token=${token}`;
+
+    return { url, urlWithToken, authHeader };
   }
 }
