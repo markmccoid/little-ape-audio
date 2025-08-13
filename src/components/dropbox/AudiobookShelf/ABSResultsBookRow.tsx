@@ -25,7 +25,7 @@ const ABSResultsBookRow = ({ book, index, includeSeriesLink = true }: Props) => 
   });
   const showSeriesLink = book?.series && includeSeriesLink;
   const showInlineSeries = book?.series;
-
+  // console.log("BOOK isFav", book?.isFavorite, book?.id);
   return (
     <View className="flex-col">
       <View

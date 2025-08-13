@@ -8,14 +8,12 @@ import { useQuery } from "@tanstack/react-query";
 
 const audiobookshelf = () => {
   const updateSearchObject = useABSStore((state) => state.actions.updateSearchObject);
-  const initABSFolderAttribiutes = useDropboxStore(
-    (state) => state.actions.initABSFolderAttribiutes
-  );
+  const initABSFolderAttributes = useDropboxStore((state) => state.actions.initABSFolderAttributes);
   // No data returned, we are reading Favorite and Read(isFinsihed) attributes
   // from ABS database and syncing with our folderAttributes object in store-dropbox
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["initABSFavorites"],
-    queryFn: async () => await initABSFolderAttribiutes(),
+    queryFn: async () => await initABSFolderAttributes(),
     staleTime: 120 * 1000, // 120 seconds
   });
 

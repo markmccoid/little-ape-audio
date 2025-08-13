@@ -1,8 +1,11 @@
-import { absGetLibraryFilterData } from "@store/data/absAPI";
+// import { absGetLibraryFilterData } from "@store/data/absAPI";
+import { absAPIClient, useABSStore } from "@store/store-abs";
 import { useQuery } from "@tanstack/react-query";
 
 const formatFilterData = async () => {
-  const filterData = await absGetLibraryFilterData();
+  const libraryId = useABSStore.getState().activeLibraryId;
+  const filterData = await absAPIClient.getLibraryFilterData(libraryId);
+  // const filterData = await absGetLibraryFilterData(libraryId);
 
   return {
     genres: filterData?.genres ?? [],

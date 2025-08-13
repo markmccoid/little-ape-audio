@@ -117,12 +117,12 @@ const getAuthHeader = async () => {
 //~~ ========================================================
 //~~ absGetLibraries - UPDATED to use new authentication service
 //~~ ========================================================
-export type ABSGetLibraries = Awaited<ReturnType<typeof absGetLibraries>>;
-export const absGetLibraries = async () => {
-  const absAPI = useABSStore.getState().authClient.api;
-  console.warn("absGetLibraries() is deprecated. Use ABSAuthService.getLibraries() instead.");
-  return await absAPI.getLibraries();
-};
+// export type ABSGetLibraries = Awaited<ReturnType<typeof absGetLibraries>>;
+// export const absGetLibraries = async () => {
+//   const absAPI = useABSStore.getState().authClient.api;
+//   console.warn("absGetLibraries() is deprecated. Use ABSAuthService.getLibraries() instead.");
+//   return await absAPI.getLibraries();
+// };
 
 //~~ ========================================================
 //~~ absGetLibraryFilterData - Get the filterdata
@@ -130,45 +130,45 @@ export const absGetLibraries = async () => {
 //~~ include the base64 encoded versions needed for search
 //!! UPDATED
 //~~ ========================================================
-export const absGetLibraryFilterData = async (libraryId?: string) => {
-  const authHeader = await getAuthHeader();
-  const activeLibraryId = useABSStore.getState().activeLibraryId;
-  const libraryIdToUse = libraryId || activeLibraryId;
+// export const absGetLibraryFilterData = async (libraryId?: string) => {
+//   const authHeader = await getAuthHeader();
+//   const activeLibraryId = useABSStore.getState().activeLibraryId;
+//   const libraryIdToUse = libraryId || activeLibraryId;
 
-  const url = `${getAbsURL()}/api/libraries/${libraryIdToUse}/filterdata`;
+//   const url = `${getAbsURL()}/api/libraries/${libraryIdToUse}/filterdata`;
 
-  let response;
-  try {
-    response = await axios.get(url, { headers: authHeader });
-  } catch (error) {
-    throw new Error(`absGetLibraryFilterData - ${error}`);
-  }
-  const libararyData = response.data as FilterData;
-  // create encodings that can be used in filter query param in "Get a Library's Items"
-  const genres = libararyData.genres.map((genre) => ({
-    name: genre,
-    b64Encoded: btoa(genre),
-  }));
-  const tags = libararyData.tags.map((tag) => ({ name: tag, b64Encoded: btoa(tag) }));
-  const authors = libararyData.authors.map((author) => ({
-    ...author,
-    base64encoded: btoa(author.id),
-  }));
-  const series = libararyData.series.map((series) => ({
-    ...series,
-    base64encoded: btoa(series.id),
-  }));
+//   let response;
+//   try {
+//     response = await axios.get(url, { headers: authHeader });
+//   } catch (error) {
+//     throw new Error(`absGetLibraryFilterData - ${error}`);
+//   }
+//   const libararyData = response.data as FilterData;
+//   // create encodings that can be used in filter query param in "Get a Library's Items"
+//   const genres = libararyData.genres.map((genre) => ({
+//     name: genre,
+//     b64Encoded: btoa(genre),
+//   }));
+//   const tags = libararyData.tags.map((tag) => ({ name: tag, b64Encoded: btoa(tag) }));
+//   const authors = libararyData.authors.map((author) => ({
+//     ...author,
+//     base64encoded: btoa(author.id),
+//   }));
+//   const series = libararyData.series.map((series) => ({
+//     ...series,
+//     base64encoded: btoa(series.id),
+//   }));
 
-  // Return
-  return {
-    id: libraryId,
-    // name: libararyData.library.name,
-    genres,
-    tags,
-    authors,
-    series,
-  };
-};
+//   // Return
+//   return {
+//     id: libraryId,
+//     // name: libararyData.library.name,
+//     genres,
+//     tags,
+//     authors,
+//     series,
+//   };
+// };
 
 //~~ ========================================================
 //~~ absGetLibraryItems - Return a subset of a libraries items
@@ -215,6 +215,7 @@ export const absGetLibraryItems = async ({
   // URL to get tags.<user>-laab-favorite list of books
   const favoriteSearchString = getUserFavoriteTagInfo().favoriteSearchString;
   const favoriteurl = `${getAbsURL()}/api/libraries/${libraryIdToUse}/items?filter=tags.${favoriteSearchString}`;
+
   try {
     // Get all books
     response = await axios.get(url, { headers: authHeader });
@@ -240,13 +241,11 @@ export const absGetLibraryItems = async ({
   const finishedItemIds = progressresponse?.data?.results?.map((el) => el.id);
   const finishedItemIdSet = new Set(finishedItemIds);
   const favoritedItemIds = favresponse?.data?.results?.map((el) => el.id);
-
   const favoritedItemIdSet = new Set(favoritedItemIds);
 
   const booksMin = await Promise.all(
     libraryItems.results.map(async (item) => {
       const coverURL = await absAPIClient.buildCoverURL(item.id);
-
       return {
         id: item.id,
         title: item.media.metadata.title,
@@ -369,7 +368,7 @@ export const absGetLibraryItems = async ({
 //~~ reads favorites for current user <user>-laab-favorite
 //~~ from ABS db and returns data to be used to update
 //~~ dropboxStore.folderAttributes
-//~~ called from store-dropbox.ts -> initABSFolderAttribiutes
+//~~ called from store-dropbox.ts -> initABSFolderAttributes
 //~~ ========================================================
 //!!! DOCUMENT!!!
 export const absUpdateLocalAttributes = async () => {
@@ -434,7 +433,8 @@ export const absUpdateLocalAttributes = async () => {
   readResults.forEach(mergeItems);
 
   // Step 3: Convert the map back to an array
-  const combinedResults = Array.from(resultMap.values());
+  const combinedResults = Array.from(resultMap.values()).filter((el) => el.itemId);
+
   return combinedResults;
 };
 
@@ -570,6 +570,7 @@ export const absDownloadEbook = async (itemId: string, fileIno: string, filename
 //~~ ========================================================
 export const getUserFavoriteTagInfo = () => {
   const userInfo = useABSStore.getState().userInfo;
+
   let favoriteSearchString = userInfo?.favoriteSearchString;
   if (!favoriteSearchString) {
     favoriteSearchString = btoa(`${userInfo.username}-laab-favorite`);

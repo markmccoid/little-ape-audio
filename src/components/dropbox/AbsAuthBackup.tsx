@@ -11,9 +11,7 @@ import { useDropboxStore } from "@store/store-dropbox";
 
 const AbsAuth = () => {
   const queryClient = useQueryClient();
-  const initABSFolderAttribiutes = useDropboxStore(
-    (state) => state.actions.initABSFolderAttribiutes
-  );
+  const initABSFolderAttributes = useDropboxStore((state) => state.actions.initABSFolderAttributes);
   const absUserInfo = useABSStore((state) => state.userInfo);
   const librariesStored = useABSStore((state) => state.libraries);
   const [username, setUsername] = React.useState(absUserInfo?.username);
@@ -53,7 +51,7 @@ const AbsAuth = () => {
     await actions.saveLibraries(libs, libs[0].id);
 
     setLoggedIn(true);
-    await initABSFolderAttribiutes();
+    await initABSFolderAttributes();
     return true;
   };
 

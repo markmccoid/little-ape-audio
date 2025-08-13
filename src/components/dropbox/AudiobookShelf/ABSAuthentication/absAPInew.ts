@@ -1,14 +1,34 @@
 // services/AudiobookshelfAPI.ts
-import { ABSLoginResponse, Library, LibraryItem, User } from "@store/data/absTypes";
+import { ABSLoginResponse, FilterData, Library, LibraryItem, User } from "@store/data/absTypes";
 import { AudiobookshelfAuth } from "./absAuthClass";
 import { AuthenticationError, NetworkError, AudiobookshelfError } from "./abstypes";
 import axios, { AxiosRequestConfig } from "axios";
 import { Bookmark } from "@store/types";
 import { getCoverURI } from "@store/data/absUtils";
+import { btoa } from "react-native-quick-base64";
 
+// export type ABSGetLibraryItems = Awaited<ReturnType<typeof absGetLibraryItems>>;
+export type FilterType = "genres" | "tags" | "authors" | "series" | "progress";
+type GetLibraryItemsParams = {
+  libraryId?: string;
+  filterType?: FilterType;
+  // NOTE: for filterType "authors" and "series", the filterValue should be the ID of the author or series
+  //       for filterType "genres" and "tags", the filterValue should be the base64 version of the genre or tag
+  filterValue?: string;
+  sortBy?: string; // should be the output json's path -> media.metadata.title or media.metadata.series.sequence
+  page?: number;
+  limit?: number;
+};
 export class AudiobookshelfAPI {
-  constructor(private serverUrl: string, private auth: AudiobookshelfAuth) {}
-
+  constructor(
+    private serverUrl: string,
+    private auth: AudiobookshelfAuth,
+    private userFavoriteInfo: {
+      favoriteSearchString: string;
+      favoriteUserTagValue: string;
+    }
+  ) {}
+  private activeLibraryId = undefined;
   // Generic authenticated request method
 
   private async makeAuthenticatedRequest<T>(
@@ -76,13 +96,27 @@ export class AudiobookshelfAPI {
     return this.makeAuthenticatedRequest("/api/me");
   }
 
-  async getLibraryFilterData(libraryId: string) {
-    return this.makeAuthenticatedRequest(`/api/libraries/${libraryId}/filterdata`);
+  // Setter method
+  public setActiveLibraryId(libraryId: string | undefined): void {
+    // Optional: validation
+    if (libraryId && libraryId.trim() === "") {
+      throw new Error("Library ID cannot be an empty string");
+    }
+    this.activeLibraryId = libraryId;
   }
 
-  async getLibraryItems(libraryId: string, queryParams: string = "") {
-    return this.makeAuthenticatedRequest(`/api/libraries/${libraryId}/items${queryParams}`);
+  // Getter method
+  public getActiveLibraryId(): string | undefined {
+    return this.activeLibraryId;
   }
+
+  // async getLibraryFilterData(libraryId: string) {
+  //   return this.makeAuthenticatedRequest(`/api/libraries/${libraryId}/filterdata`);
+  // }
+
+  // async getLibraryItems(libraryId: string, queryParams: string = "") {
+  //   return this.makeAuthenticatedRequest(`/api/libraries/${libraryId}/items${queryParams}`);
+  // }
 
   // async getItemDetails(itemId: string) {
   //   return this.makeAuthenticatedRequest(`/api/items/${itemId}?expanded=1&include=progress`);
@@ -143,6 +177,73 @@ export class AudiobookshelfAPI {
     return `${this.serverUrl}/api/items/${itemId}/cover?token=${token}`;
   }
 
+  //~~ ========================================================
+  //~~ getFavoritedItems - query ABS server and return list
+  //~~ of ids that are favorited
+  //~~ ========================================================
+  async getFavoritedAndFinishedItems() {
+    // URL to get progess.finished books
+    const progressurl = `/api/libraries/${this.getActiveLibraryId()}/items?filter=progress.ZmluaXNoZWQ=`;
+    // URL to get tags.<user>-laab-favorite list of books
+    const favoriteSearchString = this.userFavoriteInfo.favoriteSearchString;
+
+    const favoriteurl = `/api/libraries/${this.getActiveLibraryId()}/items?filter=tags.${favoriteSearchString}`;
+    //~~ Query for "progress", checking if isFinished so we can set the Read/Not Read on book list
+    let progressData = undefined;
+    let favData = undefined;
+
+    try {
+      // Get book progress
+      progressData = await this.makeAuthenticatedRequest(progressurl);
+      // query for <user>-laab-favorite
+      favData = await this.makeAuthenticatedRequest(favoriteurl);
+    } catch (error) {
+      // Don't throw error, maybe an alert or a log or a toast
+      console.log("GETFAVITEMS", error);
+    }
+
+    // const libraryItems = response.data as GetLibraryItemsResponse;
+    // Get finished items
+    interface ItemInfo {
+      id: string;
+      title: string;
+      author: string;
+      coverURI: string;
+    }
+    const finishedItemIds: ItemInfo[] = await Promise.all(
+      progressData?.results?.map(async (el) => {
+        const coverURL = await this.buildCoverURL(el.id);
+        const coverURI = (await getCoverURI(coverURL)).coverURL;
+
+        return {
+          id: el.id,
+          title: el.media.metadata.title,
+          author: el.media.metadata.authorName,
+          coverURI,
+        };
+      }) ?? []
+    );
+
+    const favoritedItemIds: ItemInfo[] = await Promise.all(
+      favData?.results?.map(async (el) => {
+        const coverURL = await this.buildCoverURL(el.id);
+        const coverURI = (await getCoverURI(coverURL)).coverURL;
+
+        return {
+          id: el.id,
+          title: el.media.metadata.title,
+          author: el.media.metadata.authorName,
+          coverURI,
+        };
+      }) ?? []
+    );
+    // const favoritedItemIdSet = new Set(favoritedItemIds);
+
+    return {
+      finishedItemIds,
+      favoritedItemIds,
+    };
+  }
   //~~ ========================================================
   //~~ absGetItemDetails
   //~~ ========================================================
@@ -227,5 +328,131 @@ export class AudiobookshelfAPI {
     const urlWithToken = `${url}?token=${token}`;
 
     return { url, urlWithToken, authHeader };
+  }
+  //~~ ========================================================
+  //~~ absGetLibraryFilterData - Get the filterdata
+  //~~ genres, tags, authors and series
+  //~~ include the base64 encoded versions needed for search
+  //~~ ========================================================
+  async getLibraryFilterData(libraryId?: string) {
+    let response;
+    try {
+      response = await this.makeAuthenticatedRequest(`/api/libraries/${libraryId}/filterdata`);
+    } catch (error) {
+      throw new Error(`absGetLibraryFilterData - ${error}`);
+    }
+    const libararyData = response as FilterData;
+    // create encodings that can be used in filter query param in "Get a Library's Items"
+    const genres = libararyData.genres.map((genre) => ({
+      name: genre,
+      b64Encoded: btoa(genre),
+    }));
+    const tags = libararyData.tags.map((tag) => ({ name: tag, b64Encoded: btoa(tag) }));
+    const authors = libararyData.authors.map((author) => ({
+      ...author,
+      base64encoded: btoa(author.id),
+    }));
+    const series = libararyData.series.map((series) => ({
+      ...series,
+      base64encoded: btoa(series.id),
+    }));
+
+    // Return
+    return {
+      id: libraryId,
+      // name: libararyData.library.name,
+      genres,
+      tags,
+      authors,
+      series,
+    };
+  }
+  //# MAIN get function.  Will get library items filtered and sorted
+  async getLibraryItems({
+    libraryId,
+    filterType,
+    filterValue,
+    sortBy,
+    page,
+    limit,
+  }: GetLibraryItemsParams) {
+    // const authHeader = await getAuthHeader();
+    // const activeLibraryId = useABSStore.getState().activeLibraryId;
+    const libraryIdToUse = libraryId;
+    let response;
+    let progressresponse;
+    let favresponse;
+    let queryParams = "";
+
+    if (filterType) {
+      queryParams = `?filter=${filterType}.${filterValue}`;
+    }
+    if (sortBy) {
+      queryParams = `${queryParams}${queryParams ? "&" : "?"}sort=${sortBy}`;
+    }
+
+    const url = `/api/libraries/${libraryIdToUse}/items${queryParams}`;
+    // URL to get progess.finished books
+    const progressurl = `/api/libraries/${libraryIdToUse}/items?filter=progress.ZmluaXNoZWQ=`;
+    // URL to get tags.<user>-laab-favorite list of books
+    const favoriteSearchString = this.userFavoriteInfo.favoriteSearchString;
+    console.log("API", favoriteSearchString);
+    const favoriteurl = `/api/libraries/${libraryIdToUse}/items?filter=tags.${favoriteSearchString}`;
+    try {
+      // Get all books
+      response = await axios.get(url, { headers: authHeader });
+    } catch (error) {
+      // Don't throw error, maybe an alert or a log or a toast
+      console.log("absAPI-absGetLibraryItems-Main", error);
+      throw error;
+    }
+
+    //~~ Query for "progress", checking if isFinished so we can set the Read/Not Read on book list
+    try {
+      // Get book progress
+      progressresponse = await axios.get(progressurl, { headers: authHeader });
+      // query for <user>-laab-favorite
+      favresponse = await axios.get(favoriteurl, { headers: authHeader });
+    } catch (error) {
+      // Don't throw error, maybe an alert or a log or a toast
+      console.log("absAPICLASS-absGetLibraryItems-Progress", error);
+    }
+
+    const libraryItems = response.data as GetLibraryItemsResponse;
+    // Get finished items
+    const finishedItemIds = progressresponse?.data?.results?.map((el) => el.id);
+    const finishedItemIdSet = new Set(finishedItemIds);
+    const favoritedItemIds = favresponse?.data?.results?.map((el) => el.id);
+
+    const favoritedItemIdSet = new Set(favoritedItemIds);
+
+    const booksMin = await Promise.all(
+      libraryItems.results.map(async (item) => {
+        const coverURL = await absAPIClient.buildCoverURL(item.id);
+
+        return {
+          id: item.id,
+          title: item.media.metadata.title,
+          subtitle: item.media.metadata.subtitle,
+          author: item.media.metadata.authorName,
+          series: item.media.metadata.seriesName,
+          publishedDate: item.media.metadata.publishedDate,
+          publishedYear: item.media.metadata.publishedYear,
+          narratedBy: item.media.metadata.narratorName,
+          description: item.media.metadata.description,
+          duration: item.media.duration,
+          addedAt: item.addedAt,
+          updatedAt: item.updatedAt,
+          cover: coverURL,
+          numAudioFiles: item.media.numAudioFiles,
+          genres: item.media.metadata.genres,
+          tags: item.media.tags,
+          asin: item.media.metadata.asin,
+          isFinished: finishedItemIdSet.has(item.id),
+          isFavorite: favoritedItemIdSet.has(item.id),
+        };
+      })
+    );
+    return booksMin;
   }
 }

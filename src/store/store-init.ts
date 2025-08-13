@@ -4,7 +4,7 @@ import {
   saveToAsyncStorage,
 } from "./data/asyncStorage";
 import { useTracksStore } from "./store";
-import { useABSStore } from "./store-abs";
+import { absAPIClient, useABSStore } from "./store-abs";
 import { useDropboxStore } from "./store-dropbox";
 import { useSettingStore } from "./store-settings";
 import { Playlist, defaultCollections } from "./types";
@@ -178,10 +178,55 @@ export const onInitialize = async () => {
     actions: absActions,
   });
 
-  const absToken = useABSStore.getState()?.userInfo?.token;
+  // const absToken = useABSStore.getState()?.userInfo?.token;
+  const isAuthenticated = await useABSStore.getState()?.authClient?.auth?.isAuthenticated();
   const absSyncBookmarks = useSettingStore.getState().absSyncBookmarks;
-  if (absToken && absSyncBookmarks) {
+  const initABSFolderAttribiutes = useDropboxStore.getState().actions.initABSFolderAttributes;
+  if (isAuthenticated && absSyncBookmarks) {
     //# Load All bookmarks from ABS and merge with local bookmarks
     await useTracksStore.getState().actions.mergeABSBookmarks();
+    await initABSFolderAttribiutes();
   }
+
+  // await useDropboxStore.getState().actions.clearABSFolderAttributes();
+  console.log("IN INIT", isAuthenticated);
+  // Load favorites
+  // if (isAuthenticated) {
+  //   try {
+  //     const { finishedItemIds, favoritedItemIds } =
+  //       await absAPIClient.getFavoritedAndFinishedItems();
+
+  //     await Promise.all(
+  //       finishedItemIds.map((item) => {
+  //         useDropboxStore.getState().actions.updateFolderAttribute({
+  //           id: item.id,
+  //           type: "isRead",
+  //           action: "add",
+  //           folderNameIn: `${item.title}~${item.author}`,
+  //           audioSource: "abs",
+  //           parentFolderId: "",
+  //           imageURL: item.coverURI,
+  //           absId: item.id,
+  //         });
+  //       })
+  //     );
+
+  //     await Promise.all(
+  //       favoritedItemIds.map((item) => {
+  //         useDropboxStore.getState().actions.updateFolderAttribute({
+  //           id: item.id,
+  //           type: "isFavorite",
+  //           action: "add",
+  //           folderNameIn: `${item.title}~${item.author}`,
+  //           audioSource: "abs",
+  //           parentFolderId: "",
+  //           imageURL: item.coverURI,
+  //           absId: item.id,
+  //         });
+  //       })
+  //     );
+  //   } catch (e) {
+  //     console.log("Init Load favs and finished", e);
+  //   }
+  //}
 };

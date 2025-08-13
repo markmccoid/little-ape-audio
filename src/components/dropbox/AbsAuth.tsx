@@ -10,7 +10,13 @@ import {
 import React, { useEffect, useState } from "react";
 import { MotiPressable } from "moti/interactions";
 import { AnimatedPressable } from "@components/common/buttons/Pressables";
-import { StoredLibraries, useABSStore, UserInfo } from "@store/store-abs";
+import {
+  absAPIClient,
+  getUserFavoriteTagId,
+  StoredLibraries,
+  useABSStore,
+  UserInfo,
+} from "@store/store-abs";
 import { colors } from "@constants/Colors";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { EyeOffOutlineIcon, EyeOutlineIcon } from "@components/common/svg/Icons";
@@ -18,13 +24,10 @@ import { useDropboxStore } from "@store/store-dropbox";
 import { AudiobookshelfAuth } from "./AudiobookShelf/ABSAuthentication/absAuthClass";
 import { AudiobookshelfAPI } from "./AudiobookShelf/ABSAuthentication/absAPInew";
 import { AuthCredentials } from "./AudiobookShelf/ABSAuthentication/abstypes";
-import { absGetLibraryFilterData } from "@store/data/absAPI";
 
 const AbsAuth = () => {
   const queryClient = useQueryClient();
-  const initABSFolderAttribiutes = useDropboxStore(
-    (state) => state.actions.initABSFolderAttribiutes
-  );
+  const initABSFolderAttributes = useDropboxStore((state) => state.actions.initABSFolderAttributes);
   const absUserInfo = useABSStore((state) => state.userInfo);
 
   const librariesStored = useABSStore((state) => state.libraries);
@@ -46,14 +49,10 @@ const AbsAuth = () => {
 
     // Create auth instances directly
     const auth = new AudiobookshelfAuth(absURL);
-    const api = new AudiobookshelfAPI(absURL, auth);
     const credentials: AuthCredentials = { username, password };
 
     // Login directly
     const loginResponse = await auth.login(credentials);
-
-    // Store auth instances in store
-    actions.setAuthClient({ auth, api });
 
     // Create and save user info
     const userInfo: UserInfo = {
@@ -66,13 +65,17 @@ const AbsAuth = () => {
     };
     // console.log("USERINFO-AbsAuth.tsx", userInfo);
     await actions.saveUserInfo(userInfo);
-
+    // Get user favorite tag
+    const userFavoriteInfo = getUserFavoriteTagId();
+    const api = new AudiobookshelfAPI(absURL, auth, userFavoriteInfo);
+    // Store auth instances in store
+    actions.setAuthClient({ auth, api });
     // Get libraries directly
     const libs = await api.getLibraries();
     await actions.saveLibraries(libs, libs[0].id);
 
     setLoggedIn(true);
-    await initABSFolderAttribiutes();
+    await initABSFolderAttributes();
     return true;
   };
 
@@ -92,6 +95,8 @@ const AbsAuth = () => {
   const handleLogout = async () => {
     // Get auth instances and logout directly
     const authInstances = useABSStore.getState().authClient;
+
+    // await useDropboxStore.getState().actions.clearABSFolderAttributes();
     if (authInstances) {
       try {
         await authInstances.auth.logout();
@@ -243,6 +248,7 @@ const AbsAuth = () => {
                     queryClient.resetQueries({ queryKey: ["allABSBooks"] });
                     queryClient.invalidateQueries({ queryKey: ["absfilterdata"] });
                     queryClient.resetQueries({ queryKey: ["absfilterdata"] });
+                    // This will also update the activeLibraryId in the abs API Class
                     actions.saveLibraries(libraries, lib.id);
                   }}
                   className={`flex flex-row justify-between px-2 py-1 ${

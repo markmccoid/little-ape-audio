@@ -1,13 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  ABSGetLibraryItems,
-  absGetLibraryFilterData,
-  absGetLibraryItems,
-  getUserFavoriteTagInfo,
-} from "./absAPI";
+import { ABSGetLibraryItems, absGetLibraryItems, getUserFavoriteTagInfo } from "./absAPI";
 import { reverse, sortBy } from "lodash";
 import { absAPIClient, useABSStore } from "@store/store-abs";
-import { useMemo } from "react";
+import { act, useMemo } from "react";
 import { btoa } from "react-native-quick-base64";
 import { useDropboxStore } from "@store/store-dropbox";
 import { sanitizeString } from "@utils/otherUtils";
@@ -18,9 +13,12 @@ import { EbookFile } from "./absTypes";
 //~~ useGetFilterData - Get the filter data for the library
 //~~ ================================================================
 export const useGetFilterData = () => {
+  const activeLibraryId = useABSStore((state) => state.activeLibraryId);
+
   const { data, ...rest } = useQuery({
     queryKey: ["absfilterdata"],
-    queryFn: async () => await absGetLibraryFilterData(),
+    queryFn: async () => await absAPIClient.getLibraryFilterData(activeLibraryId),
+    // queryFn: async () => await absGetLibraryFilterData(activeLibraryId),
   });
 
   return { filterData: data, ...rest };
@@ -45,9 +43,10 @@ export const useGetAllABSBooks = () => {
     isRead: isReadOption,
   } = useABSStore((state) => state.searchObject);
   const { field, direction } = useABSStore((state) => state.resultSort);
+  const libraryId = useABSStore((state) => state.activeLibraryId);
   const { data, ...rest } = useQuery({
     queryKey: ["allABSBooks"],
-    queryFn: async () => await absGetLibraryItems({}),
+    queryFn: async () => await absGetLibraryItems({ libraryId }),
   });
 
   // const { data: progressData, ...progressRest } = useQuery({
@@ -73,14 +72,24 @@ export const useGetAllABSBooks = () => {
   const isFavoriteIds = new Set(folderAttributes.filter((el) => el.isFavorite).map((el) => el.id));
   const isReadIds = new Set(folderAttributes.filter((el) => el.isRead).map((el) => el.id));
 
+  // console.log(
+  //   "EL FAV",
+  //   folderAttributes.filter((el) => el.isFavorite).map((el) => el.id)
+
+  // );
   // For abs, sanitizeString takes the uuid (el.id) and returns a string with the hypens turned to underscores
   // abdfef-4fef-4fef-4fef-4fe -> abdfef_4fef_4fef_4fef_4fe
   // This map will apply the local favorites and read ids to each book.
+
+  // const dataWAttributes = data;
+  //! The issue was that we favored local favorites.  Thus if you logged in on two devices
+  //! this will overwrite with the local and you loose all the server
   const dataWAttributes = data?.map((el) => ({
     ...el,
-    isFavorite: isFavoriteIds.has(sanitizeString(el.id)),
-    isFinished: isReadIds.has(sanitizeString(el.id)),
+    isFavorite: isFavoriteIds.has(sanitizeString(el.id)) || el.isFavorite,
+    isFinished: isReadIds.has(sanitizeString(el.id)) || el.isFinished,
   }));
+
   //~ -----------------------------------------
 
   // If no search criteria, return the data
@@ -115,7 +124,8 @@ export const useGetAllABSBooks = () => {
     const bookTitle = book.title.toLowerCase() || "";
     const bookAuthor = book.author.toLowerCase() || "";
     const bookDescription = book.description?.toLowerCase() || "";
-    const isFavorite = isFavoriteIds.has(sanitizeString(book.id));
+    //! This works, but doesn't update data coming from the ABS API
+    const isFavorite = book.isFavorite; // isFavoriteIds.has(sanitizeString(book.id));
     const isRead = isReadIds.has(sanitizeString(book.id));
 
     let includeFlag = undefined;
@@ -257,9 +267,11 @@ export const useGetSeriesBooks = (bookId: string) => {
 //~~  uses Promise.all()
 //~~ ---------
 async function getSeriesBooks(seriesIds: string[], seriesInfo: { id: string; name: string }[]) {
+  const libraryId = useABSStore.getState().activeLibraryId;
   const promises = seriesIds.map(async (id) => {
     const seriesDetail = seriesInfo.find((el) => el.id === id);
     const response = await absGetLibraryItems({
+      libraryId,
       filterType: "series",
       filterValue: btoa(id),
       sortBy: "media.metadata.series.sequence",

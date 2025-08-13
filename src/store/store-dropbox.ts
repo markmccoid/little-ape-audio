@@ -130,7 +130,8 @@ type DropboxState = {
     popFolderNavigation: () => FolderNavigation;
     clearFolderNavigation: () => void;
     // only used by ABS to initialize folderAttributes with Favorites from ABS Database
-    initABSFolderAttribiutes: () => Promise<string>;
+    initABSFolderAttributes: () => Promise<string>;
+    clearABSFolderAttributes: () => Promise<void>;
     updateFolderAttribute: ({
       id,
       type,
@@ -222,20 +223,25 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
     clearFolderNavigation: () => {
       set({ folderNavigation: [] });
     },
-    initABSFolderAttribiutes: async () => {
+    initABSFolderAttributes: async () => {
       // query ABS and get current favorites
       const attributeRecords = await absUpdateLocalAttributes();
       //
+
       const attributes = [...get().folderAttributes];
       // Set all ABS attributes flagForDelete to true
       // this allows us to delete favs that were removed in the ABS DB if not toggled in next step
       // "attributes" are the favs stored in the app
       const absFlaggedAttribs = [];
       for (const attrib of attributes) {
-        if (attrib.audioSource === "abs") {
-          attrib.flagForDelete = true;
-        }
-        absFlaggedAttribs.push(attrib);
+        // console.log("attrib.audioSource", attrib.audioSource);
+        // if (attrib.audioSource === "abs") {
+        //   attrib = {...attrib,flagForDelete: true};
+        // }
+        absFlaggedAttribs.push({
+          ...attrib,
+          flagForDelete: attrib.audioSource === "abs" ? true : false,
+        });
       }
       // Loop through passed ABS records from abs web database
       // to either set the flagForDelete to false or add a new fav record
@@ -282,6 +288,18 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       await saveToAsyncStorage("folderattributes", finalAttributes);
       return "success";
     },
+    clearABSFolderAttributes: async () => {
+      const attributes = [...get().folderAttributes];
+      const finalAttributes = [];
+      for (let attrib of attributes) {
+        if (attrib.audioSource !== "abs") {
+          finalAttributes.push(attrib);
+        }
+      }
+      set({ folderAttributes: finalAttributes });
+      //!!!!!! IMPLEMENT Save to file system ()
+      await saveToAsyncStorage("folderattributes", finalAttributes);
+    },
     updateFolderAttribute: async ({
       id: pathIn, // for ABS this is the item id
       type, // favorite or read
@@ -295,6 +313,7 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
       const id = createFolderMetadataKey(pathIn);
       const attributes = [...get().folderAttributes];
       let currAttribute = attributes?.find((el) => el.id === id);
+
       // -- No attribute found for passed data, must create it
       if (!currAttribute) {
         // If currAttrtibute doesn't exist, means we are creating it

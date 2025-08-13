@@ -3,6 +3,7 @@ import { saveToAsyncStorage } from "./data/asyncStorage";
 import { btoa } from "react-native-quick-base64";
 import { AudiobookshelfAuth } from "../components/dropbox/AudiobookShelf/ABSAuthentication/absAuthClass";
 import { AudiobookshelfAPI } from "../components/dropbox/AudiobookShelf/ABSAuthentication/absAPInew";
+import { useDropboxStore } from "./store-dropbox";
 
 // Type for storing auth instances directly
 export type AuthInstances = {
@@ -118,7 +119,8 @@ export const useABSStore = create<ABSState>((set, get) => ({
           activeLibraryId,
           searchObject: {},
         });
-
+        // Save the activeLibraryId in the abs API Class
+        get().authClient.api.setActiveLibraryId(activeLibraryId);
         await absSaveStore();
       }
     },
@@ -158,10 +160,13 @@ export const useABSStore = create<ABSState>((set, get) => ({
         return false;
       }
 
+      const userFavoriteInfo = getUserFavoriteTagId();
+      // console.log("userFAV in store-abs", userFavoriteInfo.favoriteUserTagValue);
       try {
         // Create auth instances
         const auth = new AudiobookshelfAuth(userInfo.absURL);
-        const api = new AudiobookshelfAPI(userInfo.absURL, auth);
+        const api = new AudiobookshelfAPI(userInfo.absURL, auth, userFavoriteInfo);
+        api.setActiveLibraryId(get().activeLibraryId);
         const authInstances: AuthInstances = { auth, api };
 
         // Check if user is authenticated (this will try to refresh tokens if needed)
@@ -271,3 +276,16 @@ export const absAPIClient: AudiobookshelfAPI = new Proxy(
     },
   })
 ) as AudiobookshelfAPI;
+
+export const getUserFavoriteTagId = () => {
+  const userInfo = useABSStore.getState().userInfo;
+  let favoriteSearchString = userInfo?.favoriteSearchString;
+  if (!favoriteSearchString) {
+    favoriteSearchString = btoa(`${userInfo.username}-laab-favorite`);
+    useABSStore.setState({ userInfo: { ...userInfo, favoriteSearchString } });
+  }
+  return {
+    favoriteSearchString,
+    favoriteUserTagValue: `${userInfo.username}-laab-favorite`,
+  };
+};
