@@ -1,4 +1,4 @@
-import { isAuthenticated } from "./../store-abs";
+import { isAuthenticated } from "../store-abs";
 //~~ ========================================================
 //~~ AudioBookShelf APIs                                    -
 //~~ ========================================================
@@ -175,130 +175,131 @@ const getAuthHeader = async () => {
 //~~ absGetLibraryItems - Return a subset of a libraries items
 //~~  based on the passed filterType
 //~~ ========================================================
-export type ABSGetLibraryItems = Awaited<ReturnType<typeof absGetLibraryItems>>;
-export type FilterType = "genres" | "tags" | "authors" | "series" | "progress";
-type GetLibraryItemsParams = {
-  libraryId?: string;
-  filterType?: FilterType;
-  // NOTE: for filterType "authors" and "series", the filterValue should be the ID of the author or series
-  //       for filterType "genres" and "tags", the filterValue should be the base64 version of the genre or tag
-  filterValue?: string;
-  sortBy?: string; // should be the output json's path -> media.metadata.title or media.metadata.series.sequence
-  page?: number;
-  limit?: number;
-};
-export const absGetLibraryItems = async ({
-  libraryId,
-  filterType,
-  filterValue,
-  sortBy,
-  page,
-  limit,
-}: GetLibraryItemsParams) => {
-  const authHeader = await getAuthHeader();
-  const activeLibraryId = useABSStore.getState().activeLibraryId;
-  const libraryIdToUse = libraryId || activeLibraryId;
-  let response;
-  let progressresponse;
-  let favresponse;
-  let queryParams = "";
+// export type ABSGetLibraryItems = Awaited<ReturnType<typeof absGetLibraryItems>>;
+// export type FilterType = "genres" | "tags" | "authors" | "series" | "progress";
+// type GetLibraryItemsParams = {
+//   libraryId?: string;
+//   filterType?: FilterType;
+//   // NOTE: for filterType "authors" and "series", the filterValue should be the ID of the author or series
+//   //       for filterType "genres" and "tags", the filterValue should be the base64 version of the genre or tag
+//   filterValue?: string;
+//   sortBy?: string; // should be the output json's path -> media.metadata.title or media.metadata.series.sequence
+//   page?: number;
+//   limit?: number;
+// };
+// export const absGetLibraryItems = async ({
+//   libraryId,
+//   filterType,
+//   filterValue,
+//   sortBy,
+//   page,
+//   limit,
+// }: GetLibraryItemsParams) => {
+//   console.log("IN OLD ONE");
+//   const authHeader = await getAuthHeader();
+//   const activeLibraryId = useABSStore.getState().activeLibraryId;
+//   const libraryIdToUse = libraryId || activeLibraryId;
+//   let response;
+//   let progressresponse;
+//   let favresponse;
+//   let queryParams = "";
 
-  if (filterType) {
-    queryParams = `?filter=${filterType}.${filterValue}`;
-  }
-  if (sortBy) {
-    queryParams = `${queryParams}${queryParams ? "&" : "?"}sort=${sortBy}`;
-  }
+//   if (filterType) {
+//     queryParams = `?filter=${filterType}.${filterValue}`;
+//   }
+//   if (sortBy) {
+//     queryParams = `${queryParams}${queryParams ? "&" : "?"}sort=${sortBy}`;
+//   }
 
-  const url = `${getAbsURL()}/api/libraries/${libraryIdToUse}/items${queryParams}`;
-  // URL to get progess.finished books
-  const progressurl = `${getAbsURL()}/api/libraries/${libraryIdToUse}/items?filter=progress.ZmluaXNoZWQ=`;
-  // URL to get tags.<user>-laab-favorite list of books
-  const favoriteSearchString = getUserFavoriteTagInfo().favoriteSearchString;
-  const favoriteurl = `${getAbsURL()}/api/libraries/${libraryIdToUse}/items?filter=tags.${favoriteSearchString}`;
+//   const url = `${getAbsURL()}/api/libraries/${libraryIdToUse}/items${queryParams}`;
+//   // URL to get progess.finished books
+//   const progressurl = `${getAbsURL()}/api/libraries/${libraryIdToUse}/items?filter=progress.ZmluaXNoZWQ=`;
+//   // URL to get tags.<user>-laab-favorite list of books
+//   const favoriteSearchString = getUserFavoriteTagInfo().favoriteSearchString;
+//   const favoriteurl = `${getAbsURL()}/api/libraries/${libraryIdToUse}/items?filter=tags.${favoriteSearchString}`;
 
-  try {
-    // Get all books
-    response = await axios.get(url, { headers: authHeader });
-  } catch (error) {
-    // Don't throw error, maybe an alert or a log or a toast
-    console.log("absAPI-absGetLibraryItems-Main", error);
-    throw error;
-  }
+//   try {
+//     // Get all books
+//     response = await axios.get(url, { headers: authHeader });
+//   } catch (error) {
+//     // Don't throw error, maybe an alert or a log or a toast
+//     console.log("absAPI-absGetLibraryItems-Main", error);
+//     throw error;
+//   }
 
-  //~~ Query for "progress", checking if isFinished so we can set the Read/Not Read on book list
-  try {
-    // Get book progress
-    progressresponse = await axios.get(progressurl, { headers: authHeader });
-    // query for <user>-laab-favorite
-    favresponse = await axios.get(favoriteurl, { headers: authHeader });
-  } catch (error) {
-    // Don't throw error, maybe an alert or a log or a toast
-    console.log("absAPI-absGetLibraryItems-Progress", error);
-  }
+//   //~~ Query for "progress", checking if isFinished so we can set the Read/Not Read on book list
+//   try {
+//     // Get book progress
+//     progressresponse = await axios.get(progressurl, { headers: authHeader });
+//     // query for <user>-laab-favorite
+//     favresponse = await axios.get(favoriteurl, { headers: authHeader });
+//   } catch (error) {
+//     // Don't throw error, maybe an alert or a log or a toast
+//     console.log("absAPI-absGetLibraryItems-Progress", error);
+//   }
 
-  const libraryItems = response.data as GetLibraryItemsResponse;
-  // Get finished items
-  const finishedItemIds = progressresponse?.data?.results?.map((el) => el.id);
-  const finishedItemIdSet = new Set(finishedItemIds);
-  const favoritedItemIds = favresponse?.data?.results?.map((el) => el.id);
-  const favoritedItemIdSet = new Set(favoritedItemIds);
+//   const libraryItems = response.data as GetLibraryItemsResponse;
+//   // Get finished items
+//   const finishedItemIds = progressresponse?.data?.results?.map((el) => el.id);
+//   const finishedItemIdSet = new Set(finishedItemIds);
+//   const favoritedItemIds = favresponse?.data?.results?.map((el) => el.id);
+//   const favoritedItemIdSet = new Set(favoritedItemIds);
 
-  const booksMin = await Promise.all(
-    libraryItems.results.map(async (item) => {
-      const coverURL = await absAPIClient.buildCoverURL(item.id);
-      return {
-        id: item.id,
-        title: item.media.metadata.title,
-        subtitle: item.media.metadata.subtitle,
-        author: item.media.metadata.authorName,
-        series: item.media.metadata.seriesName,
-        publishedDate: item.media.metadata.publishedDate,
-        publishedYear: item.media.metadata.publishedYear,
-        narratedBy: item.media.metadata.narratorName,
-        description: item.media.metadata.description,
-        duration: item.media.duration,
-        addedAt: item.addedAt,
-        updatedAt: item.updatedAt,
-        cover: coverURL,
-        numAudioFiles: item.media.numAudioFiles,
-        genres: item.media.metadata.genres,
-        tags: item.media.tags,
-        asin: item.media.metadata.asin,
-        isFinished: finishedItemIdSet.has(item.id),
-        isFavorite: favoritedItemIdSet.has(item.id),
-      };
-    })
-  );
-  return booksMin;
-  // const booksMin = libraryItems.results.map((item) => {
-  //   // const coverURL = await absAPIClient.buildCoverURL(item.id);
-  //   // const coverURL = buildCoverURL(item.id);
-  //   // console.log("COVin-getlibitems", coverURL);
-  //   return {
-  //     id: item.id,
-  //     title: item.media.metadata.title,
-  //     subtitle: item.media.metadata.subtitle,
-  //     author: item.media.metadata.authorName,
-  //     series: item.media.metadata.seriesName,
-  //     publishedDate: item.media.metadata.publishedDate,
-  //     publishedYear: item.media.metadata.publishedYear,
-  //     narratedBy: item.media.metadata.narratorName,
-  //     description: item.media.metadata.description,
-  //     duration: item.media.duration,
-  //     addedAt: item.addedAt,
-  //     updatedAt: item.updatedAt,
-  //     cover: buildCoverURL(item.id),
-  //     numAudioFiles: item.media.numAudioFiles,
-  //     genres: item.media.metadata.genres,
-  //     tags: item.media.tags,
-  //     asin: item.media.metadata.asin,
-  //     isFinished: finishedItemIdSet.has(item.id),
-  //     isFavorite: favoritedItemIdSet.has(item.id),
-  //   };
-  // });
-  // return booksMin;
-};
+//   const booksMin = await Promise.all(
+//     libraryItems.results.map(async (item) => {
+//       const coverURL = await absAPIClient.buildCoverURL(item.id);
+//       return {
+//         id: item.id,
+//         title: item.media.metadata.title,
+//         subtitle: item.media.metadata.subtitle,
+//         author: item.media.metadata.authorName,
+//         series: item.media.metadata.seriesName,
+//         publishedDate: item.media.metadata.publishedDate,
+//         publishedYear: item.media.metadata.publishedYear,
+//         narratedBy: item.media.metadata.narratorName,
+//         description: item.media.metadata.description,
+//         duration: item.media.duration,
+//         addedAt: item.addedAt,
+//         updatedAt: item.updatedAt,
+//         cover: coverURL,
+//         numAudioFiles: item.media.numAudioFiles,
+//         genres: item.media.metadata.genres,
+//         tags: item.media.tags,
+//         asin: item.media.metadata.asin,
+//         isFinished: finishedItemIdSet.has(item.id),
+//         isFavorite: favoritedItemIdSet.has(item.id),
+//       };
+//     })
+//   );
+//   return booksMin;
+//   // const booksMin = libraryItems.results.map((item) => {
+//   //   // const coverURL = await absAPIClient.buildCoverURL(item.id);
+//   //   // const coverURL = buildCoverURL(item.id);
+//   //   // console.log("COVin-getlibitems", coverURL);
+//   //   return {
+//   //     id: item.id,
+//   //     title: item.media.metadata.title,
+//   //     subtitle: item.media.metadata.subtitle,
+//   //     author: item.media.metadata.authorName,
+//   //     series: item.media.metadata.seriesName,
+//   //     publishedDate: item.media.metadata.publishedDate,
+//   //     publishedYear: item.media.metadata.publishedYear,
+//   //     narratedBy: item.media.metadata.narratorName,
+//   //     description: item.media.metadata.description,
+//   //     duration: item.media.duration,
+//   //     addedAt: item.addedAt,
+//   //     updatedAt: item.updatedAt,
+//   //     cover: buildCoverURL(item.id),
+//   //     numAudioFiles: item.media.numAudioFiles,
+//   //     genres: item.media.metadata.genres,
+//   //     tags: item.media.tags,
+//   //     asin: item.media.metadata.asin,
+//   //     isFinished: finishedItemIdSet.has(item.id),
+//   //     isFavorite: favoritedItemIdSet.has(item.id),
+//   //   };
+//   // });
+//   // return booksMin;
+// };
 
 //~~ ========================================================
 //~~ absGetItemDetails
@@ -371,80 +372,79 @@ export const absGetLibraryItems = async ({
 //~~ dropboxStore.folderAttributes
 //~~ called from store-dropbox.ts -> initABSFolderAttributes
 //~~ ========================================================
-//!!! DOCUMENT!!!
-export const absUpdateLocalAttributes = async () => {
-  const authClient = useABSStore.getState().authClient;
-  const isAuthenticated = await authClient.auth.isAuthenticated();
-  console.log("absAPI isAuthed", isAuthenticated);
-  if (!isAuthenticated) {
-    return [];
-  }
+// export const absUpdateLocalAttributes = async () => {
+//   const authClient = useABSStore.getState().authClient;
+//   const isAuthenticated = await authClient.auth.isAuthenticated();
+//   console.log("absAPI isAuthed", isAuthenticated);
+//   if (!isAuthenticated) {
+//     return [];
+//   }
 
-  const authHeader = await getAuthHeader();
-  const activeLibraryId = useABSStore.getState().activeLibraryId;
-  const libraryIdToUse = activeLibraryId;
+//   const authHeader = await getAuthHeader();
+//   const activeLibraryId = useABSStore.getState().activeLibraryId;
+//   const libraryIdToUse = activeLibraryId;
 
-  // ~~ GET Favorites
-  let favoriteSearchString = getUserFavoriteTagInfo().favoriteSearchString;
-  // Get ABS Favorites for current user
-  const favs = await absGetLibraryItems({
-    filterType: "tags",
-    filterValue: favoriteSearchString,
-  });
+//   // ~~ GET Favorites
+//   let favoriteSearchString = getUserFavoriteTagInfo().favoriteSearchString;
+//   // Get ABS Favorites for current user
+//   const favs = await absGetLibraryItems({
+//     filterType: "tags",
+//     filterValue: favoriteSearchString,
+//   });
 
-  // ~~ URL to get progess.finished books
-  const progressurl = `${getAbsURL()}/api/libraries/${libraryIdToUse}/items?filter=progress.ZmluaXNoZWQ=`;
-  let progressresponse;
-  //~~ Query for "progress", checking if isFinished so we can set the Read/Not Read on book list
-  try {
-    // Get book progress
-    progressresponse = await axios.get(progressurl, { headers: authHeader });
-  } catch (error) {
-    // Don't throw error, maybe an alert or a log or a toast
-    console.log("absAPI-absUpdateLocalFavorites-Progress", error);
-  }
+//   // ~~ URL to get progess.finished books
+//   const progressurl = `${getAbsURL()}/api/libraries/${libraryIdToUse}/items?filter=progress.ZmluaXNoZWQ=`;
+//   let progressresponse;
+//   //~~ Query for "progress", checking if isFinished so we can set the Read/Not Read on book list
+//   try {
+//     // Get book progress
+//     progressresponse = await axios.get(progressurl, { headers: authHeader });
+//   } catch (error) {
+//     // Don't throw error, maybe an alert or a log or a toast
+//     console.log("absAPI-absUpdateLocalFavorites-Progress", error);
+//   }
 
-  const favResults = favs.map((el) => {
-    return {
-      itemId: el.id,
-      type: "isFavorite",
-      folderNameIn: `${el.title}~${el.author}`,
-      imageURL: el.cover,
-    } as const;
-  });
-  const readResults = progressresponse?.data?.results?.map(async (el) => {
-    const coverURL = await absAPIClient.buildCoverURL(el.id);
-    return {
-      itemId: el.id,
-      type: "isRead",
-      folderNameIn: `${el.media.metadata.authorName}~${el.media.metadata.authorName}`,
-      imageURL: coverURL,
-    };
-  });
+//   const favResults = favs.map((el) => {
+//     return {
+//       itemId: el.id,
+//       type: "isFavorite",
+//       folderNameIn: `${el.title}~${el.author}`,
+//       imageURL: el.cover,
+//     } as const;
+//   });
+//   const readResults = progressresponse?.data?.results?.map(async (el) => {
+//     const coverURL = await absAPIClient.buildCoverURL(el.id);
+//     return {
+//       itemId: el.id,
+//       type: "isRead",
+//       folderNameIn: `${el.media.metadata.title}~${el.media.metadata.authorName}`,
+//       imageURL: coverURL,
+//     };
+//   });
 
-  // Step 1: Create a map for quick lookup
-  const resultMap = new Map();
+//   // Step 1: Create a map for quick lookup
+//   const resultMap = new Map();
 
-  // Helper function to merge items.  If we have an item that is both read and favorited
-  // type will contain ["isFavorite", "isRead"]
-  const mergeItems = (item) => {
-    if (resultMap.has(item.itemId)) {
-      const existingItem = resultMap.get(item.itemId);
-      existingItem.type = [...new Set([...existingItem.type, item.type])];
-    } else {
-      resultMap.set(item.itemId, { ...item, type: [item.type] });
-    }
-  };
+//   // Helper function to merge items.  If we have an item that is both read and favorited
+//   // type will contain ["isFavorite", "isRead"]
+//   const mergeItems = (item) => {
+//     if (resultMap.has(item.itemId)) {
+//       const existingItem = resultMap.get(item.itemId);
+//       existingItem.type = [...new Set([...existingItem.type, item.type])];
+//     } else {
+//       resultMap.set(item.itemId, { ...item, type: [item.type] });
+//     }
+//   };
 
-  // Step 2: Merge the arrays -- fav and read in a single array with type differentiating
-  favResults.forEach(mergeItems);
-  readResults.forEach(mergeItems);
+//   // Step 2: Merge the arrays -- fav and read in a single array with type differentiating
+//   favResults.forEach(mergeItems);
+//   readResults.forEach(mergeItems);
 
-  // Step 3: Convert the map back to an array
-  const combinedResults = Array.from(resultMap.values()).filter((el) => el.itemId);
+//   // Step 3: Convert the map back to an array
+//   const combinedResults = Array.from(resultMap.values()).filter((el) => el.itemId);
 
-  return combinedResults;
-};
+//   return combinedResults;
+// };
 
 //~~ ========================================================
 //~~ absSetFavoriteTag
@@ -478,57 +478,57 @@ export const absUpdateLocalAttributes = async () => {
 //~~ ========================================================
 //~~ absDownloadEbook ## EBOOKDL
 //~~ ========================================
-export const absDownloadEbook = async (itemId: string, fileIno: string, filenameWExt: string) => {
-  let tempFileUri: string | null = null;
-  const { url, urlWithToken, authHeader } = await absAPIClient.absDownloadItem(itemId, fileIno);
+// export const absDownloadEbook = async (itemId: string, fileIno: string, filenameWExt: string) => {
+//   let tempFileUri: string | null = null;
+//   const { url, urlWithToken, authHeader } = await absAPIClient.absDownloadItem(itemId, fileIno);
 
-  try {
-    // console.log("Starting download...");
+//   try {
+//     // console.log("Starting download...");
 
-    // Create a temporary directory for downloads
-    const tempDir = `${FileSystem.cacheDirectory}temp_downloads/`;
-    await FileSystem.makeDirectoryAsync(tempDir, { intermediates: true });
+//     // Create a temporary directory for downloads
+//     const tempDir = `${FileSystem.cacheDirectory}temp_downloads/`;
+//     await FileSystem.makeDirectoryAsync(tempDir, { intermediates: true });
 
-    // Create file URI in the temporary directory
-    tempFileUri = `${tempDir}${filenameWExt}`;
+//     // Create file URI in the temporary directory
+//     tempFileUri = `${tempDir}${filenameWExt}`;
 
-    // Download the file
-    const downloadResult = await FileSystem.downloadAsync(url, tempFileUri, {
-      headers: authHeader,
-    });
+//     // Download the file
+//     const downloadResult = await FileSystem.downloadAsync(url, tempFileUri, {
+//       headers: authHeader,
+//     });
 
-    if (downloadResult.status === 200) {
-      // console.log("Download completed:", downloadResult.uri);
+//     if (downloadResult.status === 200) {
+//       // console.log("Download completed:", downloadResult.uri);
 
-      const isAvailable = await Sharing.isAvailableAsync();
+//       const isAvailable = await Sharing.isAvailableAsync();
 
-      if (isAvailable) {
-        await Sharing.shareAsync(downloadResult.uri);
-        // console.log("Sharing completed or cancelled");
-      } else {
-        Alert.alert("Download Complete", `File downloaded successfully`);
-      }
-    } else {
-      throw new Error(`Download failed with status: ${downloadResult.status}`);
-    }
-  } catch (error) {
-    console.error("Download error:", error);
-    Alert.alert("Download Failed", "Unable to download the file. Please try again.");
-  } finally {
-    // Clean up the temporary file
-    if (tempFileUri) {
-      try {
-        const fileInfo = await FileSystem.getInfoAsync(tempFileUri);
-        if (fileInfo.exists) {
-          await FileSystem.deleteAsync(tempFileUri);
-          console.log("Temporary file cleaned up:", tempFileUri);
-        }
-      } catch (cleanupError) {
-        console.warn("Failed to clean up temporary file:", cleanupError);
-      }
-    }
-  }
-};
+//       if (isAvailable) {
+//         await Sharing.shareAsync(downloadResult.uri);
+//         // console.log("Sharing completed or cancelled");
+//       } else {
+//         Alert.alert("Download Complete", `File downloaded successfully`);
+//       }
+//     } else {
+//       throw new Error(`Download failed with status: ${downloadResult.status}`);
+//     }
+//   } catch (error) {
+//     console.error("Download error:", error);
+//     Alert.alert("Download Failed", "Unable to download the file. Please try again.");
+//   } finally {
+//     // Clean up the temporary file
+//     if (tempFileUri) {
+//       try {
+//         const fileInfo = await FileSystem.getInfoAsync(tempFileUri);
+//         if (fileInfo.exists) {
+//           await FileSystem.deleteAsync(tempFileUri);
+//           console.log("Temporary file cleaned up:", tempFileUri);
+//         }
+//       } catch (cleanupError) {
+//         console.warn("Failed to clean up temporary file:", cleanupError);
+//       }
+//     }
+//   }
+// };
 
 //~~ ========================================================
 //~~ absUpdateBookProgress
@@ -576,16 +576,16 @@ export const absDownloadEbook = async (itemId: string, fileIno: string, filename
 //~~ getUserFavSearchTag
 //~~ returns the <user>-laab-favorite string
 //~~ ========================================================
-export const getUserFavoriteTagInfo = () => {
-  const userInfo = useABSStore.getState().userInfo;
+// export const getUserFavoriteTagInfo = () => {
+//   const userInfo = useABSStore.getState().userInfo;
 
-  let favoriteSearchString = userInfo?.favoriteSearchString;
-  if (!favoriteSearchString) {
-    favoriteSearchString = btoa(`${userInfo.username}-laab-favorite`);
-    useABSStore.setState({ userInfo: { ...userInfo, favoriteSearchString } });
-  }
-  return {
-    favoriteSearchString,
-    favoriteUserTagValue: `${userInfo.username}-laab-favorite`,
-  };
-};
+//   let favoriteSearchString = userInfo?.favoriteSearchString;
+//   if (!favoriteSearchString) {
+//     favoriteSearchString = btoa(`${userInfo.username}-laab-favorite`);
+//     useABSStore.setState({ userInfo: { ...userInfo, favoriteSearchString } });
+//   }
+//   return {
+//     favoriteSearchString,
+//     favoriteUserTagValue: `${userInfo.username}-laab-favorite`,
+//   };
+// };

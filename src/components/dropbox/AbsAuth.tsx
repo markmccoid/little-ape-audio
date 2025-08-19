@@ -24,7 +24,6 @@ import { useDropboxStore } from "@store/store-dropbox";
 import { AudiobookshelfAuth } from "./AudiobookShelf/ABSAuthentication/absAuthClass";
 import { AudiobookshelfAPI } from "./AudiobookShelf/ABSAuthentication/absAPInew";
 import { AuthCredentials } from "./AudiobookShelf/ABSAuthentication/abstypes";
-import { absUpdateLocalAttributes } from "@store/data/absAPI";
 
 const AbsAuth = () => {
   const queryClient = useQueryClient();

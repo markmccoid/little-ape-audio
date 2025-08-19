@@ -26,7 +26,7 @@ import { router } from "expo-router";
 import { getCurrentChapter } from "@utils/chapterUtils";
 import { debounce, toInteger } from "lodash";
 import { getImageColors, resolveABSImage } from "@utils/otherUtils";
-import { absUpdateBookProgress } from "./data/absAPI";
+import { absUpdateBookProgress } from "./data/absAPIOLD";
 import { ABSBookmark } from "./data/absTypes";
 import { absAPIClient } from "./store-abs";
 

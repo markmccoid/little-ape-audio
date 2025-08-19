@@ -1,26 +1,30 @@
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ABSGetLibraryItems, absGetLibraryItems, getUserFavoriteTagInfo } from "./absAPI";
 import { reverse, sortBy } from "lodash";
 import { absAPIClient, useABSStore } from "@store/store-abs";
-import { act, useMemo } from "react";
 import { btoa } from "react-native-quick-base64";
 import { useDropboxStore } from "@store/store-dropbox";
 import { sanitizeString } from "@utils/otherUtils";
 import { el } from "date-fns/locale";
 import { EbookFile } from "./absTypes";
-
+import { ABSGetLibraryItems } from "@components/dropbox/AudiobookShelf/ABSAuthentication/absAPInew";
 //~~ ================================================================
 //~~ useGetFilterData - Get the filter data for the library
 //~~ ================================================================
 export const useGetFilterData = () => {
+  const isAuthed = useIsAuthed();
   const activeLibraryId = useABSStore((state) => state.activeLibraryId);
-
   const { data, ...rest } = useQuery({
     queryKey: ["absfilterdata"],
     queryFn: async () => await absAPIClient.getLibraryFilterData(activeLibraryId),
     // queryFn: async () => await absGetLibraryFilterData(activeLibraryId),
+    enabled: !!isAuthed,
   });
 
+  if (!isAuthed) {
+    return { filterData: [], isError: true, error: new Error("Not Logged into AudiobookShelf") };
+    // throw new Error("Not Logged into AudiobookShelf");
+  }
   return { filterData: data, ...rest };
 };
 
@@ -42,18 +46,22 @@ export const useGetAllABSBooks = () => {
     favorites: showFavorites,
     isRead: isReadOption,
   } = useABSStore((state) => state.searchObject);
+  // Check to see if we are authorized.  If not, then do not run the other queries
+  const isAuthed = useIsAuthed();
+
   const { field, direction } = useABSStore((state) => state.resultSort);
   const libraryId = useABSStore((state) => state.activeLibraryId);
+
   const { data, ...rest } = useQuery({
     queryKey: ["allABSBooks"],
-    queryFn: async () => await absGetLibraryItems({ libraryId }),
+    queryFn: async () => await absAPIClient.getLibraryItems({ libraryId }),
+    enabled: !!isAuthed,
   });
 
-  // const { data: progressData, ...progressRest } = useQuery({
-  //   queryKey: ["allABSBooks-finished"],
-  //   queryFn: async () =>
-  //     await absGetLibraryItems({ filterType: "progress", filterValue: "ZmluaXNoZWQ=" }),
-  // });
+  if (!isAuthed) {
+    return { books: [], isError: true, error: new Error("Not Logged into AudiobookShelf") };
+    // throw new Error("Not Logged into AudiobookShelf");
+  }
 
   if (rest.isLoading || rest.isError) {
     return {
@@ -79,11 +87,12 @@ export const useGetAllABSBooks = () => {
   // );
   // For abs, sanitizeString takes the uuid (el.id) and returns a string with the hypens turned to underscores
   // abdfef-4fef-4fef-4fef-4fe -> abdfef_4fef_4fef_4fef_4fe
-  // This map will apply the local favorites and read ids to each book.
+  // This map will apply the local favorites and read/finished ids to each book.
 
-  // const dataWAttributes = data;
-  //! The issue was that we favored local favorites.  Thus if you logged in on two devices
-  //! this will overwrite with the local and you loose all the server
+  //! This will check if the book is locally favorited or read and if NOT
+  //! it will check to see if it favorited on the server and apply the favorite.
+  //! I am not syncing the server favorites to the local when we get books.  This is done
+  //! when the app starts and when a user logs in or out.  May get out of sync if user is offline.
   const dataWAttributes = data?.map((el) => ({
     ...el,
     isFavorite: isFavoriteIds.has(sanitizeString(el.id)) || el.isFavorite,
@@ -117,7 +126,6 @@ export const useGetAllABSBooks = () => {
   // Filter the data.
   // Grab the folder attributes and create an array of ids that are marked as favs
   let filterData: ABSGetLibraryItems = [];
-  let favoriteTag = getUserFavoriteTagInfo().favoriteUserTagValue.toLowerCase();
 
   // Loop through the data and apply the search criteria
   for (const book of dataWAttributes) {
@@ -270,7 +278,7 @@ async function getSeriesBooks(seriesIds: string[], seriesInfo: { id: string; nam
   const libraryId = useABSStore.getState().activeLibraryId;
   const promises = seriesIds.map(async (id) => {
     const seriesDetail = seriesInfo.find((el) => el.id === id);
-    const response = await absGetLibraryItems({
+    const response = await absAPIClient.absGetLibraryItems({
       libraryId,
       filterType: "series",
       filterValue: btoa(id),
@@ -340,4 +348,21 @@ function generateRandomIntegers(count, min, max) {
   }
 
   return Array.from(randomNumbers);
+}
+
+function useIsAuthed() {
+  const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
+  const authClient = useABSStore((state) => state.authClient?.auth);
+  useEffect(() => {
+    let mounted = true;
+    if (!authClient) return setIsAuthed(false);
+    authClient.isAuthenticated().then((res: boolean) => {
+      if (mounted) setIsAuthed(res);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [authClient]);
+
+  return isAuthed;
 }

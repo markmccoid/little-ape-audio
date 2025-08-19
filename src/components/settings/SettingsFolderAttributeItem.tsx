@@ -3,7 +3,7 @@ import React from "react";
 import { FolderAttributeItem, useDropboxStore } from "@store/store-dropbox";
 import { SymbolView } from "expo-symbols";
 import { colors } from "@constants/Colors";
-import { absSetBookToFinished } from "@store/data/absAPI";
+import { absSetBookToFinished } from "@store/data/absAPIOLD";
 
 type Props = { attribute: FolderAttributeItem };
 const SettingsFolderAttributeItem = ({ attribute }: Props) => {

@@ -2,7 +2,7 @@ import { View, Text, FlatList, SafeAreaView } from "react-native";
 import React, { Ref, useState } from "react";
 import ABSResultsBookRow from "./ABSResultsBookRow";
 
-import { ABSGetLibraryItems } from "@store/data/absAPI";
+import { ABSGetLibraryItems } from "./ABSAuthentication/absAPInew";
 
 type Props = {
   books: ABSGetLibraryItems;

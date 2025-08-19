@@ -177,10 +177,10 @@ export const onInitialize = async () => {
     // searchObject: {},
     actions: absActions,
   });
-
+  await absActions.initializeAuth();
   // check to see if we are authenticated to AudiobooksShelf (ABS)
   const isAuthenticated = await useABSStore.getState()?.authClient?.auth?.isAuthenticated();
-  console.log("IN INIT", isAuthenticated);
+
   const absSyncBookmarks = useSettingStore.getState().absSyncBookmarks;
   const initABSFolderAttributes = useDropboxStore.getState().actions.initABSFolderAttributes;
   if (isAuthenticated) {
@@ -196,45 +196,4 @@ export const onInitialize = async () => {
 
     await initABSFolderAttributes();
   }
-
-  // await useDropboxStore.getState().actions.clearABSFolderAttributes();
-  // Load favorites
-  // if (isAuthenticated) {
-  //   try {
-  //     const { finishedItemIds, favoritedItemIds } =
-  //       await absAPIClient.getFavoritedAndFinishedItems();
-
-  //     await Promise.all(
-  //       finishedItemIds.map((item) => {
-  //         useDropboxStore.getState().actions.updateFolderAttribute({
-  //           id: item.id,
-  //           type: "isRead",
-  //           action: "add",
-  //           folderNameIn: `${item.title}~${item.author}`,
-  //           audioSource: "abs",
-  //           parentFolderId: "",
-  //           imageURL: item.coverURI,
-  //           absId: item.id,
-  //         });
-  //       })
-  //     );
-
-  //     await Promise.all(
-  //       favoritedItemIds.map((item) => {
-  //         useDropboxStore.getState().actions.updateFolderAttribute({
-  //           id: item.id,
-  //           type: "isFavorite",
-  //           action: "add",
-  //           folderNameIn: `${item.title}~${item.author}`,
-  //           audioSource: "abs",
-  //           parentFolderId: "",
-  //           imageURL: item.coverURI,
-  //           absId: item.id,
-  //         });
-  //       })
-  //     );
-  //   } catch (e) {
-  //     console.log("Init Load favs and finished", e);
-  //   }
-  //}
 };

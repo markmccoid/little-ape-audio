@@ -5,16 +5,16 @@ import { useBookDetails } from "@store/data/absHooks";
 import { useDropboxStore } from "@store/store-dropbox";
 import { sanitizeString } from "@utils/otherUtils";
 import { useState } from "react";
-import { getUserFavoriteTagInfo } from "@store/data/absAPI";
 import { SymbolView } from "expo-symbols";
 import { colors } from "@constants/Colors";
-import { absAPIClient } from "@store/store-abs";
+import { absAPIClient, getUserFavoriteTagId } from "@store/store-abs";
 
 const ABSToggleBookFavorite = () => {
   //! Get Info needed to mark as favorite and read for ABS books
   const playlistId = usePlaybackStore((state) => state.currentPlaylistId);
   //# THis is the tag that identifies this book as a favorite of logged in user
-  const userFavTagValue = getUserFavoriteTagInfo().favoriteUserTagValue;
+  const userFavTagValue = getUserFavoriteTagId().favoriteUserTagValue;
+  // const userFavTagValue = getUserFavoriteTagInfo().favoriteUserTagValue;
 
   const actions = useTracksStore((state) => state.actions);
   const track = actions.getPlaylistTracks(playlistId)[0];

@@ -1,3 +1,4 @@
+import { absAPIClient } from "@store/store-abs";
 import { resolveABSImage } from "./../utils/otherUtils";
 import { Alert, Image } from "react-native";
 import { defaultImages, getRandomNumber } from "./storeUtils";
@@ -20,7 +21,7 @@ import { AUDIO_FORMATS } from "@utils/constants";
 import { ProcessedBookData, ScannedFolder } from "./types";
 import { differenceInDays, format } from "date-fns";
 import { sanitizeString } from "@utils/otherUtils";
-import { absUpdateLocalAttributes } from "@store/data/absAPI";
+import { absUpdateLocalAttributes } from "@store/data/absAPIOLD";
 //-- ==================================
 //-- DROPBOX STORE
 //-- ==================================
@@ -225,7 +226,8 @@ export const useDropboxStore = create<DropboxState>((set, get) => ({
     },
     initABSFolderAttributes: async () => {
       // query ABS and get current favorites
-      const attributeRecords = await absUpdateLocalAttributes();
+      const attributeRecords = await absAPIClient.getFavoritedAndFinishedItems();
+      // const attributeRecords = await absUpdateLocalAttributes();
       //
 
       const attributes = [...get().folderAttributes];

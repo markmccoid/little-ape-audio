@@ -1,13 +1,22 @@
 // services/AudiobookshelfAPI.ts
-import { ABSLoginResponse, FilterData, Library, LibraryItem, User } from "@store/data/absTypes";
+import {
+  ABSLoginResponse,
+  FilterData,
+  GetLibraryItemsResponse,
+  Library,
+  LibraryItem,
+  User,
+} from "@store/data/absTypes";
 import { AudiobookshelfAuth } from "./absAuthClass";
 import { AuthenticationError, NetworkError, AudiobookshelfError } from "./abstypes";
 import axios, { AxiosRequestConfig } from "axios";
 import { Bookmark } from "@store/types";
 import { getCoverURI } from "@store/data/absUtils";
 import { btoa } from "react-native-quick-base64";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
+import { Alert } from "react-native";
 
-// export type ABSGetLibraryItems = Awaited<ReturnType<typeof absGetLibraryItems>>;
 export type FilterType = "genres" | "tags" | "authors" | "series" | "progress";
 type GetLibraryItemsParams = {
   libraryId?: string;
@@ -19,6 +28,13 @@ type GetLibraryItemsParams = {
   page?: number;
   limit?: number;
 };
+
+// Type for the resolved return value of getLibraryItems
+export type ABSGetLibraryItems = Awaited<ReturnType<AudiobookshelfAPI["getLibraryItems"]>>;
+
+// Type for a single item
+export type ABSGetLibraryItem = ABSGetLibraryItems[number];
+
 export class AudiobookshelfAPI {
   constructor(
     private serverUrl: string,
@@ -205,45 +221,68 @@ export class AudiobookshelfAPI {
     // const libraryItems = response.data as GetLibraryItemsResponse;
     // Get finished items
     interface ItemInfo {
-      id: string;
-      title: string;
-      author: string;
-      coverURI: string;
+      itemId: string;
+      type: "isFavorite" | "isRead";
+      folderNameIn: string;
+      imageURL: string;
     }
-    const finishedItemIds: ItemInfo[] = await Promise.all(
+    // return {
+    //   itemId: el.id,
+    //   type: "isFavorite",
+    //   folderNameIn: `${el.title}~${el.author}`,
+    //   imageURL: el.cover,
+    const readResults: ItemInfo[] = await Promise.all(
       progressData?.results?.map(async (el) => {
         const coverURL = await this.buildCoverURL(el.id);
         const coverURI = (await getCoverURI(coverURL)).coverURL;
 
         return {
-          id: el.id,
-          title: el.media.metadata.title,
-          author: el.media.metadata.authorName,
-          coverURI,
+          itemId: el.id,
+          type: "isRead",
+          folderNameIn: `${el.media.metadata.title}~${el.media.metadata.authorName}`,
+          imageURL: coverURI,
         };
       }) ?? []
     );
 
-    const favoritedItemIds: ItemInfo[] = await Promise.all(
+    const favResults: ItemInfo[] = await Promise.all(
       favData?.results?.map(async (el) => {
         const coverURL = await this.buildCoverURL(el.id);
         const coverURI = (await getCoverURI(coverURL)).coverURL;
 
         return {
-          id: el.id,
-          title: el.media.metadata.title,
-          author: el.media.metadata.authorName,
-          coverURI,
+          itemId: el.id,
+          type: "isFavorite",
+          folderNameIn: `${el.media.metadata.title}~${el.media.metadata.authorName}`,
+          imageURL: coverURI,
         };
       }) ?? []
     );
-    // const favoritedItemIdSet = new Set(favoritedItemIds);
 
-    return {
-      finishedItemIds,
-      favoritedItemIds,
+    // Step 1: Create a map for quick lookup
+    const resultMap = new Map();
+
+    // Helper function to merge items.  If we have an item that is both read and favorited
+    // type will contain ["isFavorite", "isRead"]
+    const mergeItems = (item) => {
+      if (resultMap.has(item.itemId)) {
+        const existingItem = resultMap.get(item.itemId);
+        existingItem.type = [...new Set([...existingItem.type, item.type])];
+      } else {
+        resultMap.set(item.itemId, { ...item, type: [item.type] });
+      }
     };
+
+    // Step 2: Merge the arrays -- fav and read in a single array with type differentiating
+    favResults.forEach(mergeItems);
+    readResults.forEach(mergeItems);
+
+    // Step 3: Convert the map back to an array
+    const combinedResults = Array.from(resultMap.values()).filter((el) => el.itemId);
+
+    return combinedResults;
   }
+
   //~~ ========================================================
   //~~ absGetItemDetails
   //~~ ========================================================
@@ -329,6 +368,62 @@ export class AudiobookshelfAPI {
 
     return { url, urlWithToken, authHeader };
   }
+
+  //~~ ========================================================
+  //~~ downloadEbook ## EBOOKDL
+  //~~ ========================================
+  async downloadEbook(itemId: string, fileIno: string, filenameWExt: string) {
+    let tempFileUri: string | null = null;
+    const { url, urlWithToken, authHeader } = await this.absDownloadItem(itemId, fileIno);
+
+    try {
+      // console.log("Starting download...");
+
+      // Create a temporary directory for downloads
+      const tempDir = `${FileSystem.cacheDirectory}temp_downloads/`;
+      await FileSystem.makeDirectoryAsync(tempDir, { intermediates: true });
+
+      // Create file URI in the temporary directory
+      tempFileUri = `${tempDir}${filenameWExt}`;
+
+      // Download the file
+      const downloadResult = await FileSystem.downloadAsync(url, tempFileUri, {
+        headers: authHeader,
+      });
+
+      if (downloadResult.status === 200) {
+        // console.log("Download completed:", downloadResult.uri);
+
+        const isAvailable = await Sharing.isAvailableAsync();
+
+        if (isAvailable) {
+          await Sharing.shareAsync(downloadResult.uri);
+          // console.log("Sharing completed or cancelled");
+        } else {
+          Alert.alert("Download Complete", `File downloaded successfully`);
+        }
+      } else {
+        throw new Error(`Download failed with status: ${downloadResult.status}`);
+      }
+    } catch (error) {
+      console.error("Download error:", error);
+      Alert.alert("Download Failed", "Unable to download the file. Please try again.");
+    } finally {
+      // Clean up the temporary file
+      if (tempFileUri) {
+        try {
+          const fileInfo = await FileSystem.getInfoAsync(tempFileUri);
+          if (fileInfo.exists) {
+            await FileSystem.deleteAsync(tempFileUri);
+            console.log("Temporary file cleaned up:", tempFileUri);
+          }
+        } catch (cleanupError) {
+          console.warn("Failed to clean up temporary file:", cleanupError);
+        }
+      }
+    }
+  }
+
   //~~ ========================================================
   //~~ absGetLibraryFilterData - Get the filterdata
   //~~ genres, tags, authors and series
@@ -368,6 +463,10 @@ export class AudiobookshelfAPI {
     };
   }
   //# MAIN get function.  Will get library items filtered and sorted
+  //~~ ========================================================
+  //~~ getLibraryItems - Return a subset of a libraries items
+  //~~  based on the passed filterType
+  //~~ ========================================================
   async getLibraryItems({
     libraryId,
     filterType,
@@ -379,9 +478,9 @@ export class AudiobookshelfAPI {
     // const authHeader = await getAuthHeader();
     // const activeLibraryId = useABSStore.getState().activeLibraryId;
     const libraryIdToUse = libraryId;
-    let response;
-    let progressresponse;
-    let favresponse;
+    let responseData;
+    let progressresponseData;
+    let favresponseData;
     let queryParams = "";
 
     if (filterType) {
@@ -396,11 +495,11 @@ export class AudiobookshelfAPI {
     const progressurl = `/api/libraries/${libraryIdToUse}/items?filter=progress.ZmluaXNoZWQ=`;
     // URL to get tags.<user>-laab-favorite list of books
     const favoriteSearchString = this.userFavoriteInfo.favoriteSearchString;
-    console.log("API", favoriteSearchString);
+
     const favoriteurl = `/api/libraries/${libraryIdToUse}/items?filter=tags.${favoriteSearchString}`;
     try {
       // Get all books
-      response = await axios.get(url, { headers: authHeader });
+      responseData = await this.makeAuthenticatedRequest(url);
     } catch (error) {
       // Don't throw error, maybe an alert or a log or a toast
       console.log("absAPI-absGetLibraryItems-Main", error);
@@ -410,26 +509,25 @@ export class AudiobookshelfAPI {
     //~~ Query for "progress", checking if isFinished so we can set the Read/Not Read on book list
     try {
       // Get book progress
-      progressresponse = await axios.get(progressurl, { headers: authHeader });
+      progressresponseData = await this.makeAuthenticatedRequest(progressurl);
       // query for <user>-laab-favorite
-      favresponse = await axios.get(favoriteurl, { headers: authHeader });
+      favresponseData = await this.makeAuthenticatedRequest(favoriteurl);
     } catch (error) {
       // Don't throw error, maybe an alert or a log or a toast
-      console.log("absAPICLASS-absGetLibraryItems-Progress", error);
+      console.log("absAPI-absGetLibraryItems-Progress", error);
     }
 
-    const libraryItems = response.data as GetLibraryItemsResponse;
-    // Get finished items
-    const finishedItemIds = progressresponse?.data?.results?.map((el) => el.id);
-    const finishedItemIdSet = new Set(finishedItemIds);
-    const favoritedItemIds = favresponse?.data?.results?.map((el) => el.id);
+    const libraryItems = responseData.results as GetLibraryItemsResponse["results"];
 
+    // Get finished items
+    const finishedItemIds = progressresponseData?.results?.map((el) => el.id);
+    const finishedItemIdSet = new Set(finishedItemIds);
+    const favoritedItemIds = favresponseData?.results?.map((el) => el.id);
     const favoritedItemIdSet = new Set(favoritedItemIds);
 
     const booksMin = await Promise.all(
-      libraryItems.results.map(async (item) => {
-        const coverURL = await absAPIClient.buildCoverURL(item.id);
-
+      libraryItems.map(async (item) => {
+        const coverURL = await this.buildCoverURL(item.id);
         return {
           id: item.id,
           title: item.media.metadata.title,
@@ -453,6 +551,7 @@ export class AudiobookshelfAPI {
         };
       })
     );
+
     return booksMin;
   }
 }

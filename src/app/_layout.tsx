@@ -55,8 +55,6 @@ export default function RootLayout() {
   //--------
   useEffect(() => {
     const setupTP = async () => {
-      await onInitialize();
-
       // Initialize authentication system
       try {
         await useABSStore.getState().actions.initializeAuth();
@@ -65,6 +63,7 @@ export default function RootLayout() {
         console.error("Failed to initialize authentication:", error);
       }
 
+      await onInitialize();
       const jumpForwardSeconds = useSettingStore.getState().jumpForwardSeconds;
       const jumpBackwardSeconds = useSettingStore.getState().jumpBackwardSeconds;
 

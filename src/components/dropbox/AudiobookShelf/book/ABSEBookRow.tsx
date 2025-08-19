@@ -3,8 +3,8 @@ import React from "react";
 import { SymbolView } from "expo-symbols";
 import { formatBytes } from "@utils/formatUtils";
 import { EbookFile } from "@store/data/absTypes";
-import { absDownloadEbook } from "@store/data/absAPI";
 import { PDFIcon, EpubIcon, CloudDownloadIcon } from "@components/common/svg/Icons";
+import { absAPIClient } from "@store/store-abs";
 interface Props {
   bookId: string;
   ebookFile: EbookFile;
@@ -15,7 +15,7 @@ const ABSEBookRow = ({ ebookFile, bookId }: Props) => {
   const handleDownload = async () => {
     try {
       setIsDownloading(true);
-      await absDownloadEbook(bookId, ebookFile.ino, ebookFile.metadata.filename);
+      await absAPIClient.downloadEbook(bookId, ebookFile.ino, ebookFile.metadata.filename);
     } catch (error) {
       console.log("Error downloading ebook", error);
     } finally {

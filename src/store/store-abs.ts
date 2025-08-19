@@ -267,7 +267,7 @@ export const absAPIClient: AudiobookshelfAPI = new Proxy(
   {},
   Object.freeze({
     get(_: unknown, prop: keyof AudiobookshelfAPI, receiver: unknown) {
-      const actualClient = useABSStore.getState().authClient.api;
+      const actualClient = useABSStore.getState().authClient?.api;
       if (!actualClient) {
         throw new Error("API client not yet loaded");
       }

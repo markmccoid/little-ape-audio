@@ -25,10 +25,9 @@ import {
   SeriesIcon,
 } from "@components/common/svg/Icons";
 import { createFolderMetadataKey, useDropboxStore } from "@store/store-dropbox";
-import { absAPIClient, useABSStore } from "@store/store-abs";
+import { absAPIClient, getUserFavoriteTagId, useABSStore } from "@store/store-abs";
 import { router } from "expo-router";
-import { getUserFavoriteTagInfo } from "@store/data/absAPI";
-import { formatBytes, formatSeconds } from "@utils/formatUtils";
+import { formatSeconds } from "@utils/formatUtils";
 import { useQueryClient } from "@tanstack/react-query";
 import { SymbolView } from "expo-symbols";
 import * as Linking from "expo-linking";
@@ -64,7 +63,7 @@ const ABSBookContainer = ({ data, isLoading, isError }: Props) => {
   const clearSearchBar = useABSStore((state) => state.clearSearchBar);
   const dropboxActions = useDropboxStore((state) => state.actions);
   const folderAttributes = useDropboxStore((state) => state.folderAttributes);
-  const userFavTagValue = getUserFavoriteTagInfo().favoriteUserTagValue;
+  const userFavTagValue = getUserFavoriteTagId().favoriteUserTagValue;
   const [showDescription, setShowDescription] = React.useState(false);
   const authors = media?.metadata?.authorName || formatAuthors(media?.metadata?.authors);
   const taggedAudioFiles = useMemo(

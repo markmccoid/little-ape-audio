@@ -1,6 +1,5 @@
 import { View, Text, Image, Pressable, StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
-import { ABSGetLibraryItems } from "@store/data/absAPI";
 import { getCoverURI } from "@store/data/absUtils";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useRouter } from "expo-router";
@@ -9,10 +8,12 @@ import { SymbolView, SymbolViewProps, SFSymbol } from "expo-symbols";
 import { DurationIcon, SeriesIcon } from "@components/common/svg/Icons";
 import { colors } from "@constants/Colors";
 import { LinearGradient } from "expo-linear-gradient";
+// import { ABSGetLibraryItems } from "@store/data/absAPI";
+import { ABSGetLibraryItem } from "@components/dropbox/AudiobookShelf/ABSAuthentication/absAPInew";
 
-type Unpacked<T> = T extends (infer U)[] ? U : T;
+// type Unpacked<T> = T extends (infer U)[] ? U : T;
 type Props = {
-  book: Unpacked<ABSGetLibraryItems>;
+  book: ABSGetLibraryItem;
   index: number;
   includeSeriesLink?: boolean;
 };
