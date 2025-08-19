@@ -178,18 +178,26 @@ export const onInitialize = async () => {
     actions: absActions,
   });
 
-  // const absToken = useABSStore.getState()?.userInfo?.token;
+  // check to see if we are authenticated to AudiobooksShelf (ABS)
   const isAuthenticated = await useABSStore.getState()?.authClient?.auth?.isAuthenticated();
+  console.log("IN INIT", isAuthenticated);
   const absSyncBookmarks = useSettingStore.getState().absSyncBookmarks;
-  const initABSFolderAttribiutes = useDropboxStore.getState().actions.initABSFolderAttributes;
-  if (isAuthenticated && absSyncBookmarks) {
-    //# Load All bookmarks from ABS and merge with local bookmarks
-    await useTracksStore.getState().actions.mergeABSBookmarks();
-    await initABSFolderAttribiutes();
+  const initABSFolderAttributes = useDropboxStore.getState().actions.initABSFolderAttributes;
+  if (isAuthenticated) {
+    if (absSyncBookmarks) {
+      try {
+        //# Load All bookmarks from ABS and merge with local bookmarks
+        await useTracksStore.getState().actions.mergeABSBookmarks();
+      } catch (err) {
+        console.error("Failed to merge ABS bookmarks:", err);
+        // Optionally: send error to monitoring service (e.g., Sentry, LogRocket)
+      }
+    }
+
+    await initABSFolderAttributes();
   }
 
   // await useDropboxStore.getState().actions.clearABSFolderAttributes();
-  console.log("IN INIT", isAuthenticated);
   // Load favorites
   // if (isAuthenticated) {
   //   try {

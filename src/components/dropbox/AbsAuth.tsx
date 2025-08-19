@@ -24,6 +24,7 @@ import { useDropboxStore } from "@store/store-dropbox";
 import { AudiobookshelfAuth } from "./AudiobookShelf/ABSAuthentication/absAuthClass";
 import { AudiobookshelfAPI } from "./AudiobookShelf/ABSAuthentication/absAPInew";
 import { AuthCredentials } from "./AudiobookShelf/ABSAuthentication/abstypes";
+import { absUpdateLocalAttributes } from "@store/data/absAPI";
 
 const AbsAuth = () => {
   const queryClient = useQueryClient();
@@ -93,21 +94,22 @@ const AbsAuth = () => {
   });
 
   const handleLogout = async () => {
-    // Get auth instances and logout directly
-    const authInstances = useABSStore.getState().authClient;
+    // // Get auth instances and logout directly
+    // const authInstances = useABSStore.getState().authClient;
 
-    // await useDropboxStore.getState().actions.clearABSFolderAttributes();
-    if (authInstances) {
-      try {
-        await authInstances.auth.logout();
-      } catch (error) {
-        console.error("Logout error:", error);
-      }
-    }
+    // // await useDropboxStore.getState().actions.clearABSFolderAttributes();
+    // if (authInstances) {
+    //   try {
+    //     await authInstances.auth.logout();
+    //   } catch (error) {
+    //     console.error("Logout error:", error);
+    //   }
+    // }
 
-    // Use store logout action
+    // Use store logout action.  This action will also run the authClient logout function
     await actions.logout();
-
+    await useDropboxStore.getState().actions.clearABSFolderAttributes();
+    // await initABSFolderAttributes();
     queryClient.invalidateQueries({ queryKey: ["allABSBooks"] });
     queryClient.invalidateQueries({ queryKey: ["absfilterdata"] });
     setLoggedIn(false);

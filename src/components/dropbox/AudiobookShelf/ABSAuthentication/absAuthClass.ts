@@ -7,6 +7,7 @@ import {
   LogoutResponse,
   AuthenticationError,
   NetworkError,
+  AudiobookshelfError,
 } from "./abstypes";
 
 export class AudiobookshelfAuth {

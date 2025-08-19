@@ -1,3 +1,4 @@
+import { isAuthenticated } from "./../store-abs";
 //~~ ========================================================
 //~~ AudioBookShelf APIs                                    -
 //~~ ========================================================
@@ -372,6 +373,13 @@ export const absGetLibraryItems = async ({
 //~~ ========================================================
 //!!! DOCUMENT!!!
 export const absUpdateLocalAttributes = async () => {
+  const authClient = useABSStore.getState().authClient;
+  const isAuthenticated = await authClient.auth.isAuthenticated();
+  console.log("absAPI isAuthed", isAuthenticated);
+  if (!isAuthenticated) {
+    return [];
+  }
+
   const authHeader = await getAuthHeader();
   const activeLibraryId = useABSStore.getState().activeLibraryId;
   const libraryIdToUse = activeLibraryId;
