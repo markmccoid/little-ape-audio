@@ -7,8 +7,12 @@ import {
   LibraryItem,
   User,
 } from "@store/data/absTypes";
-import { AudiobookshelfAuth } from "./absAuthClass";
-import { AuthenticationError, NetworkError, AudiobookshelfError } from "./abstypes";
+import { AudiobookshelfAuth } from "../../components/dropbox/AudiobookShelf/ABSAuthentication/absAuthClass";
+import {
+  AuthenticationError,
+  NetworkError,
+  AudiobookshelfError,
+} from "../../components/dropbox/AudiobookShelf/ABSAuthentication/abstypes";
 import axios, { AxiosRequestConfig } from "axios";
 import { Bookmark } from "@store/types";
 import { getCoverURI } from "@store/data/absUtils";

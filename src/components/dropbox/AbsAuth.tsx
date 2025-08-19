@@ -22,7 +22,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { EyeOffOutlineIcon, EyeOutlineIcon } from "@components/common/svg/Icons";
 import { useDropboxStore } from "@store/store-dropbox";
 import { AudiobookshelfAuth } from "./AudiobookShelf/ABSAuthentication/absAuthClass";
-import { AudiobookshelfAPI } from "./AudiobookShelf/ABSAuthentication/absAPInew";
+import { AudiobookshelfAPI } from "../../store/data/absAPIClass";
 import { AuthCredentials } from "./AudiobookShelf/ABSAuthentication/abstypes";
 
 const AbsAuth = () => {

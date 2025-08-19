@@ -7,7 +7,7 @@ import { useDropboxStore } from "@store/store-dropbox";
 import { sanitizeString } from "@utils/otherUtils";
 import { el } from "date-fns/locale";
 import { EbookFile } from "./absTypes";
-import { ABSGetLibraryItems } from "@components/dropbox/AudiobookShelf/ABSAuthentication/absAPInew";
+import { ABSGetLibraryItems } from "@store/data/absAPIClass";
 //~~ ================================================================
 //~~ useGetFilterData - Get the filter data for the library
 //~~ ================================================================

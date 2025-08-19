@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { saveToAsyncStorage } from "./data/asyncStorage";
 import { btoa } from "react-native-quick-base64";
 import { AudiobookshelfAuth } from "../components/dropbox/AudiobookShelf/ABSAuthentication/absAuthClass";
-import { AudiobookshelfAPI } from "../components/dropbox/AudiobookShelf/ABSAuthentication/absAPInew";
+import { AudiobookshelfAPI } from "./data/absAPIClass";
 import { useDropboxStore } from "./store-dropbox";
 
 // Type for storing auth instances directly

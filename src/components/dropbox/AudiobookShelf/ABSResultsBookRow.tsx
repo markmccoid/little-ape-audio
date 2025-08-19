@@ -9,7 +9,7 @@ import { DurationIcon, SeriesIcon } from "@components/common/svg/Icons";
 import { colors } from "@constants/Colors";
 import { LinearGradient } from "expo-linear-gradient";
 // import { ABSGetLibraryItems } from "@store/data/absAPI";
-import { ABSGetLibraryItem } from "@components/dropbox/AudiobookShelf/ABSAuthentication/absAPInew";
+import { ABSGetLibraryItem } from "@store/data/absAPIClass";
 
 // type Unpacked<T> = T extends (infer U)[] ? U : T;
 type Props = {
