@@ -80,9 +80,9 @@ export const getAuthClient = () => {
 };
 
 // Helper function to check if user is authenticated
-export const isAuthenticated = () => {
-  return useABSStore.getState()?.userInfo?.isAuthenticated ?? false;
-};
+// export const isAuthenticated = () => {
+//   return useABSStore.getState()?.userInfo?.isAuthenticated ?? false;
+// };
 
 export const useABSStore = create<ABSState>((set, get) => ({
   userInfo: undefined,

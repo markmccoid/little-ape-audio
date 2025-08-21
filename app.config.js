@@ -13,15 +13,15 @@ export default {
   scheme: "littleapeaudio",
   privacy: "unlisted",
   platforms: ["ios"],
-  version: "1.2.1",
+  version: "1.2.2",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "automatic",
-  splash: {
-    image: "./assets/splash.png",
-    resizeMode: "contain",
-    backgroundColor: "#fef9B0",
-  },
+  // splash: {
+  //   image: "./assets/splash.png",
+  //   resizeMode: "contain",
+  //   backgroundColor: "#fef9B0",
+  // },
   updates: {
     fallbackToCacheTimeout: 0,
   },
@@ -35,7 +35,7 @@ export default {
     },
     supportsTablet: false,
     bundleIdentifier: "com.markmccoid.little-ape-audio",
-    buildNumber: "1.2.1",
+    buildNumber: "1.2.2",
     infoPlist: {
       RCTAsyncStorageExcludeFromBackup: false,
       NSMicrophoneUsageDescription:
@@ -66,14 +66,15 @@ export default {
         iosUrlScheme: "com.googleusercontent.apps.7341344916-s7s48gfijshrnjjh60koigq33b32dn4d",
       },
     ],
-    // [
-    //   "expo-splash-screen",
-    //   {
-    //     backgroundColor: "#ffffff",
-    //     image: "./assets/splash.png",
-    //     imageWidth: 1284,
-    //   },
-    // ],
+    [
+      "expo-splash-screen",
+      {
+        backgroundColor: "#ffffff",
+        image: "./assets/splash.png",
+        resizeMode: "cover",
+        // imageWidth: 1284,
+      },
+    ],
   ],
   experiments: {
     tsconfigPaths: true,

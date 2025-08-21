@@ -177,9 +177,11 @@ export const onInitialize = async () => {
     // searchObject: {},
     actions: absActions,
   });
+
   await absActions.initializeAuth();
+
   // check to see if we are authenticated to AudiobooksShelf (ABS)
-  const isAuthenticated = await useABSStore.getState()?.authClient?.auth?.isAuthenticated();
+  const isAuthenticated = useABSStore.getState()?.userInfo?.isAuthenticated; //await useABSStore.getState()?.authClient?.auth?.isAuthenticated();
 
   const absSyncBookmarks = useSettingStore.getState().absSyncBookmarks;
   const initABSFolderAttributes = useDropboxStore.getState().actions.initABSFolderAttributes;
@@ -187,13 +189,13 @@ export const onInitialize = async () => {
     if (absSyncBookmarks) {
       try {
         //# Load All bookmarks from ABS and merge with local bookmarks
-        await useTracksStore.getState().actions.mergeABSBookmarks();
+        useTracksStore.getState().actions.mergeABSBookmarks();
       } catch (err) {
         console.error("Failed to merge ABS bookmarks:", err);
         // Optionally: send error to monitoring service (e.g., Sentry, LogRocket)
       }
     }
 
-    await initABSFolderAttributes();
+    initABSFolderAttributes();
   }
 };
