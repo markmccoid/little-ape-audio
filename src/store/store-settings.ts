@@ -13,6 +13,8 @@ type SettingsState = {
   // Stores the forward/backware jump seconds
   jumpForwardSeconds: number;
   jumpBackwardSeconds: number;
+  // store whether extended jumps are shown
+  showExtendedJumps: boolean;
   // Sleep Timer ----
   sleepTimeMinutes: number;
   sleepStartDateTime: Date;
@@ -59,11 +61,13 @@ type SettingsState = {
     toggleCollectionColorStrip: () => Promise<void>;
     setDefaultCollectionId: (collectionId: string) => Promise<void>;
     setSelectedCollection: (collection: CollectionItem) => Promise<void>;
+    setShowExtendedJumps: (showFlag: boolean) => Promise<void>;
   };
 };
 export const useSettingStore = create<SettingsState>((set, get) => ({
   jumpForwardSeconds: 15,
   jumpBackwardSeconds: 15,
+  showExtendedJumps: true,
   sleepTimeMinutes: 0,
   sleepStartDateTime: undefined,
   absSyncProgress: false,
@@ -260,6 +264,13 @@ export const useSettingStore = create<SettingsState>((set, get) => ({
     },
     setSelectedCollection: async (collection) => {
       set({ selectedCollection: collection });
+      const newSettingsData = { ...get() };
+      delete newSettingsData.actions;
+      // Save to settings store
+      await saveToAsyncStorage("settings", newSettingsData);
+    },
+    setShowExtendedJumps: async (showFlag) => {
+      set({ showExtendedJumps: showFlag });
       const newSettingsData = { ...get() };
       delete newSettingsData.actions;
       // Save to settings store

@@ -23,6 +23,8 @@ import ABSToggleBookRead from "@components/common/ABSToggleBookRead";
 import ABSToggleBookFavorite from "@components/common/ABSToggleBookFavorite";
 import ABSLinkToBook from "@components/common/ABSLinkToBook";
 import { ShareIcon } from "@components/common/svg/Icons";
+import TrackPlayerExtendedJumps from "./TrackPlayerExtendedJumps";
+import { useSettingStore } from "@store/store-settings";
 
 const { width, height } = Dimensions.get("window");
 const transition = SharedTransition.custom((values) => {
@@ -40,6 +42,7 @@ const TrackPlayerContainer = () => {
   const playlistTracks = useTracksStore((state) =>
     state.actions.getPlaylistTracks(params?.playlistId)
   );
+  const showExtendedJumps = useSettingStore((state) => state.showExtendedJumps);
   // const audioSource = playlistTracks[0].externalMetadata.audioSource;
   //! Get Info needed to mark as favorite and read for ABS books
   // const playlistId = usePlaybackStore((state) => state.currentPlaylistId);
@@ -82,6 +85,7 @@ const TrackPlayerContainer = () => {
             >
               <TrackPlayerProgressBar />
               <TrackPlayerChaptProgressBar />
+              {showExtendedJumps && <TrackPlayerExtendedJumps />}
             </MotiView>
           </View>
         ) : null}

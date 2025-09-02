@@ -15,6 +15,7 @@ const SettingsContainer = () => {
   const actions = useSettingStore((state) => state.actions);
   const forwardSecs = useSettingStore((state) => state.jumpForwardSeconds);
   const backwardSecs = useSettingStore((state) => state.jumpBackwardSeconds);
+  const showExtendedJumps = useSettingStore((state) => state.showExtendedJumps);
   const dynamicColors = useSettingStore((state) => state.isUsingDynamicColors);
   const showCollectionColorStrip = useSettingStore((state) => state.showCollectionColorStrip);
   const autoPlay = useSettingStore((state) => state.autoPlay);
@@ -96,6 +97,21 @@ const SettingsContainer = () => {
             <Text className="text-sm">Seek Backward</Text>
           </Pressable>
           <Text>{backwardSecs}</Text>
+        </View>
+        {/* ------------------ */}
+        {/* Show Extended Jumps */}
+        {/* ------------------ */}
+        <View className="px-2 py-2" style={[styles.borderBottom]}>
+          <Text className="text-sm">Show Extended Jump Buttons</Text>
+
+          <Switch
+            style={{ marginRight: -10, transform: [{ scaleY: 0.7 }, { scaleX: 0.7 }] }}
+            trackColor={{ false: "#767577", true: "#4caf50" }}
+            thumbColor={showExtendedJumps ? "#8bc34a" : "#ddd"}
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={async (v) => await actions.setShowExtendedJumps(v)}
+            value={showExtendedJumps}
+          />
         </View>
         {/* ------------------ */}
         {/* Dynamic Colors */}
