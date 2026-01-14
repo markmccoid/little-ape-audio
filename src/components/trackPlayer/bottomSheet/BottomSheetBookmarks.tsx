@@ -9,6 +9,7 @@ import { colors } from "../../../constants/Colors";
 import { useSharedValue } from "react-native-reanimated";
 import BookmarkRow from "../settings/TrackPlayerSettingsBookmarkRow";
 import { useSettingStore } from "@store/store-settings";
+import { useUIStore } from "@store/store-ui";
 
 const BottomSheetsBookmarks = () => {
   //-- Setup for swipe left gestures
@@ -20,9 +21,16 @@ const BottomSheetsBookmarks = () => {
   // This forces a rerender when a bookmark is deleted
   const didUpdate = usePlaybackStore((state) => state.didUpdate);
   const router = useRouter();
-  const bookmarks = playbackActions.getBookmarks();
+  const [bookmarks, setBookmarks] = useState(playbackActions.getBookmarks());
   const segments = useSegments();
   const playerBottomSheetRef = useSettingStore((state) => state.playerBottomSheetRef);
+  const bookmarkModalVisible = useUIStore((state) => state.bookmarkModalVisible);
+
+  useEffect(() => {
+    if (!bookmarkModalVisible) {
+      setBookmarks(playbackActions.getBookmarks());
+    }
+  }, [bookmarkModalVisible]);
 
   const handleApplyBookmark = async (bookmarkId) => {
     const currSegment = segments[segments.length - 1];

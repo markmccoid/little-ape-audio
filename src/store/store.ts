@@ -26,7 +26,6 @@ import { router } from "expo-router";
 import { getCurrentChapter } from "@utils/chapterUtils";
 import { debounce, toInteger } from "lodash";
 import { getImageColors, resolveABSImage } from "@utils/otherUtils";
-import { absUpdateBookProgress } from "./data/absAPIOLD";
 import { ABSBookmark } from "./data/absTypes";
 import { absAPIClient } from "./store-abs";
 
@@ -447,7 +446,13 @@ export const useTracksStore = create<AudioState>((set, get) => ({
       set({ playlists });
       await saveToAsyncStorage("playlists", playlists);
     },
-    addBookmarkToPlaylist: async (bookmarkName, playlistId, trackId, positionSeconds) => {
+    addBookmarkToPlaylist: async (
+      bookmarkName,
+      playlistId,
+      trackId,
+      positionSeconds,
+      bookmarkNotes
+    ) => {
       const playlists = { ...get().playlists };
       const playlist = playlists[playlistId];
       const bookmarks = playlist?.bookmarks || [];
@@ -457,16 +462,58 @@ export const useTracksStore = create<AudioState>((set, get) => ({
         name: bookmarkName,
         trackId,
         positionSeconds,
+        notes: bookmarkNotes,
       } as Bookmark;
       const newBookmarks = [...bookmarks, newBookmark];
       playlist.bookmarks = newBookmarks;
       set({ playlistUpdated: new Date() });
-      // If the bookmark is from ABS, save it to the ABS server
+      // If the book is from ABS, save it to the ABS server
       const absSyncBookmarks = useSettingStore.getState().absSyncBookmarks;
       if (playlist.source === "abs" && absSyncBookmarks) {
         await absAPIClient.saveBookmark(newBookmark);
       }
       saveToAsyncStorage("playlists", playlists);
+    },
+    //!! Can we sync to ABS?  Not sure about updating bookmarks on ABS.
+    //!!  I think if you send same position with different name you get two bookmarks
+    updateBookmark: async (playlistId, bookmarkId, updateObj) => {
+      const playlists = { ...get().playlists };
+      const currentPlaylist = playlists[playlistId];
+
+      // 1. Guard clause if data is missing
+      if (!currentPlaylist?.bookmarks) return;
+
+      // 2. Create an Immutable Update
+      // We map through bookmarks to create a new array, and create a new object for the specific bookmark
+      const updatedBookmarks = currentPlaylist.bookmarks.map((b) =>
+        b.id === bookmarkId
+          ? { ...b, ...updateObj } // Merge existing bookmark with updates
+          : b
+      );
+
+      // 3. Reconstruct the state tree
+      const updatedPlaylists = {
+        ...playlists,
+        [playlistId]: {
+          ...currentPlaylist,
+          bookmarks: updatedBookmarks,
+        },
+      };
+
+      // 4. Update the store properly
+      set({
+        playlists: updatedPlaylists,
+        playlistUpdated: new Date(), // Optional if you strictly rely on playlists selector
+      });
+      // const playlist = playlists[playlistId];
+      // const bookmarks = playlist?.bookmarks;
+      // const bookmark = bookmarks?.find((el) => el.id === bookmarkId);
+      // if (!bookmark) return;
+      // bookmark.name = updateObj.name;
+      // bookmark.notes = updateObj.notes;
+      // set({ playlistUpdated: new Date() });
+
+      saveToAsyncStorage("playlists", updatedPlaylists);
     },
     deleteBookmarkFromPlaylist: async (playlistId, bookmarkId) => {
       const playlists = { ...get().playlists };
@@ -704,7 +751,7 @@ type PlaybackState = {
     getPrevTrackDuration: () => number;
     setCurrentTrackPosition: (positionSeconds: number) => void;
     getCurrentTrackPosition: () => number;
-    addBookmark: (bookmarkName: string, currPos?: number) => void;
+    addBookmark: (bookmarkName: string, bookmarkNotes?: string, currPos?: number) => void;
     deleteBookmark: (bookmarkId: string) => void;
     getBookmarks: () => Bookmark[];
     applyBookmark: (bookmarkId: string) => Promise<void>;
@@ -959,13 +1006,19 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
     getCurrentTrackPosition: () => {
       return get().currentTrackPosition;
     },
-    addBookmark: (bookmarkName = "Unknown", currPos) => {
+    addBookmark: (bookmarkName = "Unknown", bookmarkNotes = "", currPos) => {
       const currPlaylistId = get().currentPlaylistId;
       const currTrack = get().currentTrack;
       const currPosition = currPos || get().currentTrackPosition;
       useTracksStore
         .getState()
-        .actions.addBookmarkToPlaylist(bookmarkName, currPlaylistId, currTrack.id, currPosition);
+        .actions.addBookmarkToPlaylist(
+          bookmarkName,
+          currPlaylistId,
+          currTrack.id,
+          currPosition,
+          bookmarkNotes
+        );
       set({ didUpdate: uuid.v4().toString() });
     },
     deleteBookmark: async (bookmarkId) => {

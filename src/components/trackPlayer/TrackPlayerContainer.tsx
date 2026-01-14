@@ -5,6 +5,7 @@ import TrackPlayerControls from "./TrackPlayerControls";
 import TrackPlayerProgressBar from "./TrackPlayerProgressBar";
 import TrackPlayerImage from "./TrackPlayerImage";
 import BottomSheetContainer from "./bottomSheet/BottomSheetContainer";
+import AddEditBookmark from "./AddEditBookmark";
 import {
   useCurrentPlaylist,
   usePlaybackStore,
@@ -18,11 +19,11 @@ import TrackPlayerChaptProgressBar from "./TrackPlayerChaptProgressBar";
 import { Link, useLocalSearchParams } from "expo-router";
 import { MotiView } from "moti";
 import Animated, { SharedTransition, withSpring } from "react-native-reanimated";
-import { useDropboxStore } from "@store/store-dropbox";
-import ABSToggleBookRead from "@components/common/ABSToggleBookRead";
-import ABSToggleBookFavorite from "@components/common/ABSToggleBookFavorite";
-import ABSLinkToBook from "@components/common/ABSLinkToBook";
-import { ShareIcon } from "@components/common/svg/Icons";
+// import { useDropboxStore } from "@store/store-dropbox";
+// import ABSToggleBookRead from "@components/common/ABSToggleBookRead";
+// import ABSToggleBookFavorite from "@components/common/ABSToggleBookFavorite";
+// import ABSLinkToBook from "@components/common/ABSLinkToBook";
+// import { ShareIcon } from "@components/common/svg/Icons";
 import TrackPlayerExtendedJumps from "./TrackPlayerExtendedJumps";
 import { useSettingStore } from "@store/store-settings";
 
@@ -39,9 +40,9 @@ const TrackPlayerContainer = () => {
   const params = useLocalSearchParams<{ playlistId: string }>();
   const playlistColors = usePlaylistColors(params?.playlistId);
   const isLoaded = usePlaybackStore((state) => state.playlistLoaded);
-  const playlistTracks = useTracksStore((state) =>
-    state.actions.getPlaylistTracks(params?.playlistId)
-  );
+  // const playlistTracks = useTracksStore((state) =>
+  //   state.actions.getPlaylistTracks(params?.playlistId)
+  // );
   const showExtendedJumps = useSettingStore((state) => state.showExtendedJumps);
   // const audioSource = playlistTracks[0].externalMetadata.audioSource;
   //! Get Info needed to mark as favorite and read for ABS books
@@ -103,6 +104,7 @@ const TrackPlayerContainer = () => {
         ) : null}
       </View>
       {isLoaded ? <BottomSheetContainer /> : null}
+      <AddEditBookmark />
     </MotiView>
   );
 };

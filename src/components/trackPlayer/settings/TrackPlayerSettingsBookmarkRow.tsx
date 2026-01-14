@@ -1,16 +1,15 @@
-import { View, Text, StyleSheet, Dimensions, Pressable, TouchableOpacity } from "react-native";
-import React, { Ref, useState } from "react";
+import { View, Text, StyleSheet, Dimensions } from "react-native";
+import React, { useState } from "react";
 import {
-  PanGestureHandler,
-  PanGestureHandlerGestureEvent,
-  PanGestureHandlerProps,
-  TapGesture,
   ScrollView,
-  TapGestureHandler,
+  Gesture,
+  GestureDetector,
+  GestureUpdateEvent,
+  PanGestureHandlerEventPayload,
 } from "react-native-gesture-handler";
 import Animated, {
   SharedValue,
-  useAnimatedGestureHandler,
+  runOnJS,
   useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
@@ -20,18 +19,19 @@ import Animated, {
 import { DeleteIcon, EditIcon, EnterKeyIcon } from "../../common/svg/Icons";
 import { AnimatedPressable } from "../../common/buttons/Pressables";
 import { Bookmark } from "../../../store/types";
-import { AnimatePresence } from "moti";
 import { formatSeconds } from "../../../utils/formatUtils";
 import usePlaylistColors from "hooks/usePlaylistColors";
+import { usePlaybackStore } from "@store/store";
+import { useUIStore, useUIActions } from "@store/store-ui";
+import { useFocusEffect } from "expo-router";
 
-const { width: SCREEN_WIDTH, height } = Dimensions.get("window");
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-const TRANSLATE_X_THRESHOLD = SCREEN_WIDTH * 0.15 * -1;
+const TRANSLATE_X_THRESHOLD = SCREEN_WIDTH * 0.25 * -1;
 
 type Props = {
   bookmark: Bookmark;
-  simultaneousHandler: ScrollView;
-  currentKey: string;
+  simultaneousHandler: React.RefObject<ScrollView | null>;
   activeKey: SharedValue<string>;
   onDeleteBookmark: (bookmarkId: string) => void;
   onApplyBookmark: (bookmarkId: string) => void;
@@ -39,7 +39,6 @@ type Props = {
 const BookmarkRow = ({
   bookmark,
   simultaneousHandler,
-  currentKey,
   activeKey,
   onDeleteBookmark,
   onApplyBookmark,
@@ -48,27 +47,30 @@ const BookmarkRow = ({
   const isOpen = useSharedValue(false);
   const iconOpacity = useSharedValue(0);
   const iconPos = useSharedValue(0);
-  const [isPanActive, setIsPanActive] = useState(false);
   const playlistColors = usePlaylistColors();
+  const currentPlaylistId = usePlaybackStore((state) => state.currentPlaylistId);
+  const uiActions = useUIActions();
+  const bookmarkModalVisible = useUIStore((state) => state.bookmarkModalVisible);
 
+  React.useEffect(() => {
+    if (!bookmarkModalVisible) {
+      offsetX.value = withSpring(0);
+      iconOpacity.value = withTiming(0);
+      iconPos.value = withTiming(90);
+      isOpen.value = false;
+      activeKey.value = undefined;
+    }
+  }, [bookmarkModalVisible]);
   const animatedStyles = useAnimatedStyle(() => {
     return {
-      transform: [
-        // only reason for the terniary is because I don't want the spring to ever be positive
-        { translateX: offsetX.value <= 0 ? offsetX.value : offsetX.value * -1 },
-        // { scale: withSpring(isPressed.value ? 1.1 : 1) },
-      ],
-      // backgroundColor: isPressed.value ? "yellow" : "blue",
+      transform: [{ translateX: offsetX.value <= 0 ? offsetX.value : offsetX.value * -1 }],
     };
   });
 
   const rIconStyle = useAnimatedStyle(() => {
     return {
       opacity: iconOpacity.value,
-      transform: [
-        { translateX: iconPos.value },
-        // { translateX: offsetX.value + 90 <= 0 ? 0 : offsetX.value + 90 },
-      ],
+      transform: [{ translateX: iconPos.value }],
     };
   });
 
@@ -86,27 +88,22 @@ const BookmarkRow = ({
         iconPos.value = withTiming(90);
         isOpen.value = false;
       }
-    }
+    },
+    [bookmark.id]
   );
 
-  const gestureHandler = useAnimatedGestureHandler<
-    PanGestureHandlerGestureEvent,
-    { isOpen: boolean }
-  >({
-    onStart(event, context) {
-      // console.log(event.translationX, event.absoluteX);
-      // If the slide is open, then close it
-      activeKey.value = bookmark.id; // Whenever the activeKey changes useAnimatedReaction runs above
-
+  const panGesture = Gesture.Pan()
+    .onStart(() => {
+      activeKey.value = bookmark.id;
       iconOpacity.value = withTiming(1, { duration: 1000 });
+      // console.log("OPEN", isOpen.value);
       if (isOpen.value) {
         offsetX.value = withSpring(0);
         iconPos.value = withTiming(90);
         isOpen.value = false;
       }
-    },
-    onActive(event, context) {
-      // Only allow to be pulled to the left
+    })
+    .onUpdate((event: GestureUpdateEvent<PanGestureHandlerEventPayload>) => {
       if (event.translationX <= 0) {
         offsetX.value = event.translationX;
 
@@ -117,14 +114,10 @@ const BookmarkRow = ({
           iconPos.value = event.translationX + 90;
         }
       }
-    },
-    onEnd(event, context) {
-      // We are pulling left, so values will be negative.
-      // If offsetX is > than the threshold, than we need to close the slide
-      // If not, then we will hold the slide open at the threshold.
-      // This means if threshold is -120 and offsetX is -56 it IS greater than threshold
+    })
+    .onEnd(() => {
       const shouldBeDismissed = offsetX.value > TRANSLATE_X_THRESHOLD;
-      // console.log(shouldBeDismissed, offsetX.value, TRANSLATE_X_THRESHOLD);
+      // console.log(offsetX.value, TRANSLATE_X_THRESHOLD, shouldBeDismissed);
       if (shouldBeDismissed) {
         offsetX.value = withSpring(0);
         iconOpacity.value = withTiming(0);
@@ -132,13 +125,29 @@ const BookmarkRow = ({
         isOpen.value = false;
         activeKey.value = undefined;
       } else {
+        // console.log("OPEN");
         offsetX.value = withSpring(TRANSLATE_X_THRESHOLD);
         iconPos.value = withSpring(0);
         iconOpacity.value = withTiming(1);
         isOpen.value = true;
+        activeKey.value = bookmark.id;
       }
-    },
+    })
+    .activeOffsetX([-20, 20])
+    .failOffsetY([-20, 20])
+    .simultaneousWithExternalGesture(simultaneousHandler);
+
+  const tapGesture = Gesture.Tap().onEnd(() => {
+    if (isOpen.value) {
+      offsetX.value = withSpring(0);
+      iconOpacity.value = withTiming(0);
+      iconPos.value = withTiming(90);
+      isOpen.value = false;
+      activeKey.value = undefined;
+    }
   });
+
+  const gesture = Gesture.Race(panGesture, tapGesture);
 
   return (
     <View className="w-full" style={{ backgroundColor: playlistColors.bg }}>
@@ -151,22 +160,21 @@ const BookmarkRow = ({
           <DeleteIcon color="white" size={18} />
         </Animated.View>
       </AnimatedPressable>
-      {/* <AnimatedPressable onPress={() => console.log("HI")}>
+      {/* !! DO WE NEED PLAYLIST ID FOR EDIT kind of, not assuming we can grab current????  !! */}
+      <AnimatedPressable
+        onPress={() => {
+          uiActions.openBookmarkModal({ bookmarkId: bookmark.id, playlistId: currentPlaylistId });
+        }}
+      >
         <Animated.View
           style={rIconStyle}
-          className="absolute rounded-lg w-[35] bg-amber-800 h-[35] flex-row justify-center items-center right-[50] top-[3]"
+          className="absolute rounded-lg w-[35] bg-white h-[35] flex-row justify-center items-center right-[50] top-[3]"
         >
-          <EditIcon color="white" size={18} />
+          <EditIcon color="black" size={18} />
         </Animated.View>
-      </AnimatedPressable> */}
-      {/* END -- ICONS REVEALED ON SWIPE */}
+      </AnimatedPressable>
 
-      <PanGestureHandler
-        onGestureEvent={gestureHandler}
-        simultaneousHandlers={simultaneousHandler}
-        onActivated={() => setIsPanActive(true)}
-        onEnded={() => setIsPanActive(false)}
-      >
+      <GestureDetector gesture={gesture}>
         <Animated.View
           style={[animatedStyles, { borderWidth: 1, borderColor: playlistColors.bgBorder }]}
           className="py-1 px-2 bg-white mb-0"
@@ -190,7 +198,7 @@ const BookmarkRow = ({
             </View>
           </View>
         </Animated.View>
-      </PanGestureHandler>
+      </GestureDetector>
     </View>
   );
 };

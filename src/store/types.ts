@@ -118,6 +118,7 @@ export type Bookmark = {
   id: string;
   absBookId?: string;
   name: string;
+  notes?: string;
   trackId: string;
   positionSeconds: number;
 };
@@ -230,7 +231,13 @@ export type AudioState = {
       bookmarkName: string,
       playlistId: string,
       trackId: string,
-      positionSeconds: number
+      positionSeconds: number,
+      bookmarkNotes?: string
+    ) => Promise<void>;
+    updateBookmark: (
+      playlistId: string,
+      bookmarkId: string,
+      updateObj: { name: string; notes?: string }
     ) => Promise<void>;
     getBookmarksForPlaylist: (playlistId) => Bookmark[];
     deleteBookmarkFromPlaylist: (playlistId: string, bookmarkId: string) => Promise<void>;

@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Alert } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import React, { useReducer, useState } from "react";
 import {
   BookmarkIcon,
@@ -8,7 +8,6 @@ import {
   SpeedIcon,
 } from "@components/common/svg/Icons";
 import { useBottomSheet } from "@gorhom/bottom-sheet";
-import { formatSeconds } from "@utils/formatUtils";
 import { useCurrentPlaylist, usePlaybackStore } from "@store/store";
 
 type Props = {
@@ -16,8 +15,9 @@ type Props = {
   setPage: (index: number) => void;
   snapToIndex: (index: number) => void;
   expand: () => void;
+  onAddBookmark: (pos?: number | undefined, playlistId?: string | undefined) => void;
 };
-const BottomSheetMenu = ({ isExpanded, setPage, expand, snapToIndex }: Props) => {
+const BottomSheetMenu = ({ isExpanded, setPage, expand, snapToIndex, onAddBookmark }: Props) => {
   const playbackActions = usePlaybackStore((state) => state.actions);
   const currRate = usePlaybackStore((state) => state.currentRate);
   const didUpdate = usePlaybackStore((state) => state.didUpdate);
@@ -25,19 +25,7 @@ const BottomSheetMenu = ({ isExpanded, setPage, expand, snapToIndex }: Props) =>
 
   const handleAddBookmark = () => {
     const currTrackPos = playbackActions.getCurrentTrackPosition();
-    Alert.prompt(
-      "Enter Bookmark Name",
-      "Enter a name for the bookmark at " + formatSeconds(currTrackPos),
-      [
-        {
-          text: "OK",
-          onPress: (bookmarkName) => {
-            playbackActions.addBookmark(bookmarkName, currTrackPos);
-          },
-        },
-        { text: "Cancel", onPress: () => {} },
-      ]
-    );
+    onAddBookmark(currTrackPos);
   };
 
   return (

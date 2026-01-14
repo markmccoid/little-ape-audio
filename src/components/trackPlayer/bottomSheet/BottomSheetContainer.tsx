@@ -1,10 +1,12 @@
 import React, { useRef, useState } from "react";
 import TrackPlayerBottomSheet from "./TrackPlayerBottomSheet";
 import BottomSheetMenu from "./BottomSheetMenu";
+// import AddEditBookmark from "../AddEditBookmark";
 import usePlaylistColors from "hooks/usePlaylistColors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSettingStore } from "@store/store-settings";
 import { colors } from "@constants/Colors";
+import { useUIActions } from "@store/store-ui";
 
 export type BottomSheetImpRef = {
   expand: () => void;
@@ -20,6 +22,26 @@ const BottomSheetContainer = () => {
   const handleExpand = () => bottomSheetRef.current?.expand();
   const handleSetPage = (page: number) => bottomSheetRef.current?.setPage(page);
   const handleSnapToIndex = (index: number) => bottomSheetRef.current?.snapToIndex(index);
+
+  /* const [bookmarkModalVisible, setBookmarkModalVisible] = useState(false);
+  const [newBookmarkPos, setNewBookmarkPos] = useState<number | undefined>();
+  const [editingBookmarkId, setEditingBookmarkId] = useState<string | undefined>();
+  const [playlistId, setPlaylistId] = useState<string | undefined>(); */
+
+  const uiActions = useUIActions();
+
+  const handleOpenBookmarkModal = (bookmarkId?: string, playlistId?: string, pos?: number) => {
+    uiActions.openBookmarkModal({ bookmarkId, playlistId, position: pos });
+  };
+
+  const handleOpenAddBookmarkModal = (pos?: number) => {
+    handleOpenBookmarkModal(undefined, undefined, pos);
+  };
+  /* const handleCloseBookmarkModal = () => {
+    setBookmarkModalVisible(false);
+    setEditingBookmarkId(undefined);
+    setPlaylistId(undefined);
+  }; */
 
   React.useEffect(() => {
     if (bottomSheetRef.current) {
@@ -37,6 +59,7 @@ const BottomSheetContainer = () => {
           setPage={handleSetPage}
           expand={handleExpand}
           snapToIndex={handleSnapToIndex}
+          onAddBookmark={handleOpenAddBookmarkModal}
         />
       </SafeAreaView>
       <TrackPlayerBottomSheet ref={bottomSheetRef} />
