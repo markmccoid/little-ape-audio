@@ -239,6 +239,16 @@ export const shareJsonStringAsFile = async (jsonString: string, filename: string
   await Sharing.shareAsync(tempFileUri);
 };
 
+export const shareTextStringAsFile = async (textString: string, filename: string) => {
+  // Create a temporary file to store the JSON string.
+  const tempFileUri = `${FileSystem.cacheDirectory}${filename}.txt`;
+
+  // Write the JSON string to the temporary file.
+  await FileSystem.writeAsStringAsync(tempFileUri, textString);
+
+  // Share the temporary file using the Expo Sharing API.
+  await Sharing.shareAsync(tempFileUri);
+};
 //~-=======================================
 //~ gets the file extension of the passed URI
 //~-=======================================

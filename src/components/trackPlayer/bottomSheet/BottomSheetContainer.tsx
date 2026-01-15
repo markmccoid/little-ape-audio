@@ -7,6 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useSettingStore } from "@store/store-settings";
 import { colors } from "@constants/Colors";
 import { useUIActions } from "@store/store-ui";
+import { usePlaybackStore, useTracksStore } from "@store/store";
 
 export type BottomSheetImpRef = {
   expand: () => void;
@@ -19,6 +20,7 @@ const BottomSheetContainer = () => {
   const bottomSheetRef = useRef<BottomSheetImpRef | null>();
   const setBottomSheetRef = useSettingStore((state) => state.actions.setBottomSheetRef);
   const playlistColors = usePlaylistColors();
+  const playlistId = usePlaybackStore((state) => state.currentPlaylistId);
   const handleExpand = () => bottomSheetRef.current?.expand();
   const handleSetPage = (page: number) => bottomSheetRef.current?.setPage(page);
   const handleSnapToIndex = (index: number) => bottomSheetRef.current?.snapToIndex(index);
@@ -35,7 +37,7 @@ const BottomSheetContainer = () => {
   };
 
   const handleOpenAddBookmarkModal = (pos?: number) => {
-    handleOpenBookmarkModal(undefined, undefined, pos);
+    handleOpenBookmarkModal(undefined, playlistId, pos);
   };
   /* const handleCloseBookmarkModal = () => {
     setBookmarkModalVisible(false);

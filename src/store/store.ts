@@ -25,9 +25,10 @@ import { getImageSize } from "@utils/audioUtils";
 import { router } from "expo-router";
 import { getCurrentChapter } from "@utils/chapterUtils";
 import { debounce, toInteger } from "lodash";
-import { getImageColors, resolveABSImage } from "@utils/otherUtils";
+import { getImageColors, resolveABSImage, shareTextStringAsFile } from "@utils/otherUtils";
 import { ABSBookmark } from "./data/absTypes";
 import { absAPIClient } from "./store-abs";
+import { formatSeconds } from "@utils/formatUtils";
 
 let eventPlayerTrackChange = undefined;
 let eventEndOfQueue = undefined;
@@ -753,8 +754,10 @@ type PlaybackState = {
     getCurrentTrackPosition: () => number;
     addBookmark: (bookmarkName: string, bookmarkNotes?: string, currPos?: number) => void;
     deleteBookmark: (bookmarkId: string) => void;
+    // Gets the bookmarks for the current playlist
     getBookmarks: () => Bookmark[];
     applyBookmark: (bookmarkId: string) => Promise<void>;
+    exportBookmarks: () => Promise<void>;
   };
 };
 
@@ -1039,8 +1042,19 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       const { positionSeconds, trackId } = bookmarks.find((el) => el.id === bookmarkId);
       const trackQ = get().trackPlayerQueue;
       const trackIndex = trackQ.findIndex((el) => el.id === trackId);
+      // Gets the bookmarks for the current playlist
       await TrackPlayer.skip(trackIndex);
       await get().actions.seekTo(positionSeconds);
+    },
+    exportBookmarks: async () => {
+      const bookmarks = get().actions.getBookmarks();
+      const playlistId = get().currentPlaylistId;
+      const playlistName = useTracksStore.getState().playlists[playlistId].name;
+      const output = bookmarks
+        .map((item) => `${item.name} - ${formatSeconds(item.positionSeconds)}\n${item.notes}`)
+        .join("\n\n");
+      console.log("Exporting bookmarks", output);
+      await shareTextStringAsFile(output, `${playlistName}-bookmarks`);
     },
     alignServerProgress: async (serverSeconds: number) => {
       // Aligns the current track position to the server progress

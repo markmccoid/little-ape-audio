@@ -36,6 +36,7 @@ const TrackPlayerSettingsContainer = () => {
   );
   const playlistColors = usePlaylistColors();
   const actions = useTrackActions();
+  const { exportBookmarks } = usePlaybackStore((state) => state.actions);
 
   const alignServerProgress = usePlaybackStore((state) => state.actions.alignServerProgress);
   const { data, isLoading } = useQuery({
@@ -207,6 +208,15 @@ const TrackPlayerSettingsContainer = () => {
                 }}
                 className="w-full px-2 flex-1"
               >
+                {/* EXPORT BOOKMARKS */}
+                <View className="flex-row justify-between">
+                  <Pressable
+                    onPress={() => exportBookmarks()}
+                    className="bg-green-600 p-2 rounded-lg"
+                  >
+                    <Text>Export Bookmarks</Text>
+                  </Pressable>
+                </View>
                 <TrackPlayerSettingsBookmarks />
               </MotiView>
             )}
