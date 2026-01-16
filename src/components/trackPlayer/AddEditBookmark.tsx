@@ -27,7 +27,7 @@ const AddEditBookmark = () => {
   if (bgColorType === "dark") {
     foregroundColor = "#FFFFFF";
   }
-  console.log("BG COLOR", bgColor, bgColorType, playlistId);
+
   useEffect(() => {
     if (visible) {
       if (bookmarkId && playlistId) {

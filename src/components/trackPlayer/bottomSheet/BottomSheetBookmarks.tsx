@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Pressable } from "react-native";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { usePlaybackState } from "react-native-track-player";
 import { usePlaybackStore } from "../../../store/store";
@@ -10,6 +10,8 @@ import { useSharedValue } from "react-native-reanimated";
 import BookmarkRow from "../settings/TrackPlayerSettingsBookmarkRow";
 import { useSettingStore } from "@store/store-settings";
 import { useUIStore } from "@store/store-ui";
+import { SymbolView } from "expo-symbols";
+import ExportBookmarks from "../ExportBookmarks";
 
 const BottomSheetsBookmarks = () => {
   //-- Setup for swipe left gestures
@@ -53,22 +55,26 @@ const BottomSheetsBookmarks = () => {
       </View>
     );
   }
+
   return (
-    <ScrollView ref={scrollRef} style={{ marginHorizontal: 10, marginTop: 5 }}>
-      {bookmarks &&
-        bookmarks.map((el) => {
-          return (
-            <BookmarkRow
-              key={el.id}
-              bookmark={el}
-              activeKey={activeKey}
-              simultaneousHandler={scrollRef}
-              onApplyBookmark={handleApplyBookmark}
-              onDeleteBookmark={handleDeleteBookmark}
-            />
-          );
-        })}
-    </ScrollView>
+    <View>
+      <ExportBookmarks />
+      <ScrollView ref={scrollRef} style={{ marginHorizontal: 10, marginTop: 5 }}>
+        {bookmarks &&
+          bookmarks.map((el) => {
+            return (
+              <BookmarkRow
+                key={el.id}
+                bookmark={el}
+                activeKey={activeKey}
+                simultaneousHandler={scrollRef}
+                onApplyBookmark={handleApplyBookmark}
+                onDeleteBookmark={handleDeleteBookmark}
+              />
+            );
+          })}
+      </ScrollView>
+    </View>
   );
 };
 

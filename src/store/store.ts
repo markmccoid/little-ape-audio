@@ -25,7 +25,12 @@ import { getImageSize } from "@utils/audioUtils";
 import { router } from "expo-router";
 import { getCurrentChapter } from "@utils/chapterUtils";
 import { debounce, toInteger } from "lodash";
-import { getImageColors, resolveABSImage, shareTextStringAsFile } from "@utils/otherUtils";
+import {
+  getImageColors,
+  resolveABSImage,
+  shareJsonStringAsFile,
+  shareTextStringAsFile,
+} from "@utils/otherUtils";
 import { ABSBookmark } from "./data/absTypes";
 import { absAPIClient } from "./store-abs";
 import { formatSeconds } from "@utils/formatUtils";
@@ -757,7 +762,7 @@ type PlaybackState = {
     // Gets the bookmarks for the current playlist
     getBookmarks: () => Bookmark[];
     applyBookmark: (bookmarkId: string) => Promise<void>;
-    exportBookmarks: () => Promise<void>;
+    exportBookmarks: (format?: "txt" | "json") => Promise<void>;
   };
 };
 
@@ -1046,15 +1051,31 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
       await TrackPlayer.skip(trackIndex);
       await get().actions.seekTo(positionSeconds);
     },
-    exportBookmarks: async () => {
+    exportBookmarks: async (format: "txt" | "json" = "txt") => {
       const bookmarks = get().actions.getBookmarks();
       const playlistId = get().currentPlaylistId;
       const playlistName = useTracksStore.getState().playlists[playlistId].name;
-      const output = bookmarks
-        .map((item) => `${item.name} - ${formatSeconds(item.positionSeconds)}\n${item.notes}`)
-        .join("\n\n");
-      console.log("Exporting bookmarks", output);
-      await shareTextStringAsFile(output, `${playlistName}-bookmarks`);
+
+      if (format === "json") {
+        const jsonBookmarks = bookmarks.map((el) => {
+          return {
+            id: el.id,
+            name: el.name,
+            positionSeconds: el.positionSeconds,
+            trackId: el.trackId,
+            notes: el.notes,
+          };
+        });
+        const jsonOutput = JSON.stringify({ title: playlistName, bookmarks: jsonBookmarks });
+        await shareJsonStringAsFile(jsonOutput, `${playlistName}-bookmarks`);
+      } else {
+        // Build Text Files
+        const output = bookmarks
+          .map((item) => `${item.name} - ${formatSeconds(item.positionSeconds)}\n${item.notes}`)
+          .join("\n");
+
+        await shareTextStringAsFile(`${playlistName} \n ${output}`, `${playlistName}-bookmarks`);
+      }
     },
     alignServerProgress: async (serverSeconds: number) => {
       // Aligns the current track position to the server progress

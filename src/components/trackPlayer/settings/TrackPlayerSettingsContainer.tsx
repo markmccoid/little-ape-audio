@@ -5,6 +5,7 @@ import TrackPlayerSettingsTracks from "./TrackPlayerSettingsTracks";
 import { useEffect, useMemo, useRef, useState } from "react";
 import TrackPlayerSettingsBookmarks from "./TrackPlayerSettingsBookmarks";
 import { MotiView } from "moti";
+import ExportBookmarks from "../ExportBookmarks";
 import { LinearGradient } from "expo-linear-gradient";
 import TPSettingsScroller from "./TPSettingsScroller";
 import usePlaylistColors from "hooks/usePlaylistColors";
@@ -209,14 +210,7 @@ const TrackPlayerSettingsContainer = () => {
                 className="w-full px-2 flex-1"
               >
                 {/* EXPORT BOOKMARKS */}
-                <View className="flex-row justify-between">
-                  <Pressable
-                    onPress={() => exportBookmarks()}
-                    className="bg-green-600 p-2 rounded-lg"
-                  >
-                    <Text>Export Bookmarks</Text>
-                  </Pressable>
-                </View>
+                <ExportBookmarks />
                 <TrackPlayerSettingsBookmarks />
               </MotiView>
             )}
