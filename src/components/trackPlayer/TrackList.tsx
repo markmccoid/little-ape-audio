@@ -7,6 +7,7 @@ import {
   Dimensions,
   StyleSheet,
   Pressable,
+  Alert,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { usePlaybackStore, useTrackActions, useTracksStore } from "../../store/store";
@@ -18,7 +19,6 @@ import { Chapter } from "@store/store-functions";
 import { getCurrentChapter } from "@utils/chapterUtils";
 import usePlaylistColors from "hooks/usePlaylistColors";
 import { darkenColor, lightenColor } from "@utils/otherUtils";
-import { play } from "react-native-track-player/lib/trackPlayer";
 import { pl } from "date-fns/locale";
 import { EnterKeyIcon } from "@components/common/svg/Icons";
 import { MotiView } from "moti";
@@ -265,7 +265,7 @@ const TrackList = ({ isExpanded }) => {
           backgroundColor: isCurrentSection ? chaptActiveColor : chaptInactiveColor,
           borderBottomWidth: StyleSheet.hairlineWidth,
           borderBottomColor: chaptBorder,
-          height: 45,
+          height: 65,
         }}
       >
         <TouchableOpacity onPress={skipToChapter}>
@@ -286,20 +286,35 @@ const TrackList = ({ isExpanded }) => {
             </Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity className={`flex-row flex-1 h-full`} onPress={skipToChapter}>
+        <TouchableOpacity
+          className={`flex-row flex-1 h-full`}
+          onPress={skipToChapter}
+          onLongPress={() => Alert.alert(item.title)}
+        >
           <View className={`flex-row pl-2 items-center justify-between flex-1`}>
             {/* <Text className="text-base">{props.item.title}</Text> */}
             <Text
               className="text-sm flex-1"
-              numberOfLines={1}
+              numberOfLines={2}
               ellipsizeMode="tail"
               style={{ color: chaptText }}
             >
               {item.title}
             </Text>
-            <Text className="text-xs pr-2" style={{ color: chaptText }}>{`${formatSeconds(
-              item?.startSeconds
-            )} - ${formatSeconds(item.endSeconds)}`}</Text>
+            <View className="flex-col items-center">
+              <Text className="text-xs pr-2" style={{ color: chaptText }}>{`${formatSeconds(
+                item?.startSeconds
+              )}`}</Text>
+              <Text
+                className="text-xs pr-2 pt-[2]"
+                style={{ color: chaptText, lineHeight: 10, textAlignVertical: "center" }}
+              >
+                -
+              </Text>
+              <Text className="text-xs pr-2" style={{ color: chaptText }}>{`${formatSeconds(
+                item?.endSeconds
+              )}`}</Text>
+            </View>
           </View>
         </TouchableOpacity>
       </View>

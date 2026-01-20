@@ -382,15 +382,23 @@ const absChapterConvert = (chapters: ABSChapter[]) => {
   const newChapters = [];
   for (const chapter of chapters) {
     const chapterStart = Math.floor(chapter.start);
-    const chapterEnd = Math.floor(chapter.end) - 1;
+    let chapterEnd = Math.floor(chapter.end) - 1;
+    //~ Check if the chapterEnd is less than the chapterStart
+    //~ This can happen if the chapter is less than 1 second long
+    //~ If so, set the chapterEnd to the chapterStart
+    if (chapterEnd < chapterStart) {
+      chapterEnd = chapterStart;
+    }
+    const durationSeconds = chapterEnd - chapterStart;
+
     newChapters.push({
       title: chapter.title,
       startSeconds: chapterStart,
       endSeconds: chapterEnd,
-      durationSeconds: chapterEnd - chapterStart,
+      durationSeconds: durationSeconds <= 0 ? 0 : durationSeconds,
       startMilliSeconds: chapterStart * 1000,
       endMilliSeconds: chapterEnd * 1000,
-      lengthMilliSeconds: (chapterEnd - chapterStart) * 1000,
+      lengthMilliSeconds: durationSeconds <= 0 ? 0 : durationSeconds * 1000,
     });
   }
   return newChapters;
